@@ -1,0 +1,62 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');const path=require('node:path');const http=require('node:http');const {execFileSync}=require('node:child_process');
+const deps=process.env.CUTFLOW_QA_MODULES;const {chromium}=require(path.join(deps,'playwright-core'));
+const browserPackage=require(path.join(deps,'@sparticuz/chromium/build/index.js')).default;
+const root=__dirname,fixtures='/tmp/cutflow-v3-test';
+const server=http.createServer((req,res)=>{
+ const pathname=new URL(req.url,'http://localhost').pathname;const file=path.join(root,pathname==='/'?'index.html':pathname);
+ if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404).end();return;}
+ res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.woff2')?'font/woff2':file.endsWith('.html')?'text/html':'application/octet-stream');fs.createReadStream(file).pipe(res);
+});
+(async()=>{
+ server.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));let browser;
+ try{
+ browser=await chromium.launch({executablePath:await browserPackage.executablePath(),args:browserPackage.args,headless:true});
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(`http://127.0.0.1:${server.address().port}`);await page.addStyleTag({content:'html{scroll-behavior:auto!important}'});
+ await page.locator('#titleInput').fill('실제 MP4 테스트\n제목은 고정됩니다');await page.locator('#channelInput').fill('@테스트');
+ await page.locator('#fileInput').setInputFiles([`${fixtures}/image.png`,`${fixtures}/motion.webm`]);
+ await page.waitForFunction(()=>scenes.length===2 && loading===0);
+ assert.equal(await page.evaluate(()=>scenes[1].type),'video');
+ await page.locator('#audioInput').setInputFiles(`${fixtures}/narration.wav`);await page.waitForFunction(()=>audioBuffer!==null && loading===0);
+ await page.locator('#scriptInput').fill('전설적인 투자자\n[[찰리 멍거]]가 남긴');await page.click('#buildCuesBtn');
+ assert.equal(await page.locator('.cue-row').count(),2);
+ assert.ok(Math.abs(await page.evaluate(()=>cutDuration()-audioBuffer.duration))<.001);
+ await page.locator('.scene-row').nth(1).locator('[data-action="trim"]').fill('0.30');await page.locator('.scene-row').nth(1).locator('[data-action="trim"]').dispatchEvent('change');
+ assert.equal(await page.evaluate(()=>scenes[1].trimStart),.3);
+ await page.locator('.scene-row').nth(1).locator('[data-action="transition"]').selectOption('dissolve');
+ await page.locator('.scene-row').nth(0).locator('[data-action="motion"]').selectOption('pan-right');
+ await page.locator('.scene-row').nth(1).locator('[data-action="motion"]').selectOption('pan-right');
+ assert.equal(await page.locator('#repeatCount').textContent(),'2개 확인');
+ await page.locator('.cue-row').nth(0).locator('[data-action="split"]').click();assert.equal(await page.locator('.cue-row').count(),3);
+ await page.click('#undoCuesBtn');assert.equal(await page.locator('.cue-row').count(),2);
+ await page.locator('.cue-row').nth(0).locator('[data-action="end"]').fill('0.8');await page.locator('.cue-row').nth(0).locator('[data-action="end"]').dispatchEvent('change');
+ assert.equal(await page.evaluate(()=>cues[0].end),.8);
+ await page.locator('.cue-row').nth(1).locator('[data-action="start"]').fill('0.9');await page.locator('.cue-row').nth(1).locator('[data-action="start"]').dispatchEvent('change');
+ assert.equal(await page.evaluate(()=>cues[1].start),.9);
+ await page.evaluate(()=>jump(0));await page.click('#playBtn');await page.waitForTimeout(400);assert.equal(await page.evaluate(()=>playing),true);assert.ok(await page.evaluate(()=>$('narration').currentTime)>.1);await page.click('#playBtn');
+ await page.selectOption('#layoutSelect','immersive');await page.evaluate(()=>jump(1.8));await page.waitForTimeout(200);await page.evaluate(()=>CutRenderer.fonts(project()));
+ await page.screenshot({path:`${fixtures}/desktop.png`,fullPage:true});
+ await page.selectOption('#resolutionSelect','720');
+ console.log('UI checks passed. Beginning actual MP4 encoding.');
+ await page.click('#exportBtn');
+ await page.waitForFunction(()=>!exporting,{},{timeout:180000});
+ const status=await page.locator('#exportStatus').textContent();console.log(status);
+ assert.ok(status.includes('MP4 완성'),status);
+ const promise=page.waitForEvent('download');await page.click('#downloadLink');const download=await promise;const output=`${fixtures}/output.mp4`;await download.saveAs(output);
+ const probe=JSON.parse(execFileSync('ffprobe',['-v','error','-show_entries','stream=codec_name,codec_type,width,height:format=duration','-of','json',output],{encoding:'utf8'}));
+ assert.ok(probe.streams.some(s=>s.codec_name==='h264'&&s.width===720&&s.height===1280));assert.ok(probe.streams.some(s=>s.codec_type==='audio'&&s.codec_name==='aac'));assert.ok(Math.abs(Number(probe.format.duration)-3)<.08);
+ console.log('MP4 verified:',JSON.stringify(probe));
+ await page.click('#closeExportBtn');await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));await page.screenshot({path:`${fixtures}/mobile.png`,fullPage:true});
+ await page.setViewportSize({width:1440,height:1000});await page.selectOption('#layoutSelect','framed');await page.selectOption('#resolutionSelect','1080');
+ await page.click('#exportBtn');await page.click('#cancelExportBtn');await page.waitForFunction(()=>!exporting,{},{timeout:30000});
+ assert.ok((await page.locator('#exportStatus').textContent()).includes('취소'));await page.click('#closeExportBtn');
+ await page.click('#exportBtn');await page.waitForFunction(()=>!exporting,{},{timeout:240000});
+ assert.ok((await page.locator('#exportStatus').textContent()).includes('MP4 완성'));
+ const p2=page.waitForEvent('download');await page.click('#downloadLink');await (await p2).saveAs(`${fixtures}/output1080.mp4`);
+ const probe2=JSON.parse(execFileSync('ffprobe',['-v','error','-show_entries','stream=codec_name,codec_type,width,height:format=duration','-of','json',`${fixtures}/output1080.mp4`],{encoding:'utf8'}));
+ assert.ok(probe2.streams.some(s=>s.width===1080&&s.height===1920));console.log('1080p version 1 export and cancellation recovery verified.');
+ assert.deepEqual(errors,[]);console.log('PASS: script+real narration, editable cue times, split/undo, image+video, trim, repetition, audio playback, MP4 H264/AAC, mobile layout.');
+ }finally{await browser?.close();server.close();}
+})().catch(e=>{console.error(e);server.close();process.exitCode=1;});

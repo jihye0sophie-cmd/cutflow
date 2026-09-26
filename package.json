@@ -1,0 +1,16 @@
+{
+  "name": "cutflow-studio",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "node build.cjs",
+    "test": "node test-v4.cjs",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "devDependencies": {
+    "vite": "7.3.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

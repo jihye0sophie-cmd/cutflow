@@ -1,0 +1,22 @@
+Third-party components used for local video encoding
+
+@ffmpeg/core 0.12.10 (single-thread UMD)
+Copyright FFmpeg contributors and bundled codec-library contributors.
+License: GPL-2.0-or-later; see COPYING.GPL-2.
+Distribution: https://www.npmjs.com/package/@ffmpeg/core/v/0.12.10
+Upstream source and build scripts: https://github.com/ffmpegwasm/ffmpeg.wasm
+FFmpeg source: https://ffmpeg.org/download.html
+The four core.part files are an unmodified ffmpeg-core.wasm binary split into
+transport chunks. The browser reassembles the bytes in ascending part order.
+
+@ffmpeg/ffmpeg 0.12.15 (UMD wrapper and worker)
+License: MIT.
+Distribution: https://www.npmjs.com/package/@ffmpeg/ffmpeg/v/0.12.15
+Source: https://github.com/ffmpegwasm/ffmpeg.wasm/tree/main/packages/ffmpeg
+
+mp4-muxer 5.2.2
+Copyright (c) 2023 Vanilagy. MIT; see LICENSE.mp4-muxer.
+Source: https://github.com/Vanilagy/mp4-muxer
+Distribution: https://www.npmjs.com/package/mp4-muxer/v/5.2.2
+
+Noto Sans KR is distributed separately under SIL OFL in ../fonts/LICENSE.
