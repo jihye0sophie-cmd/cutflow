@@ -11,6 +11,6 @@ window.CutflowScene={
     const added=scenes.find(s=>!oldIds.has(s.id));if(!added)return;
     const target=withCues?cues.findIndex(c=>c.id===targetId):scenes.findIndex(s=>s.id===targetId);
     if(withCues&&target>=0){const input=$('cueList').querySelector(`[data-index="${target}"] [data-action="media"]`);if(input){input.value=added.id;input.dispatchEvent(new Event('change',{bubbles:true}));}CutflowScene.select(target);}
-    else if(target>=0){const previous=scenes[target];scenes[target]={...added,id:previous.id,duration:previous.duration,motion:previous.motion,transition:previous.transition};scenes.splice(scenes.indexOf(added),1);renderScenes();CutflowScene.select(target);}
+    else if(target>=0){const previous=scenes[target];scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition};scenes.splice(scenes.indexOf(added),1);renderScenes();CutflowScene.select(target);}
  }
 };

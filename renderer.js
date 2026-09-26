@@ -45,15 +45,28 @@ window.CutRenderer = (() => {
       video.addEventListener('seeked',ok,{once:true});video.addEventListener('error',bad,{once:true});video.currentTime=target;
     });
   }
-  function drawMedia(ctx,scene,elapsed,rect,fit) {
-    const el=scene.element;
-    if(!el) return;
+  // Normalized offsets are relative to the media viewport, independent of export resolution.
+  function transform(value={}) {
+    const finite=(v,d)=>Number.isFinite(v)?v:d;
+    return {scale:Math.max(.1,Math.min(5,finite(value?.scale,1))),x:Math.max(-2,Math.min(2,finite(value?.x,0))),y:Math.max(-2,Math.min(2,finite(value?.y,0)))};
+  }
+  function mediaRect(w,h,layout) {
+    return layout==='fullscreen'?{x:0,y:0,w,h}:{x:0,y:h*(layout==='immersive'?.237:.203),w,h:h*(layout==='immersive'?.763:.594)};
+  }
+  function mediaGeometry(scene,elapsed,rect,fit) {
+    const el=scene?.element;if(!el)return null;
     const sw=el.videoWidth||el.naturalWidth||el.width,sh=el.videoHeight||el.naturalHeight||el.height;
-    if(!sw||!sh)return;
+    if(!sw||!sh)return null;
     const factor=fit==='contain'?Math.min(rect.w/sw,rect.h/sh):Math.max(rect.w/sw,rect.h/sh);
-    const m=motion(scene,elapsed),dw=sw*factor*m.scale,dh=sh*factor*m.scale;
+    const m=motion(scene,elapsed),base=transform(scene.transform);
+    const dw=sw*factor*m.scale*base.scale,dh=sh*factor*m.scale*base.scale;
+    return {x:rect.x+(rect.w-dw)/2+base.x*rect.w+m.x*rect.w*m.scale*base.scale,
+      y:rect.y+(rect.h-dh)/2+base.y*rect.h+m.y*rect.h*m.scale*base.scale,w:dw,h:dh};
+  }
+  function drawMedia(ctx,scene,elapsed,rect,fit) {
+    const box=mediaGeometry(scene,elapsed,rect,fit);if(!box)return;
     ctx.save();ctx.beginPath();ctx.rect(rect.x,rect.y,rect.w,rect.h);ctx.clip();
-    ctx.drawImage(el,rect.x+(rect.w-dw)/2+m.x*rect.w*m.scale,rect.y+(rect.h-dh)/2+m.y*rect.h*m.scale,dw,dh);ctx.restore();
+    ctx.drawImage(scene.element,box.x,box.y,box.w,box.h);ctx.restore();
   }
   function glyphs(text,highlight,base,ranges=[]) {
     const out=[];let marked=false;
@@ -105,7 +118,7 @@ window.CutRenderer = (() => {
     await fonts(project);
     const ctx=canvas.getContext('2d',{alpha:false});const w=canvas.width,h=canvas.height;
     const loc=locate(project.scenes,time),scene=project.scenes[loc.index],portrait=project.layout==='immersive',fullscreen=project.layout==='fullscreen';
-    const rect=fullscreen?{x:0,y:0,w,h}:{x:0,y:h*(portrait?.237:.203),w,h:h*(portrait?.763:.594)};
+    const rect=mediaRect(w,h,project.layout);
     const fit=fullscreen?'cover':project.fit;
     if(scene?.element) {
       await seek(scene,loc.elapsed);
@@ -138,5 +151,5 @@ window.CutRenderer = (() => {
     const ids=new Set([project.titleFont||'noto',project.channelFont||'noto',...project.cues.map(c=>window.CaptionStyle.resolve(c,project).font)]);
     await Promise.all([...ids].map(id=>window.CutFonts.ensure(id,text)));await document.fonts.ready;
   }
-  return {draw,locate,motion,cutDuration,fonts};
+  return {draw,locate,motion,cutDuration,fonts,transform,mediaRect,mediaGeometry};
 })();

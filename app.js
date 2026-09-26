@@ -10,7 +10,7 @@ const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 const options=(map,value)=>Object.entries(map).map(([k,v])=>`<option value="${k}" ${k===value?'selected':''}>${v}</option>`).join('');
 // Imported media stay reusable; each subtitle owns its exact playback interval.
 function assignAvailableCuts(){const used=new Set(cues.map(c=>c.sceneId));const available=scenes.filter(s=>!used.has(s.id));cues.forEach(c=>{if(c.sceneId===undefined&&available.length)c.sceneId=available.shift().id;});}
-function timelineScenes(){return cues.length?cues.map((c,i)=>{const sourceIndex=scenes.findIndex(s=>s.id===c.sceneId),s=scenes[sourceIndex];return {...(s||{type:'missing',motion:'still',transition:'cut'}),motion:c.motion??s?.motion??'still',transition:c.transition??s?.transition??'cut',trimStart:(c.trimStart??s?.trimStart??0)+(c.mediaOffset||0),start:c.start,end:c.end,duration:c.end-c.start,cueIndex:i,sourceIndex};}):scenes;}
+function timelineScenes(){return cues.length?cues.map((c,i)=>{const sourceIndex=scenes.findIndex(s=>s.id===c.sceneId),s=scenes[sourceIndex];return {...(s||{type:'missing',motion:'still',transition:'cut'}),transform:c.transform??s?.transform,motion:c.motion??s?.motion??'still',transition:c.transition??s?.transition??'cut',trimStart:(c.trimStart??s?.trimStart??0)+(c.mediaOffset||0),start:c.start,end:c.end,duration:c.end-c.start,cueIndex:i,sourceIndex};}):scenes;}
 const cutDuration=()=>CutRenderer.cutDuration(timelineScenes());
 const totalDuration=()=>Math.max(cutDuration(),audioBuffer?.duration||0,...cues.map(c=>c.end),0);
 const sceneStart=index=>cues.length?(cues.find(c=>c.sceneId===scenes[index]?.id)?.start||0):scenes.slice(0,index).reduce((n,s)=>n+s.duration,0);
