@@ -92,3 +92,7 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - 저장 목록에서 저장 일시, 장면 수, 영상 길이, 예상 프로젝트 용량을 확인할 수 있습니다.
 - 프로젝트에는 schemaVersion/appVersion을 기록해 이후 마이그레이션 기반을 마련했습니다.
 - 프로젝트는 현재 브라우저/기기에만 저장되며 GitHub나 서버로 업로드되지 않습니다.
+
+
+## v26
+- Fixed mobile Safari project save TypeError during capture when no BGM is loaded.
