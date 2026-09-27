@@ -119,3 +119,54 @@
  .mobile-editor .caption-style-panel summary{font-size:13px}
  .mobile-editor .caption-style-panel summary span{font-size:10px}
 }
+
+@media(max-width:760px){
+  #mobileProjectBody .title-selection-tools{border-color:var(--studio-border)}
+  #mobileProjectBody .title-selection-tools button{background:var(--studio-card);border-color:var(--studio-border);color:#fff}
+  #mobileProjectBody .compact-palette .color-swatch{width:34px;height:34px;min-height:34px;background:var(--swatch)}
+  .mobile-editor .selection-color-tools .selection-palette{width:100%}
+  .mobile-editor .selection-color-tools .mini-swatch{width:34px;height:34px;min-height:34px;background:var(--swatch)}
+}
+
+/* v20: finish compact mobile typography for form-heavy project settings.
+   These rules intentionally override the earlier 16px blanket used by the first mobile pass. */
+@media(max-width:760px){
+  /* Script / narration area */
+  .mobile-editor #mobileProjectBody #scriptInput,
+  .mobile-editor #mobileProjectBody .text-input,
+  .mobile-editor #mobileProjectBody textarea{font-size:12px;line-height:1.5}
+  .mobile-editor #mobileProjectBody #scriptFileBtn,
+  .mobile-editor #mobileProjectBody #audioBtn,
+  .mobile-editor #mobileProjectBody #buildCuesBtn{font-size:11px}
+
+  /* Template, fit, motion preset and font selectors */
+  .mobile-editor #mobileProjectBody select,
+  .mobile-editor #mobileProjectBody .select,
+  .mobile-editor #layoutSelect,
+  .mobile-editor #fitSelect,
+  .mobile-editor #templateSelect,
+  .mobile-editor #titleFont,
+  .mobile-editor #channelFont{font-size:11px;line-height:1.35}
+
+  /* Text-style cards: font selector, size/color labels, checks and stroke controls */
+  .mobile-editor #mobileProjectBody .text-style-grid>label,
+  .mobile-editor #mobileProjectBody .text-style-grid .style-checks label,
+  .mobile-editor #mobileProjectBody .text-stroke-controls,
+  .mobile-editor #mobileProjectBody .title-selection-tools>span:first-child{font-size:11px}
+  .mobile-editor #mobileProjectBody .text-style-grid input[type=number],
+  .mobile-editor #mobileProjectBody #channelInput{font-size:12px}
+  .mobile-editor #mobileProjectBody .stroke-width output,
+  .mobile-editor #mobileProjectBody .text-style-grid output{font-size:10px}
+
+  /* BGM/project-setting controls that were still inheriting 16px */
+  .mobile-editor #mobileProjectBody input[type=number]{font-size:12px}
+  .mobile-editor #mobileProjectBody .segmented button,
+  .mobile-editor #mobileProjectBody .stat-row,
+  .mobile-editor #mobileProjectBody .stat-row strong{font-size:11px}
+
+  /* Caption sheet font/select controls */
+  .mobile-editor #captionStylePanel .select,
+  .mobile-editor #captionStylePanel select{font-size:12px}
+  .mobile-editor #captionStylePanel label{font-size:11px}
+  .mobile-editor #captionStylePanel .style-checks label{font-size:11px}
+}

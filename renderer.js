@@ -133,7 +133,7 @@ window.CutRenderer = (() => {
         ctx.restore();
       }
     }else{ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);if(!project.scenes.length)drawText(ctx,'이미지·영상 컷을\n불러와 주세요',{x:w*.1,y:h*.35,w:w*.8,h:h*.25,size:w*.065,color:'#b9b9b9'});}
-    drawText(ctx,project.title,{x:w*.05,y:h*(portrait?.07:.04),w:w*.90,h:h*(portrait?.155:.15),size:(project.titleSize||86.4)*w/1080,italic:!!project.titleItalic,color:project.titleColor||'#ffe22e',weight:project.titleBold===false?400:900,align:'bottom',font:project.titleFont||'noto',...textStroke(project,'title',fullscreen,w/1080)});
+    drawText(ctx,project.title,{x:w*.05,y:h*(portrait?.07:.04),w:w*.90,h:h*(portrait?.155:.15),size:(project.titleSize||86.4)*w/1080,italic:!!project.titleItalic,color:project.titleColor||'#ffe22e',colorRanges:project.titleColorRanges||[],weight:project.titleBold===false?400:900,align:'bottom',font:project.titleFont||'noto',...textStroke(project,'title',fullscreen,w/1080)});
     const cue=project.cues.find(c=>time>=c.start&&time<c.end);
     if(cue){
       const style=window.CaptionStyle.resolve(cue,project),scale=w/1080;

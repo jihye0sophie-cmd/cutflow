@@ -25,7 +25,11 @@ const styleFields={font:'captionFont',size:'captionSize',bold:'captionBold',ital
 const fontOptions=CutFonts.list.map(f=>`<option value="${f.id}">${esc(f.label)}</option>`).join('');
 ['titleFont','channelFont','captionFont'].forEach(id=>$(id).innerHTML=fontOptions);
 const paletteNames={white:'흰색',yellow:'노란색',lime:'연두색',sky:'하늘색',red:'빨간색',orange:'주황색'};
-$('captionPalette').innerHTML=Object.entries(CaptionStyle.palette).map(([name,color])=>`<button type="button" class="color-swatch" data-color="${color}" style="--swatch:${color}" aria-label="${paletteNames[name]}" title="${paletteNames[name]}"></button>`).join('');
+const paletteMarkup=action=>Object.entries(CaptionStyle.palette).map(([name,color])=>`<button type="button" class="color-swatch" ${action?`data-action="${action}"`:''} data-color="${color}" style="--swatch:${color}" aria-label="${paletteNames[name]}" title="${paletteNames[name]}"></button>`).join('');
+$('captionPalette').innerHTML=paletteMarkup('caption-base');
+$('titlePalette').innerHTML=paletteMarkup('title-base');
+$('channelPalette').innerHTML=paletteMarkup('channel-base');
+$('titleSelectionPalette').innerHTML=paletteMarkup('title-selection');
 function styleCue(){return cues.find(c=>c.id===styleCueId)||cues[0];}
 function fontNote(id){return CutFonts.get(id).fixedBold?'이 폰트는 굵은 글꼴만 제공됩니다. 일반 굵기는 Noto Sans KR을 선택해 주세요.':'';}
 function syncTextStyleNotes(){
@@ -76,6 +80,9 @@ $('captionStyleFields').addEventListener('input',e=>{
 });
 document.addEventListener('pointerup',()=>activeStyleGesture=null);
 $('captionPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(button)applyCaptionStyle({color:button.dataset.color});};
+$('titlePalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('titleColor').value=button.dataset.color;changed();};
+$('channelPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('channelColor').value=button.dataset.color;changed();};
+$('titleSelectionPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('titleSelectionColor').value=button.dataset.color;};
 $('captionPosition').onchange=e=>{if(e.target.value!=='custom')applyCaptionStyle({y:e.target.value==='default'?null:Number(e.target.value)});};
 $('stylePreset').onchange=e=>{const preset=CaptionStyle.presets[e.target.value];if(preset){const current=CaptionStyle.resolve(styleCue(),project());applyCaptionStyle({...preset,font:current.font,y:current.y});}};
 $('styleScope').onchange=()=>{
@@ -83,6 +90,23 @@ $('styleScope').onchange=()=>{
 };
 $('applyAllCaptionStyle').onclick=applyAllCaptionStyle;
 $('styleCue').onchange=e=>{styleCueId=e.target.value;syncStyleEditor();jump(styleCue().start);};
+const templateTypography={
+  framed:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true},
+  immersive:{titleFont:'aggro',channelFont:'gangwon',captionFont:'ohsquare',captionBold:false,captionItalic:true},
+  fullscreen:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true}
+};
+async function applyTemplateTypography(layout,{applyCues=true,notify=false}={}){
+  const preset=templateTypography[layout]||templateTypography.framed;
+  $('titleFont').value=preset.titleFont;$('titleBold').checked=true;$('titleItalic').checked=false;
+  $('channelFont').value=preset.channelFont;$('channelBold').checked=true;$('channelItalic').checked=false;
+  if(applyCues&&cues.length){rememberCues();cues.forEach(c=>{c.style={...c.style,font:preset.captionFont,bold:preset.captionBold,italic:preset.captionItalic};});renderCues();}
+  else syncStyleEditor();
+  syncTextStyleNotes();changed();
+  try{await CutRenderer.fonts(project());changed();}catch{toast('폰트를 불러오지 못했습니다.');}
+  if(notify)toast('영상 템플릿의 기본 폰트 스타일을 적용했습니다.');
+}
+window.applyTemplateTypography=applyTemplateTypography;
+$('layoutSelect').addEventListener('input',()=>applyTemplateTypography($('layoutSelect').value,{applyCues:true,notify:true}));
 ['titleFont','channelFont'].forEach(id=>$(id).onchange=async()=>{syncTextStyleNotes();changed();try{await CutRenderer.fonts(project());changed();}catch{toast('폰트를 불러오지 못했습니다.');}});
 ['titleSize','channelSize'].forEach(id=>$(id).addEventListener('change',()=>{
   const input=$(id),fallback=id==='titleSize'?86.4:43.2;
@@ -90,3 +114,5 @@ $('styleCue').onchange=e=>{styleCueId=e.target.value;syncStyleEditor();jump(styl
 }));
 window.syncStyleEditor=syncStyleEditor;window.selectStyleCue=selectStyleCue;
 syncStyleEditor();syncTextStyleNotes();
+
+applyTemplateTypography($('layoutSelect').value,{applyCues:false,notify:false});

@@ -54,3 +54,15 @@
 @media(max-width:480px){.text-style-panel summary span{display:block;margin:5px 0 0}}
 
 @media(min-width:761px){.cue-row.active{border-color:#9cbc39;box-shadow:0 0 0 2px #9cbc3926;transition:border-color .18s,box-shadow .18s}.cue-row{scroll-margin-top:90px}}
+
+/* Shared quick palettes for title, channel and selected text colors. */
+.compact-palette{margin:7px 0 8px;gap:7px}
+.compact-palette .color-swatch{width:28px;height:28px;min-height:28px;padding:0}
+.title-selection-tools{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #dce1d3;padding-top:12px}
+.title-selection-tools>span:first-child{font-size:13px;font-weight:700}
+.title-selection-tools input[type=color]{width:42px!important;height:32px!important;min-width:42px;padding:2px!important}
+.title-selection-tools button{padding:7px 10px;border:1px solid #cac9c2;border-radius:8px;background:transparent;font:inherit;cursor:pointer}
+.title-selection-tools .field-help{flex-basis:100%;margin:0}
+.selection-color-tools .selection-palette{margin:0}
+.selection-color-tools .mini-swatch{width:28px;height:28px;min-height:28px;padding:0}
+.title-selection-tools .color-swatch,.selection-color-tools .mini-swatch{background:var(--swatch)}
