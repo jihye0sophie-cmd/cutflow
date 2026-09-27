@@ -84,3 +84,11 @@ assets 내부의 LICENSE와 NOTICE를 유지하세요. FFmpeg 및 폰트별 라�
 편집/렌더링 원본 코드는 그대로 포함하고 GitHub 실행·배포 설정 및 이 안내만 정리했습니다. 기존 브라우저 검수 기록은 docs/pc-ui-review.md에 있습니다. GitHub Actions 배포 및 네이티브 앱 실행은 사용자 저장소/앱 환경에서 별도 확인해야 합니다.
 
 GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
+
+## v22 · 로컬 프로젝트 저장 1차
+- IndexedDB에 프로젝트를 개수 제한 없이 저장합니다(브라우저/기기 저장공간 허용 범위 내).
+- 대본, 제목/채널명/자막 스타일, 부분 색상, 장면 순서와 타이밍, 카메라 무빙, 전환, Scale/X/Y, 내레이션, BGM, 이미지/영상 원본 파일을 함께 저장합니다.
+- 현재 프로젝트 덮어쓰기, 새 프로젝트로 저장, 불러오기, 이름 변경, 삭제를 지원합니다.
+- 저장 목록에서 저장 일시, 장면 수, 영상 길이, 예상 프로젝트 용량을 확인할 수 있습니다.
+- 프로젝트에는 schemaVersion/appVersion을 기록해 이후 마이그레이션 기반을 마련했습니다.
+- 프로젝트는 현재 브라우저/기기에만 저장되며 GitHub나 서버로 업로드되지 않습니다.
