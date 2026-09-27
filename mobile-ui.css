@@ -78,3 +78,44 @@
 
 @media(max-width:760px){.mobile-editor .preview-panel .stage-wrap{margin:0}.mobile-editor .mobile-caption-text .editor-text{display:block}}
 @media(max-width:760px) and (max-height:640px){.mobile-editor.mobile-sheet-open .topbar{display:none}.mobile-editor.mobile-sheet-open .preview-panel .stage{height:72px}.mobile-editor .preview-panel .stage{height:125px}}
+
+/* v19: compact mobile typography to match the GPT Sites density.
+   Keep form controls at 16px on iOS to avoid Safari focus-zoom. */
+@media(max-width:760px){
+ .mobile-editor .brand strong{font-size:15px}
+ .mobile-editor .brand span{font-size:10px}
+ .mobile-editor button{font-size:13px}
+ .mobile-editor label{font-size:12px}
+ .mobile-editor .panel-heading h2{font-size:16px}
+ .mobile-editor .field-label{font-size:11px;margin-top:20px;margin-bottom:7px}
+ .mobile-editor .field-help,.mobile-editor .muted,.mobile-editor .preview-note{font-size:10px;line-height:1.55}
+ .mobile-editor .step-label{font-size:9px}
+ .mobile-editor .count-pill,.mobile-editor .format-lock{font-size:10px}
+ .mobile-editor .timecode{font-size:11px}
+ .mobile-editor #mobileSceneNav button,.mobile-editor #mobileSceneCount{font-size:12px}
+ #mobileProject>summary{font-size:14px;padding:13px}
+ #mobileProject>summary span{font-size:10px;margin-top:3px}
+ #mobileProjectBody>.panel{padding:14px 11px}
+ .mobile-current-heading h2{font-size:18px}
+ .mobile-eyebrow{font-size:9px}
+ #mobileAdd{font-size:11px}
+ #mobileEmpty{font-size:12px}
+ .mobile-editor .editor-toolbar button{font-size:11px}
+ .mobile-editor .cue-row label{font-size:12px}
+ .mobile-editor .editor-row-heading strong{font-size:14px}
+ .mobile-editor .editor-row-heading span{font-size:10px}
+ .mobile-editor .editor-actions button,.mobile-editor .selection-color-tools button{font-size:11px}
+ #mobileTools button{font-size:10px}
+ #mobileTools button>span{font-size:20px}
+ .mobile-sheet-heading h2{font-size:16px}
+ .mobile-editor #captionStylePanel .caption-style-grid label{font-size:12px}
+ .mobile-editor #captionStylePanel output{font-size:10px}
+ .mobile-grid-number,.mobile-grid-duration{font-size:10px}
+ .mobile-missing{font-size:10px}
+ .mobile-caption-text summary{font-size:12px}
+ .mobile-editor #captionStylePanel #applyAllCaptionStyle{font-size:11px}
+ .mobile-editor .text-style-panel summary{font-size:12px}
+ .mobile-editor .text-style-panel summary span{font-size:10px}
+ .mobile-editor .caption-style-panel summary{font-size:13px}
+ .mobile-editor .caption-style-panel summary span{font-size:10px}
+}
