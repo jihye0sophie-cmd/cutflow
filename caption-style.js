@@ -1,7 +1,7 @@
 /* Shared caption defaults and presets for the editor, preview and MP4. */
 window.CaptionStyle=(()=>{
   const palette={white:'#ffffff',yellow:'#eeff00',lime:'#b8ff38',sky:'#70d6ff',red:'#ff4949',orange:'#ff982f'};
-  const defaults={font:'noto',size:66,bold:true,italic:true,color:'#ffffff',strokeColor:'#111111',strokeWidth:7.26,background:false,backgroundColor:'#000000',backgroundOpacity:.55,padding:18,radius:12,y:null,weight:900};
+  const defaults={font:'noto',size:66,bold:true,italic:true,color:'#ffffff',strokeColor:'#111111',strokeWidth:15,background:false,backgroundColor:'#000000',backgroundOpacity:.55,padding:18,radius:12,y:null,weight:900};
   const templateDefaults={
     framed:{font:'danjunghae',bold:true,italic:true},
     immersive:{font:'ohsquare',bold:false,italic:true},

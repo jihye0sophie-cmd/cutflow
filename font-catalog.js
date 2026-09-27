@@ -1,13 +1,14 @@
 /* Add a bundled font here; no user upload or remote font service is required. */
 window.CutFonts=(()=>{
   const list=[
-    {id:'noto',label:'Noto Sans KR · 기본',family:'Noto Sans KR'},
-    {id:'gangwon',label:'강원교육모두 Bold',family:'CF Gangwon',file:'gangwon-modu-bold-fixed.woff2',fixedBold:true},
+    {id:'noto',label:'Noto Sans KR',family:'Noto Sans KR'},
+    {id:'gangwon',label:'강원교육모두 B',family:'CF Gangwon',file:'gangwon-modu-bold-fixed.woff2',fixedBold:true},
     {id:'konkon',label:'온글잎 콘콘체',family:'CF Konkon',file:'ongleip-konkon.woff2'},
-    {id:'aggro',label:'SB 어그로 Bold',family:'CF Aggro',file:'sb-aggro-bold.woff2',fixedBold:true},
+    {id:'aggro',label:'SB 어그로 B',family:'CF Aggro',file:'sb-aggro-bold.woff2',fixedBold:true},
     {id:'danjunghae',label:'카페24 단정해',family:'CF Danjunghae',file:'cafe24-danjunghae.woff2'},
-    {id:'ohsquare',label:'Cafe24 Ohsquare',family:'CF Ohsquare',file:'cafe24-ohsquare.woff2'},
-    {id:'euljiro',label:'배민 을지로체',family:'CF Euljiro',file:'bm-euljiro.woff2'}
+    {id:'ohsquare',label:'카페24 오네모네',family:'CF Ohsquare',file:'cafe24-ohsquare.woff2'},
+    {id:'euljiro',label:'배민 을지로체',family:'CF Euljiro',file:'bm-euljiro.woff2'},
+    {id:'chosun100',label:'조선100년체',family:'CF Chosun100',file:'chosun-centennial.ttf'}
   ];
   const pending=new Map();
   const loadedText=new Set();
