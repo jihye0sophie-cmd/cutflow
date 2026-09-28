@@ -148,3 +148,8 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - Delete scenes directly from the desktop Scene Strip with confirmation.
 - Reuses the same CutflowScene move/remove logic as mobile so timing and scene-linked settings move together.
 - Narration-based projects warn before reorder/delete because picture order can diverge from narration meaning.
+
+
+## v34.4
+- PC 하단 전체 장면 스트립이 현재 선택/재생 장면을 안정적으로 따라가도록 수정했습니다.
+- 장면 선택 시 잘못된 offset 계산으로 스트립이 1번 장면 쪽으로 돌아가던 문제를 수정했습니다.
