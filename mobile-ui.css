@@ -328,3 +328,14 @@
   .mobile-editor .video-audio-head strong{font-size:12px;color:#fff}.mobile-editor .video-audio-head label{display:flex;align-items:center;gap:5px;margin:0}
   .mobile-editor .video-volume{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}.mobile-editor .video-volume input{width:100%}.mobile-editor .video-volume output{font-size:11px;color:#fff;min-width:38px;text-align:right}
 }
+
+/* v33.1 mobile trim/audio ergonomics */
+@media(max-width:760px){
+.mobile-editor .editor-trim,.mobile-editor .editor-audio{padding:10px!important;border:1px solid var(--studio-border);border-radius:9px;background:var(--studio-card)}
+.mobile-editor .trim-fields,.mobile-editor .video-audio-fades{grid-template-columns:1fr 1fr;gap:8px}
+.mobile-editor .trim-fields input,.mobile-editor .video-audio-fades input{min-height:40px;font-size:16px;padding:8px}
+.mobile-editor .video-volume input[type=range]{min-height:34px;touch-action:pan-y}
+.mobile-editor .video-volume-presets{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0}
+.mobile-editor .video-volume-presets button{min-width:0;min-height:36px;padding:5px 2px;font-size:10px}
+.mobile-editor .video-audio-head{position:sticky;top:0;background:var(--studio-card);z-index:1;padding-bottom:4px}
+}

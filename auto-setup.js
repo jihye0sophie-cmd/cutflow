@@ -68,7 +68,7 @@ async function splitGrid(grid,startIndex,limit){
 }
 function status(text,step){$('autoStatus').textContent=text;document.querySelectorAll('.auto-step').forEach((el,i)=>el.dataset.state=i<step?'done':i===step?'active':'');}
 async function applyProjectBasics(){
-  const title=$('autoTitle').value||'',channel=$('autoChannel').value||'',layout=$('autoLayout').value||'framed';
+  const title=$('autoTitle').value||'',channel=$('autoChannel').value||'',layout=$('autoLayout').value||'fullscreen';
   $('titleInput').value=title;$('titleInput').dispatchEvent(new Event('input',{bubbles:true}));
   $('channelInput').value=channel;$('channelInput').dispatchEvent(new Event('input',{bubbles:true}));
   $('layoutSelect').value=layout;$('layoutSelect').dispatchEvent(new Event('input',{bubbles:true}));
@@ -97,7 +97,7 @@ async function run(){
 function syncBasicsFromProject(){
   if(!$('autoTitle').value)$('autoTitle').value=$('titleInput').value||'';
   if(!$('autoChannel').value)$('autoChannel').value=$('channelInput').value||'';
-  $('autoLayout').value=$('layoutSelect').value||'framed';
+  $('autoLayout').value=$('layoutSelect').value||'fullscreen';
 }
 $('autoToggle').onclick=()=>{const open=$('autoPanel').hidden;if(open)syncBasicsFromProject();$('autoPanel').hidden=!open;$('autoToggle').setAttribute('aria-expanded',String(open));};
 $('autoScript').addEventListener('input',update);

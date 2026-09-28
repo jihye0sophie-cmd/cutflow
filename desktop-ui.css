@@ -35,3 +35,6 @@
  .desktop-editor .video-audio-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.desktop-editor .video-audio-head label{display:flex;gap:6px;align-items:center}
  .desktop-editor .video-volume{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}.desktop-editor .video-volume input{width:100%}
 }
+
+/* v33.1 video trim/audio controls */
+.desktop-editor .trim-fields,.desktop-editor .video-audio-fades{max-width:520px}.desktop-editor .video-volume-presets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}

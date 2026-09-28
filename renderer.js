@@ -36,7 +36,7 @@ window.CutRenderer = (() => {
   async function seek(scene,elapsed) {
     if(scene.type!=='video') return;
     const video=scene.element;
-    const target=Math.max(0,Math.min(scene.sourceDuration-.04,scene.trimStart+elapsed));
+    const trimStart=Math.max(0,Number(scene.trimStart)||0),trimEnd=Math.min(Number(scene.sourceDuration)||Infinity,Number(scene.trimEnd)||Number(scene.sourceDuration)||Infinity);const target=Math.max(trimStart,Math.min(trimEnd-.02,trimStart+elapsed));
     if(video.readyState>=2 && Math.abs(video.currentTime-target)<.002) return;
     await new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>done(new Error('영상 프레임을 읽지 못했습니다. 다른 MP4 코덱으로 변환해 주세요.')),12000);

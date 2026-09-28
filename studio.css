@@ -66,3 +66,6 @@
 .selection-color-tools .selection-palette{margin:0}
 .selection-color-tools .mini-swatch{width:28px;height:28px;min-height:28px;padding:0}
 .title-selection-tools .color-swatch,.selection-color-tools .mini-swatch{background:var(--swatch)}
+
+/* v33.1 video trim + audio controls */
+.editor-row .editor-audio{grid-column:1/-1}.editor-trim strong{width:100%;font-size:13px}.trim-fields,.video-audio-fades{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%}.trim-fields label,.video-audio-fades label{display:grid;gap:5px}.trim-fields input,.video-audio-fades input{width:100%;max-width:none}.video-volume-presets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.video-volume-presets button{min-width:42px;padding:6px 8px;border-radius:8px}.video-audio-fades{margin-top:8px}

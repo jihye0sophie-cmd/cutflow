@@ -25,10 +25,11 @@ window.CutEncoder=(()=>{
       if(scene.type!=='video'||scene.mediaMuted||(scene.mediaVolume??0)<=0||!(scene.file instanceof Blob)||duration<=0)continue;
       let src=written.get(scene.file);
       if(!src){src=`media_src_${written.size}.${safeExt(scene.name||scene.file.name)}`;await ffmpeg.writeFile(src,new Uint8Array(await scene.file.arrayBuffer()));written.set(scene.file,src);}
-      const trim=Math.max(0,Number(scene.trimStart)||0),available=Math.max(0,(Number(scene.sourceDuration)||duration)-trim),length=Math.min(duration,available);if(length<=.02)continue;
-      const out=`media_audio_${i}.wav`,rawVolume=Number(scene.mediaVolume),volume=Math.max(0,Math.min(1,Number.isFinite(rawVolume)?rawVolume:0));
+      const trim=Math.max(0,Number(scene.trimStart)||0),trimEnd=Math.min(Number(scene.sourceDuration)||duration,Number(scene.trimEnd)||Number(scene.sourceDuration)||duration),available=Math.max(0,trimEnd-trim),length=Math.min(duration,available);if(length<=.02)continue;
+      const out=`media_audio_${i}.wav`,rawVolume=Number(scene.mediaVolume),volume=Math.max(0,Math.min(1,Number.isFinite(rawVolume)?rawVolume:0)),fadeIn=Math.min(length,Math.max(0,Number(scene.mediaFadeIn)||0)),fadeOut=Math.min(length,Math.max(0,Number(scene.mediaFadeOut)||0));
       try{
-        await exec(['-ss',String(trim),'-t',String(length),'-i',src,'-vn','-ac','2','-ar','48000','-af',`volume=${volume}`,'-y',out]);
+        const filters=[`volume=${volume}`];if(fadeIn>0)filters.push(`afade=t=in:st=0:d=${fadeIn}`);if(fadeOut>0)filters.push(`afade=t=out:st=${Math.max(0,length-fadeOut)}:d=${fadeOut}`);
+        await exec(['-ss',String(trim),'-t',String(length),'-i',src,'-vn','-ac','2','-ar','48000','-af',filters.join(','),'-y',out]);
         clips.push({name:out,start});
       }catch(error){lastLogs.push(`media audio skipped: ${scene.name||i}`);}
       done++;if(done%2===0){progress(.90,`영상 원음 준비 중 ${done}개`);await new Promise(r=>setTimeout(r,0));}
@@ -41,7 +42,7 @@ window.CutEncoder=(()=>{
     if(mixedAudio){await ffmpeg.writeFile('base_audio.wav',wav(mixedAudio));audioInputs.push('-i','base_audio.wav');filters.push(`[${inputIndex}:a]atrim=0:${project.duration},asetpts=PTS-STARTPTS[a${labels.length}]`);labels.push(`[a${labels.length}]`);inputIndex++;}
     for(const clip of clips){audioInputs.push('-i',clip.name);const label=`a${labels.length}`,delay=Math.max(0,Math.round(clip.start*1000));filters.push(`[${inputIndex}:a]adelay=${delay}|${delay}[${label}]`);labels.push(`[${label}]`);inputIndex++;}
     if(!labels.length){await exec(['-i','video.mp4','-c','copy','-movflags','+faststart','-y','result.mp4']);return;}
-    filters.push(`${labels.join('')}amix=inputs=${labels.length}:duration=longest:dropout_transition=0,alimiter=limit=0.98[mix]`);
+    filters.push(`${labels.join('')}amix=inputs=${labels.length}:duration=longest:dropout_transition=0:normalize=0,alimiter=limit=0.98[mix]`);
     progress(.95,'내레이션·BGM·영상 원음을 합치는 중…');
     await exec(['-i','video.mp4',...audioInputs,'-filter_complex',filters.join(';'),'-map','0:v:0','-map','[mix]','-c:v','copy','-c:a','aac','-b:a','192k','-t',String(project.duration),'-movflags','+faststart','-y','result.mp4']);
     for(const f of ['base_audio.wav',...clips.map(x=>x.name),...sources]){try{await ffmpeg.deleteFile(f);}catch{}}
