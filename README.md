@@ -131,3 +131,12 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 
 ## v33.3
 - Grid split handles now display at the actual split-gap thickness while retaining a larger invisible drag hit area.
+
+
+## v34
+
+- 쇼츠 자동 세팅에 무음컷 v3 엔진을 통합했습니다.
+- 기존 무음컷의 세기 프리셋을 그대로 사용합니다: 부드럽게(-55 dB / 0.18초 / 0.16초), 보통(-50 dB / 0.10초 / 0.10초), 타이트(-45 dB / 0.06초 / 0.05초).
+- 기본값은 `보통`입니다.
+- 자동 세팅 시 원본 내레이션 파일은 변경하지 않고, 브라우저 메모리에서 WAV 처리본을 만든 뒤 처리본으로 Cutflow 타임라인을 생성합니다.
+- 스타일 프리셋은 별도 추가하지 않고 기존 영상 템플릿의 기본 스타일을 유지합니다.

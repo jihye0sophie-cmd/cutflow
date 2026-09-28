@@ -1,9 +1,15 @@
 (()=>{
 const $=id=>document.getElementById(id);
-const state={grids:[],narration:null,bgm:null,running:false,drag:null};
+const state={grids:[],narration:null,processedNarration:null,silencePreset:'normal',bgm:null,running:false,drag:null};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function lines(){return window.CutflowAutoBridge?.scriptLines($('autoScript').value||'')||[];}
+function silencePreset(){return document.querySelector('input[name="autoSilencePreset"]:checked')?.value||'normal';}
+function updateSilenceInfo(){
+  state.silencePreset=silencePreset();const cfg=window.CutflowSilenceCut?.PRESETS?.[state.silencePreset];if(!cfg)return;
+  const info=$('autoSilenceInfo');if(info)info.textContent=`${cfg.label} · ${cfg.thresholdDb} dB · 최소 ${cfg.minSilence.toFixed(2)}초 · 공백 ${cfg.keepSilence.toFixed(2)}초`;
+}
+
 function evenCuts(count){return Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)*100/count);}
 function normalizeGrid(grid){
   grid.cols=clamp(Number(grid.cols)||4,1,12);grid.rows=clamp(Number(grid.rows)||2,1,12);grid.gap=clamp(Number.isFinite(Number(grid.gap))?Number(grid.gap):6,0,40);
@@ -81,9 +87,12 @@ async function run(){
   try{
     status('그리드 이미지를 분할하는 중…',0);let files=[];
     for(const grid of state.grids){if(files.length>=script.length)break;files.push(...await splitGrid(grid,files.length,script.length-files.length));}
-    status(`이미지 ${files.length}장 준비 완료 · 내레이션 연결 중…`,1);
+    status(`이미지 ${files.length}장 준비 완료 · 내레이션 무음 줄이는 중…`,1);
     await applyProjectBasics();$('scriptInput').value=$('autoScript').value;window.CutflowAutoBridge.markChanged();
-    if(!await window.CutflowAutoBridge.loadNarration(state.narration))throw new Error('내레이션을 읽지 못했습니다. MP3 또는 WAV로 다시 시도해 주세요.');
+    if(!window.CutflowSilenceCut?.process)throw new Error('무음컷 엔진을 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
+    const cut=await window.CutflowSilenceCut.process(state.narration,state.silencePreset,msg=>status(msg,1));state.processedNarration=cut.processedFile;
+    status(`무음컷 완료 · ${cut.originalDuration.toFixed(1)}초 → ${cut.processedDuration.toFixed(1)}초 · 타임라인용 내레이션 연결 중…`,1);
+    if(!await window.CutflowAutoBridge.loadNarration(state.processedNarration))throw new Error('처리된 내레이션을 읽지 못했습니다.');
     status('기존 장면을 정리하고 이미지를 배치하는 중…',2);await window.CutflowAutoBridge.clearScenesOnly();
     const added=await window.CutflowAutoBridge.addMedia(files);if(added!==files.length)throw new Error(`이미지 ${files.length}장 중 ${added}장만 추가되었습니다.`);
     status('대본과 내레이션으로 자막 타임라인을 만드는 중…',3);const result=window.CutflowAutoBridge.buildTimeline();if(result.cueCount!==script.length)throw new Error('자막 구간 생성 결과를 확인해 주세요.');
@@ -101,12 +110,13 @@ function syncBasicsFromProject(){
 }
 $('autoToggle').onclick=()=>{const open=$('autoPanel').hidden;if(open)syncBasicsFromProject();$('autoPanel').hidden=!open;$('autoToggle').setAttribute('aria-expanded',String(open));};
 $('autoScript').addEventListener('input',update);
-$('autoNarrationBtn').onclick=()=>$('autoNarration').click();$('autoNarration').onchange=e=>{state.narration=e.target.files[0]||null;update();};
+$('autoNarrationBtn').onclick=()=>$('autoNarration').click();$('autoNarration').onchange=e=>{state.narration=e.target.files[0]||null;state.processedNarration=null;update();};
+document.querySelectorAll('input[name="autoSilencePreset"]').forEach(el=>el.addEventListener('change',()=>{state.processedNarration=null;updateSilenceInfo();}));
 $('autoGridBtn').onclick=()=>$('autoGrids').click();$('autoGrids').onchange=e=>{addGridFiles([...e.target.files]);e.target.value='';};
 $('autoBgmBtn').onclick=()=>$('autoBgm').click();$('autoBgm').onchange=e=>{state.bgm=e.target.files[0]||null;update();};
 $('autoGridList').addEventListener('input',e=>{const item=e.target.closest('.auto-grid-item');if(!item)return;const index=Number(item.dataset.gridIndex),grid=state.grids[index];if(!grid)return;if(e.target.matches('[data-grid-cols]')){grid.cols=clamp(Number(e.target.value)||1,1,12);resetCuts(grid);renderGrids();}if(e.target.matches('[data-grid-rows]')){grid.rows=clamp(Number(e.target.value)||1,1,12);resetCuts(grid);renderGrids();}if(e.target.matches('[data-grid-gap]')){grid.gap=clamp(Number(e.target.value)||0,0,40);renderGrids();}});
 $('autoGridList').addEventListener('click',e=>{const item=e.target.closest('.auto-grid-item');if(!item)return;const index=Number(item.dataset.gridIndex),grid=state.grids[index];if(e.target.closest('[data-grid-remove]')){URL.revokeObjectURL(grid.url);state.grids.splice(index,1);renderGrids();return;}if(e.target.closest('[data-grid-reset]')){resetCuts(grid);renderGrids();}});
 $('autoGridList').addEventListener('pointerdown',e=>{const line=e.target.closest('.auto-cut-line');if(!line)return;const item=line.closest('.auto-grid-item'),preview=line.closest('.auto-grid-preview');state.drag={gridIndex:Number(item.dataset.gridIndex),axis:line.dataset.axis,cutIndex:Number(line.dataset.cut),line,preview};line.classList.add('dragging');document.body.classList.add('auto-cut-dragging');line.setPointerCapture?.(e.pointerId);e.preventDefault();});
 window.addEventListener('pointermove',updateDraggedLine,{passive:true});window.addEventListener('pointerup',stopDrag);window.addEventListener('pointercancel',stopDrag);
-$('autoStart').onclick=run;renderGrids();update();
+$('autoStart').onclick=run;updateSilenceInfo();renderGrids();update();
 })();
