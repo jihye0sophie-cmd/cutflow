@@ -257,8 +257,37 @@ function cleanSceneState(scene){const {id,name,type,sourceDuration,trimStart,tri
 function mediaBytes(){const bgm=window.bgmSnapshot?.();return scenes.reduce((n,s)=>n+(s.file?.size||0),0)+(audioFile?.size||0)+(bgm?.file?.size||0);}
 async function clearProjectMedia(){pause();for(const s of scenes){try{s.audioElement?.pause();s.element.src='';}catch{}if(s.url)URL.revokeObjectURL(s.url);}scenes=[];cues=[];cueHistory=[];if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=null;audioBuffer=null;audioFile=null;audioName='';$('narration').removeAttribute('src');$('narration').load();silences=[];envelope=[];await window.restoreBgmSnapshot?.(null,{silent:true});}
 const cloneProjectData=value=>{if(value==null)return value;try{if(typeof structuredClone==='function')return structuredClone(value);}catch{}return JSON.parse(JSON.stringify(value));};
+function autoWrapCaptionText(text,style={}){
+  const raw=String(text||'').replace(/\s*\n\s*/g,' ').replace(/\s+/g,' ').trim();
+  if(!raw||!raw.includes(' '))return raw;
+  const canvas=autoWrapCaptionText.canvas||(autoWrapCaptionText.canvas=document.createElement('canvas'));
+  const ctx=canvas.getContext('2d'),fontInfo=window.CutFonts?.get(style.font||'noto');
+  const family=fontInfo?.family||'Noto Sans KR',nativeWeight=fontInfo?.file?400:(style.bold===false?400:900),size=Number(style.size)||66;
+  ctx.font=`${style.italic?'italic ':''}${nativeWeight} ${size}px "${family}", sans-serif`;
+  const clean=v=>v.replace(/\[\[|\]\]/g,'');
+  const width=v=>ctx.measureText(clean(v)).width;
+  const maxWidth=1080*.86,fullWidth=width(raw);
+  if(fullWidth<=maxWidth)return raw;
+  const words=raw.split(' ');let best=null;
+  for(let i=1;i<words.length;i++){
+    const a=words.slice(0,i).join(' '),b=words.slice(i).join(' '),wa=width(a),wb=width(b);
+    if(wa>maxWidth||wb>maxWidth)continue;
+    const score=Math.abs(wa-wb)+Math.max(wa,wb)*.08;
+    if(!best||score<best.score)best={a,b,score};
+  }
+  return best?`${best.a}\n${best.b}`:raw;
+}
+async function autoWrapCaptions(){
+  try{await CutRenderer.fonts(project());}catch{}
+  let changedCount=0;
+  for(const cue of cues){const style=CaptionStyle.resolve(cue,project()),next=autoWrapCaptionText(cue.text,style);if(next!==cue.text){cue.text=next;changedCount++;}}
+  if(changedCount){changed();renderCues();}
+  return changedCount;
+}
+
 window.CutflowAutoBridge={
   scriptLines,
+  async autoWrapCaptions(){return autoWrapCaptions();},
   async loadNarration(file){await loadAudio(file);return !!audioBuffer;},
   async addMedia(files){const before=scenes.length;await addFiles(files,{createFreeCues:false});return scenes.length-before;},
   buildTimeline(){buildCues();if(cues.length&&scenes.length)fitCuts(false);return {cueCount:cues.length,sceneCount:scenes.length};},
@@ -270,7 +299,7 @@ window.CutflowAutoBridge={
 
 window.CutflowProjectBridge={
   version:1,
-  capture(){return {schemaVersion:1,appVersion:'34.2',controls:captureControls(),titleColorRanges:cloneProjectData(titleColorRanges),cues:cloneProjectData(cues),scenes:scenes.map(s=>({meta:cleanSceneState(s),file:s.file})),narration:audioFile?{file:audioFile,name:audioName}:null,bgm:window.bgmSnapshot?.()||null,playhead:currentTime(),estimatedMediaBytes:mediaBytes()};},
+  capture(){return {schemaVersion:1,appVersion:'34.3',controls:captureControls(),titleColorRanges:cloneProjectData(titleColorRanges),cues:cloneProjectData(cues),scenes:scenes.map(s=>({meta:cleanSceneState(s),file:s.file})),narration:audioFile?{file:audioFile,name:audioName}:null,bgm:window.bgmSnapshot?.()||null,playhead:currentTime(),estimatedMediaBytes:mediaBytes()};},
   async restore(data){if(!data||data.schemaVersion!==1)throw new Error('지원하지 않는 프로젝트 형식입니다.');loading++;stats();try{await clearProjectMedia();restoreControls(data.controls);titleColorRanges=cloneProjectData(data.titleColorRanges||[]);lastTitleText=$('titleInput').value||'';for(const saved of data.scenes||[]){if(!saved?.file)continue;const file=saved.file instanceof File?saved.file:new File([saved.file],saved.meta?.name||'media',{type:saved.file.type||''});const scene=await makeScene(file);Object.assign(scene,saved.meta||{});scene.file=file;scenes.push(scene);}cues=cloneProjectData(data.cues||[]);if(data.narration?.file){const f=data.narration.file instanceof File?data.narration.file:new File([data.narration.file],data.narration.name||'narration.wav',{type:data.narration.file.type||'audio/wav'});await loadAudio(f);}await window.restoreBgmSnapshot?.(data.bgm||null,{silent:true});offset=Math.max(0,Math.min(Number(data.playhead)||0,totalDuration()));renderScenes();renderCues();waveform(offset);window.syncStyleEditor?.();window.syncTextStyleNotes?.();await CutRenderer.fonts(project());dirty=true;return true;}finally{loading--;stats();}},
   hasWork(){return !!(scenes.length||audioBuffer||window.bgmProject?.().buffer||$('scriptInput').value||$('titleInput').value);},
   nameSuggestion(){return ($('titleInput').value||'').replace(/\s+/g,' ').trim().slice(0,60)||`Cutflow ${new Date().toLocaleDateString('ko-KR')}`;},
