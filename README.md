@@ -119,3 +119,15 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - 장면별 영상 원음 볼륨 + 페이드 인/아웃 지원
 - 내레이션/BGM/영상 원음 믹싱 레벨 보존 및 최종 limiter 적용
 - 모바일 Trim/볼륨 조작 UI 개선
+## v33.2
+
+- 모바일 장면 탭에 순서 편집 모드 추가
+- 장면을 앞/뒤로 이동해 순서 변경 가능
+- 선택 장면 삭제 및 확인 절차 추가
+- 순서 변경/삭제 후 장면 번호와 타임라인 자동 재계산
+- 자유 편집 장면은 연결 미디어와 함께 삭제
+- 내레이션 기반 프로젝트에서는 순서 변경/삭제 전 싱크 경고 표시
+
+
+## v33.3
+- Grid split handles now display at the actual split-gap thickness while retaining a larger invisible drag hit area.

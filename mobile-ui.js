@@ -1,7 +1,7 @@
 /* v32 mobile presentation adapter. Desktop controls/events/project data remain authoritative. */
 (()=>{
   const mq=matchMedia('(max-width:760px)');
-  let enabled=false,index=0,selectedId=null,mode='caption',hadMedia=false,lastStroke=15,captionWasOpen=false;
+  let enabled=false,index=0,selectedId=null,mode='caption',hadMedia=false,lastStroke=15,captionWasOpen=false,sceneEdit=false,narrationSceneWarningShown=false;
   const slots=new Map(),q=s=>document.querySelector(s);
 
   const shell=document.createElement('section');
@@ -20,7 +20,7 @@
       <p id="mobileEmpty">장면을 추가하면 내레이션 없이도 이미지·영상과 자막을 직접 편집할 수 있습니다.</p>
       <div id="mobileEditorBody"></div>
       <section id="mobileScenesPane" hidden>
-        <div class="mobile-scenes-head"><strong>전체 장면</strong><button id="mobileScenesAdd" type="button">+ 장면 추가</button></div>
+        <div class="mobile-scenes-head"><strong>전체 장면</strong><div class="mobile-scenes-head-actions"><button id="mobileScenesEdit" type="button">순서 편집</button><button id="mobileScenesAdd" type="button">+ 장면 추가</button></div></div>
         <div id="mobileSceneGrid"></div>
       </section>
     </div>`;
@@ -52,7 +52,15 @@
 
   function buildGrid(){
     const list=items();
-    $('mobileSceneGrid').innerHTML=list.length?list.map((item,i)=>{const {source,duration}=CutflowScene.thumbnail(item,i);return `<button type="button" data-mobile-scene="${i}" aria-label="장면 ${i+1} 선택" aria-current="${i===index?'true':'false'}">${source?.thumb?`<img src="${esc(source.thumb)}" alt="">`:'<span class="mobile-missing">컷 없음</span>'}<span class="mobile-grid-number">${String(i+1).padStart(2,'0')}</span><span class="mobile-grid-duration">${duration.toFixed(1)}초</span></button>`;}).join(''):'<p class="mobile-scenes-empty">장면을 먼저 추가해 주세요.</p>';
+    const edit=$('mobileScenesEdit');if(edit){edit.textContent=sceneEdit?'완료':'순서 편집';edit.setAttribute('aria-pressed',String(sceneEdit));}
+    $('mobileSceneGrid').classList.toggle('scene-editing',sceneEdit);
+    $('mobileSceneGrid').innerHTML=list.length?list.map((item,i)=>{const {source,duration}=CutflowScene.thumbnail(item,i);return `<div class="mobile-scene-item" data-mobile-scene-item="${i}"><button type="button" class="mobile-scene-card" data-mobile-scene="${i}" aria-label="장면 ${i+1} 선택" aria-current="${i===index?'true':'false'}">${source?.thumb?`<img src="${esc(source.thumb)}" alt="">`:'<span class="mobile-missing">컷 없음</span>'}<span class="mobile-grid-number">${String(i+1).padStart(2,'0')}</span><span class="mobile-grid-duration">${duration.toFixed(1)}초</span></button>${sceneEdit?`<div class="mobile-scene-actions"><button type="button" data-scene-move="-1" data-index="${i}" aria-label="장면 ${i+1} 앞으로 이동" ${i===0?'disabled':''}>←</button><button type="button" data-scene-move="1" data-index="${i}" aria-label="장면 ${i+1} 뒤로 이동" ${i===list.length-1?'disabled':''}>→</button><button type="button" class="danger" data-scene-delete="${i}" aria-label="장면 ${i+1} 삭제">삭제</button></div>`:''}</div>`;}).join(''):'<p class="mobile-scenes-empty">장면을 먼저 추가해 주세요.</p>';
+  }
+
+  function confirmNarrationSceneEdit(){
+    if(!audioBuffer||items().every(item=>item.freeEdit)||narrationSceneWarningShown)return true;
+    const ok=confirm('이 프로젝트는 내레이션 기준으로 장면 시간이 생성되었습니다. 장면 순서 변경이나 삭제 시 내레이션과 장면 내용이 어긋날 수 있습니다. 계속할까요?');
+    if(ok)narrationSceneWarningShown=true;return ok;
   }
 
   function syncStroke(){const n=Number($('captionStroke').value);$('mobileCaptionStroke').checked=n>0;if(n>0)lastStroke=n;}
@@ -72,7 +80,7 @@
     setTab(mode);
     document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const on=Number(row.dataset.index)===index;row.classList.toggle('mobile-selected',on);row.draggable=false;const fold=row.querySelector('.mobile-caption-text');if(fold)fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY'));});
     $('mobileScenesPane').hidden=mode!=='scenes';
-    if(mode==='scenes')buildGrid();
+    if(mode==='scenes')buildGrid();else sceneEdit=false;
     if(mode==='style'&&cues.length){window.selectStyleCue?.(index);$('captionStylePanel').open=true;}else $('captionStylePanel').open=false;
     if(scenes.length&&!hadMedia){$('mobileProject').open=false;document.body.classList.remove('mobile-project-open');hadMedia=true;}if(!scenes.length)hadMedia=false;
     syncStroke();viewport();
@@ -110,10 +118,14 @@
   settingsButton.onclick=()=>{const open=!document.body.classList.contains('mobile-project-open');document.body.classList.toggle('mobile-project-open',open);$('mobileProject').open=open;if(open)pause();};
   $('mobileProject').addEventListener('toggle',()=>{if(enabled&&!$('mobileProject').open)document.body.classList.remove('mobile-project-open');});
   saveButton.onclick=()=>$('projectSaveBtn').click();$('mobileProjectOpen').onclick=()=>$('projectOpenBtn').click();exportButton.onclick=()=>$('exportBtn').click();
-  $('mobileScenesAdd').onclick=()=>$('fileInput').click();
+  $('mobileScenesAdd').onclick=()=>$('fileInput').click();$('mobileScenesEdit').onclick=()=>{sceneEdit=!sceneEdit;buildGrid();};
 
   nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;mode=tab;if(mode==='style'&&cues.length)window.selectStyleCue?.(index);sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));};
-  $('mobileSceneGrid').onclick=e=>{const target=e.target.closest('[data-mobile-scene]');if(target){select(Number(target.dataset.mobileScene));mode='caption';sync();}};
+  $('mobileSceneGrid').onclick=e=>{
+    const move=e.target.closest('[data-scene-move]');if(move){const from=Number(move.dataset.index),to=from+Number(move.dataset.sceneMove);if(confirmNarrationSceneEdit()&&CutflowScene.move(from,to)){index=to;selectedId=items()[to]?.id;buildGrid();}return;}
+    const del=e.target.closest('[data-scene-delete]');if(del){const at=Number(del.dataset.sceneDelete);if(!confirmNarrationSceneEdit())return;const name=`장면 ${at+1}`;if(confirm(`${name}을 삭제할까요? 삭제 후 뒤 장면의 시간이 자동으로 다시 계산됩니다.`)){CutflowScene.remove(at);index=Math.min(at,Math.max(0,items().length-1));selectedId=items()[index]?.id||null;buildGrid();}return;}
+    const target=e.target.closest('[data-mobile-scene]');if(target){select(Number(target.dataset.mobileScene));if(!sceneEdit){mode='caption';sync();}else buildGrid();}
+  };
 
   $('cueList').addEventListener('click',e=>{if(enabled&&e.target.closest('[data-action="style"]')){e.stopImmediatePropagation();mode='style';sync();}},true);
   $('styleCue').addEventListener('change',()=>{if(enabled){index=cues.findIndex(c=>c.id===$('styleCue').value);selectedId=cues[index]?.id;sync();}});
