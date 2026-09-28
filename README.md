@@ -176,3 +176,13 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 ## v36.3
 - Fixed production build packaging so the integrated silence-cut engine is included in `dist/`.
 - Updated cache-busting versions for `silence-cut.js` and `auto-setup.js`.
+
+## v37 timing workspace
+- Adds a dedicated timing tab on desktop and mobile.
+- Narration waveform is the fixed reference.
+- Scene boundaries and caption boundaries can be dragged independently.
+- Moving a scene boundary automatically resizes the adjacent scene and keeps captions nested inside scenes.
+- Moving a caption boundary updates the previous caption end and next caption start together.
+- Numeric scene/caption start/end fields remain available for precise sync work.
+- “내레이션에 맞춤” redistributes captions inside the current scene using text-length weighting.
+- Existing caption, media, motion, scene split/merge, project save, auto setup, silence-cut and export paths remain unchanged.
