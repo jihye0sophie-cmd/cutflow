@@ -203,3 +203,115 @@
   .mobile-editor .cue-row.mobile-selected,.mobile-editor .scene-row.mobile-selected{padding:12px;gap:10px}
   #mobileTools{min-height:66px}
 }
+
+/* v32: mobile workspace redesign — large preview + five focused editing tabs. */
+@media(max-width:760px){
+  .mobile-editor .app-shell{padding:0 8px calc(18px + env(safe-area-inset-bottom))}
+  .mobile-editor .topbar{position:sticky;top:0;z-index:80;min-height:50px;padding:7px 10px;gap:6px}
+  .mobile-editor .brand{margin-right:auto}.mobile-editor .brand strong{font-size:15px}.mobile-editor .brand span{font-size:9px}
+  .mobile-editor #mobileSettings,.mobile-editor #mobileSave,.mobile-editor #mobileExport{min-height:34px;height:34px;padding:5px 9px;border-radius:9px;font-size:10px;margin:0}
+  .mobile-editor #mobileSettings{width:34px;padding:0;font-size:16px;background:#20242a}
+  .mobile-editor #mobileSave{margin-left:0}.mobile-editor #mobileExport{margin-left:0}
+
+  /* Preview is intentionally larger and no longer sticky, so the editor can reclaim the screen after scrolling. */
+  .mobile-editor #mobilePreview{position:relative;top:auto;z-index:20;padding:0;background:var(--studio-bg)}
+  .mobile-editor .preview-panel{padding:5px 4px 0;border-radius:0;background:transparent;border-left:0;border-right:0}
+  .mobile-editor .preview-panel .stage-wrap{width:100%;padding:0;background:#050607;border-radius:10px;display:flex;justify-content:center;overflow:hidden}
+  .mobile-editor .preview-panel .stage{height:clamp(280px,46dvh,470px);width:auto;max-width:100%;margin:0;touch-action:none;transition:none}
+  .mobile-editor .player-controls{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:8px;margin:5px 2px 0;min-height:40px}
+  .mobile-editor #playBtn{width:38px;height:38px;min-height:38px;padding:0}
+  .mobile-editor .player-controls .scrubber{display:block;width:100%;height:28px;min-height:28px!important;margin:0}
+  .mobile-editor .timecode{font-size:10px;white-space:nowrap}
+  .mobile-editor #mobileSceneNav{height:34px;min-height:34px;margin:1px 2px 5px;padding:0 2px;border:0;border-radius:8px;background:#171a1f;touch-action:pan-y}
+  .mobile-editor #mobileSceneNav button{width:38px;height:32px;min-height:32px;padding:0;border:0;font-size:20px;line-height:1;background:transparent}
+  .mobile-editor #mobileSceneCount{font-size:11px}
+
+  /* Project settings leave the main flow and open as a dedicated drawer from the gear button. */
+  #mobileProject{display:none!important}
+  .mobile-editor.mobile-project-open #mobileProject{display:block!important;position:fixed;z-index:90;inset:54px 8px calc(8px + env(safe-area-inset-bottom));margin:0;background:#111418;border:1px solid var(--studio-border);border-radius:14px;overflow:auto;overscroll-behavior:contain;box-shadow:0 16px 60px #000c}
+  .mobile-editor.mobile-project-open #mobileProject>summary{position:sticky;top:0;z-index:2;background:#171a1f;padding:12px 14px}
+  .mobile-editor.mobile-project-open #mobileProjectBody{padding:0 8px 16px}
+
+  /* Five small tabs live directly above the work area rather than occupying a fixed bottom bar. */
+  .mobile-editor #mobileTools{position:sticky;top:50px;bottom:auto;z-index:45;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;margin:2px 0 7px;padding:3px;background:#111418;border:1px solid var(--studio-border);border-radius:9px}
+  #mobileTools button{min-height:38px;height:38px;padding:3px 1px;border:0;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:3px;font-size:9px;white-space:nowrap;background:transparent;color:var(--studio-muted)}
+  #mobileTools button>span{font-size:12px;line-height:1}
+  #mobileTools button[aria-pressed=true]{background:var(--studio-accent);color:#101114;font-weight:800}
+
+  #mobileEditor{margin:0;min-height:220px;scroll-margin-top:96px}
+  #mobileEmpty{margin:14px 4px}
+  .mobile-current-heading,#mobileAdd{display:none!important}
+  .mobile-editor .timeline-panel{margin:0;padding:0;border:0;background:transparent}
+  .mobile-editor .editor-toolbar{display:none}
+  .mobile-editor #mobileReplace{display:none;margin:0 0 7px;min-height:38px;font-size:11px}
+  .mobile-editor .cue-row.mobile-selected,.mobile-editor .scene-row.mobile-selected{padding:10px;gap:9px;border-radius:10px;min-height:0}
+  .mobile-editor .cue-row.mobile-selected>div{display:none!important}
+  .mobile-editor .scene-row.mobile-selected>div{display:none!important}
+
+  /* Caption tab: the highest-frequency task gets only the caption editor and selection highlighting. */
+  #mobileEditor[data-mode=caption] .cue-row.mobile-selected{display:block!important}
+  #mobileEditor[data-mode=caption] .cue-row.mobile-selected>.editor-text{display:block!important}
+  #mobileEditor[data-mode=caption] .editor-text>label{display:block;margin:0 0 5px;font-size:10px}
+  #mobileEditor[data-mode=caption] .editor-text textarea{min-height:92px;font-size:16px;line-height:1.55}
+  #mobileEditor[data-mode=caption] .selection-color-tools{margin-top:8px;padding-top:8px;border-top:1px solid var(--studio-border);gap:5px}
+  #mobileEditor[data-mode=caption] .selection-color-tools>span:first-child{width:100%;font-size:10px}
+  #mobileEditor[data-mode=caption] .selection-color-tools .mini-swatch{width:30px;height:30px;min-height:30px}
+  #mobileEditor[data-mode=caption] .selection-color-tools label{font-size:9px;display:flex;align-items:center;gap:4px;width:auto}
+  #mobileEditor[data-mode=caption] .selection-color-tools input[type=color]{width:34px;height:30px;min-height:30px}
+  #mobileEditor[data-mode=caption] .selection-color-tools button{min-height:34px;padding:6px 8px;font-size:10px}
+
+  /* Media tab: source, timing and transform controls together. */
+  #mobileEditor[data-mode=media] #mobileReplace{display:block}
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-row-heading,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-media,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-start,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-end,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-trim{display:block!important}
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-row-heading{display:grid!important}
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-start{grid-column:1!important}
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-end{grid-column:2!important}
+  #mobileEditor[data-mode=media] #mediaTransform{display:block!important;margin:8px 0 0;padding:10px;background:var(--studio-card);border-color:var(--studio-border)}
+  #mobileEditor[data-mode=media] #mediaTransform legend{font-size:10px}
+  #mobileEditor[data-mode=media] #mediaTransform p{font-size:9px;line-height:1.45}
+
+  /* Motion tab: movement and transition only. */
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-row-heading,
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-motion,
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-transition{display:block!important}
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-row-heading{display:grid!important}
+
+  /* Caption style lives in its own focused tab. */
+  .mobile-editor #captionStylePanel{display:none!important;margin:0;padding:10px;background:var(--studio-card);border:1px solid var(--studio-border);border-radius:10px}
+  #mobileEditor[data-mode=style] #captionStylePanel{display:block!important}
+  #mobileEditor[data-mode=style] #captionStylePanel>summary{padding:5px 0 9px;font-size:12px}
+  #mobileEditor[data-mode=style] #captionStylePanel .caption-style-grid{gap:10px 8px}
+  #mobileEditor[data-mode=style] #captionStylePanel .color-swatch{width:32px;height:32px;min-height:32px}
+  #mobileEditor[data-mode=style] #captionStylePanel input[type=color]{height:34px}
+
+  /* Scene tab becomes an inline workspace rather than a large modal sheet. */
+  #mobileScenesPane{padding:8px 0 0}
+  .mobile-scenes-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 8px}.mobile-scenes-head strong{font-size:12px}.mobile-scenes-head button{min-height:34px;padding:5px 8px;font-size:10px}
+  #mobileSceneGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0}
+  #mobileSceneGrid>button{border-radius:8px;min-height:0;aspect-ratio:3/4}
+  .mobile-grid-number,.mobile-grid-duration{font-size:9px;padding:2px 4px}
+  .mobile-scenes-empty{grid-column:1/-1;color:var(--studio-muted);font-size:11px;text-align:center;padding:24px 8px}
+
+  /* Elements outside their focused tabs stay out of the layout. */
+  #mobileEditor[data-mode=caption] #mediaTransform,
+  #mobileEditor[data-mode=motion] #mediaTransform,
+  #mobileEditor[data-mode=style] #mediaTransform,
+  #mobileEditor[data-mode=scenes] #mediaTransform{display:none!important}
+  #mobileEditor[data-mode=style] #cueList,
+  #mobileEditor[data-mode=style] #sceneList,
+  #mobileEditor[data-mode=scenes] .timeline-panel{display:none!important}
+
+  .mobile-editor.mobile-keyboard #mobileTools{position:relative;top:auto}
+  .mobile-editor.mobile-keyboard #mobilePreview{position:relative}
+  .mobile-editor .toast{bottom:18px}
+}
+
+@media(max-width:380px){
+  .mobile-editor .preview-panel .stage{height:clamp(250px,43dvh,390px)}
+  #mobileTools button{font-size:8px;gap:2px}
+  #mobileTools button>span{font-size:11px}
+}

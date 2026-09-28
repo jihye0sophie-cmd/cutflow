@@ -96,3 +96,10 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 
 ## v26
 - Fixed mobile Safari project save TypeError during capture when no BGM is loaded.
+
+
+## v32.1
+- Auto Setup grid splitter now defaults to a 6px real crop gap per internal divider.
+- Each grid image can set its own split gap (0-40px).
+- Preview divider bands are scaled from the source-image pixel gap, so the visible band matches the actual removed crop area.
+- Adjustable cut positions and per-image row/column settings are preserved.
