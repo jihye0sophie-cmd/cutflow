@@ -140,3 +140,11 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - 기본값은 `보통`입니다.
 - 자동 세팅 시 원본 내레이션 파일은 변경하지 않고, 브라우저 메모리에서 WAV 처리본을 만든 뒤 처리본으로 Cutflow 타임라인을 생성합니다.
 - 스타일 프리셋은 별도 추가하지 않고 기존 영상 템플릿의 기본 스타일을 유지합니다.
+
+## v34.1 desktop scene editing
+
+- Added desktop Scene Strip edit mode.
+- Reorder scenes by drag-and-drop or arrow controls.
+- Delete scenes directly from the desktop Scene Strip with confirmation.
+- Reuses the same CutflowScene move/remove logic as mobile so timing and scene-linked settings move together.
+- Narration-based projects warn before reorder/delete because picture order can diverge from narration meaning.
