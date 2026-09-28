@@ -1,3 +1,9 @@
+# Cutflow v35.1
+
+- 프로젝트 설정의 대본 입력 영역에도 `자막 보기 좋게 자동 줄바꿈` 옵션을 추가했습니다.
+- 기본값은 ON이며 `대본으로 자막 구간 만들기` 후 긴 자막을 최대 2줄로 자동 정리합니다.
+- 자동 세팅의 기존 자동 줄바꿈 옵션은 그대로 유지합니다.
+
 # v18 업데이트 — 장면별 이미지·영상 크기와 위치
 
 `이미지·영상` 메뉴에 Scale, Position X/Y, 초기화를 추가했습니다. PC/모바일은 같은 컨트롤과 장면 데이터를 사용합니다.
@@ -155,8 +161,25 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - 장면 선택 시 잘못된 offset 계산으로 스트립이 1번 장면 쪽으로 돌아가던 문제를 수정했습니다.
 
 
+
+## v35
+- One media scene can now contain multiple timed caption segments.
+- Splitting a caption at the text cursor keeps the same image/video and divides only the caption timing.
+- Split timing is initially estimated from the relative text lengths, then remains manually editable.
+- Video playback continues from the correct source offset across caption segments; camera motion progresses continuously instead of restarting on every caption.
+- Video audio fade-in applies only to the first caption segment and fade-out only to the last segment of the same scene.
+- Caption editor shows `장면 N · 자막 X/Y` plus previous/next caption navigation.
+- `다음과 합치기` is exposed only for caption segments belonging to the same media scene.
+- Deleting one of several caption segments keeps the media scene/timing and turns that interval into a no-caption segment; deleting the only caption keeps the existing scene-delete behavior.
+- Project save remains backward compatible because caption segments are stored in the existing cue model with shared scene IDs.
+
 ## v34.5
 - PC shortcuts: Space play/pause, Left/Right previous/next scene, Ctrl/Cmd+S project save.
 - Caption split/merge/delete controls moved directly below the caption editor.
 - Split now uses the caret position in the caption text.
 - Caption style panel has a visible `자막 스타일` heading in the desktop caption tab.
+
+
+## v35.2
+- 쇼츠 자동 세팅에서 그리드 분할 이미지와 개별 이미지를 함께 사용할 수 있습니다.
+- 개별 이미지는 분할 없이 장면 1컷으로 사용되며 선택 순서대로 배치됩니다.

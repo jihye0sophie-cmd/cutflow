@@ -11,8 +11,7 @@ window.CutRenderer = (() => {
     return {index:-1,start:0,elapsed:0};
   }
   function motion(scene,elapsed) {
-    const motionElapsed=Math.max(0,elapsed+(Number(scene.motionOffset)||0)),motionDuration=Math.max(.001,Number(scene.motionDuration)||scene.duration||.001);
-    const p=Math.max(0,Math.min(1,motionElapsed/motionDuration));
+    const p=Math.max(0,Math.min(1,elapsed/scene.duration));
     const m={scale:1,x:0,y:0};
     if(scene.motion==='zoom-in') m.scale=1+.13*p;
     if(scene.motion==='zoom-out') m.scale=1.13-.13*p;
