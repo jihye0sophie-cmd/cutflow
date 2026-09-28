@@ -153,3 +153,10 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 ## v34.4
 - PC 하단 전체 장면 스트립이 현재 선택/재생 장면을 안정적으로 따라가도록 수정했습니다.
 - 장면 선택 시 잘못된 offset 계산으로 스트립이 1번 장면 쪽으로 돌아가던 문제를 수정했습니다.
+
+
+## v34.5
+- PC shortcuts: Space play/pause, Left/Right previous/next scene, Ctrl/Cmd+S project save.
+- Caption split/merge/delete controls moved directly below the caption editor.
+- Split now uses the caret position in the caption text.
+- Caption style panel has a visible `자막 스타일` heading in the desktop caption tab.

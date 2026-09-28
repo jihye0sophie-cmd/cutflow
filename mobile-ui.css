@@ -355,3 +355,9 @@
   .mobile-scene-actions button.danger{background:#352022;border-color:#6c3438;color:#ffb8bd}
   .mobile-scene-actions button:disabled{opacity:.28}
 }
+
+/* v34.5 caption editing actions */
+@media(max-width:760px){
+ .mobile-editor .caption-cue-actions{display:flex!important;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--studio-border)}
+ .mobile-editor .caption-cue-actions button{flex:1 1 auto;min-height:36px;font-size:11px;padding:7px 9px}
+}
