@@ -1,13 +1,13 @@
 /* Mobile presentation adapter. Existing controls, events and project data stay authoritative. */
 (()=>{
   const mq=matchMedia('(max-width:760px)');
-  let enabled=false,index=0,selectedId=null,mode='image',hadMedia=false,opener=null,lastStroke=6;
+  let enabled=false,index=0,selectedId=null,mode='caption',hadMedia=false,opener=null,lastStroke=6;
   const slots=new Map(),q=s=>document.querySelector(s);
   const shell=document.createElement('section');shell.id='mobileStudio';shell.className='mobile-only';
   shell.innerHTML=`<div id="mobilePreview"></div><details id="mobileProject"><summary>⚙ 프로젝트 설정 <span>대본 · 음성 · 템플릿 · 제목 · BGM</span></summary><div id="mobileProjectBody"><div id="mobileProjectQuick" class="mobile-project-quick"><button id="mobileProjectOpen" type="button">저장된 프로젝트 열기</button></div><div id="mobileProjectGroups"></div></div></details><div id="mobileEditor"><div class="mobile-current-heading"><div><span class="mobile-eyebrow">CURRENT SCENE</span><h2 id="mobileSceneTitle">장면을 추가하세요</h2></div><button id="mobileAdd" type="button">+ 이미지·영상</button></div><p id="mobileEmpty">프로젝트 설정에서 대본, 내레이션과 이미지·영상을 입력하세요.</p><div id="mobileEditorBody"></div></div>`;
   q('.app-shell').prepend(shell);
   const nav=document.createElement('nav');nav.id='mobileTools';nav.className='mobile-only';nav.setAttribute('aria-label','모바일 편집 도구');
-  nav.innerHTML=[['image','▧','이미지'],['caption','T','자막'],['effects','✧','효과'],['scenes','▦','전체 장면']].map(([key,icon,name])=>`<button type="button" data-mobile-tab="${key}" aria-pressed="${key==='image'}"><span aria-hidden="true">${icon}</span>${name}</button>`).join('');document.body.append(nav);
+  nav.innerHTML=[['caption','T','자막'],['image','▧','이미지·영상'],['scenes','▦','전체 장면']].map(([key,icon,name])=>`<button type="button" data-mobile-tab="${key}" aria-pressed="${key==='caption'}"><span aria-hidden="true">${icon}</span>${name}</button>`).join('');document.body.append(nav);
   const sheet=document.createElement('section');sheet.id='mobileSheet';sheet.className='mobile-only';sheet.hidden=true;sheet.setAttribute('role','dialog');sheet.setAttribute('aria-label','편집 설정');
   sheet.innerHTML='<div class="mobile-sheet-heading"><h2 id="mobileSheetTitle">자막 설정</h2><button type="button" id="mobileSheetClose" aria-label="설정 닫기">×</button></div><div id="mobileSheetBody"><div id="mobileCaptionHost"></div><div id="mobileSceneGrid"></div></div>';document.body.append(sheet);
   const mobileNav=document.createElement('div');mobileNav.id='mobileSceneNav';mobileNav.className='mobile-only';mobileNav.innerHTML='<button id="mobilePrev" type="button">‹ 이전</button><strong id="mobileSceneCount">장면 0 / 0</strong><button id="mobileNext" type="button">다음 ›</button>';
@@ -42,7 +42,7 @@
     exportButton.disabled=$('exportBtn').disabled;saveButton.disabled=$('projectSaveBtn')?.disabled||false;replaceButton.disabled=!list.length||loading>0||exporting;
     $('mobileEmpty').hidden=!!list.length;
     q('#mobileEditor').dataset.mode=mode;
-    document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const on=Number(row.dataset.index)===index;row.classList.toggle('mobile-selected',on);row.draggable=false;if(!row.querySelector('.mobile-caption-text')){const text=row.querySelector('.editor-text');if(text){const fold=document.createElement('details');fold.className='mobile-caption-text';fold.innerHTML='<summary>자막 문구 · 선택 글자색</summary>';text.before(fold);fold.append(text);}}});
+    document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const on=Number(row.dataset.index)===index;row.classList.toggle('mobile-selected',on);row.draggable=false;const fold=row.querySelector('.mobile-caption-text');if(fold)fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY'));});
     if(scenes.length&&!hadMedia){$('mobileProject').open=false;hadMedia=true;}if(!scenes.length)hadMedia=false;
     if(!sheet.hidden&&!$('mobileSceneGrid').hidden)buildGrid();syncStroke();
   }
@@ -52,19 +52,19 @@
     const groups=$('mobileProjectGroups');groups.innerHTML='';
     const specs=[['대본 · 음성','내레이션과 자막 구간',q('.hero'),q('.source-panel')],['템플릿 · 제목 · 채널명','화면 전체 스타일',q('.setup-panel')],['배경음악 · BGM','음악 · 볼륨 · 페이드',q('.bgm-panel')],['영상 출력','해상도 · MP4 저장',q('.export-panel')]];
     specs.forEach(([title,desc,...nodes])=>{const d=document.createElement('details');d.className='mobile-project-group';d.innerHTML=`<summary><strong>${title}</strong><span>${desc}</span></summary><div class="mobile-project-group-body"></div>`;groups.append(d);nodes.forEach(n=>move(n,d.lastElementChild));});
-    move(q('.timeline-panel'),$('mobileEditorBody'));move($('captionStylePanel'),$('mobileCaptionHost'));
-    $('captionStylePanel').open=true;sync();
+    move(q('.timeline-panel'),$('mobileEditorBody'));move($('captionStylePanel'),$('mobileEditorBody'));
+    $('captionStylePanel').open=false;sync();
   }
   function deactivate(){if(!enabled)return;closeSheet(false);enabled=false;document.body.classList.remove('mobile-editor','mobile-compact','mobile-keyboard','mobile-input-focus');for(const [node,marker] of slots){marker.replaceWith(node);}slots.clear();$('mobileProjectGroups').innerHTML='';document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);document.querySelectorAll('.mobile-caption-text').forEach(fold=>fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY')));$('captionStylePanel').open=captionWasOpen;}
   let captionWasOpen=$('captionStylePanel').open;
   mq.addEventListener('change',()=>mq.matches?activate():deactivate());
   $('mobilePrev').onclick=()=>select(index-1);$('mobileNext').onclick=()=>select(index+1);
   $('mobileAdd').onclick=()=>$('fileInput').click();saveButton.onclick=()=>$('projectSaveBtn').click();$('mobileProjectOpen').onclick=()=>$('projectOpenBtn').click();exportButton.onclick=()=>$('exportBtn').click();
-  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;if(tab==='caption'||tab==='scenes')openSheet(tab);else{mode=tab;closeSheet(false);sync();}};
+  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;if(tab==='scenes')openSheet(tab);else{mode=tab;closeSheet(false);sync();}};
   $('mobileSheetClose').onclick=()=>closeSheet();
   $('mobileSceneGrid').onclick=e=>{const target=e.target.closest('[data-mobile-scene]');if(target){select(Number(target.dataset.mobileScene));closeSheet(false);}};
   // Capture only mobile UI actions; the desktop listeners are untouched.
-  $('cueList').addEventListener('click',e=>{if(enabled&&e.target.closest('[data-action="style"]')){e.stopImmediatePropagation();openSheet('caption');}},true);
+  $('cueList').addEventListener('click',e=>{if(enabled&&e.target.closest('[data-action="style"]')){e.stopImmediatePropagation();mode='caption';closeSheet(false);$('captionStylePanel').open=true;sync();}},true);
   $('styleCue').addEventListener('change',()=>{if(enabled){index=cues.findIndex(c=>c.id===$('styleCue').value);selectedId=cues[index]?.id;sync();}});
   $('mobileCaptionStroke').oninput=()=>{const control=$('captionStroke');control.value=$('mobileCaptionStroke').checked?lastStroke:0;control.dispatchEvent(new Event('input',{bubbles:true}));};
   replaceButton.onclick=()=>replaceInput.click();
