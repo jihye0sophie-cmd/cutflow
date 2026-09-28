@@ -171,3 +171,8 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 ## v35.2
 - 쇼츠 자동 세팅에서 그리드 분할 이미지와 개별 이미지를 함께 사용할 수 있습니다.
 - 개별 이미지는 분할 없이 장면 1컷으로 사용되며 선택 순서대로 배치됩니다.
+
+
+## v36.3
+- Fixed production build packaging so the integrated silence-cut engine is included in `dist/`.
+- Updated cache-busting versions for `silence-cut.js` and `auto-setup.js`.
