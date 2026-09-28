@@ -384,3 +384,11 @@
   #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-start,
   #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-end{display:none!important}
 }
+/* v36.2 scene edit tools */
+.mobile-scene-tools{display:none;margin:8px 0 10px;padding:10px;border:1px solid var(--studio-border);border-radius:10px;background:var(--studio-card)}
+#mobileEditor[data-mode=media] .mobile-scene-tools{display:block}
+.mobile-scene-tools>strong{display:block;margin-bottom:7px;font-size:11px}
+.mobile-scene-tools>div{display:grid;grid-template-columns:1fr 1.25fr .8fr;gap:6px}
+.mobile-scene-tools button{min-height:38px;padding:7px 6px;font-size:10px}
+.mobile-scene-tools button.danger{color:#ff8d8d;border-color:#6d3434}
+.mobile-scene-tools small{display:block;margin-top:6px;color:var(--studio-muted);font-size:9px}

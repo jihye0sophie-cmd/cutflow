@@ -1,6 +1,21 @@
 /* Logical-scene helpers. A scene can own multiple caption cues without duplicating media. */
 (()=>{
   const releaseScene=scene=>{if(!scene)return;try{scene.audioElement?.pause();if(scene.element)scene.element.src='';}catch{}if(scene.url)URL.revokeObjectURL(scene.url);};
+  const sceneSettings=scene=>({
+    duration:scene.duration,motion:scene.motion,transition:scene.transition,
+    transform:cloneProjectData(scene.transform||null),mediaVolume:scene.mediaVolume,
+    mediaMuted:scene.mediaMuted,mediaFadeIn:scene.mediaFadeIn,mediaFadeOut:scene.mediaFadeOut,
+    trimStart:scene.trimStart,trimEnd:scene.trimEnd
+  });
+  const duplicateScene=async scene=>{
+    if(!scene?.file)throw new Error('원본 미디어를 찾을 수 없습니다.');
+    const copy=await makeScene(scene.file);Object.assign(copy,sceneSettings(scene));return copy;
+  };
+  const sameMedia=(a,b)=>{
+    if(!a||!b)return false;if(a.file&&b.file&&a.file===b.file)return true;
+    const fa=a.file,fb=b.file;if(!fa||!fb)return false;
+    return fa.name===fb.name&&fa.size===fb.size&&fa.type===fb.type&&Number(fa.lastModified||0)===Number(fb.lastModified||0);
+  };
   const recalcCueTimes=()=>{
     let time=0;const totals=new Map();
     cues.forEach(cue=>{const duration=Math.max(.1,Number(cue.end)-Number(cue.start)||.1);cue.start=time;cue.end=time+duration;time=cue.end;if(cue.sceneId)totals.set(cue.sceneId,(totals.get(cue.sceneId)||0)+duration);});
@@ -53,6 +68,42 @@
         syncSceneOrderToCues();renderCues();
       }else{const [scene]=scenes.splice(index,1);releaseScene(scene);renderScenes();}
       offset=Math.min(offset,totalDuration());changed();const next=logicalItems();if(next.length)this.select(Math.min(index,next.length-1));else{jump(0);window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:0}));}return true;
+    },
+    async split(index,time=currentTime()){
+      const list=logicalItems();if(exporting||loading||index<0||index>=list.length)return false;const group=list[index],source=group?.source||scenes[index];if(!source)return false;
+      const start=cues.length?group.start:this.start(index),duration=Math.max(.1,cues.length?group.duration:source.duration||0),end=start+duration,splitAt=Number(time);
+      if(!Number.isFinite(splitAt)||splitAt<=start+.1||splitAt>=end-.1){toast('장면 안쪽의 원하는 위치로 재생 헤드를 옮긴 뒤 장면 나누기를 눌러 주세요.');return false;}
+      pause();loading++;stats();
+      try{
+        const second=await duplicateScene(source),relative=splitAt-start,sourceIndex=scenes.indexOf(source),oldTrimStart=Number(source.trimStart)||0,oldTrimEnd=Number(source.trimEnd??source.sourceDuration)||0;
+        source.duration=relative;second.duration=Math.max(.1,duration-relative);second.transition='cut';
+        if(source.type==='video'){
+          const sourceSplit=Math.max(oldTrimStart+.04,Math.min(oldTrimEnd-.04,oldTrimStart+relative));
+          source.trimEnd=sourceSplit;second.trimStart=sourceSplit;second.trimEnd=oldTrimEnd;
+          const oldFadeOut=Number(source.mediaFadeOut)||0;source.mediaFadeOut=0;second.mediaFadeIn=0;second.mediaFadeOut=oldFadeOut;
+        }
+        scenes.splice(sourceIndex+1,0,second);
+        if(cues.length){
+          rememberCues();const originalSceneId=source.id;let cutCue=-1;
+          for(const ci of group.cueIndices){const c=cues[ci];if(c.start<splitAt-.001&&c.end>splitAt+.001){cutCue=ci;break;}}
+          if(cutCue>=0){const cue=cues[cutCue],tail=cloneProjectData(cue);cue.end=splitAt;tail.id=uid();tail.start=splitAt;tail.sceneId=second.id;tail.mediaOffset=0;cues.splice(cutCue+1,0,tail);}
+          for(const c of cues){if(c.sceneId===originalSceneId&&c.start>=splitAt-.001){c.sceneId=second.id;c.mediaOffset=Math.max(0,c.start-splitAt);}}
+          for(const c of cues){if(c.sceneId===originalSceneId)c.mediaOffset=Math.max(0,c.start-start);}
+          renderCues();
+        }else renderScenes();
+        changed();jump(splitAt);this.select(index+1);toast('현재 재생 위치를 기준으로 장면을 두 개로 나눴습니다.');return true;
+      }catch(error){toast(`장면을 나누지 못했습니다: ${error.message}`);return false;}finally{loading--;stats();}
+    },
+    mergeNext(index){
+      const list=logicalItems();if(exporting||index<0||index>=list.length-1)return false;const current=list[index],next=list[index+1],a=current?.source||scenes[index],b=next?.source||scenes[index+1];if(!a||!b)return false;
+      if(!sameMedia(a,b)){toast('다음 장면과 미디어가 달라 합칠 수 없습니다. 같은 이미지 또는 같은 영상 장면만 합칠 수 있습니다.');return false;}
+      if(a.type==='video'&&Math.abs(Number(a.trimEnd??a.sourceDuration)-Number(b.trimStart||0))>.08){toast('같은 영상이라도 원본 구간이 이어져 있지 않아 합칠 수 없습니다.');return false;}
+      pause();if(cues.length)rememberCues();
+      if(a.type==='video'){a.trimEnd=Number(b.trimEnd??b.sourceDuration)||a.trimEnd;a.mediaFadeOut=b.mediaFadeOut??a.mediaFadeOut;}
+      a.duration=Math.max(.1,(current.duration||a.duration||0)+(next.duration||b.duration||0));
+      if(cues.length){for(const ci of next.cueIndices){cues[ci].sceneId=a.id;cues[ci].mediaOffset=Math.max(0,cues[ci].start-current.start);}const si=scenes.indexOf(b);if(si>=0){releaseScene(scenes.splice(si,1)[0]);}syncSceneOrderToCues();renderCues();}
+      else{const bi=scenes.indexOf(b);if(bi>=0){releaseScene(scenes.splice(bi,1)[0]);}renderScenes();}
+      changed();this.select(index);toast('다음 장면과 합쳤습니다. 현재 장면의 효과 설정을 유지합니다.');return true;
     },
     async replace(file){
       if(!file)return;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;const oldIds=new Set(scenes.map(s=>s.id));await addFiles([file],{createFreeCues:false});const added=scenes.find(s=>!oldIds.has(s.id));if(!added)return;if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;

@@ -18,7 +18,7 @@
     <nav id="mobileTools" aria-label="모바일 편집 도구"></nav>
     <div id="mobileEditor">
       <p id="mobileEmpty">장면을 추가하면 내레이션 없이도 이미지·영상과 자막을 직접 편집할 수 있습니다.</p>
-      <div id="mobileEditorBody"></div>
+      <div id="mobileSceneActions" class="mobile-scene-tools"><strong>장면 편집</strong><div><button id="mobileSceneSplit" type="button">나누기</button><button id="mobileSceneMerge" type="button">다음과 합치기</button><button id="mobileSceneDelete" type="button" class="danger">삭제</button></div><small>나누기는 현재 재생 위치 기준</small></div><div id="mobileEditorBody"></div>
       <section id="mobileScenesPane" hidden>
         <div class="mobile-scenes-head"><strong>전체 장면</strong><div class="mobile-scenes-head-actions"><button id="mobileScenesEdit" type="button">순서 편집</button><button id="mobileScenesAdd" type="button">+ 장면 추가</button></div></div>
         <div id="mobileSceneGrid"></div>
@@ -75,6 +75,7 @@
     $('mobileSceneCount').textContent=`장면 ${list.length?index+1:0} / ${list.length}`;
     $('mobilePrev').disabled=!list.length||index===0||exporting;$('mobileNext').disabled=!list.length||index===list.length-1||exporting;
     exportButton.disabled=$('exportBtn').disabled;saveButton.disabled=$('projectSaveBtn')?.disabled||false;replaceButton.disabled=!list.length||loading>0||exporting;
+    $('mobileSceneSplit').disabled=!list.length||loading>0||exporting;$('mobileSceneMerge').disabled=!list.length||index>=list.length-1||loading>0||exporting;$('mobileSceneDelete').disabled=!list.length||loading>0||exporting;
     $('mobileEmpty').hidden=!!list.length;
     $('mobileEditor').dataset.mode=mode;
     setTab(mode);
@@ -117,6 +118,9 @@
   window.addEventListener('cutflow-scene',e=>{if(enabled){index=e.detail;selectedId=items()[index]?.id;sync();}});
   mq.addEventListener('change',()=>mq.matches?activate():deactivate());
   $('mobilePrev').onclick=()=>select(index-1);$('mobileNext').onclick=()=>select(index+1);
+  $('mobileSceneSplit').onclick=async()=>{await CutflowScene.split(index,currentTime());sync();};
+  $('mobileSceneMerge').onclick=()=>{if(confirm('다음 장면과 합칠까요? 같은 미디어의 연속 장면만 합칠 수 있습니다.')){CutflowScene.mergeNext(index);sync();}};
+  $('mobileSceneDelete').onclick=()=>{if(!confirmNarrationSceneEdit())return;if(confirm(`장면 ${index+1}을 삭제할까요?`)){CutflowScene.remove(index);sync();}};
   settingsButton.onclick=()=>{const open=!document.body.classList.contains('mobile-project-open');document.body.classList.toggle('mobile-project-open',open);$('mobileProject').open=open;if(open)pause();};
   $('mobileProject').addEventListener('toggle',()=>{if(enabled&&!$('mobileProject').open)document.body.classList.remove('mobile-project-open');});
   saveButton.onclick=()=>$('projectSaveBtn').click();$('mobileProjectOpen').onclick=()=>$('projectOpenBtn').click();exportButton.onclick=()=>$('exportBtn').click();

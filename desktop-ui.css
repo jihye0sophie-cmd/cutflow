@@ -88,3 +88,11 @@
 #desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-duration{display:grid!important}
 #desktopEditor[data-mode=image] .caption-row-heading{display:none!important}
 #desktopEditor[data-mode=caption] .caption-row-heading{display:none!important}
+/* v36.2 scene edit tools */
+.desktop-scene-tools{display:none;margin:0 0 12px;padding:10px 12px;border:1px solid var(--studio-border);border-radius:10px;background:var(--studio-input)}
+#desktopEditor[data-mode=image] .desktop-scene-tools{display:block}
+.desktop-scene-tools>strong{display:block;margin-bottom:8px;font-size:12px}
+.desktop-scene-tools>div{display:flex;gap:8px;flex-wrap:wrap}
+.desktop-scene-tools button{min-height:34px;padding:7px 12px;font-size:12px}
+.desktop-scene-tools button.danger{color:#ff8d8d;border-color:#6d3434}
+.desktop-scene-tools small{display:block;margin-top:7px;color:var(--studio-muted);font-size:10px}
