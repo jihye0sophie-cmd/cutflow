@@ -3,17 +3,15 @@ const fs=require('node:fs'),vm=require('node:vm');
 let harness=fs.readFileSync('test-v4.cjs','utf8').split('run("scenes=')[0];
 harness+=String.raw`
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,a+' != '+b);
-run("scenes=[{id:'a',type:'image',duration:3,motion:'still',transition:'cut',element:{width:600,height:800}},{id:'b',type:'video',duration:3,motion:'zoom-in',transition:'cut',element:{videoWidth:600,videoHeight:800}}];cues=[{id:'1',sceneId:'a',start:0,end:3,text:'one'},{id:'2',sceneId:'a',start:3,end:6,text:'two'}]");
-run("cues[0].transform={scale:1.3,x:.12,y:-.08}");
+run("scenes=[{id:'a',type:'image',duration:6,motion:'still',transition:'cut',transform:{scale:1.3,x:.12,y:-.08},element:{width:600,height:800}},{id:'b',type:'video',duration:3,motion:'zoom-in',transition:'cut',element:{videoWidth:600,videoHeight:800}}];cues=[{id:'1',sceneId:'a',start:0,end:3,text:'one'},{id:'2',sceneId:'a',start:3,end:6,text:'two'}]");
 assert.equal(run('project().scenes[0].transform.scale'),1.3);
-assert.equal(run('project().scenes[1].transform'),undefined);
-run("cues[0].motion='zoom-in';jump(3);jump(0)");
+assert.equal(run('project().scenes[1].transform.scale'),1.3);
+run("scenes[0].motion='zoom-in';jump(3);jump(0)");
 assert.equal(run('project().scenes[0].transform.x'),.12);
-run("rememberCues();cues[0].transform={scale:1,x:0,y:0};$('undoCuesBtn').onclick()");
-assert.equal(run('project().scenes[0].transform.scale'),1.3);
-run("$('cueList').onclick({target:{dataset:{action:'split'},closest(){return {dataset:{index:'0'}}}}});cues[1].transform={scale:2,x:.3,y:.2}");
-assert.equal(run('cues[0].transform.scale'),1.3);
-assert.equal(run('cues[1].transform.scale'),2);
+run("$('cueList').onclick({target:{dataset:{action:'split'},closest(){return {dataset:{index:'0'},querySelector(){return null}}}}})");
+assert.equal(run('cues.length'),3);
+assert.equal(run('project().scenes.filter(s=>s.sourceIndex===0).every(s=>s.transform.scale===1.3)'),true);
+assert.equal(run('cues.every(c=>c.transform===undefined)'),true);
 for(const layout of ['reference','immersive','fullscreen'])for(const fit of ['cover','contain']){
  let previous;
  for(const w of [360,720,1080]){
@@ -30,7 +28,7 @@ const defaultBox=context.CutRenderer.mediaGeometry({element:{width:1080,height:1
 assert.equal(defaultBox.x,0);assert.equal(defaultBox.y,0);assert.equal(defaultBox.w,1080);
 assert.equal(context.CutRenderer.transform({scale:Infinity,x:NaN}).scale,1);
 assert.equal(context.CutRenderer.transform({scale:100,x:10,y:-10}).scale,5);
-console.log('PASS: independent transforms, scene navigation, split and undo; camera composition; image/video geometry; preview/export resolution equivalence and defaults.');
+console.log('PASS: scene-level transforms persist across caption splits; camera composition; image/video geometry; preview/export resolution equivalence and defaults.');
 // Drive the shipped UI adapter with pointer events, including two-pointer rebasing.
 const callbacks=[];
 Object.assign(context,{requestAnimationFrame:fn=>callbacks.push(fn)});

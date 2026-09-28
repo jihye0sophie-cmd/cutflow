@@ -79,7 +79,8 @@
     $('mobileEditor').dataset.mode=mode;
     setTab(mode);
     const cueIndex=cues.length?CutflowScene.cueIndex(index):index;
-    document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const rowIndex=Number(row.dataset.index),on=cues.length?row.classList.contains('cue-row')&&rowIndex===cueIndex:rowIndex===index;row.classList.toggle('mobile-selected',on);row.draggable=false;const fold=row.querySelector('.mobile-caption-text');if(fold)fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY'));});
+    const selectedCueIndex=cues.length&&['media','motion'].includes(mode)?(list[index]?.firstCueIndex??cueIndex):cueIndex;
+    document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const rowIndex=Number(row.dataset.index),on=cues.length?row.classList.contains('cue-row')&&rowIndex===selectedCueIndex:rowIndex===index;row.classList.toggle('mobile-selected',on);row.draggable=false;const fold=row.querySelector('.mobile-caption-text');if(fold)fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY'));});
     $('mobileScenesPane').hidden=mode!=='scenes';
     if(mode==='scenes')buildGrid();else sceneEdit=false;
     if(mode==='style'&&cues.length&&cueIndex>=0){window.selectStyleCue?.(cueIndex);$('captionStylePanel').open=true;}else $('captionStylePanel').open=false;

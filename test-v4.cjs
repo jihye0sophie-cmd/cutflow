@@ -10,12 +10,11 @@ run("$('undoCuesBtn').onclick()");assert.equal(run('cues.length'),2);
 run("$('cueList').onclick({target:{dataset:{action:'merge'},closest(){return {dataset:{index:'0'}}}}})");assert.equal(run('project().scenes[0].end'),6);assert.equal(run('cues[0].sceneId'),'a');run("$('undoCuesBtn').onclick()");
 run("cues.push({id:'c3',start:6,end:8,text:'누락',color:'white'});renderCues()");assert.equal(els.get('exportBtn').disabled,true);run("cues[2].sceneId='a';renderCues()");assert.equal(els.get('exportBtn').disabled,false);
 console.log('PASS: exact 0–3 / 3–6 boundaries; timing edits; empty gaps; split video offset; merge and undo; missing-media export gate.');
-run("cues[0].motion='pan-left';cues[2].motion='pan-right';renderCues()");
-assert.equal(run('project().scenes[0].motion'),'pan-left');assert.equal(run('project().scenes[2].motion'),'pan-right');assert.equal(run('scenes[0].motion'),'still');
+run("scenes[0].motion='pan-left';renderCues()");
+assert.equal(run("project().scenes.filter(s=>s.sourceIndex===0).every(s=>s.motion==='pan-left')"),true);assert.equal(run('scenes[0].motion'),'pan-left');
 assert.equal(els.get('sceneList').hidden,true);assert.equal(els.get('sceneList').innerHTML,'');assert.ok(els.get('cueList').innerHTML.includes('data-action="color"'));assert.ok(els.get('cueList').innerHTML.includes('data-action="motion"'));
-run("$('cueList').onchange({target:{value:'1.25',dataset:{action:'trim'},closest(){return {dataset:{index:'1'}}}}})");assert.equal(run('project().scenes[1].trimStart'),1.25);assert.equal(run('scenes[1].trimStart'),.3);
-run("$('undoCuesBtn').onclick()");assert.equal(run('project().scenes[1].trimStart'),.3);
-console.log('PASS: unified rows without duplicate cut editors, independent per-interval motion and video trim, edit undo.');
+run("$('cueList').onchange({target:{value:'1.25',dataset:{action:'trim-start'},closest(){return {dataset:{index:'1'}}}}})");assert.equal(run('project().scenes[1].trimStart'),1.25);assert.equal(run('scenes[1].trimStart'),1.25);
+console.log('PASS: caption rows share scene-level motion and video trim without duplicating media settings.');
 vm.runInContext(fs.readFileSync('caption-style.js','utf8'),context);
 context.CaptionStyle=context.window.CaptionStyle;
 context.CutFonts={list:[{id:'noto',label:'기본'}],get:()=>({}),ensure:async()=>{}};
@@ -42,9 +41,10 @@ run("$('styleScope').value='current';$('styleScope').onchange();applyCaptionStyl
 assert.equal(run('cues[0].color'),'#ff982f');
 assert.notEqual(run('cues[1].color'),'#ff982f');
 console.log('PASS: edit then select all copies complete style without changing cuts/timing/text; undo and current-only editing remain intact.');
-run("cues=Array.from({length:12},(_,i)=>({id:'r'+i,start:i,end:i+1,text:'x',sceneId:i===5?'b':'a',motion:'still'}));renderCues();$('randomMotionBtn').onclick()");
-assert.equal(run('cues[5].motion'),'still');
-assert.equal(run("cues.filter(c=>c.sceneId==='a').every((c,i,a)=>!i||c.motion!==a[i-1].motion)"),true);
+run("cues=Array.from({length:12},(_,i)=>({id:'r'+i,start:i,end:i+1,text:'x',sceneId:i===5?'b':'a',motion:'still'}));scenes[0].motion='still';scenes[1].motion='still';renderCues();$('randomMotionBtn').onclick()");
+assert.equal(run("scenes[1].motion"),'still');
+assert.notEqual(run("scenes[0].motion"),'still');
+assert.equal(run("cues.every(c=>c.motion===undefined)"),true);
 for(const name of run('Object.keys(motionLabels)')){
   for(const elapsed of [0,.22,1,2]){
     const m=context.CutRenderer.motion({motion:name,duration:2},elapsed);

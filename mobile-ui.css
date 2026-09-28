@@ -361,3 +361,26 @@
  .mobile-editor .caption-cue-actions{display:flex!important;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--studio-border)}
  .mobile-editor .caption-cue-actions button{flex:1 1 auto;min-height:36px;font-size:11px;padding:7px 9px}
 }
+
+/* v36.1: one media/effect setup per logical scene, regardless of caption count. */
+.mobile-editor .scene-media-summary{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;padding:9px 10px;border:1px solid var(--studio-border);border-radius:8px;background:rgba(255,255,255,.025)}
+.mobile-editor .scene-media-summary>div{display:flex;align-items:center;justify-content:space-between;gap:8px}.mobile-editor .scene-media-summary strong{font-size:13px;color:#fff}.mobile-editor .scene-media-summary span{font-size:9px;line-height:1.45;color:var(--studio-muted)}
+.mobile-editor .scene-media-duration{grid-column:1/-1}.mobile-editor .scene-media-duration span{display:block;margin-top:4px;font-size:9px;color:var(--studio-muted)}
+@media(max-width:760px){
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.caption-row-heading,
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.caption-row-heading{display:none!important}
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.scene-media-summary,
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.scene-media-summary{display:flex!important}
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.scene-media-duration{display:block!important}
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-media,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-trim,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-audio{display:block!important}
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-motion,
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-transition{display:block!important}
+}
+@media(max-width:760px){
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-start,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-end,
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-start,
+  #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-end{display:none!important}
+}

@@ -72,3 +72,19 @@
  .desktop-editor .caption-cue-actions button{min-height:34px}
  #desktopEditor[data-mode=caption] .editor-text{display:block!important}
 }
+
+/* v36.1: scene media settings are scene-level; captions stay caption-level. */
+.desktop-editor .scene-media-summary{grid-column:1/-1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid var(--studio-border);border-radius:8px;background:rgba(255,255,255,.025)}
+.desktop-editor .scene-media-summary>div{display:flex;flex-direction:column;gap:3px}.desktop-editor .scene-media-summary strong{font-size:15px;color:#fff}.desktop-editor .scene-media-summary span{font-size:11px;color:var(--studio-muted);line-height:1.5}
+.desktop-editor .scene-media-duration{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,180px) 1fr;gap:8px 14px;align-items:end}.desktop-editor .scene-media-duration span{font-size:11px;color:var(--studio-muted)}
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>div{display:none!important}
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-summary{display:flex!important}
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-duration,
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media,
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-motion,
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-transition,
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-trim,
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-audio{display:block!important}
+#desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-duration{display:grid!important}
+#desktopEditor[data-mode=image] .caption-row-heading{display:none!important}
+#desktopEditor[data-mode=caption] .caption-row-heading{display:none!important}

@@ -12,7 +12,7 @@
  let enabled=false,identity=null,gesture=null,inputSaved=false;
  const points=new Map(),mode=$('transformMode');
  const fields={scale:$('transformScale'),x:$('transformX'),y:$('transformY')};
- function state(){const list=timelineScenes(),loc=CutRenderer.locate(list,currentTime());return {item:CutflowScene.items()[loc.index],scene:list[loc.index],loc};}
+ function state(){const list=timelineScenes(),loc=CutRenderer.locate(list,currentTime()),timelineScene=list[loc.index],source=timelineScene?.sourceIndex>=0?scenes[timelineScene.sourceIndex]:timelineScene;return {item:source,scene:source,loc,timelineScene};}
  function allowed(){return enabled&&!exporting&&!playing&&!!state().scene?.element&&!!panel.getClientRects().length;}
  function save(){if(cues.length)rememberCues();}
  function write(value){const {item}=state();if(!item||exporting)return;item.transform=CutRenderer.transform(value);changed();syncValues();}
