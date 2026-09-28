@@ -2,6 +2,9 @@ const $=id=>document.getElementById(id);
 const motionLabels={still:'고정','zoom-in':'줌 인','zoom-out':'줌 아웃','pan-left':'오른쪽 → 왼쪽 이동','pan-right':'왼쪽 → 오른쪽 이동','pan-up':'아래 → 위 이동','pan-down':'위 → 아래 이동','zoom-in-slow':'느린 줌인','zoom-in-fast':'빠른 줌인','zoom-in-strong':'강한 줌인','zoom-out-slow':'느린 줌아웃','zoom-out-fast':'빠른 줌아웃','zoom-pan-right':'줌인 + 오른쪽 이동','zoom-pan-left':'줌인 + 왼쪽 이동','punch-hold':'빠르게 확대 후 유지'};
 const transitionLabels={cut:'하드 컷',dissolve:'디졸브',fade:'블랙 페이드',flash:'화이트 플래시',slide:'슬라이드'};
 const rhythms={reference:{motions:['zoom-in','still','zoom-out','still','pan-left','pan-right'],transitions:['cut']},balanced:{motions:['zoom-in','pan-right','zoom-out','pan-left','pan-up','pan-down'],transitions:['cut','dissolve']},calm:{motions:['zoom-in','pan-right','zoom-out','pan-left'],transitions:['dissolve','fade']},impact:{motions:['zoom-in','pan-left','zoom-out','pan-right'],transitions:['cut','flash','cut','slide']}};
+const autoMotionPool=Object.keys(motionLabels).filter(m=>m!=='still');
+let autoMotionRecent=[];
+function chooseAutoMotion(){const available=autoMotionPool.filter(m=>!autoMotionRecent.includes(m));const pool=available.length?available:autoMotionPool;const next=pool[Math.floor(Math.random()*pool.length)];autoMotionRecent=[...autoMotionRecent,next].slice(-2);return next;}
 let scenes=[],cues=[],audioBuffer=null,audioUrl=null,audioName='',audioFile=null,silences=[],envelope=[],cueHistory=[];
 let titleColorRanges=[],lastTitleText='';
 let playRequest=0;
@@ -153,7 +156,7 @@ async function makeScene(file){
 async function addFiles(files){
   const list=[...files].filter(f=>/^image\/|^video\//.test(f.type)||/\.(mp4|mov|webm|m4v)$/i.test(f.name));if(!list.length){toast('이미지 또는 영상 파일을 선택해 주세요.');return;}
   pause();loading++;stats();let success=0,errors=[];
-  for(const file of list){try{const scene=await makeScene(file);const rhythm=rhythms[$('templateSelect').value];scene.motion=scene.type==='image'?rhythm.motions[scenes.length%rhythm.motions.length]:'still';scenes.push(scene);success++;}catch{errors.push(file.name);}}
+  for(const file of list){try{const scene=await makeScene(file);scene.motion=scene.type==='image'?chooseAutoMotion():'still';scenes.push(scene);success++;}catch{errors.push(file.name);}}
   loading--;renderCues();$('fileInput').value='';toast(`${success}개 컷을 추가했습니다.${errors.length?' 읽기 실패: '+errors.join(', '):''}`);
 }
 function moveScene(from,to){if(to<0||to>=scenes.length)return;pause();const [scene]=scenes.splice(from,1);scenes.splice(to,0,scene);if(cues.length)fitCuts(false);offset=sceneStart(to);renderScenes();}
@@ -211,6 +214,17 @@ function cleanSceneState(scene){const {id,name,type,sourceDuration,trimStart,dur
 function mediaBytes(){const bgm=window.bgmSnapshot?.();return scenes.reduce((n,s)=>n+(s.file?.size||0),0)+(audioFile?.size||0)+(bgm?.file?.size||0);}
 async function clearProjectMedia(){pause();for(const s of scenes){try{s.element.src='';}catch{}if(s.url)URL.revokeObjectURL(s.url);}scenes=[];cues=[];cueHistory=[];if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=null;audioBuffer=null;audioFile=null;audioName='';$('narration').removeAttribute('src');$('narration').load();silences=[];envelope=[];await window.restoreBgmSnapshot?.(null,{silent:true});}
 const cloneProjectData=value=>{if(value==null)return value;try{if(typeof structuredClone==='function')return structuredClone(value);}catch{}return JSON.parse(JSON.stringify(value));};
+window.CutflowAutoBridge={
+  scriptLines,
+  async loadNarration(file){await loadAudio(file);return !!audioBuffer;},
+  async addMedia(files){const before=scenes.length;await addFiles(files);return scenes.length-before;},
+  buildTimeline(){buildCues();if(cues.length&&scenes.length)fitCuts(false);return {cueCount:cues.length,sceneCount:scenes.length};},
+  counts(){return {sceneCount:scenes.length,cueCount:cues.length,scriptCount:scriptLines($('scriptInput').value).length};},
+  async clearScenesOnly(){pause();for(const s of scenes){try{s.element.src='';}catch{}if(s.url)URL.revokeObjectURL(s.url);}scenes=[];cues.forEach(c=>{c.sceneId=null;});offset=0;renderCues();},
+  markChanged(){changed();},
+  toast
+};
+
 window.CutflowProjectBridge={
   version:1,
   capture(){return {schemaVersion:1,appVersion:'26',controls:captureControls(),titleColorRanges:cloneProjectData(titleColorRanges),cues:cloneProjectData(cues),scenes:scenes.map(s=>({meta:cleanSceneState(s),file:s.file})),narration:audioFile?{file:audioFile,name:audioName}:null,bgm:window.bgmSnapshot?.()||null,playhead:currentTime(),estimatedMediaBytes:mediaBytes()};},

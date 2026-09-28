@@ -31,6 +31,12 @@ async function restoreBgmSnapshot(snapshot,{silent=false}={}){
   }catch(error){bgmBuffer=null;bgmName='';bgmFile=null;syncBgm();throw new Error('저장된 BGM을 복원하지 못했습니다.');}
   finally{await ctx?.close();}
 }
+async function loadBgmFile(file){
+  if(!file)return false;pause();const id=++bgmLoadId;loading++;stats();$('bgmStatus').textContent='음악 읽는 중…';let ctx;
+  try{ctx=new AudioContext();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return false;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();changed();syncBgm();return true;}
+  catch{return false;}finally{await ctx?.close();loading--;stats();}
+}
+window.loadBgmFile=loadBgmFile;
 window.bgmSnapshot=bgmSnapshot;window.restoreBgmSnapshot=restoreBgmSnapshot;
 
 window.bgmProject=bgmProject;window.syncBgm=syncBgm;syncBgm();
