@@ -1,3 +1,8 @@
+## v37.1
+- Fix desktop timing workspace clipping/scroll alignment.
+- Keep the lower timing controls fully accessible inside the editor panel.
+- Fix scene numbering in the timing track.
+
 # Cutflow v36.2 v36.1
 
 - 이미지·영상 설정을 자막 구간이 아니라 **논리 장면 단위**로 고정했습니다. 한 장면에서 자막을 여러 개로 나누거나 합쳐도 Scale/X/Y, 카메라 무빙, 전환, Trim, 영상 원음·볼륨·페이드 설정은 한 번만 유지됩니다.
