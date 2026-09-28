@@ -97,6 +97,8 @@ const templateTypography={
 };
 async function applyTemplateTypography(layout,{applyCues=true,notify=false}={}){
   const preset=templateTypography[layout]||templateTypography.framed;
+  const positions={framed:{titleY:4,channelY:81.7},immersive:{titleY:7,channelY:92},fullscreen:{titleY:4,channelY:92}}[layout]||{titleY:4,channelY:81.7};
+  $('titleX').value='50';$('titleY').value=String(positions.titleY);$('channelX').value='50';$('channelY').value=String(positions.channelY);syncTextPositionUI();
   $('titleFont').value=preset.titleFont;$('titleBold').checked=true;$('titleItalic').checked=false;
   $('channelFont').value=preset.channelFont;$('channelBold').checked=true;$('channelItalic').checked=false;
   if(applyCues&&cues.length){rememberCues();cues.forEach(c=>{c.style={...c.style,font:preset.captionFont,bold:preset.captionBold,italic:preset.captionItalic};});renderCues();}
@@ -108,6 +110,9 @@ async function applyTemplateTypography(layout,{applyCues=true,notify=false}={}){
 window.applyTemplateTypography=applyTemplateTypography;
 $('layoutSelect').addEventListener('input',()=>applyTemplateTypography($('layoutSelect').value,{applyCues:true,notify:true}));
 ['titleFont','channelFont'].forEach(id=>$(id).onchange=async()=>{syncTextStyleNotes();changed();try{await CutRenderer.fonts(project());changed();}catch{toast('폰트를 불러오지 못했습니다.');}});
+function syncTextPositionUI(){for(const id of ['titleX','titleY','channelX','channelY']){const out=$(id+'Value');if(out)out.textContent=`${Number($(id).value).toFixed(Number($(id).value)%1?1:0)}%`;}}
+['titleX','titleY','channelX','channelY'].forEach(id=>$(id).addEventListener('input',()=>{syncTextPositionUI();changed();}));
+syncTextPositionUI();
 ['titleSize','channelSize'].forEach(id=>$(id).addEventListener('change',()=>{
   const input=$(id),fallback=id==='titleSize'?86.4:43.2;
   input.value=String(Math.min(Number(input.max),Math.max(Number(input.min),Number(input.value)||fallback)));changed();

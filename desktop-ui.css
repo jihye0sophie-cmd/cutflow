@@ -58,3 +58,10 @@
  #desktopStrip .desktop-scene-item.dragging{opacity:.45}
  #desktopStrip .desktop-scene-item.drop-target::after{content:'';position:absolute;inset:-3px;border:2px dashed var(--studio-accent);border-radius:9px;pointer-events:none;z-index:5}
 }
+
+/* v34.2 project text controls + scene strip follow */
+@media(min-width:761px){
+ .desktop-editor #desktopProject .text-style-grid input[type=number]{background:var(--studio-card);color:#fff;-webkit-text-fill-color:#fff;caret-color:#fff}
+ .desktop-editor #desktopProject .text-style-grid input[type=range]{width:100%;accent-color:var(--studio-accent);background:transparent;border:0;padding:0}
+ .desktop-editor #desktopProject .text-style-grid output{float:right;color:var(--studio-accent);font-size:12px}
+}

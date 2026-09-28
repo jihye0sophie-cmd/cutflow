@@ -133,7 +133,7 @@ window.CutRenderer = (() => {
         ctx.restore();
       }
     }else{ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);if(!project.scenes.length)drawText(ctx,'이미지·영상 컷을\n불러와 주세요',{x:w*.1,y:h*.35,w:w*.8,h:h*.25,size:w*.065,color:'#b9b9b9'});}
-    drawText(ctx,project.title,{x:w*.05,y:h*(portrait?.07:.04),w:w*.90,h:h*(portrait?.155:.15),size:(project.titleSize||86.4)*w/1080,italic:!!project.titleItalic,color:project.titleColor||'#ffe22e',colorRanges:project.titleColorRanges||[],weight:project.titleBold===false?400:900,align:'bottom',font:project.titleFont||'noto',...textStroke(project,'title',fullscreen,w/1080)});
+    drawText(ctx,project.title,{x:w*((project.titleX??50)/100-.45),y:h*((project.titleY??((portrait?.07:.04)*100))/100),w:w*.90,h:h*(portrait?.155:.15),size:(project.titleSize||86.4)*w/1080,italic:!!project.titleItalic,color:project.titleColor||'#ffe22e',colorRanges:project.titleColorRanges||[],weight:project.titleBold===false?400:900,align:'bottom',font:project.titleFont||'noto',...textStroke(project,'title',fullscreen,w/1080)});
     const cue=project.cues.find(c=>time>=c.start&&time<c.end);
     if(cue){
       const style=window.CaptionStyle.resolve(cue,project),scale=w/1080;
@@ -143,7 +143,7 @@ window.CutRenderer = (() => {
       const y=customPosition?Math.max(0,Math.min(h-areaH,center-areaH/2)):(portrait?h*.635:h*.64);
       drawText(ctx,cue.text,{x:w*.07,y,w:w*.86,h:areaH,size:style.size*scale,color:style.color,colorRanges:cue.colorRanges||[],highlight:true,italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:customPosition||portrait?'center':'bottom',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});
     }
-    drawText(ctx,project.channel,{x:w*.04,y:h*(fullscreen||portrait?.92:.817),w:w*.92,h:h*.06,size:(project.channelSize||43.2)*w/1080,italic:!!project.channelItalic,color:project.channelColor||'#dddddd',weight:project.channelBold===false?400:900,font:project.channelFont||'noto',...textStroke(project,'channel',fullscreen||portrait,w/1080)});
+    drawText(ctx,project.channel,{x:w*((project.channelX??50)/100-.46),y:h*((project.channelY??((fullscreen||portrait?.92:.817)*100))/100),w:w*.92,h:h*.06,size:(project.channelSize||43.2)*w/1080,italic:!!project.channelItalic,color:project.channelColor||'#dddddd',weight:project.channelBold===false?400:900,font:project.channelFont||'noto',...textStroke(project,'channel',fullscreen||portrait,w/1080)});
     return loc;
   }
   async function fonts(project){
