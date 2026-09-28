@@ -17,6 +17,35 @@ window.CutEncoder=(()=>{
     assertActive(token);
   }
   async function exec(args){const code=await ffmpeg.exec(args);if(code!==0)throw new Error('MP4 인코딩에 실패했습니다. 720p로 낮춰 다시 저장해 주세요. '+lastLogs.filter(x=>/error|invalid|failed/i.test(x)).slice(-1).join(''));}
+  const safeExt=name=>{const m=String(name||'').match(/\.([a-z0-9]{1,5})$/i);return m?m[1].toLowerCase():'mp4';};
+  async function prepareMediaAudio(project,token,progress){
+    const clips=[],written=new Map();let cursor=0,done=0;
+    for(let i=0;i<(project.scenes||[]).length;i++){
+      assertActive(token);const scene=project.scenes[i],start=Number.isFinite(scene.start)?scene.start:cursor,duration=Math.max(0,Number(scene.duration)||0);cursor=start+duration;
+      if(scene.type!=='video'||scene.mediaMuted||(scene.mediaVolume??0)<=0||!(scene.file instanceof Blob)||duration<=0)continue;
+      let src=written.get(scene.file);
+      if(!src){src=`media_src_${written.size}.${safeExt(scene.name||scene.file.name)}`;await ffmpeg.writeFile(src,new Uint8Array(await scene.file.arrayBuffer()));written.set(scene.file,src);}
+      const trim=Math.max(0,Number(scene.trimStart)||0),available=Math.max(0,(Number(scene.sourceDuration)||duration)-trim),length=Math.min(duration,available);if(length<=.02)continue;
+      const out=`media_audio_${i}.wav`,rawVolume=Number(scene.mediaVolume),volume=Math.max(0,Math.min(1,Number.isFinite(rawVolume)?rawVolume:0));
+      try{
+        await exec(['-ss',String(trim),'-t',String(length),'-i',src,'-vn','-ac','2','-ar','48000','-af',`volume=${volume}`,'-y',out]);
+        clips.push({name:out,start});
+      }catch(error){lastLogs.push(`media audio skipped: ${scene.name||i}`);}
+      done++;if(done%2===0){progress(.90,`영상 원음 준비 중 ${done}개`);await new Promise(r=>setTimeout(r,0));}
+    }
+    return {clips,sources:[...written.values()]};
+  }
+  async function muxFinalAudio(project,mixedAudio,token,progress){
+    const {clips,sources}=await prepareMediaAudio(project,token,progress);assertActive(token);
+    const audioInputs=[],filters=[],labels=[];let inputIndex=1;
+    if(mixedAudio){await ffmpeg.writeFile('base_audio.wav',wav(mixedAudio));audioInputs.push('-i','base_audio.wav');filters.push(`[${inputIndex}:a]atrim=0:${project.duration},asetpts=PTS-STARTPTS[a${labels.length}]`);labels.push(`[a${labels.length}]`);inputIndex++;}
+    for(const clip of clips){audioInputs.push('-i',clip.name);const label=`a${labels.length}`,delay=Math.max(0,Math.round(clip.start*1000));filters.push(`[${inputIndex}:a]adelay=${delay}|${delay}[${label}]`);labels.push(`[${label}]`);inputIndex++;}
+    if(!labels.length){await exec(['-i','video.mp4','-c','copy','-movflags','+faststart','-y','result.mp4']);return;}
+    filters.push(`${labels.join('')}amix=inputs=${labels.length}:duration=longest:dropout_transition=0,alimiter=limit=0.98[mix]`);
+    progress(.95,'내레이션·BGM·영상 원음을 합치는 중…');
+    await exec(['-i','video.mp4',...audioInputs,'-filter_complex',filters.join(';'),'-map','0:v:0','-map','[mix]','-c:v','copy','-c:a','aac','-b:a','192k','-t',String(project.duration),'-movflags','+faststart','-y','result.mp4']);
+    for(const f of ['base_audio.wav',...clips.map(x=>x.name),...sources]){try{await ffmpeg.deleteFile(f);}catch{}}
+  }
   function wav(buffer){
     const channels=Math.min(2,buffer.numberOfChannels),samples=buffer.length,rate=buffer.sampleRate;
     const data=new Uint8Array(44+samples*channels*2),v=new DataView(data.buffer);
@@ -74,11 +103,8 @@ window.CutEncoder=(()=>{
       assertActive(token);
       if(codecConfig){try{await fastVideo(canvas,project,frames,fps,codecConfig,token,progress);}catch(error){assertActive(token);progress(.08,'호환 인코딩으로 다시 만드는 중…');await softwareVideo(canvas,project,frames,fps,token,progress);}}
       else await softwareVideo(canvas,project,frames,fps,token,progress);
-      assertActive(token);progress(.89,'내레이션·BGM을 합치고 MP4를 마무리하는 중…');
-      if(mixedAudio){
-        await ffmpeg.writeFile('narration.wav',wav(mixedAudio));
-        await exec(['-i','video.mp4','-i','narration.wav','-map','0:v:0','-map','1:a:0','-c:v','copy','-c:a','aac','-b:a','192k','-af','apad','-t',String(project.duration),'-movflags','+faststart','-y','result.mp4']);
-      }else await exec(['-i','video.mp4','-c','copy','-movflags','+faststart','-y','result.mp4']);
+      assertActive(token);progress(.89,'오디오를 준비하고 MP4를 마무리하는 중…');
+      await muxFinalAudio(project,mixedAudio,token,progress);
       assertActive(token);const data=await ffmpeg.readFile('result.mp4');progress(1,'MP4 완성');return new Blob([data],{type:'video/mp4'});
     }finally{ffmpeg?.terminate();ffmpeg=null;if(activeEncoder?.state!=='closed')activeEncoder?.close();activeEncoder=null;}
   }

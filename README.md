@@ -103,3 +103,11 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - Each grid image can set its own split gap (0-40px).
 - Preview divider bands are scaled from the source-image pixel gap, so the visible band matches the actual removed crop area.
 - Adjustable cut positions and per-image row/column settings are preserved.
+
+## v33
+
+- 내레이션 없이도 이미지·영상 장면을 추가하면 장면별 자막을 직접 입력할 수 있는 자유 편집 모드를 추가했습니다.
+- 자유 편집 장면은 이미지 3초, 영상은 원본 길이를 기본값으로 사용하며 장면 길이 변경 시 뒤 장면 시간이 자동 재계산됩니다.
+- 영상 장면별 원음 볼륨과 음소거를 조절할 수 있으며 미리보기와 MP4에 반영됩니다.
+- 기존 대본+내레이션 자동 자막 타임라인 방식은 그대로 유지합니다.
+- 프로젝트 저장 시 자유 편집 정보와 영상 원음 설정도 함께 저장됩니다.

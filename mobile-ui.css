@@ -315,3 +315,16 @@
   #mobileTools button{font-size:8px;gap:2px}
   #mobileTools button>span{font-size:11px}
 }
+/* v33 free-edit and video-audio controls */
+@media(max-width:760px){
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-duration,
+  #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-audio{display:block!important;grid-column:1/-1!important}
+  .mobile-editor .editor-duration,.mobile-editor .editor-audio{order:3;grid-column:1/-1}
+  .mobile-editor .editor-duration label,.mobile-editor .editor-audio label{font-size:10px;color:var(--studio-muted)}
+  .mobile-editor .editor-duration input[type=number]{width:100%;margin-top:5px}
+  .mobile-editor .editor-duration span,.mobile-editor .editor-audio>span{display:block;margin-top:5px;font-size:9px;line-height:1.45;color:var(--studio-muted)}
+  .mobile-editor .editor-audio{padding:10px;border:1px solid var(--studio-border);border-radius:8px;background:var(--studio-card)}
+  .mobile-editor .video-audio-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .mobile-editor .video-audio-head strong{font-size:12px;color:#fff}.mobile-editor .video-audio-head label{display:flex;align-items:center;gap:5px;margin:0}
+  .mobile-editor .video-volume{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}.mobile-editor .video-volume input{width:100%}.mobile-editor .video-volume output{font-size:11px;color:#fff;min-width:38px;text-align:right}
+}

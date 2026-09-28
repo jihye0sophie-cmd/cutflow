@@ -7,8 +7,8 @@ window.CutflowScene={
  thumbnail(item,i){const source=cues.length?scenes.find(s=>s.id===item.sceneId):item;return {source,duration:cues.length?item.end-item.start:item.duration,index:i};},
  async replace(file){
     const targetId=CutflowScene.items()[CutflowScene.index()]?.id,withCues=!!cues.length;if(!file)return;
-    const oldIds=new Set(scenes.map(s=>s.id));await addFiles([file]);
-    const added=scenes.find(s=>!oldIds.has(s.id));if(!added)return;
+    const oldIds=new Set(scenes.map(s=>s.id));await addFiles([file],{createFreeCues:false});
+    const added=scenes.find(s=>!oldIds.has(s.id));if(!added)return;if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
     const target=withCues?cues.findIndex(c=>c.id===targetId):scenes.findIndex(s=>s.id===targetId);
     if(withCues&&target>=0){const input=$('cueList').querySelector(`[data-index="${target}"] [data-action="media"]`);if(input){input.value=added.id;input.dispatchEvent(new Event('change',{bubbles:true}));}CutflowScene.select(target);}
     else if(target>=0){const previous=scenes[target];scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition};scenes.splice(scenes.indexOf(added),1);renderScenes();CutflowScene.select(target);}

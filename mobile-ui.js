@@ -17,10 +17,10 @@
     </details>
     <nav id="mobileTools" aria-label="모바일 편집 도구"></nav>
     <div id="mobileEditor">
-      <p id="mobileEmpty">프로젝트 설정에서 대본, 내레이션과 이미지·영상을 입력하세요.</p>
+      <p id="mobileEmpty">장면을 추가하면 내레이션 없이도 이미지·영상과 자막을 직접 편집할 수 있습니다.</p>
       <div id="mobileEditorBody"></div>
       <section id="mobileScenesPane" hidden>
-        <div class="mobile-scenes-head"><strong>전체 장면</strong><button id="mobileScenesAdd" type="button">+ 이미지·영상</button></div>
+        <div class="mobile-scenes-head"><strong>전체 장면</strong><button id="mobileScenesAdd" type="button">+ 장면 추가</button></div>
         <div id="mobileSceneGrid"></div>
       </section>
     </div>`;
