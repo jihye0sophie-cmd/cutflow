@@ -137,9 +137,12 @@ function selectNavigationCue(index,scroll=false){
   $('nowPlaying').textContent=`자막 ${index+1} · 컷 ${sourceIndex+1}`;
 }
 function navigateCut(direction){
+  if(desktopNavigation()&&window.CutflowScene?.items?.().length){
+    const list=CutflowScene.items(),current=CutflowScene.index(),target=Math.max(0,Math.min(list.length-1,current+direction));
+    CutflowScene.select(target);return;
+  }
   if(desktopNavigation()&&cues.length){
-    const time=currentTime(),active=cues.findIndex(c=>time>=c.start&&time<c.end);
-    let index;
+    const time=currentTime(),active=cues.findIndex(c=>time>=c.start&&time<c.end);let index;
     if(active>=0)index=Math.max(0,Math.min(cues.length-1,active+direction));
     else if(direction>0){index=cues.findIndex(c=>c.start>time);if(index<0)index=cues.length-1;}
     else{index=cues.findLastIndex(c=>c.start<time);if(index<0)index=0;}

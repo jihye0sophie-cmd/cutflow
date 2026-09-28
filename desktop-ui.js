@@ -17,7 +17,8 @@
   const begin=item?CutflowScene.start(i):0,duration=item?(cues.length?item.end-item.start:item.duration):0;$('desktopSceneTime').textContent=item?`${begin.toFixed(2)} – ${(begin+duration).toFixed(2)}초 (${duration.toFixed(2)}초)`:'';
   $('desktopPrev').disabled=!item||i===0||exporting;$('desktopNext').disabled=!item||i===list.length-1||exporting;$('desktopReplace').disabled=!item||loading>0||exporting;$('desktopExport').disabled=$('exportBtn').disabled;
   $('desktopEditor').dataset.mode=mode;
-  document.querySelectorAll('.cue-row,.scene-row').forEach(row=>row.classList.toggle('desktop-selected',Number(row.dataset.index)===i));
+  const cueIndex=cues.length?CutflowScene.cueIndex(i):i;
+  document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const rowIndex=Number(row.dataset.index),selected=cues.length?row.classList.contains('cue-row')&&rowIndex===cueIndex:rowIndex===i;row.classList.toggle('desktop-selected',selected);});
   const sceneChanged=i!==lastIndex;
   const next=JSON.stringify(list.map((item,j)=>{const {source,duration}=CutflowScene.thumbnail(item,j);return [item.id,source?.thumb,duration]}));
   const edit=$('desktopSceneEdit');if(edit){edit.textContent=sceneEdit?'편집 완료':'순서 편집';edit.setAttribute('aria-pressed',String(sceneEdit));}
@@ -29,7 +30,7 @@
    const tile=active.closest('.desktop-scene-item')||active,sr=liveStrip.getBoundingClientRect(),tr=tile.getBoundingClientRect(),pad=10;
    if(tr.left<sr.left+pad||tr.right>sr.right-pad){const delta=(tr.left+tr.width/2)-(sr.left+sr.width/2);liveStrip.scrollTo({left:Math.max(0,liveStrip.scrollLeft+delta),behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}
   });}
-  if(i!==lastIndex){lastIndex=i;if(cues.length)window.selectStyleCue?.(i);}
+  if(i!==lastIndex){lastIndex=i;if(cues.length&&cueIndex>=0)window.selectStyleCue?.(cueIndex);}
   window.syncCaptionStrokeUI?.();
   $('desktopTabs').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===mode)));
  }
@@ -54,7 +55,7 @@
  $('desktopStrip').addEventListener('dragend',clearDragState);
  for(const [id,d] of [['desktopStripPrev',-1],['desktopStripNext',1]])$(id).onclick=()=>$('desktopStrip').scrollBy({left:d*$('desktopStrip').clientWidth*.7,behavior:'smooth'});
  $('desktopStrip').addEventListener('wheel',e=>{const s=$('desktopStrip');if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&s.scrollWidth>s.clientWidth){const before=s.scrollLeft;s.scrollLeft+=e.deltaY;if(s.scrollLeft!==before)e.preventDefault();}},{passive:false});
- $('cueList').addEventListener('click',e=>{if(!enabled)return;const b=e.target.closest('[data-action="style"],[data-action="jump"]');if(b){e.stopImmediatePropagation();CutflowScene.select(Number(b.closest('[data-index]').dataset.index));if(b.dataset.action==='style'){mode='caption';sync();}}},true);
+ $('cueList').addEventListener('click',e=>{if(!enabled)return;const b=e.target.closest('[data-action="style"],[data-action="jump"]');if(!b)return;const cueIndex=Number(b.closest('[data-index]').dataset.index),sceneIndex=CutflowScene.sceneIndexForCue(cueIndex);if(sceneIndex>=0){lastIndex=sceneIndex;window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:sceneIndex}));}if(b.dataset.action==='style'){mode='caption';queueMicrotask(sync);}},true);
  window.addEventListener('cutflow-scene',sync);window.addEventListener('cutflow-mobile-activate',deactivate);mq.addEventListener('change',()=>queueMicrotask(()=>mq.matches?activate():deactivate()));
  for(const id of ['cueList','sceneList'])new MutationObserver(sync).observe($(id),{childList:true});
  let previewLabel='';new MutationObserver(()=>{const value=$('nowPlaying').textContent;if(value!==previewLabel){previewLabel=value;sync();}}).observe($('nowPlaying'),{childList:true});

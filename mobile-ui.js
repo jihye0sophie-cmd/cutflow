@@ -78,10 +78,11 @@
     $('mobileEmpty').hidden=!!list.length;
     $('mobileEditor').dataset.mode=mode;
     setTab(mode);
-    document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const on=Number(row.dataset.index)===index;row.classList.toggle('mobile-selected',on);row.draggable=false;const fold=row.querySelector('.mobile-caption-text');if(fold)fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY'));});
+    const cueIndex=cues.length?CutflowScene.cueIndex(index):index;
+    document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const rowIndex=Number(row.dataset.index),on=cues.length?row.classList.contains('cue-row')&&rowIndex===cueIndex:rowIndex===index;row.classList.toggle('mobile-selected',on);row.draggable=false;const fold=row.querySelector('.mobile-caption-text');if(fold)fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY'));});
     $('mobileScenesPane').hidden=mode!=='scenes';
     if(mode==='scenes')buildGrid();else sceneEdit=false;
-    if(mode==='style'&&cues.length){window.selectStyleCue?.(index);$('captionStylePanel').open=true;}else $('captionStylePanel').open=false;
+    if(mode==='style'&&cues.length&&cueIndex>=0){window.selectStyleCue?.(cueIndex);$('captionStylePanel').open=true;}else $('captionStylePanel').open=false;
     if(scenes.length&&!hadMedia){$('mobileProject').open=false;document.body.classList.remove('mobile-project-open');hadMedia=true;}if(!scenes.length)hadMedia=false;
     syncStroke();viewport();
   }
@@ -120,7 +121,7 @@
   saveButton.onclick=()=>$('projectSaveBtn').click();$('mobileProjectOpen').onclick=()=>$('projectOpenBtn').click();exportButton.onclick=()=>$('exportBtn').click();
   $('mobileScenesAdd').onclick=()=>$('fileInput').click();$('mobileScenesEdit').onclick=()=>{sceneEdit=!sceneEdit;buildGrid();};
 
-  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;mode=tab;if(mode==='style'&&cues.length)window.selectStyleCue?.(index);sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));};
+  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;mode=tab;if(mode==='style'&&cues.length){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));};
   $('mobileSceneGrid').onclick=e=>{
     const move=e.target.closest('[data-scene-move]');if(move){const from=Number(move.dataset.index),to=from+Number(move.dataset.sceneMove);if(confirmNarrationSceneEdit()&&CutflowScene.move(from,to)){index=to;selectedId=items()[to]?.id;buildGrid();}return;}
     const del=e.target.closest('[data-scene-delete]');if(del){const at=Number(del.dataset.sceneDelete);if(!confirmNarrationSceneEdit())return;const name=`장면 ${at+1}`;if(confirm(`${name}을 삭제할까요? 삭제 후 뒤 장면의 시간이 자동으로 다시 계산됩니다.`)){CutflowScene.remove(at);index=Math.min(at,Math.max(0,items().length-1));selectedId=items()[index]?.id||null;buildGrid();}return;}
@@ -128,7 +129,7 @@
   };
 
   $('cueList').addEventListener('click',e=>{if(enabled&&e.target.closest('[data-action="style"]')){e.stopImmediatePropagation();mode='style';sync();}},true);
-  $('styleCue').addEventListener('change',()=>{if(enabled){index=cues.findIndex(c=>c.id===$('styleCue').value);selectedId=cues[index]?.id;sync();}});
+  $('styleCue').addEventListener('change',()=>{if(enabled){const cueIndex=cues.findIndex(c=>c.id===$('styleCue').value),sceneIndex=CutflowScene.sceneIndexForCue(cueIndex);if(sceneIndex>=0){index=sceneIndex;selectedId=items()[index]?.id;}sync();}});
   $('mobileCaptionStroke').oninput=()=>{const control=$('captionStroke');control.value=$('mobileCaptionStroke').checked?lastStroke:0;control.dispatchEvent(new Event('input',{bubbles:true}));};
 
   replaceButton.onclick=()=>replaceInput.click();
@@ -146,7 +147,7 @@
   window.visualViewport?.addEventListener('resize',viewport);window.addEventListener('resize',viewport);
   new MutationObserver(()=>sync()).observe($('cueList'),{childList:true});
   new MutationObserver(()=>sync()).observe($('sceneList'),{childList:true});
-  new MutationObserver(()=>{if(!enabled)return;const active=CutRenderer.locate(timelineScenes(),currentTime()).index;if(active>=0&&active!==index){index=active;selectedId=items()[index]?.id;if(cues.length&&mode==='style')window.selectStyleCue?.(index);sync();}}).observe($('nowPlaying'),{childList:true});
+  new MutationObserver(()=>{if(!enabled)return;const active=CutflowScene.index();if(active>=0&&active!==index){index=active;selectedId=items()[index]?.id;if(cues.length&&mode==='style'){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();}else if(cues.length){sync();}}).observe($('nowPlaying'),{childList:true});
   new MutationObserver(()=>{if(enabled)exportButton.disabled=$('exportBtn').disabled;}).observe($('exportBtn'),{attributes:true,attributeFilter:['disabled']});
   const saveStatus=$('projectSaveStatus');if(saveStatus)new MutationObserver(()=>{if(!enabled)return;const state=saveStatus.dataset.state;saveButton.textContent=state==='saved'?'✓ 저장됨':state==='busy'?'저장 중…':'저장';saveButton.dataset.state=state||'';}).observe(saveStatus,{childList:true,attributes:true,attributeFilter:['data-state']});
   if(mq.matches)activate();viewport();

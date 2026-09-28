@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node build.cjs",
-    "test": "node test-v4.cjs && node test-transform.cjs",
+    "test": "node test-v4.cjs && node test-transform.cjs && node test-scene-groups.cjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "devDependencies": {
