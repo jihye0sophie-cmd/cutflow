@@ -49,11 +49,11 @@
     return true;
   };
   const setCaptionBoundary=(leftIndex,value,{commit=true}={})=>{
-    const item=sceneItem();if(!item||!item.cueIndices.includes(leftIndex))return false;
+    const items=sceneItems(),item=items.find(g=>g?.cueIndices?.includes(leftIndex));if(!item)return false;
     const pos=item.cueIndices.indexOf(leftIndex),rightIndex=item.cueIndices[pos+1];if(rightIndex==null)return false;
     const left=cues[leftIndex],right=cues[rightIndex],min=left.start+.08,max=right.end-.08;value=clamp(num(value,left.end),min,max);
     left.end=value;right.start=value;updateOffsets(item);
-    if(commit){changed();renderCues();window.CutflowScene.select(sceneIndex());}
+    if(commit){changed();renderCues();const si=items.indexOf(item);if(si>=0)window.CutflowScene.select(si);}
     return true;
   };
   const redistribute=()=>{
