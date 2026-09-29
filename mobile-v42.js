@@ -262,20 +262,19 @@
     settingsProxyMap.clear();
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map:settingsProxyMap});
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
-    const quickActions=`<div class="v42-settings-actions"><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">이미지·영상 추가</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플로 시작</button></div>`;
-    const history=`<div class="v42-settings-actions"><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="undo" ${window.CutflowHistory?.canUndo?'':'disabled'}>↶ 실행 취소</button><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="redo" ${window.CutflowHistory?.canRedo?'':'disabled'}>↷ 다시 실행</button></div>`;
+    const settingsSection=(step,title,body,extra='')=>`<section class="v42-pc-settings-section ${extra}"><header><span>${esc(step)}</span><strong>${esc(title)}</strong></header><div class="v42-pc-settings-body">${body}</div></section>`;
+    const quickActions=`<div class="v42-settings-utility"><div class="v42-settings-utility-group"><span>PROJECT</span><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">+ 이미지·영상</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플 시작</button></div><div class="v42-settings-utility-group"><span>HISTORY</span><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="undo" ${window.CutflowHistory?.canUndo?'':'disabled'}>↶ 실행 취소</button><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="redo" ${window.CutflowHistory?.canRedo?'':'disabled'}>↷ 다시 실행</button></div></div>`;
     const source=`${pc($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}${pc($('projectCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-actions">${pb($('scriptFileBtn'),'TXT 대본 불러오기')}${pb($('audioBtn'),'내레이션 불러오기')}</div><p class="v42-status">${esc($('audioStatus')?.textContent||'오디오 없음')}</p>${pb($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}<div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills"><label><input type="radio" name="v42SettingsSilence" value="soft"><span>부드럽게</span></label><label><input type="radio" name="v42SettingsSilence" value="normal" checked><span>보통</span></label><label><input type="radio" name="v42SettingsSilence" value="tight"><span>타이트</span></label></div><button type="button" class="v42-btn wide" data-settings-silence-run>무음 줄이기</button><p class="v42-help" data-settings-silence-status>원본은 유지하고 처리본을 사용합니다.</p></div>`;
     const bgm=`<div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div><p class="v42-status">${esc($('bgmStatus')?.textContent||'음악 없음')}</p><div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인')}${pc($('bgmFadeOut'),'페이드 아웃')}</div>`;
-    const project=`${pc($('layoutSelect'),'영상 템플릿')}${pc($('titleInput'),'상단 제목',{wide:true})}${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}${pb($('applyTemplateBtn'),'움직임만 전체 적용',{wide:true})}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙',{wide:true})}`;
-    const output=`${pc($('resolutionSelect'),'출력 해상도')}${pb($('exportBtn'),'MP4 영상 저장',{primary:true,wide:true})}`;
+    const project=`${pc($('layoutSelect'),'영상 템플릿')}${pc($('titleInput'),'상단 제목',{wide:true})}<div class="v42-grid2">${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}</div><div class="v42-actions">${pb($('applyTemplateBtn'),'움직임 전체 적용')}${pb($('randomMotionBtn'),'랜덤 무빙')}</div>`;
+    const output=`<div class="v42-grid2">${pc($('resolutionSelect'),'출력 해상도')}${pb($('exportBtn'),'MP4 영상 저장',{primary:true,wide:true})}</div>`;
     $('v42SettingsBody').innerHTML=
-      section('빠른 시작',quickActions,'PROJECT')+
-      section('편집 기록',history,'UNDO · REDO')+
-      section('대본과 내레이션',source,'01 SCRIPT & VOICE')+
-      section('배경음악 · BGM',bgm,'AUDIO')+
-      section('화면 구성',project,'02 COMPOSE')+
-      section('쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'QUICK START','v42-quick-start')+
-      section('출력 설정',output,'04 EXPORT');
+      quickActions+
+      settingsSection('01 SCRIPT & VOICE','대본과 내레이션',source)+
+      settingsSection('AUDIO','배경음악 · BGM',bgm)+
+      settingsSection('02 COMPOSE','화면 구성',project)+
+      settingsSection('QUICK START','쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'v42-quick-start')+
+      settingsSection('04 EXPORT','출력 설정',output);
     syncSettingsProxyState();
   }
   function renderTemplate(){
