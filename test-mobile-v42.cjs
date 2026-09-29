@@ -46,7 +46,7 @@ assert(css.includes('.v42-section.v42-quick-start'),'auto setup visual emphasis 
 assert(js.includes('id="v42Settings"')&&js.includes("settingsDialog.id='v42SettingsDialog'"),'mobile settings sheet missing');
 assert(js.includes('data-direct-click="uploadBtn"')&&js.includes('data-direct-click="demoBtn"'),'settings quick actions missing');
 assert(js.includes('autoSetupMarkup(settingsProxyMap)'),'auto setup must live in settings sheet');
-assert(js.includes('class="v42-fullscreen-icon"')&&!js.includes('>전체화면</button>'),'preview fullscreen must be an icon control');
+assert(js.includes('id="v42Fullscreen"')&&js.includes('>⛶</button>')&&!js.includes('>전체화면</button>'),'preview fullscreen must be an icon control');
 assert(css.includes('#v42SettingsDialog'),'settings bottom sheet styling missing');
 assert(build.includes("'mobile-v42.js','mobile-v42.css'")&&!build.includes("'mobile-ui.js','mobile-ui.css'"),'build must publish v42 only');
 assert(!js.includes("panel.scrollIntoView({block:'start',behavior:'smooth'})"),'tab click must not force page scroll');
