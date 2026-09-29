@@ -321,7 +321,12 @@ const captionChanged=index=>{renderCues();window.selectStyleCue?.(Math.max(0,Mat
 window.CutflowCaption={
   count(){return cues.length;},
   state:captionState,
-  currentIndex(){const si=window.CutflowScene?.index?.()||0;const ci=window.CutflowScene?.cueIndex?.(si);return Number.isInteger(ci)&&ci>=0?ci:Math.max(0,cues.findIndex(c=>currentTime()>=c.start&&currentTime()<c.end));},
+  currentIndex(){
+    const time=currentTime(),active=cues.findIndex(c=>time>=c.start&&time<c.end);
+    if(active>=0)return active;
+    const si=window.CutflowScene?.index?.()||0,ci=window.CutflowScene?.cueIndex?.(si);
+    return Number.isInteger(ci)&&ci>=0?ci:Math.max(0,active);
+  },
   update(index,patch={}){
     const c=cues[index];if(!c)return false;const seg=captionSegmentInfo(index);rememberCues();
     if(patch.text!=null){c.colorRanges=CaptionRanges.edit(c.text,String(patch.text),c.colorRanges);c.text=String(patch.text);c.captionGap=!c.text.trim();}
