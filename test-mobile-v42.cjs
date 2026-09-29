@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.6.2'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.6.2'),'responsive mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6.3'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.6.3'),'responsive mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'responsive mode switching must not reload the page');
 assert(js.includes("const compactMq=matchMedia('(max-width:760px)')"),'responsive mobile breakpoint missing');
@@ -107,7 +107,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.6.2'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6.3'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -205,4 +205,11 @@ assert(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'),'
 assert(css.includes('.v42-caption-segment-nav'),'desktop-parity mobile caption navigation styling missing');
 assert(css.includes('.v42-caption-base-color'),'detailed caption base color styling missing');
 console.log('Cutflow v42.6.2 caption tab desktop parity checks passed');
+assert(js.includes("details('상세 설정',style"),'mobile caption details label must match desktop workflow');
+assert(js.includes("styleRange('captionSize','글자 크기','sizeValue')"),'caption size live value missing');
+assert(js.includes("styleRange('captionStroke','스트로크 두께','strokeValue')"),'caption stroke live value missing');
+assert(js.includes("styleRange('captionOpacity','배경 불투명도','opacityValue')"),'caption opacity live value missing');
+assert(js.includes("captionFontNote"),'caption font note missing');
+assert(css.includes('.v42-live-value'),'caption detail live value styling missing');
+console.log('Cutflow v42.6.3 caption detail parity checks passed');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
