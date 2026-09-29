@@ -270,10 +270,10 @@
     const output=`<div class="v42-grid2">${pc($('resolutionSelect'),'출력 해상도')}${pb($('exportBtn'),'MP4 영상 저장',{primary:true,wide:true})}</div>`;
     $('v42SettingsBody').innerHTML=
       quickActions+
+      collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'v42-quick-start')+
       settingsSection('01 SCRIPT & VOICE','대본과 내레이션',source)+
       settingsSection('AUDIO','배경음악 · BGM',bgm)+
       settingsSection('02 COMPOSE','화면 구성',project)+
-      collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'v42-quick-start')+
       settingsSection('04 EXPORT','출력 설정',output);
     syncSettingsProxyState();
   }
