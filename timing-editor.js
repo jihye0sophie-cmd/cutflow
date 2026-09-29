@@ -1,7 +1,7 @@
 /* v37 timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
 (()=>{
   const q=id=>document.getElementById(id);
-  let selectedCueId=null,drag=null,raf=0,externalPanel=null;
+  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const num=(n,d=0)=>Number.isFinite(Number(n))?Number(n):d;
   const fmt=n=>num(n).toFixed(2);
@@ -82,21 +82,52 @@
   };
   function waveform(canvas,start,end){
     if(!canvas)return;const r=canvas.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}const ctx=canvas.getContext('2d');ctx.clearRect(0,0,w,h);ctx.fillStyle='#20262d';ctx.fillRect(0,0,w,h);if(!audioBuffer){ctx.fillStyle='#69727e';ctx.font=`${12*dpr}px sans-serif`;ctx.fillText('내레이션 없음',12*dpr,h/2);return;}const data=audioBuffer.getChannelData(0),sr=audioBuffer.sampleRate,duration=end-start;ctx.strokeStyle='#8f9aa7';ctx.lineWidth=Math.max(1,dpr);ctx.beginPath();const columns=Math.max(1,Math.floor(w));for(let x=0;x<columns;x++){const t0=start+(x/columns)*duration,t1=start+((x+1)/columns)*duration,a=Math.max(0,Math.floor(t0*sr)),b=Math.min(data.length,Math.max(a+1,Math.ceil(t1*sr)));let peak=0;const step=Math.max(1,Math.floor((b-a)/8));for(let j=a;j<b;j+=step)peak=Math.max(peak,Math.abs(data[j]||0));const y=peak*h*.44;ctx.moveTo(x,h/2-y);ctx.lineTo(x,h/2+y);}ctx.stroke();}
-  function boundsFor(item){const list=sceneItems(),i=sceneIndex(),prev=list[i-1],next=list[i+1];let start=prev?prev.start:Math.max(0,item.start-1),end=next?next.end:item.end+Math.max(1,Math.min(3,(audioBuffer?.duration||item.end+2)-item.end));if(audioBuffer)end=Math.min(Math.max(end,item.end+.5),audioBuffer.duration);if(end<=start)end=start+1;return {start,end};}
-  const pct=(t,b)=>((t-b.start)/(b.end-b.start))*100;
+  const timelineDuration=()=>{
+    const list=sceneItems(),sceneEnd=list.at(-1)?.end||0,cueEnd=cues?.at(-1)?.end||0;
+    return Math.max(.1,num(totalDuration?.(),0),num(sceneEnd,0),num(cueEnd,0));
+  };
+  const pctAll=(t,duration)=>clamp((num(t)/Math.max(.1,duration))*100,0,100);
+  const tickStep=pps=>pps>=110?.5:pps>=55?1:pps>=28?2:5;
+  const sceneForCueIndex=ci=>sceneItems().findIndex(item=>item?.cueIndices?.includes(ci));
+  function timelineTicks(duration,pps){
+    const step=tickStep(pps),out=[];
+    for(let t=0;t<=duration+.0001;t+=step){
+      const major=Math.abs((t/step)%5)<.001;
+      out.push(`<span class="timeline-tick ${major?'major':''}" style="left:${pctAll(t,duration)}%"><i></i><b>${t.toFixed(step<1?1:0)}s</b></span>`);
+    }
+    if(!out.length||duration%step>.05)out.push(`<span class="timeline-tick major end" style="left:100%"><i></i><b>${duration.toFixed(1)}s</b></span>`);
+    return out.join('');
+  }
   function renderTrack(host,item){
-    if(!host||!item){if(host)host.innerHTML='<p class="timing-empty">장면을 먼저 선택해 주세요.</p>';return;}
-    const b=boundsFor(item),list=sceneItems(),i=sceneIndex(),prev=list[i-1],next=list[i+1];
-    const segs=[{g:prev,n:i},{g:item,n:i+1},{g:next,n:i+2}].filter(x=>x.g).map(({g,n})=>`<div class="timing-scene-block ${g===item?'active':''}" style="left:${pct(g.start,b)}%;width:${Math.max(.5,pct(g.end,b)-pct(g.start,b))}%"><b>장면 ${n}</b><span>${fmt(g.start)}–${fmt(g.end)}</span></div>`).join('');
-    const captions=(item.cueIndices||[]).map((ci,k)=>{const c=cues[ci];return `<button type="button" class="timing-caption-block ${c.id===selectedCueId?'active':''}" data-timing-cue="${ci}" style="left:${pct(c.start,b)}%;width:${Math.max(.5,pct(c.end,b)-pct(c.start,b))}%"><b>자막 ${k+1}</b><span>${fmt(c.start)}–${fmt(c.end)}</span></button>`;}).join('');
-    const capHandles=(item.cueIndices||[]).slice(0,-1).map(ci=>`<button type="button" class="timing-handle caption" data-boundary-caption="${ci}" style="left:${pct(cues[ci].end,b)}%" aria-label="자막 경계 조절"></button>`).join('');
-    host.innerHTML=`<div class="timing-wave"><canvas></canvas><div class="timing-scene-shade" style="left:${pct(item.start,b)}%;width:${pct(item.end,b)-pct(item.start,b)}%"></div><div class="timing-playhead" style="left:${pct(currentTime(),b)}%"></div></div><div class="timing-scenes-track">${segs}<button class="timing-handle scene start" data-boundary-scene="start" style="left:${pct(item.start,b)}%" ${i===0?'disabled':''}></button><button class="timing-handle scene end" data-boundary-scene="end" style="left:${pct(item.end,b)}%"></button></div><div class="timing-captions-track">${captions}${capHandles}</div>`;
-    host.dataset.windowStart=b.start;host.dataset.windowEnd=b.end;waveform(host.querySelector('canvas'),b.start,b.end);
+    if(!host){return;}
+    const list=sceneItems(),duration=timelineDuration();
+    if(!list.length){host.innerHTML='<p class="timing-empty">장면을 먼저 추가해 주세요.</p>';return;}
+    const previousScroll=host.querySelector('.timing-scroll')?.scrollLeft||0;
+    const activeScene=sceneIndex(),selectedCue=cues.findIndex(c=>c.id===selectedCueId);
+    const pps=40*timelineZoom,canvasWidth=Math.max(320,Math.ceil(duration*pps));
+    const scenesMarkup=list.map((g,i)=>`<button type="button" class="timeline-scene-block ${i===activeScene?'active':''}" data-timeline-scene="${i}" style="left:${pctAll(g.start,duration)}%;width:${Math.max(.25,pctAll(g.end,duration)-pctAll(g.start,duration))}%"><b>장면 ${i+1}</b><span>${fmt(g.end-g.start)}s</span></button>`).join('');
+    const captionsMarkup=(cues||[]).map((c,i)=>`<button type="button" class="timeline-caption-block ${i===selectedCue?'active':''}" data-timing-cue="${i}" style="left:${pctAll(c.start,duration)}%;width:${Math.max(.25,pctAll(c.end,duration)-pctAll(c.start,duration))}%"><b>${esc((c.text||'자막 '+(i+1)).replace(/\s+/g,' ').slice(0,28))}</b><span>${fmt(c.end-c.start)}s</span></button>`).join('');
+    const captionHandles=list.flatMap(g=>(g.cueIndices||[]).slice(0,-1)).map(ci=>`<button type="button" class="timing-handle caption timeline-caption-handle" data-boundary-caption="${ci}" style="left:${pctAll(cues[ci].end,duration)}%" aria-label="자막 경계 조절"></button>`).join('');
+    host.innerHTML=`
+      <div class="timing-toolbar">
+        <div class="timing-play-tools"><button type="button" data-timing-action="toggle-play">▶/Ⅱ</button><strong data-timeline-clock>${fmt(currentTime())} / ${fmt(duration)}</strong></div>
+        <div class="timing-zoom-tools"><span>타임라인</span><button type="button" data-timing-action="zoom-out" aria-label="축소">−</button><b>${Math.round(timelineZoom*100)}%</b><button type="button" data-timing-action="zoom-in" aria-label="확대">＋</button></div>
+      </div>
+      <div class="timing-scroll">
+        <div class="timing-canvas" data-timeline-seek style="width:max(100%,${canvasWidth}px)" data-window-start="0" data-window-end="${duration}">
+          <div class="timing-ruler">${timelineTicks(duration,pps)}</div>
+          <div class="timing-layer timing-scene-layer"><span class="timing-layer-label">장면</span><div class="timing-layer-body">${scenesMarkup}</div></div>
+          <div class="timing-layer timing-caption-layer"><span class="timing-layer-label">자막</span><div class="timing-layer-body">${captionsMarkup}${captionHandles}</div></div>
+          <div class="timing-playhead" style="left:${pctAll(currentTime(),duration)}%"></div>
+        </div>
+      </div>`;
+    host.dataset.windowStart='0';host.dataset.windowEnd=String(duration);
+    const scroller=host.querySelector('.timing-scroll');if(scroller)scroller.scrollLeft=Math.min(previousScroll,Math.max(0,scroller.scrollWidth-scroller.clientWidth));
   }
   function editorMarkup(item){
     if(!item)return '<p class="timing-empty">타이밍을 조정할 장면을 선택해 주세요.</p>';
     const sel=cueForSelection(item),cue=sel?.cue,pos=sel?item.cueIndices.indexOf(sel.index):-1,count=item.cueIndices.length;
-    return `<div class="timing-head"><div><span>TIMING</span><h3>장면 ${sceneIndex()+1}</h3><small>${fmt(item.start)}–${fmt(item.end)}초 · ${fmt(item.end-item.start)}초</small></div><div class="timing-head-actions"><button type="button" data-timing-action="prev-scene" ${sceneIndex()===0?'disabled':''}>‹ 이전 장면</button><button type="button" data-timing-action="next-scene" ${sceneIndex()===sceneItems().length-1?'disabled':''}>다음 장면 ›</button><button type="button" data-timing-action="redistribute" ${count<2?'disabled':''}>✨ 내레이션에 맞춤</button></div></div><div class="timing-grid"><section><h4>장면 시간</h4><div class="timing-fields"><label>시작 (초)<input type="number" step="0.01" data-timing-scene="start" value="${fmt(item.start)}" ${sceneIndex()===0?'readonly':''}></label><label>종료 (초)<input type="number" step="0.01" data-timing-scene="end" value="${fmt(item.end)}"></label></div><p>장면 경계를 바꾸면 앞·뒤 장면과 내부 자막 길이가 자동으로 맞춰집니다.</p></section><section><h4>선택 자막 ${count?`${pos+1}/${count}`:''}</h4>${cue?`<div class="timing-caption-nav"><button type="button" data-timing-action="prev-caption" ${pos<=0?'disabled':''}>‹ 이전</button><button type="button" data-timing-action="play-caption">재생</button><button type="button" data-timing-action="next-caption" ${pos>=count-1?'disabled':''}>다음 ›</button></div><div class="timing-caption-text">${esc(cue.text||'(무자막 구간)')}</div><div class="timing-fields"><label>시작 (초)<input type="number" step="0.01" data-timing-caption="start" value="${fmt(cue.start)}"></label><label>종료 (초)<input type="number" step="0.01" data-timing-caption="end" value="${fmt(cue.end)}"></label></div>`:'<p>자막이 없습니다.</p>'}</section></div>`;
+    return `<div class="timing-head"><div><span>TIMING</span><h3>장면 ${sceneIndex()+1}</h3><small>${fmt(item.start)}–${fmt(item.end)}초 · ${fmt(item.end-item.start)}초</small></div><div class="timing-head-actions"><button type="button" data-timing-action="redistribute" ${count<2?'disabled':''}>✨ 내레이션에 맞춤</button></div></div><div class="timing-grid timeline-selection-grid"><section><h4>선택 장면</h4><div class="timing-selection-summary"><b>장면 ${sceneIndex()+1}</b><span>${fmt(item.start)}–${fmt(item.end)}초</span><small>타임라인의 장면 블록을 누르면 선택 위치가 이동합니다.</small></div></section><section><h4>선택 자막 ${count?`${pos+1}/${count}`:''}</h4>${cue?`<div class="timing-caption-text">${esc(cue.text||'(무자막 구간)')}</div><div class="timing-fields"><label>시작 (초)<input type="number" step="0.01" data-timing-caption="start" value="${fmt(cue.start)}"></label><label>종료 (초)<input type="number" step="0.01" data-timing-caption="end" value="${fmt(cue.end)}"></label></div><div class="timing-caption-actions"><button type="button" data-timing-action="play-caption">▶ 선택 자막 재생</button></div>`:'<p>자막이 없습니다.</p>'}</section></div>`;
   }
   function ensureUI(){
     const dt=q('desktopTabs');if(dt&&!dt.querySelector('[data-tab="timing"]')){const b=document.createElement('button');b.type='button';b.dataset.tab='timing';b.textContent='정밀 타이밍';dt.appendChild(b);}
