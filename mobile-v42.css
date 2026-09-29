@@ -676,3 +676,11 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
     grid-column:1/-1;
   }
 }
+
+/* v42.6.3 caption detail value labels */
+.v42-live-value{
+  margin-left:4px;
+  color:var(--v42-accent);
+  font-size:9px;
+  font-weight:800;
+}
