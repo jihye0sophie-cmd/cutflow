@@ -13,7 +13,7 @@ const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
 assert(html.includes('mobile-v42.css?v=42.6'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.6'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.js?v=42.6.1'),'responsive mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'responsive mode switching must not reload the page');
 assert(js.includes("const compactMq=matchMedia('(max-width:760px)')"),'responsive mobile breakpoint missing');
