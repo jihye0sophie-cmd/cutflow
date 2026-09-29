@@ -33,7 +33,7 @@
         <button type="button" id="v42Settings" class="v42-icon-btn" aria-label="설정" title="설정">⚙</button>
         <button type="button" data-click="projectOpenBtn">열기</button>
         <button type="button" data-click="projectSaveBtn">저장</button>
-        <button type="button" class="primary" data-click="exportBtn">내보내기</button>
+        <button type="button" id="v42Export" class="primary">내보내기</button>
       </div>
     </header>
     <main class="v42-main">
@@ -65,6 +65,10 @@
   previewDialog.id='v42PreviewDialog';
   previewDialog.innerHTML='<div class="v42-full-head"><strong>전체화면 미리보기</strong><button type="button" id="v42FullClose">×</button></div><canvas id="v42FullStage" width="360" height="640"></canvas>';
   document.body.append(previewDialog);
+  const exportDialogV42=document.createElement('dialog');
+  exportDialogV42.id='v42ExportDialog';
+  exportDialogV42.innerHTML='<div class="v42-sheet-head"><div><strong>MP4 내보내기</strong><small>Cutflow</small></div><button type="button" id="v42ExportClose" aria-label="닫기">×</button></div><div class="v42-export-body"><progress id="v42ExportProgress" max="1" value="0"></progress><p id="v42ExportStatus" class="v42-status">준비 중…</p><div id="v42ExportResult" class="v42-export-result" hidden></div><div class="v42-actions"><button type="button" id="v42ExportCancel" class="v42-btn danger">취소</button><button type="button" id="v42ExportShare" class="v42-btn primary" hidden>iPhone에 저장/공유</button><a id="v42ExportDownload" class="v42-btn primary" hidden>MP4 다운로드</a><button type="button" id="v42ExportDone" class="v42-btn" hidden>닫기</button></div></div>';
+  document.body.append(exportDialogV42);
   const scenesDialog=document.createElement('dialog');
   scenesDialog.id='v42ScenesDialog';
   scenesDialog.innerHTML='<div class="v42-sheet-head"><strong>전체 장면</strong><button type="button" id="v42ScenesClose">×</button></div><div id="v42ScenesGrid" class="v42-scenes-grid"></div>';
@@ -340,9 +344,10 @@
     if(renderQueued&&!force)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderSceneStrip();renderPanel(force);syncPlayer();});
   }
   function syncPlayer(){
-    const s=$('scrubber'),m=$('v42Scrubber');if(s&&m&&document.activeElement!==m){m.min=s.min;m.max=s.max;m.value=s.value;}
+    const state=window.CutflowPlayer?.state?.(),m=$('v42Scrubber');
+    if(state&&m&&document.activeElement!==m){m.min='0';m.max='1000';m.value=String(Math.round((state.progress||0)*1000));}
     const ct=$('currentTime')?.textContent||'0:00.0',et=$('endTime')?.textContent||'0:00.0';$('v42TimeLabel').textContent=`${ct} / ${et}`;
-    const play=$('playBtn'),mobilePlay=qs('.v42-player .play');if(play&&mobilePlay)mobilePlay.textContent=play.textContent||'▶';
+    const mobilePlay=qs('.v42-player .play');if(mobilePlay)mobilePlay.textContent=state?.playing?'Ⅱ':'▶';
   }
   function mirrorStage(){
     const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(previewDialog.open){fullCtx.clearRect(0,0,fullStage.width,fullStage.height);fullCtx.drawImage(src,0,0,fullStage.width,fullStage.height);}}catch{}}
@@ -441,9 +446,36 @@
   $('v42ScenesClose').onclick=()=>scenesDialog.close();
   $('v42ScenesGrid').onclick=e=>{const b=e.target.closest('[data-scene-grid]');if(!b)return;window.CutflowScene?.select?.(Number(b.dataset.sceneGrid));scenesDialog.close();requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));};
   scenesDialog.addEventListener('cancel',e=>{e.preventDefault();scenesDialog.close();});
-  $('v42Fullscreen').onclick=()=>previewDialog.showModal();$('v42FullClose').onclick=()=>previewDialog.close();previewDialog.addEventListener('cancel',e=>{e.preventDefault();previewDialog.close();});
-  $('v42Scrubber').addEventListener('input',e=>{const s=$('scrubber');if(s){s.value=e.target.value;dispatch(s,'input');}});
-  $('v42Scrubber').addEventListener('change',e=>{const s=$('scrubber');if(s){s.value=e.target.value;dispatch(s,'change');}});
+  async function openPreviewFullscreen(){
+    previewDialog.showModal();
+    try{if(previewDialog.requestFullscreen&&!document.fullscreenElement)await previewDialog.requestFullscreen();}catch{}
+  }
+  async function closePreviewFullscreen(){
+    try{if(document.fullscreenElement===previewDialog)await document.exitFullscreen();}catch{}
+    if(previewDialog.open)previewDialog.close();
+  }
+  $('v42Fullscreen').onclick=openPreviewFullscreen;$('v42FullClose').onclick=closePreviewFullscreen;previewDialog.addEventListener('cancel',e=>{e.preventDefault();closePreviewFullscreen();});
+  document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&previewDialog.open)previewDialog.close();});
+  $('v42Scrubber').addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
+  $('v42Scrubber').addEventListener('change',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
+
+  let mobileExportBlob=null,mobileExportFilename='';
+  const resetMobileExport=()=>{
+    mobileExportBlob=null;mobileExportFilename='';$('v42ExportProgress').value=0;$('v42ExportStatus').textContent='준비 중…';$('v42ExportResult').hidden=true;$('v42ExportResult').textContent='';$('v42ExportCancel').hidden=false;$('v42ExportShare').hidden=true;$('v42ExportDownload').hidden=true;$('v42ExportDone').hidden=true;
+  };
+  $('v42Export').onclick=()=>{resetMobileExport();exportDialogV42.showModal();window.CutflowExport?.start?.();};
+  $('v42ExportCancel').onclick=()=>window.CutflowExport?.cancel?.();
+  $('v42ExportClose').onclick=()=>{if(!window.CutflowExport?.busy)exportDialogV42.close();};
+  $('v42ExportDone').onclick=()=>exportDialogV42.close();
+  exportDialogV42.addEventListener('cancel',e=>{if(window.CutflowExport?.busy){e.preventDefault();window.CutflowExport.cancel();}});
+  $('v42ExportShare').onclick=async()=>{
+    if(!mobileExportBlob)return;
+    const file=new File([mobileExportBlob],mobileExportFilename||'Cutflow.mp4',{type:'video/mp4'});
+    try{
+      if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'Cutflow MP4'});$('v42ExportStatus').textContent='공유/저장 창을 열었습니다.';return;}
+    }catch(err){if(err?.name==='AbortError')return;}
+    $('v42ExportDownload').click();
+  };
 
   for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus']){const el=$(id);if(el)new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
   window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
@@ -456,6 +488,11 @@
   window.addEventListener('cutflow-auto-status',e=>{const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.text||'';});
   window.addEventListener('cutflow-auto-error',e=>{if(!settingsDialog.open){renderSettings();settingsDialog.showModal();}const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.message?'자동 세팅 중단: '+e.detail.message:'자동 세팅이 중단되었습니다.';});
   window.addEventListener('cutflow-auto-complete',e=>{const detail=e.detail||{};const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent='완료 · 장면 '+(detail.sceneCount||0)+'개 · 자막 '+(detail.cueCount||0)+'개';requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
+  window.addEventListener('cutflow-export-start',e=>{if(!exportDialogV42.open)exportDialogV42.showModal();$('v42ExportStatus').textContent=(e.detail?.width||'')+'p MP4 준비 중…';$('v42ExportCancel').hidden=false;});
+  window.addEventListener('cutflow-export-progress',e=>{$('v42ExportProgress').value=Number(e.detail?.progress)||0;$('v42ExportStatus').textContent=e.detail?.message||'MP4 만드는 중…';});
+  window.addEventListener('cutflow-export-complete',e=>{mobileExportBlob=e.detail?.blob||null;mobileExportFilename=e.detail?.filename||'Cutflow.mp4';$('v42ExportProgress').value=1;$('v42ExportStatus').textContent='MP4 완성';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;const result=$('v42ExportResult');result.hidden=false;result.textContent=(e.detail?.width||'')+'p · '+((e.detail?.size||0)/1024/1024).toFixed(1)+'MB';const dl=$('v42ExportDownload');if(mobileExportBlob){dl.href=URL.createObjectURL(mobileExportBlob);dl.download=mobileExportFilename;dl.hidden=false;const file=new File([mobileExportBlob],mobileExportFilename,{type:'video/mp4'});$('v42ExportShare').hidden=!(navigator.canShare?.({files:[file]})&&navigator.share);}});
+  window.addEventListener('cutflow-export-error',e=>{if(!exportDialogV42.open)exportDialogV42.showModal();$('v42ExportStatus').textContent=e.detail?.message||'MP4 저장에 실패했습니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
+  window.addEventListener('cutflow-export-cancelled',()=>{$('v42ExportStatus').textContent='저장을 취소했습니다. 편집 내용은 유지됩니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
   $('projectDialog')?.addEventListener('close',()=>setTimeout(()=>requestRefresh(false),0));
   const syncAfterProjectRestore=()=>{
     const items=window.CutflowScene?.items?.()||[];
