@@ -112,7 +112,8 @@ async function run(){
     if($('autoCaptionWrap')?.checked){status('자막을 보기 좋게 줄바꿈하는 중…',3);await window.CutflowAutoBridge.autoWrapCaptions?.();}
     status('BGM을 적용하는 중…',4);if(state.bgm&&!(await window.loadBgmFile?.(state.bgm)))throw new Error('BGM을 읽지 못했습니다.');
     status('자동 세팅이 완료되었습니다.',5);$('autoProgress').querySelectorAll('.auto-step').forEach(el=>el.dataset.state='done');
-    setTimeout(()=>document.querySelector('.workspace')?.scrollIntoView({behavior:'smooth',block:'start'}),250);
+    if(window.CutflowUI?.mode==='mobile')window.dispatchEvent(new CustomEvent('cutflow-auto-complete',{detail:{cueCount:result.cueCount}}));
+    else setTimeout(()=>document.querySelector('.workspace')?.scrollIntoView({behavior:'smooth',block:'start'}),250);
   }catch(e){status(`자동 세팅 중단: ${e.message}`,0);window.CutflowAutoBridge?.toast?.(e.message);}
   finally{state.running=false;update();}
 }
