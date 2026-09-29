@@ -3,9 +3,10 @@ const html=fs.readFileSync('index.html','utf8');
 const js=fs.readFileSync('mobile-v42.js','utf8');
 const css=fs.readFileSync('mobile-v42.css','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
+const app=fs.readFileSync('app.js','utf8');
 
 assert(html.includes('mobile-v42.css?v=42.4.2'),'v42.4 mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.1'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -62,4 +63,11 @@ assert(js.includes("audioBtn:'audioInput'"),'narration direct file picker mappin
 assert(js.includes("bgmBtn:'bgmInput'"),'BGM direct file picker mapping missing');
 assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapping missing');
 assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
-console.log('Cutflow v42.5 mobile function hardening checks passed');
+assert(html.includes('app.js?v=41.1'),'shared app bridge cache key missing');
+assert(app.includes('async processNarration('),'shared narration processing bridge missing');
+assert(app.includes('async buildProjectCues()'),'shared cue building bridge missing');
+assert(app.includes("scriptInput').dispatchEvent(new Event('input'"),'TXT import must dispatch input');
+assert(!js.includes("typeof audioFile==='undefined'"),'mobile must not depend on app lexical audioFile');
+assert(js.includes('CutflowAutoBridge?.processNarration'),'mobile silence cut must use shared bridge');
+assert(js.includes("'cutflow-auto-grid-change'"),'mobile auto grid state sync missing');
+console.log('Cutflow v42.5.1 script voice workflow checks passed');
