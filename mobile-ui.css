@@ -392,3 +392,17 @@
 .mobile-scene-tools button{min-height:38px;padding:7px 6px;font-size:10px}
 .mobile-scene-tools button.danger{color:#ff8d8d;border-color:#6d3434}
 .mobile-scene-tools small{display:block;margin-top:6px;color:var(--studio-muted);font-size:9px}
+
+/* v38 workflow polish */
+@media(max-width:760px){
+ .mobile-editor .caption-quick-timing{margin-top:10px;padding:11px;border:1px solid var(--studio-border);border-radius:9px;background:var(--studio-input)}
+ .mobile-editor .caption-quick-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.mobile-editor .caption-quick-head span{font-size:11px;color:var(--studio-muted)}
+ .mobile-editor .caption-quick-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mobile-editor .caption-quick-fields label{display:grid;gap:4px}.mobile-editor .caption-quick-fields input{font-size:16px;min-height:42px}
+ .mobile-editor .caption-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.mobile-editor .caption-quick-actions button{min-width:0;font-size:11px}
+ .mobile-editor .media-advanced{grid-column:1/-1;border:1px solid var(--studio-border);border-radius:9px;background:var(--studio-input);overflow:hidden}.mobile-editor .media-advanced>summary{padding:12px;font-weight:700}.mobile-editor .media-advanced>summary span{font-size:10px;color:var(--studio-muted);font-weight:400}.mobile-editor .media-advanced-body{display:grid;gap:12px;padding:0 12px 12px}
+ .mobile-scene-card{position:relative}.mobile-scene-badge{position:absolute;z-index:3;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#090b0ddd;color:#fff;border:1px solid #ffffff33;font-size:9px;font-weight:800}.mobile-scene-badge.caption-count{right:4px;top:4px}.mobile-scene-badge.motion-state{left:4px;bottom:4px;color:var(--studio-accent)}
+}
+@media(max-width:760px){
+ #mobileEditor:not([data-mode=media]) .media-advanced{display:none!important}
+ #mobileEditor[data-mode=media] .media-advanced{display:block!important}
+}

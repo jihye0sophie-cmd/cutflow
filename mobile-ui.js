@@ -1,7 +1,7 @@
 /* v32 mobile presentation adapter. Desktop controls/events/project data remain authoritative. */
 (()=>{
   const mq=matchMedia('(max-width:760px)');
-  let enabled=false,index=0,selectedId=null,mode='caption',hadMedia=false,lastStroke=15,captionWasOpen=false,sceneEdit=false,narrationSceneWarningShown=false;
+  let enabled=false,index=0,selectedId=null,mode='caption',lastEditMode='caption',hadMedia=false,lastStroke=15,captionWasOpen=false,sceneEdit=false,narrationSceneWarningShown=false;
   const slots=new Map(),q=s=>document.querySelector(s);
 
   const shell=document.createElement('section');
@@ -50,11 +50,13 @@
   function select(i){if(!enabled)return;const list=items();if(i<0||i>=list.length)return;CutflowScene.select(i);}
   function setTab(tab){nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTab===tab)));}
 
+  function sceneStatus(item){const count=(item?.cueIndices||[]).length;const motion={zoomIn:'Z+',zoomOut:'Z−',panLeft:'←',panRight:'→',panUp:'↑',panDown:'↓',still:'●'}[item?.motion]||'';return `${count>1?`<span class="mobile-scene-badge caption-count">${count}</span>`:''}${motion?`<span class="mobile-scene-badge motion-state">${motion}</span>`:''}`;}
+
   function buildGrid(){
     const list=items();
     const edit=$('mobileScenesEdit');if(edit){edit.textContent=sceneEdit?'완료':'순서 편집';edit.setAttribute('aria-pressed',String(sceneEdit));}
     $('mobileSceneGrid').classList.toggle('scene-editing',sceneEdit);
-    $('mobileSceneGrid').innerHTML=list.length?list.map((item,i)=>{const {source,duration}=CutflowScene.thumbnail(item,i);return `<div class="mobile-scene-item" data-mobile-scene-item="${i}"><button type="button" class="mobile-scene-card" data-mobile-scene="${i}" aria-label="장면 ${i+1} 선택" aria-current="${i===index?'true':'false'}">${source?.thumb?`<img src="${esc(source.thumb)}" alt="">`:'<span class="mobile-missing">컷 없음</span>'}<span class="mobile-grid-number">${String(i+1).padStart(2,'0')}</span><span class="mobile-grid-duration">${duration.toFixed(1)}초</span></button>${sceneEdit?`<div class="mobile-scene-actions"><button type="button" data-scene-move="-1" data-index="${i}" aria-label="장면 ${i+1} 앞으로 이동" ${i===0?'disabled':''}>←</button><button type="button" data-scene-move="1" data-index="${i}" aria-label="장면 ${i+1} 뒤로 이동" ${i===list.length-1?'disabled':''}>→</button><button type="button" class="danger" data-scene-delete="${i}" aria-label="장면 ${i+1} 삭제">삭제</button></div>`:''}</div>`;}).join(''):'<p class="mobile-scenes-empty">장면을 먼저 추가해 주세요.</p>';
+    $('mobileSceneGrid').innerHTML=list.length?list.map((item,i)=>{const {source,duration}=CutflowScene.thumbnail(item,i);return `<div class="mobile-scene-item" data-mobile-scene-item="${i}"><button type="button" class="mobile-scene-card" data-mobile-scene="${i}" aria-label="장면 ${i+1} 선택" aria-current="${i===index?'true':'false'}">${source?.thumb?`<img src="${esc(source.thumb)}" alt="">`:'<span class="mobile-missing">컷 없음</span>'}<span class="mobile-grid-number">${String(i+1).padStart(2,'0')}</span><span class="mobile-grid-duration">${duration.toFixed(1)}초</span>${sceneStatus(item)}</button>${sceneEdit?`<div class="mobile-scene-actions"><button type="button" data-scene-move="-1" data-index="${i}" aria-label="장면 ${i+1} 앞으로 이동" ${i===0?'disabled':''}>←</button><button type="button" data-scene-move="1" data-index="${i}" aria-label="장면 ${i+1} 뒤로 이동" ${i===list.length-1?'disabled':''}>→</button><button type="button" class="danger" data-scene-delete="${i}" aria-label="장면 ${i+1} 삭제">삭제</button></div>`:''}</div>`;}).join(''):'<p class="mobile-scenes-empty">장면을 먼저 추가해 주세요.</p>';
   }
 
   function confirmNarrationSceneEdit(){
@@ -126,11 +128,11 @@
   saveButton.onclick=()=>$('projectSaveBtn').click();$('mobileProjectOpen').onclick=()=>$('projectOpenBtn').click();exportButton.onclick=()=>$('exportBtn').click();
   $('mobileScenesAdd').onclick=()=>$('fileInput').click();$('mobileScenesEdit').onclick=()=>{sceneEdit=!sceneEdit;buildGrid();};
 
-  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;mode=tab;if(mode==='style'&&cues.length){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));};
+  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;if(tab!=='scenes')lastEditMode=tab;mode=tab;if(mode==='style'&&cues.length){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));};
   $('mobileSceneGrid').onclick=e=>{
     const move=e.target.closest('[data-scene-move]');if(move){const from=Number(move.dataset.index),to=from+Number(move.dataset.sceneMove);if(confirmNarrationSceneEdit()&&CutflowScene.move(from,to)){index=to;selectedId=items()[to]?.id;buildGrid();}return;}
     const del=e.target.closest('[data-scene-delete]');if(del){const at=Number(del.dataset.sceneDelete);if(!confirmNarrationSceneEdit())return;const name=`장면 ${at+1}`;if(confirm(`${name}을 삭제할까요? 삭제 후 뒤 장면의 시간이 자동으로 다시 계산됩니다.`)){CutflowScene.remove(at);index=Math.min(at,Math.max(0,items().length-1));selectedId=items()[index]?.id||null;buildGrid();}return;}
-    const target=e.target.closest('[data-mobile-scene]');if(target){select(Number(target.dataset.mobileScene));if(!sceneEdit){mode='caption';sync();}else buildGrid();}
+    const target=e.target.closest('[data-mobile-scene]');if(target){select(Number(target.dataset.mobileScene));if(!sceneEdit){mode=lastEditMode;sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));}else buildGrid();}
   };
 
   $('cueList').addEventListener('click',e=>{if(enabled&&e.target.closest('[data-action="style"]')){e.stopImmediatePropagation();mode='style';sync();}},true);
@@ -145,6 +147,8 @@
   mobileNav.addEventListener('touchstart',e=>{if(enabled&&e.touches.length===1)navTouch={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   mobileNav.addEventListener('touchend',e=>{if(!navTouch||!enabled)return;const t=e.changedTouches[0],dx=t.clientX-navTouch.x,dy=t.clientY-navTouch.y;navTouch=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5)select(index+(dx<0?1:-1));},{passive:true});
   mobileNav.addEventListener('touchcancel',()=>navTouch=null,{passive:true});
+
+  window.addEventListener('cutflow-open-timing',()=>{if(!enabled)return;mode='timing';sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));});
 
   function viewport(){if(!enabled)return;const vv=window.visualViewport;const height=vv?.height||innerHeight;document.documentElement.style.setProperty('--mobile-visible-height',height+'px');document.documentElement.style.setProperty('--mobile-keyboard-offset',Math.max(0,innerHeight-height-(vv?.offsetTop||0))+'px');document.body.classList.toggle('mobile-keyboard',height<innerHeight*.75);}
   document.addEventListener('focusin',()=>{if(enabled){document.body.classList.toggle('mobile-input-focus',document.activeElement.matches('textarea,input[type=number],input[type=text],input:not([type])'));viewport();}});
