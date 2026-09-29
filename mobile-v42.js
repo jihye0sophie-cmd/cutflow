@@ -195,20 +195,26 @@
       <div class="v42-caption-timing"><div class="v42-caption-timing-head"><strong>자막 타이밍</strong><span>${Number(state.end-state.start).toFixed(2)}초</span></div>
       <div class="v42-grid2"><label class="v42-field"><span>시작</span><input data-caption-field="start" type="number" min="0" step="0.01" value="${Number(state.start).toFixed(2)}" ${state.freeEdit?'disabled':''}></label><label class="v42-field"><span>종료</span><input data-caption-field="end" type="number" min="0.1" step="0.01" value="${Number(state.end).toFixed(2)}" ${state.freeEdit?'disabled':''}></label></div>
       <div class="v42-actions"><button type="button" id="v42CaptionPlay" class="v42-btn">▶ 현재 자막 재생</button><button type="button" id="v42CaptionTiming" class="v42-btn">정밀 타이밍 조정 ›</button></div></div>`;
+    const styleRange=(id,label,outputId)=>{
+      const el=$(id);if(!el)return '';const k=key();proxyMap.set(k,el);
+      const value=$(outputId)?.textContent||el.value;
+      return `<label class="v42-field"><span>${esc(label)} <b class="v42-live-value">${esc(value)}</b></span><input data-proxy="${k}" type="range" value="${esc(el.value)}" min="${esc(el.min)}" max="${esc(el.max)}" step="${esc(el.step)}"></label>`;
+    };
     const style=`
       ${proxyControl($('styleScope'),'적용 범위',{wide:true})}
       ${proxyButton($('applyAllCaptionStyle'),'현재 스타일을 전체 자막에 적용',{primary:true,wide:true})}
       <p class="v42-help">${esc($('styleScopeNote')?.textContent||'선택한 자막 스타일을 수정합니다.')}</p>
       ${proxyControl($('stylePreset'),'스타일 프리셋',{wide:true})}
-      <div class="v42-grid2">${proxyControl($('captionFont'),'자막 폰트')}${proxyControl($('captionSize'),'글자 크기')}</div>
+      <div class="v42-grid2">${proxyControl($('captionFont'),'자막 폰트')}${styleRange('captionSize','글자 크기','sizeValue')}</div>
       <div class="v42-grid2">${proxyControl($('captionBold'),'볼드')}${proxyControl($('captionItalic'),'이탤릭')}</div>
+      <p class="v42-help">${esc($('captionFontNote')?.textContent||'')}</p>
       <div class="v42-caption-base-color"><strong>글자색</strong>${palette('captionColor')}${proxyControl($('captionColor'),'직접 선택',{wide:true})}</div>
-      <div class="v42-grid2">${proxyControl($('captionStrokeColor'),'스트로크 색상')}${proxyControl($('captionStroke'),'스트로크 두께')}</div>
+      <div class="v42-grid2">${proxyControl($('captionStrokeColor'),'스트로크 색상')}${styleRange('captionStroke','스트로크 두께','strokeValue')}</div>
       ${proxyControl($('captionBackground'),'자막 배경 사용',{wide:true})}
-      <div class="v42-grid2">${proxyControl($('captionBackgroundColor'),'배경색')}${proxyControl($('captionOpacity'),'배경 불투명도')}${proxyControl($('captionPadding'),'배경 내부 여백')}${proxyControl($('captionRadius'),'모서리 둥글기')}</div>
-      <div class="v42-grid2">${proxyControl($('captionPosition'),'자막 위치')}${proxyControl($('captionY'),'세로 위치 · 위에서')}</div>
-      <p class="v42-help">변경 즉시 미리보기와 MP4에 반영됩니다. [[강조]]로 감싼 글자는 노란색으로 유지됩니다.</p>`;
-    panel.innerHTML=section('자막',core,`자막 ${state.segment.position}/${state.segment.count}`)+details('자막 스타일',style,'폰트 · 크기 · 색상 · B · I · 스트로크 · 배경',false);
+      <div class="v42-grid2">${proxyControl($('captionBackgroundColor'),'배경색')}${styleRange('captionOpacity','배경 불투명도','opacityValue')}${styleRange('captionPadding','배경 내부 여백','paddingValue')}${styleRange('captionRadius','모서리 둥글기','radiusValue')}</div>
+      <div class="v42-grid2">${proxyControl($('captionPosition'),'자막 위치')}${styleRange('captionY','세로 위치 · 위에서','yValue')}</div>
+      <p class="v42-help">변경 즉시 미리보기와 MP4에 반영됩니다. 크기·두께·여백은 1080px 너비 기준입니다. [[강조]]로 감싼 글자는 노란색으로 유지됩니다.</p>`;
+    panel.innerHTML=section('자막',core,`자막 ${state.segment.position}/${state.segment.count}`)+details('상세 설정',style,'폰트 · 크기 · 색상 · B · I · 스트로크 · 배경',false);
 
     const captionText=$('v42CaptionText');
     const rememberCaptionSelection=()=>{if(!captionText)return;captionSelection={index,start:captionText.selectionStart??0,end:captionText.selectionEnd??0};};
