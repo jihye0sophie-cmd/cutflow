@@ -470,3 +470,47 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
     height:min(21dvh,180px)!important;
   }
 }
+
+/* v42.5.13 ultra-compact scene strip */
+.v42-scenes-card{
+  margin-top:4px!important;
+  padding:3px 4px!important;
+  border-radius:8px!important;
+}
+.v42-scenes-row{
+  align-items:center!important;
+  gap:3px!important;
+  min-height:38px!important;
+}
+.v42-scene-strip{
+  gap:3px!important;
+  padding:0!important;
+}
+.v42-scene-strip>button{
+  flex:0 0 36px!important;
+  width:36px!important;
+  height:36px!important;
+  min-height:36px!important;
+  padding:1px!important;
+  border-radius:5px!important;
+}
+.v42-scene-strip img,
+.v42-scene-strip .missing{
+  height:100%!important;
+  border-radius:4px!important;
+}
+.v42-add-scene{
+  flex:0 0 34px!important;
+  width:34px!important;
+  height:36px!important;
+  min-height:36px!important;
+  font-size:17px!important;
+  border-radius:6px!important;
+}
+.v42-empty-strip{
+  font-size:8px!important;
+  line-height:36px!important;
+}
+.v42-panel{
+  margin-top:4px!important;
+}
