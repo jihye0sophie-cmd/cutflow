@@ -20,6 +20,7 @@
     const canUndo=!busy&&past.length>0,canRedo=!busy&&future.length>0;
     document.querySelectorAll('[data-cutflow-history="undo"]').forEach(b=>{b.disabled=!canUndo;b.setAttribute('aria-disabled',String(!canUndo));});
     document.querySelectorAll('[data-cutflow-history="redo"]').forEach(b=>{b.disabled=!canRedo;b.setAttribute('aria-disabled',String(!canRedo));});
+    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-history-updated',{detail:{canUndo,canRedo,busy}}));
   }
   function begin(label='편집'){
     if(applying||busy||!bridge())return;
