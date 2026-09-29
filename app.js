@@ -262,7 +262,7 @@ async function exportVideo(){
   finally{await wakeLock?.release();exporting=false;window.currentExport=null;$('cancelExportBtn').hidden=true;$('closeExportBtn').hidden=false;dirty=true;stats();}
 }
 $('uploadBtn').onclick=$('addMoreBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>addFiles(e.target.files);
-$('audioBtn').onclick=()=>$('audioInput').click();$('audioInput').onchange=e=>loadAudio(e.target.files[0]);$('scriptFileBtn').onclick=()=>$('scriptFile').click();$('scriptFile').onchange=async e=>{if(e.target.files[0]){$('scriptInput').value=await e.target.files[0].text();changed();}e.target.value='';};
+$('audioBtn').onclick=()=>$('audioInput').click();$('audioInput').onchange=e=>loadAudio(e.target.files[0]);$('scriptFileBtn').onclick=()=>$('scriptFile').click();$('scriptFile').onchange=async e=>{if(e.target.files[0]){$('scriptInput').value=await e.target.files[0].text();$('scriptInput').dispatchEvent(new Event('input',{bubbles:true}));changed();}e.target.value='';};
 $('randomMotionBtn').onclick=()=>{
   pause();if(cues.length)rememberCues();let previous=[];
   const choose=()=>{const pool=Object.keys(motionLabels).filter(m=>m!=='still'&&!previous.includes(m));const next=pool[Math.floor(Math.random()*pool.length)];previous=[...previous,next].slice(-2);return next;};
@@ -327,8 +327,11 @@ async function autoWrapCaptions(){
 
 window.CutflowAutoBridge={
   scriptLines,
+  narration(){return {file:audioFile||null,name:audioName||'',duration:audioBuffer?.duration||0,loaded:!!audioBuffer};},
   async autoWrapCaptions(){return autoWrapCaptions();},
   async loadNarration(file){await loadAudio(file);return !!audioBuffer;},
+  async processNarration(preset='normal',onProgress){if(!audioFile)throw new Error('먼저 내레이션을 불러오세요.');if(!window.CutflowSilenceCut?.process)throw new Error('무음컷 엔진을 불러오지 못했습니다.');const result=await window.CutflowSilenceCut.process(audioFile,preset,onProgress);await loadAudio(result.processedFile);return result;},
+  async buildProjectCues(){buildCues();if(cues.length&&$('projectCaptionWrap')?.checked)await autoWrapCaptions();return {cueCount:cues.length,sceneCount:scenes.length};},
   async addMedia(files){const before=scenes.length;await addFiles(files,{createFreeCues:false});return scenes.length-before;},
   buildTimeline(){buildCues();if(cues.length&&scenes.length)fitCuts(false);return {cueCount:cues.length,sceneCount:scenes.length};},
   counts(){return {sceneCount:scenes.length,cueCount:cues.length,scriptCount:scriptLines($('scriptInput').value).length};},
