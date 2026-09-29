@@ -11,7 +11,7 @@
  function restore(){if(!active)return;active=false;generation++;nativeEntered=false;for(const [node,marker] of slots)marker.replaceWith(node);slots.clear();document.body.style.overflow=overflow;document.body.classList.remove('preview-fullscreen-open');window.scrollTo({top:scroll,behavior:'instant'});launch.focus({preventScroll:true});}
  function close(){if(document.fullscreenElement===view)document.exitFullscreen().catch(()=>{});if(dialog.open)dialog.close();restore();}
  launch.onclick=()=>{
-  if(!mq.matches||active||exporting)return;
+  if(!(window.CutflowUI?.isMobileDevice?.()||mq.matches)||active||exporting)return;
   const sheet=document.getElementById('mobileSheet');if(sheet&&!sheet.hidden)document.getElementById('mobileSheetClose').click();
   active=true;const ticket=++generation;scroll=window.scrollY;overflow=document.body.style.overflow;document.body.style.overflow='hidden';document.body.classList.add('preview-fullscreen-open');
   for(const node of [panel.querySelector('.stage-wrap'),panel.querySelector('.player-controls'),document.getElementById('scrubber'),document.getElementById('mobileSceneNav')]){
@@ -23,5 +23,5 @@
  };
  closeButton.onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close();});dialog.addEventListener('close',restore);
  document.addEventListener('fullscreenchange',()=>{if(document.fullscreenElement===view)nativeEntered=true;else if(nativeEntered)close();});
- mq.addEventListener('change',()=>{if(!mq.matches)close();});
+ const syncMode=()=>{if(!(window.CutflowUI?.isMobileDevice?.()||mq.matches))close();};if(typeof mq.addEventListener==='function')mq.addEventListener('change',syncMode);else if(typeof mq.addListener==='function')mq.addListener(syncMode);
 })();

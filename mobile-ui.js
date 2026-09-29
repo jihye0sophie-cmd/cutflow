@@ -1,6 +1,16 @@
 /* v41 mobile presentation adapter. Desktop controls/events/project data remain authoritative. */
 (()=>{
   const mq=matchMedia('(max-width:760px)');
+  const ua=navigator.userAgent||'';
+  const uaMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  const ipadDesktop=/Macintosh/i.test(ua)&&(navigator.maxTouchPoints||0)>1;
+  const touchCapable=('ontouchstart' in window)||(navigator.maxTouchPoints||0)>0;
+  const portraitLike=()=>{const w=window.visualViewport?.width||innerWidth||screen.width||0,h=window.visualViewport?.height||innerHeight||screen.height||0;return h>=w;};
+  const portraitPhysical=()=>{const sw=Math.min(screen.width||0,screen.height||0),sh=Math.max(screen.width||0,screen.height||0);return sw>0&&sw<=1200&&sh>=sw*1.25&&(window.devicePixelRatio||1)>=1.5;};
+  const iosStandalone=()=>window.navigator.standalone===true;
+  const desktopSizedTouch=()=>touchCapable&&Math.min(screen.width||innerWidth||0,screen.height||innerHeight||0)<=1366;
+  const mobileDevice=()=>mq.matches||uaMobile||ipadDesktop||iosStandalone()||(touchCapable&&portraitLike())||portraitPhysical()||desktopSizedTouch();
+  window.CutflowUI=window.CutflowUI||{};window.CutflowUI.isMobileDevice=mobileDevice;window.CutflowUI.mobileActive=false;
   let enabled=false,index=0,selectedId=null,mode='caption',lastEditMode='caption',hadMedia=false,lastStroke=15,captionWasOpen=false,sceneEdit=false,narrationSceneWarningShown=false;
   const slots=new Map(),q=s=>document.querySelector(s);
 
@@ -87,21 +97,42 @@
     syncStroke();viewport();
   }
 
+  function markMobileSections(){
+    const hero=q('.hero'),timeline=q('.timeline-panel'),captionStyle=$('captionStylePanel'),source=q('.source-panel'),autoSetup=q('.auto-setup'),setup=q('.setup-panel'),bgm=q('.bgm-panel');
+    if(hero)hero.dataset.mobileSection='editor';
+    if(timeline)timeline.dataset.mobileSection='editor';
+    if(captionStyle)captionStyle.dataset.mobileSection='caption-style';
+    if(source)source.dataset.mobileSection='narration';
+    if(autoSetup)autoSetup.dataset.mobileSection='narration';
+    if(setup)setup.dataset.mobileSection='template';
+    if(bgm)bgm.dataset.mobileSection='bgm';
+    return {hero,timeline,captionStyle,source,autoSetup,setup,bgm};
+  }
+
+  let activateRetry=0;
   function activate(){
     if(enabled)return;
+    if(!window.CutflowScene||typeof window.CutflowScene.index!=='function'||typeof window.CutflowScene.items!=='function'){
+      if(activateRetry++<60)setTimeout(activate,50);
+      return;
+    }
+    activateRetry=0;
+    const parts=markMobileSections();
+    enabled=true;document.body.classList.add('mobile-editor');document.body.classList.remove('desktop-editor');
+    window.CutflowUI.mobileActive=true;
     window.dispatchEvent(new Event('cutflow-mobile-activate'));
-    index=CutflowScene.index();selectedId=items()[index]?.id;captionWasOpen=$('captionStylePanel').open;enabled=true;document.body.classList.add('mobile-editor');
+    index=CutflowScene.index();selectedId=items()[index]?.id;captionWasOpen=$('captionStylePanel').open;
     move(q('.preview-panel'),$('mobilePreview'));
     move($('scrubber'),q('.player-controls'));
     const controls=q('.player-controls');if(controls&&$('scrubber'))controls.insertBefore($('scrubber'),controls.querySelector('.timecode'));
 
-    move(q('.hero'),$('mobileEditorBody'));
-    move(q('.timeline-panel'),$('mobileEditorBody'));
-    move($('captionStylePanel'),$('mobileEditorBody'));
-    move(q('.source-panel'),$('mobileEditorBody'));q('.source-panel')?.append(silenceBox);
-    move(q('.auto-setup'),$('mobileEditorBody'));
-    move(q('.setup-panel'),$('mobileEditorBody'));
-    move(q('.bgm-panel'),$('mobileEditorBody'));
+    move(parts.hero,$('mobileEditorBody'));
+    move(parts.timeline,$('mobileEditorBody'));
+    move(parts.captionStyle,$('mobileEditorBody'));
+    move(parts.source,$('mobileEditorBody'));parts.source?.append(silenceBox);
+    move(parts.autoSetup,$('mobileEditorBody'));
+    move(parts.setup,$('mobileEditorBody'));
+    move(parts.bgm,$('mobileEditorBody'));
     move(q('.export-panel'),$('mobileOutputBody'));
     q('.timeline-panel')?.prepend(replaceButton);
     $('captionStylePanel').open=false;
@@ -110,13 +141,15 @@
 
   function deactivate(){
     if(!enabled)return;enabled=false;
-    document.body.classList.remove('mobile-editor','mobile-compact','mobile-keyboard','mobile-input-focus','mobile-project-open');
+    document.body.classList.remove('mobile-editor','mobile-compact','mobile-keyboard','mobile-input-focus','mobile-project-open');window.CutflowUI.mobileActive=false;
     for(const [node,marker] of slots)marker.replaceWith(node);slots.clear();
-document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);document.querySelectorAll('.mobile-caption-text').forEach(fold=>fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY')));$('captionStylePanel').open=captionWasOpen;
+document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);document.querySelectorAll('.mobile-caption-text').forEach(fold=>fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY')));$('captionStylePanel').open=captionWasOpen;window.dispatchEvent(new Event('cutflow-mobile-deactivate'));
   }
 
   window.addEventListener('cutflow-scene',e=>{if(enabled){index=e.detail;selectedId=items()[index]?.id;sync();}});
-  mq.addEventListener('change',()=>mq.matches?activate():deactivate());
+  const syncDeviceMode=()=>mobileDevice()?activate():deactivate();
+  if(typeof mq.addEventListener==='function')mq.addEventListener('change',syncDeviceMode);
+  else if(typeof mq.addListener==='function')mq.addListener(syncDeviceMode);
   $('mobilePrev').onclick=()=>select(index-1);$('mobileNext').onclick=()=>select(index+1);
   $('mobileSceneSplit').onclick=async()=>{await CutflowScene.split(index,currentTime());sync();};
   $('mobileSceneMerge').onclick=()=>{if(confirm('다음 장면과 합칠까요? 같은 미디어의 연속 장면만 합칠 수 있습니다.')){CutflowScene.mergeNext(index);sync();}};
@@ -148,11 +181,12 @@ document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);documen
   function viewport(){if(!enabled)return;const vv=window.visualViewport;const height=vv?.height||innerHeight;document.documentElement.style.setProperty('--mobile-visible-height',height+'px');document.documentElement.style.setProperty('--mobile-keyboard-offset',Math.max(0,innerHeight-height-(vv?.offsetTop||0))+'px');document.body.classList.toggle('mobile-keyboard',height<innerHeight*.75);}
   document.addEventListener('focusin',()=>{if(enabled){document.body.classList.toggle('mobile-input-focus',document.activeElement.matches('textarea,input[type=number],input[type=text],input:not([type])'));viewport();}});
   document.addEventListener('focusout',()=>{if(enabled)requestAnimationFrame(()=>{document.body.classList.toggle('mobile-input-focus',document.activeElement.matches('textarea,input[type=number],input[type=text],input:not([type])'));viewport();});});
-  window.visualViewport?.addEventListener('resize',viewport);window.addEventListener('resize',viewport);
+  if(window.visualViewport&&typeof window.visualViewport.addEventListener==='function')window.visualViewport.addEventListener('resize',viewport);
+  window.addEventListener('resize',()=>{syncDeviceMode();viewport();});
   new MutationObserver(()=>sync()).observe($('cueList'),{childList:true});
   new MutationObserver(()=>sync()).observe($('sceneList'),{childList:true});
   new MutationObserver(()=>{if(!enabled)return;const active=CutflowScene.index();if(active>=0&&active!==index){index=active;selectedId=items()[index]?.id;if(cues.length&&mode==='caption'){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();}else if(cues.length){sync();}}).observe($('nowPlaying'),{childList:true});
   new MutationObserver(()=>{if(enabled)exportButton.disabled=$('exportBtn').disabled;}).observe($('exportBtn'),{attributes:true,attributeFilter:['disabled']});
   const saveStatus=$('projectSaveStatus');if(saveStatus)new MutationObserver(()=>{if(!enabled)return;const state=saveStatus.dataset.state;saveButton.textContent=state==='saved'?'✓ 저장됨':state==='busy'?'저장 중…':'저장';saveButton.dataset.state=state||'';}).observe(saveStatus,{childList:true,attributes:true,attributeFilter:['data-state']});
-  if(mq.matches)activate();viewport();
+  if(mobileDevice())activate();viewport();
 })();
