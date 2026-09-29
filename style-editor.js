@@ -133,6 +133,7 @@ window.CutflowTypography={
     for(const [key,suffix] of Object.entries(fields)){
       if(patch[key]==null)continue;const el=$(p+suffix);if(!el)continue;
       if(el.type==='checkbox')el.checked=!!patch[key];else el.value=String(patch[key]);
+      if(key==='strokeEnabled'||key==='strokeWidth')textStrokeOverrides[p]=key==='strokeEnabled'?!!patch[key]:$(p+'StrokeEnabled').checked;
       el.dispatchEvent(new Event(['font','size','strokeEnabled','strokeWidth'].includes(key)?'change':'input',{bubbles:true}));
     }
     syncTextStrokes();syncTextPositionUI();syncTextStyleNotes();changed();
