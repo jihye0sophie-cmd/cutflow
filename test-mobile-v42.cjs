@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.5.13'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.15'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.16'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.16'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -70,7 +70,7 @@ assert(js.includes("audioBtn:'audioInput'"),'narration direct file picker mappin
 assert(js.includes("bgmBtn:'bgmInput'"),'BGM direct file picker mapping missing');
 assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapping missing');
 assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
-assert(html.includes('app.js?v=41.7'),'shared app bridge cache key missing');
+assert(html.includes('app.js?v=41.8'),'shared app bridge cache key missing');
 assert(app.includes('async processNarration('),'shared narration processing bridge missing');
 assert(app.includes('async buildProjectCues()'),'shared cue building bridge missing');
 assert(app.includes("scriptInput').dispatchEvent(new Event('input'"),'TXT import must dispatch input');
@@ -92,7 +92,7 @@ assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'vid
 assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
 assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener missing');
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
-assert(html.includes('app.js?v=41.7'),'caption bridge cache key missing');
+assert(html.includes('app.js?v=41.8'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
 assert(html.includes('timing-editor.js?v=41.4'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
@@ -103,7 +103,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.5.13'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.16'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -118,6 +118,14 @@ assert(js.includes('function applyBgmField('),'mobile BGM direct field bridge mi
 assert(js.includes('v42BgmInput')&&js.includes('v42BgmAdd')&&js.includes('v42BgmRemove'),'mobile BGM direct file controls missing');
 assert(js.includes('data-bgm-field="start"')&&js.includes('data-bgm-field="volume"')&&js.includes('data-bgm-field="repeat"'),'mobile BGM fields missing');
 assert(js.includes("'cutflow-bgm-updated'"),'mobile BGM refresh listener missing');
+assert(app.includes("selectNavigationCue(target,false)"),'segment caption navigation must not scroll');
+assert(!app.includes('data-action="selection-apply">선택 글자에 적용'),'selection apply button should be removed');
+assert(app.includes('function applyCueSelectionColor('),'instant selected text color helper missing');
+assert(app.includes('applySelectionColor(index,start,end,color)'),'shared selected text color API missing');
+assert(js.includes('data-caption-selection-color'),'mobile instant selected text color palette missing');
+assert(js.includes('v42CaptionSelectionReset'),'mobile selected color reset button missing');
+assert(js.includes('const editingBgm=!!active?.dataset?.bgmField'),'mobile BGM live-edit rerender guard missing');
+assert(css.includes('.v42-selection-colors'),'mobile selected text color styling missing');
 assert(app.includes("typeof CustomEvent==='function'"),'compose event guard missing');
 assert(html.includes('history.js?v=40.1'),'history cache key missing');
 assert(html.includes('project-store.js?v=41.1'),'project store cache key missing');
