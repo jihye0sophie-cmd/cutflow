@@ -51,8 +51,7 @@
         <input id="v42Scrubber" class="v42-scrubber" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
         <div class="v42-scene-nav"><button type="button" id="v42PrevScene" aria-label="이전 장면" title="이전 장면">‹</button><strong id="v42SceneLabel">0 / 0</strong><button type="button" id="v42NextScene" aria-label="다음 장면" title="다음 장면">›</button></div>
       </section>
-      <section class="v42-scenes-card">
-        <div class="v42-scenes-head"><strong>장면</strong><button id="v42AllScenes" type="button">전체 장면</button></div>
+      <section class="v42-scenes-card" aria-label="장면 목록">
         <div class="v42-scenes-row"><div id="v42SceneStrip" class="v42-scene-strip"></div><button id="v42AddScene" type="button" class="v42-add-scene" aria-label="장면 추가">＋</button></div>
       </section>
       <nav id="v42Tabs" class="v42-tabs" aria-label="모바일 편집 탭">
@@ -73,10 +72,6 @@
   exportDialogV42.id='v42ExportDialog';
   exportDialogV42.innerHTML='<div class="v42-sheet-head"><div><strong>MP4 내보내기</strong><small>Cutflow</small></div><button type="button" id="v42ExportClose" aria-label="닫기">×</button></div><div class="v42-export-body"><progress id="v42ExportProgress" max="1" value="0"></progress><p id="v42ExportStatus" class="v42-status">준비 중…</p><div id="v42ExportResult" class="v42-export-result" hidden></div><div class="v42-actions"><button type="button" id="v42ExportCancel" class="v42-btn danger">취소</button><button type="button" id="v42ExportShare" class="v42-btn primary" hidden>iPhone에 저장/공유</button><a id="v42ExportDownload" class="v42-btn primary" hidden>MP4 다운로드</a><button type="button" id="v42ExportDone" class="v42-btn" hidden>닫기</button></div></div>';
   document.body.append(exportDialogV42);
-  const scenesDialog=document.createElement('dialog');
-  scenesDialog.id='v42ScenesDialog';
-  scenesDialog.innerHTML='<div class="v42-sheet-head"><strong>전체 장면</strong><button type="button" id="v42ScenesClose">×</button></div><div id="v42ScenesGrid" class="v42-scenes-grid"></div>';
-  document.body.append(scenesDialog);
   const settingsDialog=document.createElement('dialog');
   settingsDialog.id='v42SettingsDialog';
   settingsDialog.innerHTML='<div class="v42-sheet-head"><div><strong>프로젝트 설정</strong><small>Cutflow</small></div><button type="button" id="v42SettingsClose" aria-label="닫기">×</button></div><div id="v42SettingsBody" class="v42-settings-body"></div>';
@@ -170,7 +165,7 @@
     const {items,index}=currentScene(),root=$('v42SceneStrip');
     root.innerHTML=items.length?items.map((item,i)=>{const t=window.CutflowScene?.thumbnail?.(item,i)||{},src=t.source?.thumb||'';return `<button type="button" data-scene="${i}" aria-current="${i===index}" aria-label="장면 ${i+1}">${src?`<img src="${esc(src)}" alt="">`:'<span class="missing">'+(i+1)+'</span>'}</button>`}).join(''):'<p class="v42-empty-strip">장면을 추가해 주세요.</p>';
     $('v42SceneLabel').textContent=`${items.length?index+1:0} / ${items.length}`;
-    const grid=$('v42ScenesGrid');if(grid)grid.innerHTML=items.length?items.map((item,i)=>{const t=window.CutflowScene?.thumbnail?.(item,i)||{},src=t.source?.thumb||'';return `<button type="button" data-scene-grid="${i}" aria-current="${i===index}">${src?`<img src="${esc(src)}" alt="">`:'<span class="missing">'+(i+1)+'</span>'}<strong>${String(i+1).padStart(2,'0')}</strong><small>${Number(t.duration||item.duration||0).toFixed(1)}초</small></button>`}).join(''):'<p class="v42-help">장면이 없습니다.</p>';
+
   }
   function renderCaption(){
     proxyMap.clear();
@@ -450,10 +445,6 @@
   syncPreviewHistory();
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
   $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
-  $('v42AllScenes').onclick=()=>{renderSceneStrip();scenesDialog.showModal();};
-  $('v42ScenesClose').onclick=()=>scenesDialog.close();
-  $('v42ScenesGrid').onclick=e=>{const b=e.target.closest('[data-scene-grid]');if(!b)return;window.CutflowScene?.select?.(Number(b.dataset.sceneGrid));scenesDialog.close();requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));};
-  scenesDialog.addEventListener('cancel',e=>{e.preventDefault();scenesDialog.close();});
   async function openPreviewFullscreen(){
     previewDialog.showModal();
     try{if(previewDialog.requestFullscreen&&!document.fullscreenElement)await previewDialog.requestFullscreen();}catch{}
