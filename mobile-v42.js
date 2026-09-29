@@ -14,15 +14,12 @@
   const physicalShort=Math.min(screen.width||9999,screen.height||9999);
   const desktopOS=/Windows NT|X11|CrOS/i.test(ua);
   const touchHandheld=!desktopOS&&coarse&&touchPoints>0&&physicalShort<=900;
-  const lockedMobile=!!(mobileUA||ipadDesktop||touchHandheld);
-  const isMobile=()=>lockedMobile;
+  const deviceMobile=!!(mobileUA||ipadDesktop||touchHandheld);
+  const compactMq=matchMedia('(max-width:760px)');
   window.CutflowUI=window.CutflowUI||{};
-  window.CutflowUI.mode=lockedMobile?'mobile':'desktop';
-  window.CutflowUI.isMobileDevice=isMobile;
-
-  if(!lockedMobile)return;
-  document.body.classList.add('v42-mobile');
-  document.body.classList.remove('mobile-editor');
+  window.CutflowUI.isMobileDevice=()=>deviceMobile;
+  window.CutflowUI.mobileActive=!!(deviceMobile||compactMq.matches);
+  window.CutflowUI.mode=window.CutflowUI.mobileActive?'mobile':'desktop';
 
   const app=document.createElement('div');
   app.id='mobileAppV42';
@@ -76,6 +73,25 @@
   document.body.append(settingsDialog);
 
   const panel=$('v42Panel'),tabs=$('v42Tabs'),stage=$('v42Stage'),ctx=stage.getContext('2d'),fullStage=$('v42FullStage'),fullCtx=fullStage.getContext('2d');
+  const setMobileActive=(next,{initial=false}={})=>{
+    next=!!next;
+    const prev=!!window.CutflowUI.mobileActive;
+    window.CutflowUI.mobileActive=next;
+    window.CutflowUI.mode=next?'mobile':'desktop';
+    document.body.classList.toggle('v42-mobile',next);
+    document.body.classList.remove('mobile-editor');
+    if(!next){
+      for(const dialog of [settingsDialog,previewDialog,exportDialogV42]){try{if(dialog?.open)dialog.close();}catch{}}
+      try{if(document.fullscreenElement===previewDialog)document.exitFullscreen();}catch{}
+    }
+    if(initial||prev===next)return;
+    window.dispatchEvent(new CustomEvent(next?'cutflow-mobile-activate':'cutflow-mobile-deactivate',{detail:{responsive:!deviceMobile,width:innerWidth}}));
+    if(next){requestAnimationFrame(()=>{requestRefresh(true);syncPreviewHistory();});}
+  };
+  const syncResponsiveMode=()=>setMobileActive(deviceMobile||compactMq.matches);
+  setMobileActive(deviceMobile||compactMq.matches,{initial:true});
+  if(typeof compactMq.addEventListener==='function')compactMq.addEventListener('change',syncResponsiveMode);
+  else if(typeof compactMq.addListener==='function')compactMq.addListener(syncResponsiveMode);
   const proxyMap=new Map(),settingsProxyMap=new Map();
   let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false,captionMode='edit',captionSelection={index:-1,start:0,end:0};
 
