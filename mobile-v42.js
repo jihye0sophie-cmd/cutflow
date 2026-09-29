@@ -236,7 +236,22 @@
   }
   function renderPanel(force=false){
     if(!force&&panel.contains(document.activeElement))return;
-    if(tab==='caption')renderCaption(); else if(tab==='media')renderMedia(); else if(tab==='narration')renderNarration(); else if(tab==='template')renderTemplate(); else renderBgm();
+    panel.hidden=false;panel.dataset.activeTab=tab;
+    try{
+      if(tab==='caption')renderCaption(); else if(tab==='media')renderMedia(); else if(tab==='narration')renderNarration(); else if(tab==='template')renderTemplate(); else renderBgm();
+      panel.dataset.renderState='ready';
+    }catch(error){
+      console.error('Cutflow mobile panel render failed',tab,error);
+      proxyMap.clear();
+      panel.dataset.renderState='error';
+      panel.innerHTML=section('편집창을 불러오지 못했습니다.',`<p class="v42-help">현재 탭을 다시 불러오세요.</p><button type="button" id="v42PanelRetry" class="v42-btn primary wide">다시 불러오기</button>`,'MOBILE');
+      $('v42PanelRetry').onclick=()=>renderPanel(true);
+    }
+  }
+  function ensurePanelVisible(){
+    const rect=panel.getBoundingClientRect(),nav=tabs.getBoundingClientRect(),vh=window.visualViewport?.height||window.innerHeight;
+    const visibleBottom=Math.min(nav.top||vh,vh)-8;
+    if(rect.top>=visibleBottom||rect.bottom<=0)panel.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
   }
   function requestRefresh(force=false){
     if(renderQueued&&!force)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderSceneStrip();renderPanel(force);syncPlayer();});
@@ -268,7 +283,7 @@
     handleAutoClick(e,()=>requestRefresh(true));
   });
   panel.addEventListener('input',e=>{handleAutoInput(e,()=>requestRefresh(true));});
-  $('v42Settings').onclick=()=>{renderSettings();settingsDialog.showModal();};
+  $('v42Settings').onclick=()=>{renderSettings();settingsDialog.showModal();requestAnimationFrame(()=>{$('v42SettingsBody').scrollTop=0;syncSettingsProxyState();});};
   $('v42SettingsClose').onclick=()=>settingsDialog.close();
   settingsDialog.addEventListener('cancel',e=>{e.preventDefault();settingsDialog.close();});
   $('v42SettingsBody').addEventListener('click',e=>{
@@ -280,7 +295,7 @@
   });
   $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});});
   $('v42SettingsBody').addEventListener('change',e=>{proxyChange(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});setTimeout(syncSettingsProxyState,0);});
-  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);});
+  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
   $('v42AddScene').onclick=()=>$('fileInput')?.click();
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
   $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
@@ -294,7 +309,10 @@
 
   for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo']){const el=$(id);if(el)new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
   window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
-  window.addEventListener('cutflow-auto-complete',()=>{if(settingsDialog.open)settingsDialog.close();requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
+  window.addEventListener('cutflow-auto-complete',()=>{if(settingsDialog.open)settingsDialog.close();requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
+  $('projectDialog')?.addEventListener('close',()=>setTimeout(()=>requestRefresh(true),0));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
+  window.addEventListener('pageshow',()=>requestRefresh(false));
   setInterval(syncPlayer,200);
   renderSceneStrip();renderPanel(true);syncPlayer();mirrorStage();
 })();
