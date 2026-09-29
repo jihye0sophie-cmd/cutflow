@@ -98,13 +98,15 @@ assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener miss
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
 assert(html.includes('app.js?v=41.9'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
-assert(html.includes('timing-editor.js?v=41.4'),'timing mount cache key missing');
+assert(html.includes('timing-editor.js?v=42.2'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
 assert(app.includes('captionChanged(index)'),'caption update refresh hook missing');
 assert(styleEditor.includes('window.CutflowCaptionStyle={'),'caption style bridge missing');
 assert(timingEditor.includes('mount(container,index)'),'v42 timing mount API missing');
 assert(timingEditor.includes('externalPanel?.isConnected'),'external timing panel visibility missing');
-assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
+assert(timingEditor.includes('window.CutflowTimeline={'),'shared timeline API missing');
+assert(timingEditor.includes('timing-scene-layer')&&timingEditor.includes('timing-caption-layer'),'shared timeline layers missing');
+assert(js.includes("tab='timing'"),'mobile precision timing tab navigation missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
 assert(html.includes('mobile-v42.css?v=42.6.4'),'template typography css cache key missing');
