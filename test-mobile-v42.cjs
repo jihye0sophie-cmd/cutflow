@@ -8,9 +8,10 @@ const autoSetup=fs.readFileSync('auto-setup.js','utf8');
 const sceneUi=fs.readFileSync('scene-ui.js','utf8');
 const styleEditor=fs.readFileSync('style-editor.js','utf8');
 const timingEditor=fs.readFileSync('timing-editor.js','utf8');
+const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 
 assert(html.includes('mobile-v42.css?v=42.4.2'),'v42.4 mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.5'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.6'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -67,7 +68,7 @@ assert(js.includes("audioBtn:'audioInput'"),'narration direct file picker mappin
 assert(js.includes("bgmBtn:'bgmInput'"),'BGM direct file picker mapping missing');
 assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapping missing');
 assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
-assert(html.includes('app.js?v=41.4'),'shared app bridge cache key missing');
+assert(html.includes('app.js?v=41.5'),'shared app bridge cache key missing');
 assert(app.includes('async processNarration('),'shared narration processing bridge missing');
 assert(app.includes('async buildProjectCues()'),'shared cue building bridge missing');
 assert(app.includes("scriptInput').dispatchEvent(new Event('input'"),'TXT import must dispatch input');
@@ -89,7 +90,7 @@ assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'vid
 assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
 assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener missing');
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
-assert(html.includes('app.js?v=41.4'),'caption bridge cache key missing');
+assert(html.includes('app.js?v=41.5'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
 assert(html.includes('timing-editor.js?v=41.4'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
@@ -108,4 +109,12 @@ assert(js.includes('function applyTypographyField('),'mobile typography direct b
 assert(js.includes("data-typo-field=\"x\"")&&js.includes("data-typo-field=\"y\""),'mobile title/channel position controls missing');
 assert(js.includes('v42ApplyMotionPreset')&&js.includes('v42RandomMotion'),'mobile motion preset actions missing');
 assert(css.includes('.v42-typo-palette'),'mobile typography palette styles missing');
-console.log('Cutflow v42.5.5 template typography workflow checks passed');
+assert(html.includes('bgm-editor.js?v=13.1'),'BGM bridge cache key missing');
+assert(bgmEditor.includes('window.CutflowBgm={'),'shared BGM bridge missing');
+assert(bgmEditor.includes("cutflow-bgm-updated"),'BGM update event missing');
+assert(js.includes('function applyBgmField('),'mobile BGM direct field bridge missing');
+assert(js.includes('v42BgmInput')&&js.includes('v42BgmAdd')&&js.includes('v42BgmRemove'),'mobile BGM direct file controls missing');
+assert(js.includes('data-bgm-field="start"')&&js.includes('data-bgm-field="volume"')&&js.includes('data-bgm-field="repeat"'),'mobile BGM fields missing');
+assert(js.includes("'cutflow-bgm-updated'"),'mobile BGM refresh listener missing');
+assert(app.includes("typeof CustomEvent==='function'"),'compose event guard missing');
+console.log('Cutflow v42.5.6 BGM workflow checks passed');
