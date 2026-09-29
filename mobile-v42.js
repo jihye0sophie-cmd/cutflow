@@ -130,6 +130,12 @@
     const mediaRow=mediaCueIndex>=0?qs(`.cue-row[data-index="${mediaCueIndex}"]`):sceneRow;
     return {item,index,cueIndex,cueRow,sceneRow,mediaRow};
   }
+  function followSelectedScene(behavior='smooth'){
+    const root=$('v42SceneStrip'),selected=root?.querySelector('[aria-current="true"]');
+    if(!root||!selected)return;
+    const left=selected.offsetLeft-(root.clientWidth-selected.offsetWidth)/2;
+    root.scrollTo({left:Math.max(0,left),behavior});
+  }
   function renderSceneStrip(){
     const {items,index}=currentScene(),root=$('v42SceneStrip');
     root.innerHTML=items.length?items.map((item,i)=>{const t=window.CutflowScene?.thumbnail?.(item,i)||{},src=t.source?.thumb||'';return `<button type="button" data-scene="${i}" aria-current="${i===index}">${src?`<img src="${esc(src)}" alt="">`:'<span class="missing">'+(i+1)+'</span>'}<b>${String(i+1).padStart(2,'0')}</b><small>${Number(t.duration||item.duration||0).toFixed(1)}s</small></button>`}).join(''):'<p class="v42-empty-strip">장면을 추가해 주세요.</p>';
@@ -165,7 +171,7 @@
     const preset=document.querySelector('input[name="autoSilencePreset"]:checked')?.value||'normal';
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map});
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map});
-    return `${pc($('autoTitle'),'영상 제목',{wide:true})}${pc($('autoChannel'),'채널명')}${pc($('autoLayout'),'영상 템플릿')}${pc($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}${pc($('autoCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-file-actions">${pb($('autoNarrationBtn'),'내레이션 선택')}${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}${pb($('autoBgmBtn'),'BGM 선택')}</div><div class="v42-auto-files"><span><b>내레이션</b>${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</span><span><b>그리드</b>${esc($('autoGridName')?.textContent||'선택 안 됨')}</span><span><b>개별 이미지</b>${esc($('autoSingleName')?.textContent||'선택 안 됨')}</span></div><div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>${details('그리드 분할 설정',autoGridMirror(),'열 · 행 · 분할 여백')}<div class="v42-auto-check"><span>대본 장면 <strong>${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong>${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div><p class="v42-auto-match">${esc($('autoMatch')?.textContent||'')}</p>${pb($('autoStart'),'쇼츠 자동 세팅 시작',{primary:true,wide:true})}`;
+    return `${pc($('autoTitle'),'영상 제목',{wide:true})}${pc($('autoChannel'),'채널명')}${pc($('autoLayout'),'영상 템플릿')}${pc($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}${pc($('autoCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-file-actions">${pb($('autoNarrationBtn'),'내레이션 선택')}${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}${pb($('autoBgmBtn'),'BGM 선택')}</div><div class="v42-auto-files"><span><b>내레이션</b><i data-auto-status="narration">${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</i></span><span><b>그리드</b><i data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</i></span><span><b>개별 이미지</b><i data-auto-status="single">${esc($('autoSingleName')?.textContent||'선택 안 됨')}</i></span></div><div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div><div data-settings-grid-mirror>${details('그리드 분할 설정',autoGridMirror(),'열 · 행 · 분할 여백')}</div><div class="v42-auto-check"><span>대본 장면 <strong data-auto-status="script-count">${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong data-auto-status="image-count">${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div><p class="v42-auto-match" data-auto-status="match">${esc($('autoMatch')?.textContent||'')}</p>${pb($('autoStart'),'쇼츠 자동 세팅 시작',{primary:true,wide:true})}`;
   }
   function renderNarration(){
     proxyMap.clear();
@@ -174,13 +180,47 @@
     panel.innerHTML=section('대본 · 내레이션',source,'SCRIPT & VOICE');
     $('v42SilenceRun').onclick=async()=>{const statusEl=$('v42SilenceStatus');try{if(typeof audioFile==='undefined'||!audioFile){statusEl.textContent='먼저 내레이션을 불러오세요.';return;}const p=qs('input[name="v42Silence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowSilenceCut.process(audioFile,p,m=>statusEl.textContent=m);if(typeof loadAudio==='function')await loadAudio(result.processedFile);statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}};
   }
+  function syncSettingsProxyState(){
+    if(!settingsDialog.open)return;
+    for(const [k,source] of settingsProxyMap){
+      const mirror=settingsDialog.querySelector(`[data-proxy="${k}"]`);
+      if(!mirror||mirror===document.activeElement)continue;
+      if(source.type==='checkbox')mirror.checked=source.checked;
+      else if('value' in mirror)mirror.value=source.value;
+      mirror.disabled=!!source.disabled;
+    }
+    const statusMap={
+      narration:$('autoNarrationName')?.textContent||'선택 안 됨',
+      grid:$('autoGridName')?.textContent||'선택 안 됨',
+      single:$('autoSingleName')?.textContent||'선택 안 됨',
+      'silence-info':$('autoSilenceInfo')?.textContent||'',
+      'script-count':$('autoScriptCount')?.textContent||'0개',
+      'image-count':$('autoImageCount')?.textContent||'0개',
+      match:$('autoMatch')?.textContent||''
+    };
+    for(const [name,value] of Object.entries(statusMap)){
+      const el=settingsDialog.querySelector(`[data-auto-status="${name}"]`);
+      if(el)el.textContent=value;
+    }
+    settingsDialog.querySelector('[data-cutflow-history="undo"]')?.toggleAttribute('disabled',!window.CutflowHistory?.canUndo);
+    settingsDialog.querySelector('[data-cutflow-history="redo"]')?.toggleAttribute('disabled',!window.CutflowHistory?.canRedo);
+  }
+  function syncSettingsGridMirror(){
+    if(!settingsDialog.open)return;
+    const host=settingsDialog.querySelector('[data-settings-grid-mirror]');
+    if(!host)return;
+    const active=document.activeElement;
+    if(active&&host.contains(active))return;
+    host.innerHTML=details('그리드 분할 설정',autoGridMirror(),'열 · 행 · 분할 여백');
+  }
   function renderSettings(){
     settingsProxyMap.clear();
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map:settingsProxyMap});
-    const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
     const quickActions=`<div class="v42-settings-actions"><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">이미지·영상 추가</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플로 시작</button></div>`;
+    const history=`<div class="v42-settings-actions"><button type="button" class="v42-btn" data-cutflow-history="undo" ${window.CutflowHistory?.canUndo?'':'disabled'}>↶ 실행 취소</button><button type="button" class="v42-btn" data-cutflow-history="redo" ${window.CutflowHistory?.canRedo?'':'disabled'}>↷ 다시 실행</button></div>`;
     const project=`${pc($('layoutSelect'),'영상 템플릿')}${pc($('titleInput'),'상단 제목',{wide:true})}${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}${pc($('resolutionSelect'),'출력 해상도')}`;
-    $('v42SettingsBody').innerHTML=section('빠른 시작',quickActions,'PROJECT')+section('프로젝트 설정',project,'PC와 동일한 기본 설정')+section('쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'QUICK START','v42-quick-start');
+    $('v42SettingsBody').innerHTML=section('빠른 시작',quickActions,'PROJECT')+section('편집 기록',history,'UNDO · REDO')+section('프로젝트 설정',project,'PC와 동일한 기본 설정')+section('쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'QUICK START','v42-quick-start');
+    syncSettingsProxyState();
   }
   function renderTemplate(){
     proxyMap.clear();
@@ -231,23 +271,30 @@
   $('v42Settings').onclick=()=>{renderSettings();settingsDialog.showModal();};
   $('v42SettingsClose').onclick=()=>settingsDialog.close();
   settingsDialog.addEventListener('cancel',e=>{e.preventDefault();settingsDialog.close();});
-  $('v42SettingsBody').addEventListener('click',e=>{const direct=e.target.closest('[data-direct-click]');if(direct){$(direct.dataset.directClick)?.click();return;}const proxy=e.target.closest('[data-proxy-click]');if(proxy){settingsProxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(renderSettings,0);return;}handleAutoClick(e,renderSettings);});
-  $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,renderSettings);});
-  $('v42SettingsBody').addEventListener('change',e=>{if(proxyChange(e,settingsProxyMap))setTimeout(renderSettings,0);handleAutoInput(e,renderSettings);});
-  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);panel.scrollIntoView({block:'start',behavior:'smooth'});});
+  $('v42SettingsBody').addEventListener('click',e=>{
+    const history=e.target.closest('[data-cutflow-history]');
+    if(history){window.CutflowHistory?.[history.dataset.cutflowHistory]?.();setTimeout(syncSettingsProxyState,0);return;}
+    const direct=e.target.closest('[data-direct-click]');if(direct){$(direct.dataset.directClick)?.click();return;}
+    const proxy=e.target.closest('[data-proxy-click]');if(proxy){settingsProxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>{syncSettingsProxyState();syncSettingsGridMirror();},0);return;}
+    handleAutoClick(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});
+  });
+  $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});});
+  $('v42SettingsBody').addEventListener('change',e=>{proxyChange(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});setTimeout(syncSettingsProxyState,0);});
+  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);});
   $('v42AddScene').onclick=()=>$('fileInput')?.click();
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
   $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
   $('v42AllScenes').onclick=()=>{renderSceneStrip();scenesDialog.showModal();};
   $('v42ScenesClose').onclick=()=>scenesDialog.close();
-  $('v42ScenesGrid').onclick=e=>{const b=e.target.closest('[data-scene-grid]');if(!b)return;window.CutflowScene?.select?.(Number(b.dataset.sceneGrid));scenesDialog.close();requestRefresh(true);};
+  $('v42ScenesGrid').onclick=e=>{const b=e.target.closest('[data-scene-grid]');if(!b)return;window.CutflowScene?.select?.(Number(b.dataset.sceneGrid));scenesDialog.close();requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));};
   scenesDialog.addEventListener('cancel',e=>{e.preventDefault();scenesDialog.close();});
   $('v42Fullscreen').onclick=()=>previewDialog.showModal();$('v42FullClose').onclick=()=>previewDialog.close();previewDialog.addEventListener('cancel',e=>{e.preventDefault();previewDialog.close();});
   $('v42Scrubber').addEventListener('input',e=>{const s=$('scrubber');if(s){s.value=e.target.value;dispatch(s,'input');}});
   $('v42Scrubber').addEventListener('change',e=>{const s=$('scrubber');if(s){s.value=e.target.value;dispatch(s,'change');}});
 
-  for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo']){const el=$(id);if(el)new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open)renderSettings();}).observe(el,{subtree:true,childList:true,attributes:true});}
-  window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);});
+  for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo']){const el=$(id);if(el)new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
+  window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
+  window.addEventListener('cutflow-auto-complete',()=>{if(settingsDialog.open)settingsDialog.close();requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
   setInterval(syncPlayer,200);
   renderSceneStrip();renderPanel(true);syncPlayer();mirrorStage();
 })();
