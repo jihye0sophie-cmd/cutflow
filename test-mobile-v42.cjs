@@ -22,7 +22,7 @@ for(const id of ['autoTitle','autoChannel','autoLayout','autoScript','autoCaptio
 assert(js.includes('autoGridMirror')&&js.includes('data-auto-field="cols"')&&js.includes('data-auto-field="rows"')&&js.includes('data-auto-field="gap"'),'mobile grid split controls missing');
 assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto setup silence presets missing');
 assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
-assert(js.includes('data-media-field="scale"')&&js.includes('data-media-field="x"')&&js.includes('data-media-field="y"'),'direct media transform controls missing');
+assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X (%)','x'")&&js.includes("field('Position Y (%)','y'"),'direct media transform controls missing');
 assert(js.includes("field('Trim 시작','trimStart'")&&js.includes("field('영상 원음 볼륨 (%)','mediaVolume'")&&js.includes("field('원음 Fade In','mediaFadeIn'"),'video advanced controls missing');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
 assert(js.includes('layoutSelect')&&js.includes('titleInput')&&js.includes('channelInput'),'template workflow missing');
