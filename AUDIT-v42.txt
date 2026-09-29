@@ -1,0 +1,17 @@
+Cutflow mobile UI root-cause summary
+===================================
+
+Why v41.3.x kept failing
+- v41 mobile UI reused desktop DOM by moving existing panels at runtime.
+- Multiple historical mobile CSS layers (v19/v23/v32/v33/v36/v38/v41/v41.3) accumulated.
+- mobile-ui.js, desktop-ui.js and mobile-fullscreen.js each had their own mode/viewport assumptions.
+- A partial initialization could leave mobile buttons visible while the desktop page remained stacked below.
+- String/static tests did not validate the final iPhone DOM/CSS result.
+
+v42 resolution
+- No runtime reparenting of desktop panels.
+- New standalone #mobileAppV42.
+- Original PC topbar/app-shell are hidden as a single unit in mobile mode.
+- Mobile controls call/forward to existing authoritative engine controls.
+- Old mobile UI files are removed from index loading and build output.
+- This makes the old long PC page structurally unable to become the mobile layout.
