@@ -5,9 +5,10 @@ const css=fs.readFileSync('mobile-v42.css','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
 const app=fs.readFileSync('app.js','utf8');
 const autoSetup=fs.readFileSync('auto-setup.js','utf8');
+const sceneUi=fs.readFileSync('scene-ui.js','utf8');
 
 assert(html.includes('mobile-v42.css?v=42.4.2'),'v42.4 mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.2'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.3'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -21,8 +22,8 @@ for(const id of ['autoTitle','autoChannel','autoLayout','autoScript','autoCaptio
 assert(js.includes('autoGridMirror')&&js.includes('data-auto-field="cols"')&&js.includes('data-auto-field="rows"')&&js.includes('data-auto-field="gap"'),'mobile grid split controls missing');
 assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto setup silence presets missing');
 assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
-assert(js.includes('transformScale')&&js.includes('transformX')&&js.includes('transformY'),'media transform controls missing');
-assert(js.includes('trim-start')&&js.includes('media-volume')&&js.includes('media-fade-in'),'video advanced controls missing');
+assert(js.includes('data-media-field="scale"')&&js.includes('data-media-field="x"')&&js.includes('data-media-field="y"'),'direct media transform controls missing');
+assert(js.includes("field('Trim 시작','trimStart'")&&js.includes("field('영상 원음 볼륨 (%)','mediaVolume'")&&js.includes("field('원음 Fade In','mediaFadeIn'"),'video advanced controls missing');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
 assert(js.includes('layoutSelect')&&js.includes('titleInput')&&js.includes('channelInput'),'template workflow missing');
 assert(js.includes('bgmVolume')&&js.includes('bgmFadeIn')&&js.includes('bgmFadeOut'),'BGM workflow missing');
@@ -79,4 +80,11 @@ assert(autoSetup.includes("result.missingSceneCount"),'cue-to-scene validation m
 assert(js.includes("'cutflow-auto-status'"),'mobile auto setup progress listener missing');
 assert(js.includes("'cutflow-auto-error'"),'mobile auto setup error listener missing');
 assert(js.includes('data-auto-status="run"'),'mobile auto run status missing');
-console.log('Cutflow v42.5.2 auto setup end-to-end checks passed');
+assert(html.includes('scene-ui.js?v=36.3'),'scene bridge cache key missing');
+assert(sceneUi.includes('state:inspect')&&sceneUi.includes('update:patchScene'),'public scene media bridge missing');
+assert(sceneUi.includes("window.dispatchEvent(new CustomEvent('cutflow-scene-updated'"),'scene updated event missing');
+assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'video\''),'replacement audio defaults hardening missing');
+assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
+assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener missing');
+assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
+console.log('Cutflow v42.5.3 scene media workflow checks passed');
