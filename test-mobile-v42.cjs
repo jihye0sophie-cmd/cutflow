@@ -5,7 +5,7 @@ const css=fs.readFileSync('mobile-v42.css','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
 
 assert(html.includes('mobile-v42.css?v=42.4.2'),'v42.4 mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.4.2'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -56,4 +56,10 @@ assert(js.includes("section('출력 설정'"),'desktop-parity export settings mi
 assert(js.includes('v42-grid-preview')&&js.includes('data-auto-cut'),'mobile auto grid preview/cut controls missing');
 assert(css.includes('#v42SettingsDialog::backdrop{background:#000!important'),'opaque settings backdrop missing');
 assert(css.includes('.v42-grid-preview{position:relative'),'mobile grid preview styling missing');
-console.log('Cutflow v42.4.2 desktop-parity mobile settings checks passed');
+assert(js.includes('const fileButtonTargets='),'mobile direct file target map missing');
+assert(js.includes("scriptFileBtn:'scriptFile'"),'TXT direct file picker mapping missing');
+assert(js.includes("audioBtn:'audioInput'"),'narration direct file picker mapping missing');
+assert(js.includes("bgmBtn:'bgmInput'"),'BGM direct file picker mapping missing');
+assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapping missing');
+assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
+console.log('Cutflow v42.5 mobile function hardening checks passed');
