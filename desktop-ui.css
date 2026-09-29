@@ -133,3 +133,43 @@
  #desktopExport{background:var(--studio-accent)!important;color:#111!important;font-weight:800}
  .desktop-editor .topbar .project-tools,.desktop-editor .topbar .save-state{display:none!important}
 }
+/* v41.1 desktop polish */
+@media(min-width:761px){
+  /* Keep the app header visually separated from the editor workspace. */
+  #desktopStudio{margin-top:12px;height:calc(100dvh - 86px)}
+  .desktop-editor .app-shell{padding-top:0}
+
+  /* Project settings lives in the top toolbar only. */
+  .desktop-editor #desktopSettingsTop{width:36px;min-width:36px!important;padding:0!important;font-size:16px;display:grid;place-items:center}
+  .desktop-current-actions{margin-left:auto}
+
+  /* Caption -> image/video -> precision timing. */
+  #desktopTabs button{max-width:none}
+
+  /* Image/video mode: most-used controls first. */
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-summary{display:none!important}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media{display:block!important;grid-column:1/-1;order:1}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-motion{display:block!important;grid-column:1;order:2}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-transition{display:block!important;grid-column:2;order:3}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.media-advanced{display:block!important;grid-column:1/-1;order:4}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-duration{grid-column:1/-1;order:5}
+
+  /* Scene edit comes after the primary media controls. */
+  #desktopSceneActions{margin-top:12px;margin-bottom:12px}
+
+  /* Less-used transform controls are collapsed by default. */
+  .desktop-media-details{display:none;margin:0 0 12px;border:1px solid var(--studio-border);border-radius:10px;background:var(--studio-input);overflow:hidden}
+  #desktopEditor[data-mode=image] .desktop-media-details{display:block}
+  .desktop-media-details>summary{cursor:pointer;list-style:none;padding:11px 12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .desktop-media-details>summary::-webkit-details-marker{display:none}
+  .desktop-media-details>summary:after{content:'▾';color:var(--studio-muted);font-size:12px}
+  .desktop-media-details[open]>summary:after{content:'▴'}
+  .desktop-media-details>summary span{font-weight:400;font-size:11px;color:var(--studio-muted);margin-left:auto}
+  #desktopMediaDetailsBody{padding:0 12px 12px}
+  #desktopMediaDetailsBody #mediaTransform{margin:0;background:var(--studio-card)}
+
+  /* Compact precision timing navigation to avoid wrapped labels. */
+  .timing-caption-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .timing-caption-nav button{white-space:nowrap;padding-inline:8px!important}
+}
