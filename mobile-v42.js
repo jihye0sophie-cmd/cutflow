@@ -263,6 +263,7 @@
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map:settingsProxyMap});
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
     const settingsSection=(step,title,body,extra='')=>`<section class="v42-pc-settings-section ${extra}"><header><span>${esc(step)}</span><strong>${esc(title)}</strong></header><div class="v42-pc-settings-body">${body}</div></section>`;
+    const collapsibleSettingsSection=(step,title,body,extra='')=>`<details class="v42-pc-settings-section v42-pc-settings-collapsible ${extra}"><summary><span>${esc(step)}</span><strong>${esc(title)}</strong><em>열기</em></summary><div class="v42-pc-settings-body">${body}</div></details>`;
     const quickActions=`<div class="v42-settings-utility"><div class="v42-settings-utility-group"><span>PROJECT</span><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">+ 이미지·영상</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플 시작</button></div><div class="v42-settings-utility-group"><span>HISTORY</span><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="undo" ${window.CutflowHistory?.canUndo?'':'disabled'}>↶ 실행 취소</button><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="redo" ${window.CutflowHistory?.canRedo?'':'disabled'}>↷ 다시 실행</button></div></div>`;
     const source=`${pc($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}${pc($('projectCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-actions">${pb($('scriptFileBtn'),'TXT 대본 불러오기')}${pb($('audioBtn'),'내레이션 불러오기')}</div><p class="v42-status">${esc($('audioStatus')?.textContent||'오디오 없음')}</p>${pb($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}<div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills"><label><input type="radio" name="v42SettingsSilence" value="soft"><span>부드럽게</span></label><label><input type="radio" name="v42SettingsSilence" value="normal" checked><span>보통</span></label><label><input type="radio" name="v42SettingsSilence" value="tight"><span>타이트</span></label></div><button type="button" class="v42-btn wide" data-settings-silence-run>무음 줄이기</button><p class="v42-help" data-settings-silence-status>원본은 유지하고 처리본을 사용합니다.</p></div>`;
     const bgm=`<div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div><p class="v42-status">${esc($('bgmStatus')?.textContent||'음악 없음')}</p><div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인')}${pc($('bgmFadeOut'),'페이드 아웃')}</div>`;
@@ -273,7 +274,7 @@
       settingsSection('01 SCRIPT & VOICE','대본과 내레이션',source)+
       settingsSection('AUDIO','배경음악 · BGM',bgm)+
       settingsSection('02 COMPOSE','화면 구성',project)+
-      settingsSection('QUICK START','쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'v42-quick-start')+
+      collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'v42-quick-start')+
       settingsSection('04 EXPORT','출력 설정',output);
     syncSettingsProxyState();
   }
