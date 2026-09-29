@@ -483,3 +483,44 @@
   #mobileEditor[data-mode=template] #mobileEditorBody>.setup-panel{display:block!important}
   #mobileEditor[data-mode=bgm] #mobileEditorBody>.bgm-panel{display:block!important}
 }
+
+
+/* v41.3.1 mobile hardening: one active workspace only. */
+@media(max-width:760px){
+  /* The original desktop hero must never remain in the mobile flow. */
+  body.mobile-editor .app-shell>.hero,
+  body.mobile-editor .hero[data-mobile-section=hidden]{display:none!important}
+
+  /* Default-deny every legacy panel moved into the mobile editor. */
+  body.mobile-editor #mobileEditorBody>[data-mobile-section]{display:none!important}
+
+  /* Caption: editor + caption style. */
+  body.mobile-editor #mobileEditor[data-mode=caption] #mobileEditorBody>[data-mobile-section=editor],
+  body.mobile-editor #mobileEditor[data-mode=caption] #mobileEditorBody>[data-mobile-section=caption-style]{display:block!important}
+
+  /* Media: editor only. */
+  body.mobile-editor #mobileEditor[data-mode=media] #mobileEditorBody>[data-mobile-section=editor]{display:block!important}
+
+  /* Narration: keep the existing Script & Voice and auto-setup functionality together. */
+  body.mobile-editor #mobileEditor[data-mode=narration] #mobileEditorBody>[data-mobile-section=narration]{display:block!important}
+
+  /* Template and BGM are mutually exclusive project-wide workspaces. */
+  body.mobile-editor #mobileEditor[data-mode=template] #mobileEditorBody>[data-mobile-section=template]{display:block!important}
+  body.mobile-editor #mobileEditor[data-mode=bgm] #mobileEditorBody>[data-mobile-section=bgm]{display:block!important}
+
+  /* Timing temporarily owns the editor surface. */
+  body.mobile-editor #mobileEditor[data-mode=timing] #mobileEditorBody>[data-mobile-section]{display:none!important}
+
+  /* Never show all rows from the legacy timeline on mobile. */
+  body.mobile-editor #mobileEditor[data-mode=caption] .timeline-panel .scene-list{display:none!important}
+  body.mobile-editor #mobileEditor[data-mode=caption] .timeline-panel .cue-row:not(.mobile-selected){display:none!important}
+  body.mobile-editor #mobileEditor[data-mode=media] .timeline-panel .scene-row:not(.mobile-selected),
+  body.mobile-editor #mobileEditor[data-mode=media] .timeline-panel .cue-row:not(.mobile-selected){display:none!important}
+
+  body.mobile-editor #mobileEditor[data-mode=narration] #mobileSceneActions,
+  body.mobile-editor #mobileEditor[data-mode=template] #mobileSceneActions,
+  body.mobile-editor #mobileEditor[data-mode=bgm] #mobileSceneActions{display:none!important}
+
+  /* Keep the five-tab bar reachable after the editor content. */
+  body.mobile-editor #mobileTools{position:sticky!important;top:auto!important;bottom:0!important;z-index:70!important;margin-top:8px!important}
+}
