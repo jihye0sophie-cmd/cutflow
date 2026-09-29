@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.5.11'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.11'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.12'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.12'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -103,7 +103,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.5.11'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.12'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -159,4 +159,11 @@ assert(js.includes("collapsibleSettingsSection('QUICK START','쇼츠 자동 세�
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'settings dialog accent scope missing');
 assert(css.includes('.v42-pc-settings-collapsible'),'collapsible auto setup styles missing');
 assert(css.includes('#v42SettingsDialog .v42-btn.primary'),'settings primary contrast override missing');
-console.log('Cutflow v42.5.11 settings contrast and auto setup toggle checks passed');
+assert(js.includes('id="v42Undo"')&&js.includes('id="v42Redo"'),'preview undo redo controls missing');
+assert(js.includes('id="v42PrevScene" aria-label="이전 장면"')&&js.includes('id="v42NextScene" aria-label="다음 장면"'),'icon scene navigation missing');
+assert(js.includes('syncPreviewHistory'),'preview history state sync missing');
+assert(!js.includes('<span>HISTORY</span><button'),'history must be removed from settings utility');
+assert(css.includes('.v42-preview-tools'),'compact preview tool cluster missing');
+assert(css.includes('height:min(24dvh,220px)!important'),'compact preview height missing');
+assert(css.includes('flex:0 0 44px!important'),'compact scene thumbnail size missing');
+console.log('Cutflow v42.5.12 compact mobile editing layout checks passed');
