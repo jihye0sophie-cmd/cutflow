@@ -83,7 +83,8 @@ async function splitGrid(grid,startIndex,limit){
     const no=String(startIndex+out.length+1).padStart(2,'0');out.push(new File([blob],`scene_${no}.png`,{type:'image/png'}));
   }return out;
 }
-function status(text,step){$('autoStatus').textContent=text;document.querySelectorAll('.auto-step').forEach((el,i)=>el.dataset.state=i<step?'done':i===step?'active':'');}
+function emit(type,detail={}){window.dispatchEvent(new CustomEvent(type,{detail}));}
+function status(text,step){$('autoStatus').textContent=text;document.querySelectorAll('.auto-step').forEach((el,i)=>el.dataset.state=i<step?'done':i===step?'active':'');emit('cutflow-auto-status',{text,step});}
 async function applyProjectBasics(){
   const title=$('autoTitle').value||'',channel=$('autoChannel').value||'',layout=$('autoLayout').value||'fullscreen';
   $('titleInput').value=title;$('titleInput').dispatchEvent(new Event('input',{bubbles:true}));
@@ -91,7 +92,7 @@ async function applyProjectBasics(){
   $('layoutSelect').value=layout;$('layoutSelect').dispatchEvent(new Event('input',{bubbles:true}));
 }
 async function run(){
-  if(state.running)return;const script=lines();
+  if(state.running)return;const script=lines();state.silencePreset=silencePreset();
   if(!script.length||!state.narration||capacity()<script.length)return;
   if(window.CutflowProjectBridge?.hasWork?.()&&!confirm('자동 세팅을 시작하면 현재 대본·내레이션·장면 구성이 새 입력으로 교체됩니다. 계속할까요?'))return;
   state.running=true;update();$('autoProgress').hidden=false;
@@ -99,22 +100,28 @@ async function run(){
     status('장면 이미지를 준비하는 중…',0);let files=[];
     for(const grid of state.grids){if(files.length>=script.length)break;files.push(...await splitGrid(grid,files.length,script.length-files.length));}
     if(files.length<script.length){for(const item of state.singles){if(files.length>=script.length)break;files.push(item.file);}}
+    if(files.length!==script.length)throw new Error(`필요한 이미지 ${script.length}장 중 ${files.length}장만 준비되었습니다.`);
     status(`이미지 ${files.length}장 준비 완료 · 내레이션 무음 줄이는 중…`,1);
-    await applyProjectBasics();$('scriptInput').value=$('autoScript').value;window.CutflowAutoBridge.markChanged();
+    await applyProjectBasics();$('scriptInput').value=$('autoScript').value;$('scriptInput').dispatchEvent(new Event('input',{bubbles:true}));window.CutflowAutoBridge.markChanged();
     if(!window.CutflowSilenceCut?.process)throw new Error('무음컷 엔진을 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
     const cut=await window.CutflowSilenceCut.process(state.narration,state.silencePreset,msg=>status(msg,1));state.processedNarration=cut.processedFile;
     status(`무음컷 완료 · ${cut.originalDuration.toFixed(1)}초 → ${cut.processedDuration.toFixed(1)}초 · 타임라인용 내레이션 연결 중…`,1);
     if(!await window.CutflowAutoBridge.loadNarration(state.processedNarration))throw new Error('처리된 내레이션을 읽지 못했습니다.');
     status('기존 장면을 정리하고 이미지를 배치하는 중…',2);await window.CutflowAutoBridge.clearScenesOnly();
     const added=await window.CutflowAutoBridge.addMedia(files);if(added!==files.length)throw new Error(`이미지 ${files.length}장 중 ${added}장만 추가되었습니다.`);
-    status('내레이션의 쉼을 분석해 자막 타이밍을 자동으로 맞추는 중…',3);const result=window.CutflowAutoBridge.buildTimeline();if(result.cueCount!==script.length)throw new Error('자막 구간 생성 결과를 확인해 주세요.');
+    const afterMedia=window.CutflowAutoBridge.counts?.();if(afterMedia&&afterMedia.sceneCount!==script.length)throw new Error(`장면 생성 수가 맞지 않습니다. 필요 ${script.length}장 / 생성 ${afterMedia.sceneCount}장`);
+    status('내레이션의 쉼을 분석해 자막 타이밍을 자동으로 맞추는 중…',3);const result=window.CutflowAutoBridge.buildTimeline();
+    if(result.cueCount!==script.length)throw new Error(`자막 구간 수가 맞지 않습니다. 필요 ${script.length}개 / 생성 ${result.cueCount}개`);
+    if(result.sceneCount!==script.length)throw new Error(`장면 수가 맞지 않습니다. 필요 ${script.length}장 / 생성 ${result.sceneCount}장`);
+    if(result.missingSceneCount)throw new Error(`장면이 연결되지 않은 자막이 ${result.missingSceneCount}개 있습니다.`);
     await window.applyTemplateTypography?.($('autoLayout').value,{applyCues:true,notify:false});
     if($('autoCaptionWrap')?.checked){status('자막을 보기 좋게 줄바꿈하는 중…',3);await window.CutflowAutoBridge.autoWrapCaptions?.();}
     status('BGM을 적용하는 중…',4);if(state.bgm&&!(await window.loadBgmFile?.(state.bgm)))throw new Error('BGM을 읽지 못했습니다.');
     status('자동 세팅이 완료되었습니다.',5);$('autoProgress').querySelectorAll('.auto-step').forEach(el=>el.dataset.state='done');
-    if(window.CutflowUI?.mode==='mobile')window.dispatchEvent(new CustomEvent('cutflow-auto-complete',{detail:{cueCount:result.cueCount}}));
-    else setTimeout(()=>document.querySelector('.workspace')?.scrollIntoView({behavior:'smooth',block:'start'}),250);
-  }catch(e){status(`자동 세팅 중단: ${e.message}`,0);window.CutflowAutoBridge?.toast?.(e.message);}
+    const complete={cueCount:result.cueCount,sceneCount:result.sceneCount,missingSceneCount:result.missingSceneCount||0,imageCount:files.length};
+    emit('cutflow-auto-complete',complete);
+    if(window.CutflowUI?.mode!=='mobile')setTimeout(()=>document.querySelector('.workspace')?.scrollIntoView({behavior:'smooth',block:'start'}),250);
+  }catch(e){status(`자동 세팅 중단: ${e.message}`,0);emit('cutflow-auto-error',{message:e.message});window.CutflowAutoBridge?.toast?.(e.message);}
   finally{state.running=false;update();}
 }
 function syncBasicsFromProject(){
