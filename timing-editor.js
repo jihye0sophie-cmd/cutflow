@@ -182,12 +182,13 @@
   function handleAction(e){
     const panel=e.target.closest('.timing-panel');if(!panel)return;
     const sceneBtn=e.target.closest('[data-timeline-scene]');if(sceneBtn){window.CutflowScene?.select?.(Number(sceneBtn.dataset.timelineScene));renderAll();return;}
-    const cueBtn=e.target.closest('[data-timing-cue]');if(cueBtn){const i=Number(cueBtn.dataset.timingCue);if(cues[i]){selectedCueId=cues[i].id;jump(cues[i].start);renderAll();}return;}
+    const cueBtn=e.target.closest('[data-timing-cue]');if(cueBtn){const i=Number(cueBtn.dataset.timingCue);if(cues[i]){selectedCueId=cues[i].id;pendingCenter=true;jump(cues[i].start);renderAll();}return;}
     const action=e.target.closest('[data-timing-action]')?.dataset.timingAction;
     if(action){
       if(action==='toggle-play')window.CutflowPlayer?.toggle?.();
-      else if(action==='zoom-out'){timelineZoom=clamp(timelineZoom-.25,.5,3);renderAll();}
-      else if(action==='zoom-in'){timelineZoom=clamp(timelineZoom+.25,.5,3);renderAll();}
+      else if(action==='zoom-out'){timelineZoom=clamp(timelineZoom-.25,.5,3);pendingCenter=true;renderAll();}
+      else if(action==='zoom-in'){timelineZoom=clamp(timelineZoom+.25,.5,3);pendingCenter=true;renderAll();}
+      else if(action==='snap'){snapEnabled=!!e.target.checked;renderAll();}
       else if(action==='play-caption'){const sel=cueForSelection(sceneItem());if(sel){jump(sel.cue.start);play();}}
       else if(action==='redistribute')redistribute();
       return;
@@ -195,20 +196,36 @@
     const canvas=e.target.closest('[data-timeline-seek]');
     if(canvas&&!e.target.closest('button,input,select,textarea')){
       const rect=canvas.getBoundingClientRect(),duration=timelineDuration(),time=clamp((e.clientX-rect.left)/rect.width,0,1)*duration;
-      jump(time);renderAll();
+      jump(snapTime(time));renderAll();
     }
   }
-  function handleChange(e){if(!e.target.closest('.timing-panel'))return;if(e.target.dataset.timingScene){rememberCues();setSceneBoundary(e.target.dataset.timingScene,e.target.value);renderAll();}else if(e.target.dataset.timingCaption){changeSelectedTime(e.target.dataset.timingCaption,e.target.value);}}
+  function handleChange(e){
+    if(!e.target.closest('.timing-panel'))return;
+    if(e.target.dataset.timingScene){rememberCues();setSceneBoundary(e.target.dataset.timingScene,e.target.value);renderAll();}
+    else if(e.target.hasAttribute('data-timing-scene-duration')){const item=sceneItem();if(item){rememberCues();setSceneBoundary('end',item.start+Math.max(.1,num(e.target.value,.1)));renderAll();}}
+    else if(e.target.dataset.timingCaption){changeSelectedTime(e.target.dataset.timingCaption,e.target.value);}
+  }
   function startDrag(e){
     const h=e.target.closest('.timing-handle');if(!h||h.disabled)return;
     const canvas=h.closest('.timing-canvas'),start=num(canvas?.dataset.windowStart,0),end=num(canvas?.dataset.windowEnd,timelineDuration()),rect=canvas?.getBoundingClientRect();
     if(!canvas||!rect)return;rememberCues();
-    const leftIndex=h.dataset.boundaryCaption!=null?Number(h.dataset.boundaryCaption):null;
-    drag={kind:'caption',leftIndex,start,end,rect,pointerId:e.pointerId,scene:sceneForCueIndex(leftIndex)};
+    if(h.dataset.captionEdge){
+      const cueIndex=Number(h.dataset.cueIndex);drag={kind:'caption-edge',cueIndex,side:h.dataset.captionEdge,start,end,rect,pointerId:e.pointerId,scene:sceneForCueIndex(cueIndex)};
+    }else if(h.dataset.sceneBoundary!=null){
+      drag={kind:'scene',scene:Number(h.dataset.sceneBoundary),side:h.dataset.boundarySide||'start',start,end,rect,pointerId:e.pointerId};
+    }else return;
     h.setPointerCapture?.(e.pointerId);e.preventDefault();
   }
-  function moveDrag(e){if(!drag)return;const t=drag.start+clamp((e.clientX-drag.rect.left)/drag.rect.width,0,1)*(drag.end-drag.start);setCaptionBoundary(drag.leftIndex,t,{commit:false});changed();renderAll();}
-  function endDrag(){if(!drag)return;const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));drag=null;renderCues();CutflowScene.select(idx);renderAll();}
+  function moveDrag(e){
+    if(!drag)return;
+    const raw=drag.start+clamp((e.clientX-drag.rect.left)/drag.rect.width,0,1)*(drag.end-drag.start),t=snapTime(raw,40*timelineZoom);
+    if(drag.kind==='caption-edge')setCaptionEdge(drag.cueIndex,drag.side,t,{commit:false});
+    else if(drag.kind==='scene')setSceneBoundaryAt(drag.scene,drag.side,t,{commit:false});
+    changed();renderAll();
+  }
+  function endDrag(){
+    if(!drag)return;const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));drag=null;renderCues();CutflowScene.select(idx);renderAll();
+  }
   document.addEventListener('click',handleAction);
   document.addEventListener('change',handleChange);
   document.addEventListener('pointerdown',startDrag);
@@ -220,12 +237,13 @@
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
   setInterval(()=>{const panel=visiblePanel();if(!panel)return;const track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration();line.style.left=`${pctAll(currentTime(),duration)}%`;if(clock)clock.textContent=`${fmt(currentTime())} / ${fmt(duration)}`;},100);
   window.CutflowTimeline={
-    state(){return {duration:timelineDuration(),currentTime:currentTime(),zoom:timelineZoom,sceneIndex:sceneIndex(),selectedCueIndex:cues.findIndex(c=>c.id===selectedCueId),sceneCount:sceneItems().length,captionCount:cues.length};},
-    setZoom(value){timelineZoom=clamp(num(value,1),.5,3);renderAll();return this.state();},
-    seek(time){jump(clamp(num(time),0,timelineDuration()));renderAll();return this.state();},
+    state(){return {duration:timelineDuration(),currentTime:currentTime(),zoom:timelineZoom,snap:snapEnabled,sceneIndex:sceneIndex(),selectedCueIndex:cues.findIndex(c=>c.id===selectedCueId),sceneCount:sceneItems().length,captionCount:cues.length};},
+    setZoom(value){timelineZoom=clamp(num(value,1),.5,3);pendingCenter=true;renderAll();return this.state();},
+    setSnap(value){snapEnabled=!!value;renderAll();return this.state();},
+    seek(time){jump(snapTime(clamp(num(time),0,timelineDuration())));renderAll();return this.state();},
     selectScene(index){window.CutflowScene?.select?.(index);renderAll();return this.state();},
-    selectCaption(index){if(cues[index]){selectedCueId=cues[index].id;jump(cues[index].start);renderAll();return true;}return false;},
-    render:renderAll
+    selectCaption(index){if(cues[index]){selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);renderAll();return true;}return false;},
+    setCaptionEdge,setSceneBoundaryAt,render:renderAll
   };
   window.CutflowTiming={
     render:renderAll,setSceneBoundary,setCaptionBoundary,redistribute,
