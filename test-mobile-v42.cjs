@@ -12,15 +12,15 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.5.12'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.12'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.13'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.13'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
 assert(js.includes("app.id='mobileAppV42'"),'independent mobile app missing');
 assert(!js.includes('v42 MOBILE'),'separate mobile branding must not appear');
 assert(js.includes('쇼츠 컷 편집 스튜디오'),'Cutflow product subtitle missing');
-assert(js.includes('v42AllScenes')&&js.includes('v42ScenesGrid'),'all scenes mobile sheet missing');
+assert(!js.includes('v42AllScenes')&&!js.includes('v42ScenesGrid'),'all scenes mobile sheet should be removed');
 for(const tab of ['caption','media','narration','template','bgm'])assert(js.includes(`data-tab="${tab}"`),`missing ${tab} tab`);
 assert(js.includes("settingsSection('QUICK START','쇼츠 자동 세팅'")&&js.includes("'v42-quick-start'"),'auto setup must exist in settings');
 for(const id of ['autoTitle','autoChannel','autoLayout','autoScript','autoCaptionWrap','autoNarrationBtn','autoGridBtn','autoSingleBtn','autoBgmBtn','autoStart'])assert(js.includes(id),`auto setup bridge missing ${id}`);
@@ -103,7 +103,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.5.12'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.13'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -148,7 +148,7 @@ assert(autoSetup.includes('files.length!==script.length'),'final audit: script/i
 assert(autoSetup.includes("emit('cutflow-auto-complete'"),'final audit: auto setup completion missing');
 assert(autoSetup.includes("else window.CutflowBgm?.remove?.()"),'final audit: stale BGM cleanup missing');
 assert(js.includes('v42PrevScene')&&js.includes('v42NextScene'),'final audit: scene navigation missing');
-assert(js.includes('v42ScenesGrid')&&js.includes('data-scene-grid'),'final audit: all scenes selection missing');
+assert(js.includes('id="v42SceneStrip"')&&!js.includes('data-scene-grid'),'final audit: horizontal scene strip should replace all-scenes selection');
 assert(html.includes('auto-setup.js?v=39.4'),'final audit: auto setup cache key missing');
 assert(js.includes('v42-settings-utility'),'desktop-like compact settings utility missing');
 assert(js.includes('v42-pc-settings-section'),'desktop-like settings section structure missing');
@@ -166,4 +166,6 @@ assert(!js.includes('<span>HISTORY</span><button'),'history must be removed from
 assert(css.includes('.v42-preview-tools'),'compact preview tool cluster missing');
 assert(css.includes('height:min(24dvh,220px)!important'),'compact preview height missing');
 assert(css.includes('flex:0 0 44px!important'),'compact scene thumbnail size missing');
-console.log('Cutflow v42.5.12 compact mobile editing layout checks passed');
+assert(css.includes('flex:0 0 36px!important'),'ultra-compact scene thumbnail size missing');
+assert(css.includes('margin-top:4px!important'),'compact scene card spacing missing');
+console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
