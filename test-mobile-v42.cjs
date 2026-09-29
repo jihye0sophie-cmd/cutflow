@@ -20,7 +20,7 @@ assert(js.includes("section('쇼츠 자동 세팅'")&&js.includes("'v42-quick-st
 for(const id of ['autoTitle','autoChannel','autoLayout','autoScript','autoCaptionWrap','autoNarrationBtn','autoGridBtn','autoSingleBtn','autoBgmBtn','autoStart'])assert(js.includes(id),`auto setup bridge missing ${id}`);
 assert(js.includes('autoGridMirror')&&js.includes('data-auto-field="cols"')&&js.includes('data-auto-field="rows"')&&js.includes('data-auto-field="gap"'),'mobile grid split controls missing');
 assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto setup silence presets missing');
-assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowSilenceCut.process'),'script/voice workflow missing');
+assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
 assert(js.includes('transformScale')&&js.includes('transformX')&&js.includes('transformY'),'media transform controls missing');
 assert(js.includes('trim-start')&&js.includes('media-volume')&&js.includes('media-fade-in'),'video advanced controls missing');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
