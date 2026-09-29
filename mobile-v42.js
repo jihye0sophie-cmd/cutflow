@@ -41,7 +41,7 @@
         <div class="v42-preview-head"><strong>미리보기</strong><span id="v42TimeLabel">0:00.0 / 0:00.0</span></div>
         <div class="v42-stage-wrap"><canvas id="v42Stage" width="360" height="640" aria-label="모바일 영상 미리보기"></canvas></div>
         <div class="v42-player">
-          <button type="button" class="play" data-click="playBtn" aria-label="재생">▶</button>
+          <button type="button" id="v42Play" class="play" aria-label="재생">▶</button>
           <button type="button" id="v42Fullscreen" class="v42-fullscreen-icon" aria-label="전체화면 미리보기" title="전체화면 미리보기">⛶</button>
         </div>
         <input id="v42Scrubber" class="v42-scrubber" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
@@ -459,10 +459,12 @@
   $('v42Scrubber').addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
   $('v42Scrubber').addEventListener('change',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
 
-  let mobileExportBlob=null,mobileExportFilename='';
+  let mobileExportBlob=null,mobileExportFilename='',mobileExportUrl='';
   const resetMobileExport=()=>{
+    if(mobileExportUrl){URL.revokeObjectURL(mobileExportUrl);mobileExportUrl='';}
     mobileExportBlob=null;mobileExportFilename='';$('v42ExportProgress').value=0;$('v42ExportStatus').textContent='준비 중…';$('v42ExportResult').hidden=true;$('v42ExportResult').textContent='';$('v42ExportCancel').hidden=false;$('v42ExportShare').hidden=true;$('v42ExportDownload').hidden=true;$('v42ExportDone').hidden=true;
   };
+  $('v42Play').onclick=()=>window.CutflowPlayer?.toggle?.();
   $('v42Export').onclick=()=>{resetMobileExport();exportDialogV42.showModal();window.CutflowExport?.start?.();};
   $('v42ExportCancel').onclick=()=>window.CutflowExport?.cancel?.();
   $('v42ExportClose').onclick=()=>{if(!window.CutflowExport?.busy)exportDialogV42.close();};
@@ -490,7 +492,7 @@
   window.addEventListener('cutflow-auto-complete',e=>{const detail=e.detail||{};const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent='완료 · 장면 '+(detail.sceneCount||0)+'개 · 자막 '+(detail.cueCount||0)+'개';requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
   window.addEventListener('cutflow-export-start',e=>{if(!exportDialogV42.open)exportDialogV42.showModal();$('v42ExportStatus').textContent=(e.detail?.width||'')+'p MP4 준비 중…';$('v42ExportCancel').hidden=false;});
   window.addEventListener('cutflow-export-progress',e=>{$('v42ExportProgress').value=Number(e.detail?.progress)||0;$('v42ExportStatus').textContent=e.detail?.message||'MP4 만드는 중…';});
-  window.addEventListener('cutflow-export-complete',e=>{mobileExportBlob=e.detail?.blob||null;mobileExportFilename=e.detail?.filename||'Cutflow.mp4';$('v42ExportProgress').value=1;$('v42ExportStatus').textContent='MP4 완성';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;const result=$('v42ExportResult');result.hidden=false;result.textContent=(e.detail?.width||'')+'p · '+((e.detail?.size||0)/1024/1024).toFixed(1)+'MB';const dl=$('v42ExportDownload');if(mobileExportBlob){dl.href=URL.createObjectURL(mobileExportBlob);dl.download=mobileExportFilename;dl.hidden=false;const file=new File([mobileExportBlob],mobileExportFilename,{type:'video/mp4'});$('v42ExportShare').hidden=!(navigator.canShare?.({files:[file]})&&navigator.share);}});
+  window.addEventListener('cutflow-export-complete',e=>{mobileExportBlob=e.detail?.blob||null;mobileExportFilename=e.detail?.filename||'Cutflow.mp4';$('v42ExportProgress').value=1;$('v42ExportStatus').textContent='MP4 완성';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;const result=$('v42ExportResult');result.hidden=false;result.textContent=(e.detail?.width||'')+'p · '+((e.detail?.size||0)/1024/1024).toFixed(1)+'MB';const dl=$('v42ExportDownload');if(mobileExportBlob){mobileExportUrl=URL.createObjectURL(mobileExportBlob);dl.href=mobileExportUrl;dl.download=mobileExportFilename;dl.hidden=false;const file=new File([mobileExportBlob],mobileExportFilename,{type:'video/mp4'});$('v42ExportShare').hidden=!(navigator.canShare?.({files:[file]})&&navigator.share);}});
   window.addEventListener('cutflow-export-error',e=>{if(!exportDialogV42.open)exportDialogV42.showModal();$('v42ExportStatus').textContent=e.detail?.message||'MP4 저장에 실패했습니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
   window.addEventListener('cutflow-export-cancelled',()=>{$('v42ExportStatus').textContent='저장을 취소했습니다. 편집 내용은 유지됩니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
   $('projectDialog')?.addEventListener('close',()=>setTimeout(()=>requestRefresh(false),0));
