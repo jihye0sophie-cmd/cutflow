@@ -13,7 +13,7 @@
         const first=item.firstCueIndex,last=Number.isInteger(item.lastCueIndex)?item.lastCueIndex:first;
         cueIndices=Array.from({length:Math.max(0,last-first+1)},(_,i)=>first+i);
       }
-      return {sceneIndex,cueIndices:cueIndices.filter(i=>api()?.state?.(i))};
+      return {sceneIndex,cueIndices:cueIndices.filter(i=>{const state=api()?.state?.(i);return state&&String(state.text||'').trim();})};
     }).filter(group=>group.cueIndices.length);
   }
 
@@ -42,6 +42,7 @@
     dialog.addEventListener('keyup',rememberCursor);
     dialog.addEventListener('mouseup',rememberCursor);
     dialog.addEventListener('touchend',rememberCursor,{passive:true});
+    dialog.addEventListener('cancel',()=>{commitDraft();});
     dialog.addEventListener('close',()=>{selected=-1;cursor=0;draft='';});
     return dialog;
   }
