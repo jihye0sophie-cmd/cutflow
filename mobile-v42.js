@@ -188,6 +188,7 @@
     window.CutflowCaptionStyle?.select?.(index);
     const selectionPalette=paletteColors.map(([name,color])=>`<button type="button" data-caption-selection-color="${color}" title="${name}" aria-label="${name}" style="--swatch:${color}"></button>`).join('');
     const core=`
+      <div class="v42-caption-batch-entry"><button type="button" id="v42CaptionBatchOpen" class="v42-btn wide">전체 자막 편집</button></div>
       <label class="v42-field wide"><span>자막 · [[강조]] 지원</span><textarea id="v42CaptionText" data-caption-field="text" rows="3" maxlength="240">${esc(state.text)}</textarea></label>
       <div class="v42-caption-selection-tools"><strong>선택 글자색</strong><div class="v42-palette">${selectionPalette}</div><label class="v42-selection-picker">직접 선택 <input id="v42CaptionSelectionPicker" type="color" value="#f5e642" aria-label="선택 글자색 직접 선택"></label><button type="button" id="v42CaptionSelectionReset" class="v42-btn">선택 색상 해제</button><small>자막에서 글자를 드래그한 뒤 색상을 누르면 즉시 적용됩니다.</small></div>
       <div class="v42-caption-segment-nav"><span>자막 ${state.segment.position} / ${state.segment.count}</span><div><button type="button" id="v42CaptionPrev" class="v42-btn" ${state.segment.position===1?'disabled':''}>‹ 이전 자막</button><button type="button" id="v42CaptionNext" class="v42-btn" ${state.segment.position===state.segment.count?'disabled':''}>다음 자막 ›</button></div></div>
@@ -216,6 +217,7 @@
       <p class="v42-help">변경 즉시 미리보기와 MP4에 반영됩니다. 크기·두께·여백은 1080px 너비 기준입니다. [[강조]]로 감싼 글자는 노란색으로 유지됩니다.</p>`;
     panel.innerHTML=section('자막',core,`자막 ${state.segment.position}/${state.segment.count}`)+details('상세 설정',style,'폰트 · 크기 · 색상 · B · I · 스트로크 · 배경',false);
 
+    $('v42CaptionBatchOpen').onclick=()=>window.CutflowCaptionBatch?.open?.(index);
     const captionText=$('v42CaptionText');
     const rememberCaptionSelection=()=>{if(!captionText)return;captionSelection={index,start:captionText.selectionStart??0,end:captionText.selectionEnd??0};};
     ['select','keyup','mouseup','touchend'].forEach(type=>captionText?.addEventListener(type,rememberCaptionSelection));
