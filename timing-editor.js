@@ -153,7 +153,7 @@
           <div class="timing-layer timing-narration-layer"><span class="timing-layer-label">내레이션</span><div class="timing-layer-body">${narrationMarkup}</div></div>
           <div class="timing-layer timing-videoaudio-layer"><span class="timing-layer-label">영상 원음</span><div class="timing-layer-body">${videoMarkup}</div></div>
           <div class="timing-layer timing-bgm-layer"><span class="timing-layer-label">BGM</span><div class="timing-layer-body">${bgmMarkup}</div></div>
-          <div class="timing-playhead" style="--timeline-position:${pctAll(currentTime(),duration)}%"></div>
+          <div class="timing-playhead-area"><div class="timing-playhead" style="left:${pctAll(currentTime(),duration)}%"></div></div>
         </div>
       </div>`;
     host.dataset.windowStart='0';host.dataset.windowEnd=String(duration);
@@ -244,7 +244,7 @@
   window.addEventListener('cutflow-project-restored',()=>requestAnimationFrame(()=>{pendingCenter=true;renderAll();}));
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
-  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration();line.style.setProperty('--timeline-position',`${pctAll(currentTime(),duration)}%`);if(clock)clock.textContent=`${fmt(currentTime())} / ${fmt(duration)}`;},100);
+  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration();line.style.left=`${pctAll(currentTime(),duration)}%`;if(clock)clock.textContent=`${fmt(currentTime())} / ${fmt(duration)}`;},100);
   window.CutflowTimeline={
     state(){return {duration:timelineDuration(),currentTime:currentTime(),zoom:timelineZoom,snap:snapEnabled,sceneIndex:sceneIndex(),selectedCueIndex:cues.findIndex(c=>c.id===selectedCueId),sceneCount:sceneItems().length,captionCount:cues.length};},
     setZoom(value){timelineZoom=clamp(num(value,1),.5,3);pendingCenter=true;renderAll();return this.state();},
