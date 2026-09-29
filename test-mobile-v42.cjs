@@ -32,7 +32,7 @@ assert(js.includes('autoGridMirror')&&js.includes('data-auto-field="cols"')&&js.
 assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto setup silence presets missing');
 assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
 assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X (%)','x'")&&js.includes("field('Position Y (%)','y'"),'direct media transform controls missing');
-assert(js.includes("field('Trim 시작','trimStart'")&&js.includes("field('영상 원음 볼륨 (%)','mediaVolume'")&&js.includes("field('원음 Fade In','mediaFadeIn'"),'video advanced controls missing');
+assert(js.includes("details('영상 고급 설정'")&&js.includes("field('시작 (초)','trimStart'")&&js.includes('data-media-field="mediaVolume"')&&js.includes("field('페이드 인 (초)','mediaFadeIn'"),'video advanced controls missing');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
 assert(js.includes('layoutSelect')&&js.includes('titleInput')&&js.includes('channelInput'),'template workflow missing');
 assert(js.includes('bgmVolume')&&js.includes('bgmFadeIn')&&js.includes('bgmFadeOut'),'BGM workflow missing');
