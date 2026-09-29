@@ -6,6 +6,7 @@ function syncBgm(){
   $('bgmStatus').textContent=bgmBuffer?`${bgmName} · ${bgmBuffer.duration.toFixed(2)}초`:'음악 없음';
   const s=CutAudio.settings({duration:totalDuration(),bgm:bgmProject()});
   $('bgmSummary').textContent=!bgmBuffer?'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.':!s.duration?'컷이나 내레이션을 추가하면 사용할 길이가 정해집니다.':s.loop?`${s.start.toFixed(2)}초부터 원본 끝까지 반복 · 쇼츠 ${s.duration.toFixed(2)}초에 맞춰 종료`:`원본 ${s.start.toFixed(2)}~${(s.start+s.length).toFixed(2)}초 사용 · ${s.length.toFixed(2)}초 재생${s.length<s.duration?' 후 음악 종료':''}`;
+  if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-bgm-updated',{detail:{loaded:!!bgmBuffer,name:bgmName,duration:bgmBuffer?.duration||0}}));
 }
 $('bgmBtn').onclick=()=>$('bgmInput').click();
 $('bgmInput').onchange=async e=>{const file=e.target.files[0];if(!file)return;pause();const id=++bgmLoadId;loading++;stats();$('bgmStatus').textContent='음악 읽는 중…';let ctx;
@@ -38,5 +39,25 @@ async function loadBgmFile(file){
 }
 window.loadBgmFile=loadBgmFile;
 window.bgmSnapshot=bgmSnapshot;window.restoreBgmSnapshot=restoreBgmSnapshot;
+
+window.CutflowBgm={
+  state(){
+    const p=bgmProject(),summary=$('bgmSummary')?.textContent||'';
+    return {loaded:!!bgmBuffer,name:bgmName,duration:bgmBuffer?.duration||0,start:p.start,volume:Math.round(p.volume*100),repeat:p.loop?'loop':'stop',fadeIn:p.fadeIn,fadeOut:p.fadeOut,summary};
+  },
+  async load(file){const ok=await loadBgmFile(file);if(ok)toast('BGM을 추가했습니다. 미리보기 재생으로 함께 들어보세요.');return ok?this.state():false;},
+  remove(){pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed();syncBgm();return this.state();},
+  update(patch={}){
+    if(!bgmBuffer)return false;pause();
+    if(patch.start!=null)$('bgmStart').value=String(Math.min(Math.max(0,Number(patch.start)||0),Math.max(0,bgmBuffer.duration-.01)));
+    if(patch.volume!=null)$('bgmVolume').value=String(Math.max(0,Math.min(100,Number(patch.volume)||0)));
+    if(patch.repeat!=null)$('bgmRepeat').value=patch.repeat==='loop'?'loop':'stop';
+    if(patch.fadeIn!=null)$('bgmFadeIn').value=String(Math.max(0,Math.min(30,Number(patch.fadeIn)||0)));
+    if(patch.fadeOut!=null)$('bgmFadeOut').value=String(Math.max(0,Math.min(30,Number(patch.fadeOut)||0)));
+    CutAudio.invalidate();changed();syncBgm();return this.state();
+  },
+  snapshot:bgmSnapshot,
+  async restore(snapshot,options){await restoreBgmSnapshot(snapshot,options);return this.state();}
+};
 
 window.bgmProject=bgmProject;window.syncBgm=syncBgm;syncBgm();
