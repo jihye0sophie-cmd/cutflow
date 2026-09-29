@@ -10,11 +10,13 @@ assert(css.includes('#mobileTools{grid-template-columns:repeat(5')&&css.includes
 assert(js.includes("const active=tab==='timing'?'caption':tab"),'timing must remain a caption subview');
 assert(!timing.includes("dataset.mobileTab='timing'"),'timing editor must not inject a sixth mobile tab');
 assert(css.includes('v41.3 stabilization')&&timingCss.includes('v41.3: precision timing'),'v41.3 mobile stabilization missing');
-assert(css.includes('v41.3.1 mobile hardening'),'v41.3.1 mobile hardening missing');
+assert(css.includes('v41.3.2 mobile hardening'),'v41.3.2 mobile hardening missing');
 assert(css.includes('body.mobile-editor #mobileEditorBody>[data-mobile-section]{display:none!important}'),'mobile workspace default-deny rule missing');
 assert(css.includes('#mobileEditor[data-mode=narration] #mobileEditorBody>[data-mobile-section=narration]{display:block!important}'),'narration workspace isolation missing');
 assert(desk.includes('id="desktopOpen"')&&desk.includes('프로젝트 설정'),'desktop compact header/settings missing');
 assert(desk.includes('stabilizeImageLayout')&&desk.includes("$('desktopMediaDetailsBody')"),'desktop image/video ordering stabilization missing');
-assert(html.includes('mobile-ui.css?v=41.3.1'),'v41.3.1 mobile css cache key missing');
-assert(html.includes('mobile-ui.js?v=41.3.1')&&html.includes('desktop-ui.js?v=41.3')&&html.includes('timing-editor.js?v=41.3'),'v41.3.1 cache keys missing');
-console.log('v41.3.1 mobile stabilization checks passed');
+assert(html.includes('mobile-ui.css?v=41.3.2'),'v41.3.2 mobile css cache key missing');
+assert(html.includes('mobile-ui.js?v=41.3.2')&&html.includes('desktop-ui.js?v=41.3')&&html.includes('timing-editor.js?v=41.3'),'v41.3.2 cache keys missing');
+assert(css.includes('(hover:none) and (pointer:coarse)'),'coarse-pointer mobile CSS fallback missing');
+assert(html.includes('__cutflowNativeMatchMedia')&&html.includes("'(max-width:760px)'"),'mobile matchMedia fallback missing');
+console.log('v41.3.2 mobile detection stabilization checks passed');
