@@ -443,3 +443,43 @@
   #mobileOutputDialog .mobile-output-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}#mobileOutputDialog .mobile-output-head button{width:36px;height:36px;border-radius:8px;background:#20252b;color:#fff;border:1px solid #3b4149}
   #mobileOutputDialog .export-panel{display:block!important;margin:0!important}
 }
+
+
+/* v41.3 stabilization: the five-tab mobile workflow is authoritative. */
+@media(max-width:760px){
+  /* Legacy timing/motion/style/scenes tabs must never leak into the new bar. */
+  #mobileTools [data-mobile-tab=timing],
+  #mobileTools [data-mobile-tab=motion],
+  #mobileTools [data-mobile-tab=style],
+  #mobileTools [data-mobile-tab=scenes]{display:none!important}
+  .mobile-editor #mobileTools{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;overflow:visible!important}
+  .mobile-editor #mobileTools button{min-width:0!important;flex:none!important}
+
+  /* Precision timing is opened from Caption and replaces only the editor body. */
+  #mobileEditor:not([data-mode=timing]) #mobileTiming{display:none!important}
+  #mobileEditor[data-mode=timing] #mobileTiming{display:block!important}
+  #mobileEditor[data-mode=timing] #mobileEditorBody,
+  #mobileEditor[data-mode=timing] #mobileSceneActions{display:none!important}
+
+  /* Explicitly define which large panel is visible in every direct tab. */
+  #mobileEditor[data-mode=caption] .timeline-panel,
+  #mobileEditor[data-mode=media] .timeline-panel{display:block!important}
+  #mobileEditor[data-mode=narration] .timeline-panel,
+  #mobileEditor[data-mode=template] .timeline-panel,
+  #mobileEditor[data-mode=bgm] .timeline-panel{display:none!important}
+
+  #mobileEditor[data-mode=caption] #captionStylePanel{display:block!important}
+  #mobileEditor:not([data-mode=caption]) #captionStylePanel{display:none!important}
+
+  /* Project-wide panels are mutually exclusive and cannot fall back to the old stacked project UI. */
+  #mobileEditorBody>.hero,
+  #mobileEditorBody>.source-panel,
+  #mobileEditorBody>.auto-setup,
+  #mobileEditorBody>.setup-panel,
+  #mobileEditorBody>.bgm-panel{display:none!important}
+  #mobileEditor[data-mode=media] #mobileEditorBody>.hero{display:block!important}
+  #mobileEditor[data-mode=narration] #mobileEditorBody>.source-panel,
+  #mobileEditor[data-mode=narration] #mobileEditorBody>.auto-setup{display:block!important}
+  #mobileEditor[data-mode=template] #mobileEditorBody>.setup-panel{display:block!important}
+  #mobileEditor[data-mode=bgm] #mobileEditorBody>.bgm-panel{display:block!important}
+}

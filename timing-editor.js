@@ -101,7 +101,7 @@
   function ensureUI(){
     const dt=q('desktopTabs');if(dt&&!dt.querySelector('[data-tab="timing"]')){const b=document.createElement('button');b.type='button';b.dataset.tab='timing';b.textContent='정밀 타이밍';dt.appendChild(b);}
     const de=q('desktopEditor');if(de&&!q('desktopTiming')){const p=document.createElement('section');p.id='desktopTiming';p.className='timing-panel';p.innerHTML='<div class="timing-track"></div><div class="timing-controls"></div>';de.insertBefore(p,q('desktopEditorScroll'));}
-    const mt=q('mobileTools');if(mt&&!mt.querySelector('[data-mobile-tab="timing"]')){const b=document.createElement('button');b.type='button';b.dataset.mobileTab='timing';b.setAttribute('aria-pressed','false');b.innerHTML='<span aria-hidden="true">◷</span>정밀';mt.insertBefore(b,mt.children[1]||null);}
+    // v41.3: mobile precision timing is a subview of the Caption tab, not a sixth bottom tab.
     const me=q('mobileEditor');if(me&&!q('mobileTiming')){const p=document.createElement('section');p.id='mobileTiming';p.className='timing-panel';p.innerHTML='<div class="timing-track"></div><div class="timing-controls"></div>';me.insertBefore(p,q('mobileEditorBody'));}
   }
   function renderPanel(panel){if(!panel)return;const item=sceneItem(),track=panel.querySelector('.timing-track'),controls=panel.querySelector('.timing-controls');renderTrack(track,item);controls.innerHTML=editorMarkup(item);}

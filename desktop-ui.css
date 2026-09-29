@@ -190,3 +190,16 @@
   #desktopEditor[data-mode=image] #desktopSceneActions{order:2}
   #desktopEditor[data-mode=image] #desktopMediaDetails{order:3}
 }
+
+
+/* v41.3 stabilization: exact image/video editor order, resilient to late media-transform creation. */
+@media(min-width:761px){
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media{order:1!important;grid-column:1/-1!important}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-motion{order:2!important;grid-column:1!important}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-transition{order:3!important;grid-column:2!important}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-duration{order:4!important;grid-column:1/-1!important}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.media-advanced{order:5!important;grid-column:1/-1!important}
+  #desktopEditor[data-mode=image] #desktopMediaDetailsBody #mediaTransform{display:block!important}
+  #desktopEditor[data-mode=image] #desktopSceneActions{display:block!important}
+  #desktopEditor[data-mode=image] #desktopMediaDetails{display:block!important}
+}

@@ -11,6 +11,18 @@
  function move(node,target){const marker=document.createComment('desktop-position');node.before(marker);slots.set(node,marker);target.append(node);}
  function activate(){if(enabled||!mq.matches)return;enabled=true;captionOpen=$('captionStylePanel').open;document.body.classList.add('desktop-editor');move(q('.preview-panel'),$('desktopPreview'));[q('.hero'),q('.auto-setup'),q('.source-panel'),q('.bgm-panel'),q('.setup-panel'),q('.export-panel')].forEach(n=>move(n,$('desktopProjectBody')));move(q('.timeline-panel'),$('desktopEditorBody'));if($('mediaTransform'))move($('mediaTransform'),$('desktopMediaDetailsBody'));move($('captionStylePanel'),$('desktopCaption'));move($('undoCuesBtn'),$('desktopManage'));move($('addCueBtn'),$('desktopManage'));move($('clearBtn'),$('desktopManage'));const openProject=document.createElement('button');openProject.id='desktopOpenSaved';openProject.type='button';openProject.textContent='프로젝트 열기';$('desktopManage').prepend(openProject);openProject.onclick=()=>$('projectOpenBtn').click();signature='';sync();}
  function deactivate(){if(!enabled)return;dialog.close();enabled=false;document.body.classList.remove('desktop-editor');for(const [node,marker] of slots)marker.replaceWith(node);slots.clear();$('captionStylePanel').open=captionOpen;}
+
+ function stabilizeImageLayout(){
+  if(!enabled)return;
+  const detailsBody=$('desktopMediaDetailsBody'),transform=$('mediaTransform');
+  if(transform&&detailsBody&&transform.parentElement!==detailsBody)detailsBody.append(transform);
+  const scroll=$('desktopEditorScroll'),body=$('desktopEditorBody'),actions=$('desktopSceneActions'),details=$('desktopMediaDetails'),caption=$('desktopCaption');
+  if(scroll&&body&&actions&&details){
+   if(body.nextElementSibling!==actions)scroll.insertBefore(actions,body.nextSibling);
+   if(actions.nextElementSibling!==details)scroll.insertBefore(details,actions.nextSibling);
+   if(caption&&details.nextElementSibling!==caption)scroll.insertBefore(caption,details.nextSibling);
+  }
+ }
  function sync(){
   if(!enabled)return;const list=CutflowScene.items(),i=CutflowScene.index(),item=list[i];
   $('desktopSceneTitle').textContent=item?`장면 ${i+1}`:'장면을 추가하세요';$('desktopSceneCount').textContent=`장면 ${item?i+1:0} / ${list.length}`;$('desktopSceneTotal').textContent=`전체 장면 ${list.length}`;
@@ -21,6 +33,7 @@
   const cueIndex=cues.length?CutflowScene.cueIndex(i):i;
   const selectedCueIndex=cues.length&&mode==='image'?(item?.firstCueIndex??cueIndex):cueIndex;
   document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const rowIndex=Number(row.dataset.index),selected=cues.length?row.classList.contains('cue-row')&&rowIndex===selectedCueIndex:rowIndex===i;row.classList.toggle('desktop-selected',selected);});
+  stabilizeImageLayout();
   // Keep the image/video tab in the practical edit order:
   // media + motion + transition -> scene tools -> collapsed size/position details.
   // The source cue rows are rebuilt frequently, so create this lightweight
@@ -60,6 +73,7 @@
  $('desktopSettingsTop').onclick=()=>dialog.showModal();$('desktopOpen').onclick=()=>$('projectOpenBtn').click();$('desktopSave').onclick=()=>$('projectSaveBtn').click();$('desktopProjectClose').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
  $('desktopExport').onclick=()=>{dialog.showModal();requestAnimationFrame(()=>q('.export-panel')?.scrollIntoView({behavior:'smooth',block:'center'}));};$('desktopAdd').onclick=()=>$('fileInput').click();$('desktopSceneEdit').onclick=()=>{sceneEdit=!sceneEdit;signature='';sync();};$('desktopReplace').onclick=()=>file.click();file.onchange=async()=>{await CutflowScene.replace(file.files[0]);file.value='';sync();};
  $('desktopTabs').onclick=e=>{const tab=e.target.closest('[data-tab]');if(tab){mode=tab.dataset.tab;sync();}};
+  new MutationObserver(()=>{if(enabled)requestAnimationFrame(()=>{stabilizeImageLayout();sync();});}).observe($('sceneList'),{childList:true,subtree:false});
  $('desktopPrev').onclick=()=>CutflowScene.select(CutflowScene.index()-1);$('desktopNext').onclick=()=>CutflowScene.select(CutflowScene.index()+1);
  $('desktopSceneSplit').onclick=async()=>{await CutflowScene.split(CutflowScene.index(),currentTime());signature='';sync();};
  $('desktopSceneMerge').onclick=()=>{if(confirm('다음 장면과 합칠까요? 같은 미디어의 연속 장면만 합칠 수 있으며 현재 장면의 효과 설정이 유지됩니다.')){CutflowScene.mergeNext(CutflowScene.index());signature='';sync();}};

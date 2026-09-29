@@ -45,7 +45,7 @@
   function move(node,target){if(!node)return;if(!slots.has(node)){const marker=document.createComment('mobile-original-position');node.before(marker);slots.set(node,marker);}target.append(node);}
   function items(){return CutflowScene.items();}
   function select(i){if(!enabled)return;const list=items();if(i<0||i>=list.length)return;CutflowScene.select(i);}
-  function setTab(tab){nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTab===tab)));}
+  function setTab(tab){const active=tab==='timing'?'caption':tab;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTab===active)));}
 
   function sceneStatus(item){const count=(item?.cueIndices||[]).length;const motion={zoomIn:'Z+',zoomOut:'Z−',panLeft:'←',panRight:'→',panUp:'↑',panDown:'↓',still:'●'}[item?.motion]||'';return `${count>1?`<span class="mobile-scene-badge caption-count">${count}</span>`:''}${motion?`<span class="mobile-scene-badge motion-state">${motion}</span>`:''}`;}
   function buildStrip(){
@@ -75,6 +75,7 @@
     exportButton.disabled=$('exportBtn').disabled;saveButton.disabled=$('projectSaveBtn')?.disabled||false;replaceButton.disabled=!list.length||loading>0||exporting;
     $('mobileSceneSplit').disabled=!list.length||loading>0||exporting;$('mobileSceneMerge').disabled=!list.length||index>=list.length-1||loading>0||exporting;$('mobileSceneDelete').disabled=!list.length||loading>0||exporting;
     $('mobileEmpty').hidden=!!list.length;
+    if(!['caption','media','narration','template','bgm','timing'].includes(mode))mode='caption';
     $('mobileEditor').dataset.mode=mode;
     setTab(mode);
     const cueIndex=cues.length?CutflowScene.cueIndex(index):index;
@@ -142,7 +143,7 @@ document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);documen
   mobileNav.addEventListener('touchend',e=>{if(!navTouch||!enabled)return;const t=e.changedTouches[0],dx=t.clientX-navTouch.x,dy=t.clientY-navTouch.y;navTouch=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5)select(index+(dx<0?1:-1));},{passive:true});
   mobileNav.addEventListener('touchcancel',()=>navTouch=null,{passive:true});
 
-  window.addEventListener('cutflow-open-timing',()=>{if(!enabled)return;mode='timing';sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));});
+  window.addEventListener('cutflow-open-timing',()=>{if(!enabled)return;lastEditMode='caption';mode='timing';sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));});
 
   function viewport(){if(!enabled)return;const vv=window.visualViewport;const height=vv?.height||innerHeight;document.documentElement.style.setProperty('--mobile-visible-height',height+'px');document.documentElement.style.setProperty('--mobile-keyboard-offset',Math.max(0,innerHeight-height-(vv?.offsetTop||0))+'px');document.body.classList.toggle('mobile-keyboard',height<innerHeight*.75);}
   document.addEventListener('focusin',()=>{if(enabled){document.body.classList.toggle('mobile-input-focus',document.activeElement.matches('textarea,input[type=number],input[type=text],input:not([type])'));viewport();}});
