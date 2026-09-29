@@ -611,3 +611,68 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 .v42-timing-host{
   min-height:260px;
 }
+
+/* v42.6.2 caption tab desktop parity */
+.v42-caption-selection-tools{
+  display:grid;
+  grid-template-columns:auto 1fr auto auto;
+  align-items:center;
+  gap:7px;
+  margin:7px 0;
+  padding:7px 8px;
+  border:1px solid #303640;
+  border-radius:8px;
+  background:#171a1f;
+}
+.v42-caption-selection-tools>strong{
+  color:#eef1f4;
+  font-size:10px;
+  white-space:nowrap;
+}
+.v42-caption-selection-tools .v42-palette{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  margin:0;
+}
+.v42-caption-selection-tools .v42-selection-picker{
+  margin:0;
+  white-space:nowrap;
+}
+.v42-caption-selection-tools .v42-btn{
+  min-height:32px;
+  padding:5px 8px;
+  white-space:nowrap;
+}
+.v42-caption-selection-tools>small{
+  grid-column:1/-1;
+  color:#9fa8b3;
+  font-size:8px;
+  line-height:1.45;
+}
+.v42-caption-base-color{
+  grid-column:1/-1;
+  margin:7px 0;
+  padding:8px;
+  border:1px solid #303640;
+  border-radius:8px;
+  background:#14171c;
+}
+.v42-caption-base-color>strong{
+  display:block;
+  margin-bottom:6px;
+  color:#eef1f4;
+  font-size:10px;
+}
+.v42-caption-base-color .v42-palette{
+  margin:0 0 6px;
+}
+@media(max-width:520px){
+  .v42-caption-selection-tools{
+    grid-template-columns:1fr auto;
+  }
+  .v42-caption-selection-tools>strong,
+  .v42-caption-selection-tools .v42-palette{
+    grid-column:1/-1;
+  }
+}
