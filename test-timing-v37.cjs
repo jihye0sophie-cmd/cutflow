@@ -1,7 +1,5 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const js=fs.readFileSync('timing-editor.js','utf8'),css=fs.readFileSync('timing-editor.css','utf8'),html=fs.readFileSync('index.html','utf8'),build=fs.readFileSync('build.cjs','utf8');
-assert.ok(js.includes('data-boundary-caption'));
-assert.ok(!js.includes('data-boundary-scene="start"'),'scene boundary handles should not be rendered in timeline v1');
 assert.ok(js.includes('window.CutflowTimeline={'),'shared CutflowTimeline API missing');
 assert.ok(js.includes('timing-ruler'),'timeline ruler missing');
 assert.ok(js.includes('timing-scene-layer'),'full scene layer missing');
@@ -27,7 +25,15 @@ assert.ok(js.includes("window.addEventListener('cutflow-bgm-updated'"),'timeline
 assert.ok(css.includes('.timeline-caption-edge'),'caption edge handle styles missing');
 assert.ok(css.includes('.timeline-scene-handle'),'scene boundary handle styles missing');
 assert.ok(css.includes('.timeline-audio-block'),'audio layer styles missing');
+
+assert.ok(!js.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'playback must not rebuild the timing DOM');
+assert.ok(js.includes("targets.forEach(renderPanel)"),'timeline should render only active timing panels');
+assert.ok(js.includes("h.closest('.timing-layer-body')"),'drag geometry must use the inset time area');
+assert.ok(js.includes("drag.el?.isConnected"),'drag must keep the active handle DOM stable');
+assert.ok(css.includes('--timeline-label-width'),'timeline label/content inset missing');
+assert.ok(css.includes('.timing-playhead-area'),'playhead inset area missing');
+assert.ok(css.includes('.timing-layer-body{left:var(--timeline-label-width)!important'),'timeline content must start after layer labels');
 assert.ok(/timing-editor\.js\?v=[^\"']+/.test(html),'timing-editor.js must be loaded with a cache key');
 assert.ok(/timing-editor\.css\?v=[^\"']+/.test(html),'timing-editor.css must be loaded with a cache key');
 assert.ok(build.includes("'timing-editor.js'"));assert.ok(build.includes("'timing-editor.css'"));
-console.log('PASS: timeline editor v43 precision, UX, scene editing, and audio layers are wired into desktop/mobile.');
+console.log('PASS: timeline editor v43.1 stability, precision, UX, scene editing, and audio layers are wired into desktop/mobile.');
