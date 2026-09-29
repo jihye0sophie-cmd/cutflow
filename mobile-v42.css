@@ -82,3 +82,10 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 .v42-cut-x{top:0;bottom:0;width:10px;transform:translateX(-50%);cursor:ew-resize;background:linear-gradient(90deg,transparent 0 35%,var(--v42-accent) 35% 65%,transparent 65% 100%)}
 .v42-cut-y{left:0;right:0;height:10px;transform:translateY(-50%);cursor:ns-resize;background:linear-gradient(0deg,transparent 0 35%,var(--v42-accent) 35% 65%,transparent 65% 100%)}
 .v42-cut-line.dragging{filter:brightness(1.15);box-shadow:0 0 0 2px #000,0 0 12px var(--v42-accent)}
+
+/* v42.5 template typography */
+.v42-typo-palette{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.v42-typo-palette .v42-color{width:30px;height:30px;min-width:30px;padding:0;border:2px solid #3b4048;border-radius:8px;background:var(--v42-color);box-shadow:0 0 0 1px #0006 inset}
+.v42-typo-palette .v42-color:active{transform:scale(.96)}
+.v42-field input[type="range"][data-typo-field]{width:100%}
+.v42-check input[data-typo-field]{accent-color:var(--v42-accent)}
