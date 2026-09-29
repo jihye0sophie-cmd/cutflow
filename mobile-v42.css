@@ -522,3 +522,92 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 .v42-selection-picker{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 0;color:#bfc6cf;font-size:9px}
 .v42-selection-picker input[type="color"]{width:42px;height:30px;padding:2px;border:1px solid #3a414a;border-radius:6px;background:#0f1216}
 .v42-selection-colors .v42-btn{width:100%;min-height:34px}
+
+/* v42.6 mobile three-tab desktop-parity editor */
+.v42-tabs{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.v42-tabs button{
+  min-width:0!important;
+  padding:8px 4px!important;
+  font-size:10px!important;
+}
+.v42-tabs button span{
+  font-size:15px!important;
+}
+.v42-caption-color-row{
+  margin:8px 0;
+  padding:8px;
+  border:1px solid #303640;
+  border-radius:8px;
+  background:#171a1f;
+}
+.v42-caption-color-row>strong{
+  display:block;
+  margin-bottom:6px;
+  color:#eef1f4;
+  font-size:10px;
+}
+.v42-caption-color-row .v42-palette{
+  margin:0 0 6px;
+}
+.v42-caption-segment-nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:8px 0;
+  padding:8px;
+  border:1px solid #303640;
+  border-radius:8px;
+  background:#171a1f;
+}
+.v42-caption-segment-nav>span{
+  color:#aeb6c0;
+  font-size:10px;
+  font-weight:700;
+}
+.v42-caption-segment-nav>div{
+  display:flex;
+  gap:5px;
+}
+.v42-caption-segment-nav .v42-btn{
+  min-height:34px;
+  padding:6px 9px;
+}
+.v42-caption-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  margin:8px 0;
+  padding-top:8px;
+  border-top:1px solid #303640;
+}
+.v42-caption-actions .v42-btn{
+  min-width:0;
+  padding:7px 5px;
+}
+.v42-caption-timing{
+  margin-top:8px;
+  padding:9px;
+  border:1px solid #303640;
+  border-radius:8px;
+  background:#14171c;
+}
+.v42-caption-timing-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+.v42-caption-timing-head strong{
+  color:#f3f5f7;
+  font-size:11px;
+}
+.v42-caption-timing-head span{
+  color:#aeb6c0;
+  font-size:9px;
+}
+.v42-timing-host{
+  min-height:260px;
+}
