@@ -1,7 +1,7 @@
 /* v37 timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
 (()=>{
   const q=id=>document.getElementById(id);
-  let selectedCueId=null,drag=null,raf=0;
+  let selectedCueId=null,drag=null,raf=0,externalPanel=null;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const num=(n,d=0)=>Number.isFinite(Number(n))?Number(n):d;
   const fmt=n=>num(n).toFixed(2);
@@ -106,7 +106,7 @@
   }
   function renderPanel(panel){if(!panel)return;const item=sceneItem(),track=panel.querySelector('.timing-track'),controls=panel.querySelector('.timing-controls');renderTrack(track,item);controls.innerHTML=editorMarkup(item);}
   function renderAll(){ensureUI();renderPanel(q('desktopTiming'));renderPanel(q('mobileTiming'));}
-  function visiblePanel(){if(q('desktopEditor')?.dataset.mode==='timing')return q('desktopTiming');if(q('mobileEditor')?.dataset.mode==='timing')return q('mobileTiming');return null;}
+  function visiblePanel(){if(externalPanel?.isConnected)return externalPanel;if(q('desktopEditor')?.dataset.mode==='timing')return q('desktopTiming');if(q('mobileEditor')?.dataset.mode==='timing')return q('mobileTiming');return null;}
   function selectCaption(delta){const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;const pos=item.cueIndices.indexOf(sel.index),target=item.cueIndices[clamp(pos+delta,0,item.cueIndices.length-1)],cue=cues[target];if(cue){selectedCueId=cue.id;jump(cue.start);renderAll();}}
   function handleAction(e){const panel=e.target.closest('.timing-panel');if(!panel)return;const cueBtn=e.target.closest('[data-timing-cue]');if(cueBtn){const i=Number(cueBtn.dataset.timingCue);if(cues[i]){selectedCueId=cues[i].id;jump(cues[i].start);renderAll();}return;}
     const action=e.target.closest('[data-timing-action]')?.dataset.timingAction;if(!action)return;
@@ -126,6 +126,17 @@
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
   setInterval(()=>{const panel=visiblePanel();if(!panel)return;const track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead');if(!track||!line)return;const b={start:num(track.dataset.windowStart),end:num(track.dataset.windowEnd,1)};line.style.left=`${clamp(pct(currentTime(),b),0,100)}%`;},100);
-  window.CutflowTiming={render:renderAll,setSceneBoundary,setCaptionBoundary,redistribute};
+  window.CutflowTiming={
+    render:renderAll,setSceneBoundary,setCaptionBoundary,redistribute,
+    selectCue(index){if(cues[index]){selectedCueId=cues[index].id;jump(cues[index].start);renderAll();return true;}return false;},
+    mount(container,index){
+      if(!container)return false;externalPanel=container;container.classList.add('timing-panel','v42-timing-panel');container.style.display='block';
+      if(!container.querySelector('.timing-track'))container.innerHTML='<div class="timing-track"></div><div class="timing-controls"></div>';
+      if(Number.isInteger(index)&&cues[index])selectedCueId=cues[index].id;
+      renderPanel(container);return true;
+    },
+    unmount(container){if(!container||externalPanel===container){externalPanel=null;if(container){container.classList.remove('timing-panel','v42-timing-panel');container.innerHTML='';}}}
+  };
+  window.addEventListener('cutflow-open-timing',e=>{const index=Number(e.detail?.index);if(Number.isInteger(index))window.CutflowTiming.selectCue(index);});
   requestAnimationFrame(renderAll);
 })();
