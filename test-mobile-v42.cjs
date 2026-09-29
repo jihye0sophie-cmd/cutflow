@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.5.5'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.7'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.8'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.8'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -70,7 +70,7 @@ assert(js.includes("audioBtn:'audioInput'"),'narration direct file picker mappin
 assert(js.includes("bgmBtn:'bgmInput'"),'BGM direct file picker mapping missing');
 assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapping missing');
 assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
-assert(html.includes('app.js?v=41.6'),'shared app bridge cache key missing');
+assert(html.includes('app.js?v=41.7'),'shared app bridge cache key missing');
 assert(app.includes('async processNarration('),'shared narration processing bridge missing');
 assert(app.includes('async buildProjectCues()'),'shared cue building bridge missing');
 assert(app.includes("scriptInput').dispatchEvent(new Event('input'"),'TXT import must dispatch input');
@@ -92,7 +92,7 @@ assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'vid
 assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
 assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener missing');
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
-assert(html.includes('app.js?v=41.6'),'caption bridge cache key missing');
+assert(html.includes('app.js?v=41.7'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
 assert(html.includes('timing-editor.js?v=41.4'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
@@ -103,7 +103,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.5.5'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.8'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -127,4 +127,15 @@ assert(projectStore.includes("'cutflow-project-saved'"),'project saved event mis
 assert(history.includes("'cutflow-history-updated'"),'history updated event missing');
 assert(js.includes('syncAfterProjectRestore'),'mobile project restore resync missing');
 assert(js.includes("data-history-control=\"1\""),'mobile history controls must bypass history capture');
-console.log('Cutflow v42.5.7 project restore history checks passed');
+assert(app.includes('window.CutflowPlayer={'),'shared playback bridge missing');
+assert(app.includes('window.CutflowExport={'),'shared export bridge missing');
+assert(app.includes("'cutflow-export-progress'"),'export progress event missing');
+assert(app.includes("'cutflow-export-complete'"),'export completion event missing');
+assert(js.includes('id="v42Export"'),'direct mobile export button missing');
+assert(js.includes('id="v42Play"'),'direct mobile play button missing');
+assert(js.includes('v42ExportDialog'),'mobile export dialog missing');
+assert(js.includes('navigator.canShare?.({files:[file]})'),'iPhone file share fallback missing');
+assert(js.includes('requestFullscreen'),'fullscreen API attempt missing');
+assert(js.includes('CutflowPlayer?.seekProgress'),'direct mobile scrubber bridge missing');
+assert(css.includes('#v42ExportDialog'),'mobile export dialog styling missing');
+console.log('Cutflow v42.5.8 preview export workflow checks passed');
