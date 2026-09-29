@@ -514,3 +514,11 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 .v42-panel{
   margin-top:4px!important;
 }
+
+/* v42.5.16 instant selected-text color */
+.v42-selection-colors{margin:6px 0 8px;padding:7px;border:1px solid #303640;border-radius:8px;background:#12151a}
+.v42-selection-colors>span{display:block;margin-bottom:5px;color:#d8dde4;font-size:9px;font-weight:800}
+.v42-selection-colors .v42-palette{margin:0 0 6px}
+.v42-selection-picker{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 0;color:#bfc6cf;font-size:9px}
+.v42-selection-picker input[type="color"]{width:42px;height:30px;padding:2px;border:1px solid #3a414a;border-radius:6px;background:#0f1216}
+.v42-selection-colors .v42-btn{width:100%;min-height:34px}
