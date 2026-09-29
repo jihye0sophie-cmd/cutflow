@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.5.10'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.10'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.11'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.11'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -103,7 +103,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.5.10'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.11'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -154,4 +154,9 @@ assert(js.includes('v42-settings-utility'),'desktop-like compact settings utilit
 assert(js.includes('v42-pc-settings-section'),'desktop-like settings section structure missing');
 assert(css.includes('#v42SettingsDialog .v42-btn:disabled'),'readable disabled settings buttons missing');
 assert(css.includes('.v42-settings-utility-group'),'compact settings toolbar styling missing');
-console.log('Cutflow v42.5.10 desktop-like project settings checks passed');
+assert(js.includes('collapsibleSettingsSection'),'collapsible mobile settings helper missing');
+assert(js.includes("collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅'"),'auto setup must be collapsed by default');
+assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'settings dialog accent scope missing');
+assert(css.includes('.v42-pc-settings-collapsible'),'collapsible auto setup styles missing');
+assert(css.includes('#v42SettingsDialog .v42-btn.primary'),'settings primary contrast override missing');
+console.log('Cutflow v42.5.11 settings contrast and auto setup toggle checks passed');
