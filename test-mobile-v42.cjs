@@ -9,9 +9,11 @@ const sceneUi=fs.readFileSync('scene-ui.js','utf8');
 const styleEditor=fs.readFileSync('style-editor.js','utf8');
 const timingEditor=fs.readFileSync('timing-editor.js','utf8');
 const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
+const projectStore=fs.readFileSync('project-store.js','utf8');
+const history=fs.readFileSync('history.js','utf8');
 
 assert(html.includes('mobile-v42.css?v=42.5.5'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.6'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.7'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -68,7 +70,7 @@ assert(js.includes("audioBtn:'audioInput'"),'narration direct file picker mappin
 assert(js.includes("bgmBtn:'bgmInput'"),'BGM direct file picker mapping missing');
 assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapping missing');
 assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
-assert(html.includes('app.js?v=41.5'),'shared app bridge cache key missing');
+assert(html.includes('app.js?v=41.6'),'shared app bridge cache key missing');
 assert(app.includes('async processNarration('),'shared narration processing bridge missing');
 assert(app.includes('async buildProjectCues()'),'shared cue building bridge missing');
 assert(app.includes("scriptInput').dispatchEvent(new Event('input'"),'TXT import must dispatch input');
@@ -90,7 +92,7 @@ assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'vid
 assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
 assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener missing');
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
-assert(html.includes('app.js?v=41.5'),'caption bridge cache key missing');
+assert(html.includes('app.js?v=41.6'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
 assert(html.includes('timing-editor.js?v=41.4'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
@@ -117,4 +119,12 @@ assert(js.includes('v42BgmInput')&&js.includes('v42BgmAdd')&&js.includes('v42Bgm
 assert(js.includes('data-bgm-field="start"')&&js.includes('data-bgm-field="volume"')&&js.includes('data-bgm-field="repeat"'),'mobile BGM fields missing');
 assert(js.includes("'cutflow-bgm-updated'"),'mobile BGM refresh listener missing');
 assert(app.includes("typeof CustomEvent==='function'"),'compose event guard missing');
-console.log('Cutflow v42.5.6 BGM workflow checks passed');
+assert(html.includes('history.js?v=40.1'),'history cache key missing');
+assert(html.includes('project-store.js?v=41.1'),'project store cache key missing');
+assert(app.includes("'cutflow-project-restored'"),'project restore completion event missing');
+assert(projectStore.includes("'cutflow-project-loaded'"),'project loaded event missing');
+assert(projectStore.includes("'cutflow-project-saved'"),'project saved event missing');
+assert(history.includes("'cutflow-history-updated'"),'history updated event missing');
+assert(js.includes('syncAfterProjectRestore'),'mobile project restore resync missing');
+assert(js.includes("data-history-control=\"1\""),'mobile history controls must bypass history capture');
+console.log('Cutflow v42.5.7 project restore history checks passed');
