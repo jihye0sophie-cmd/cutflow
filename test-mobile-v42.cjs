@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.6.3'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.6.3'),'responsive mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6.4'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.6.4'),'responsive mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'responsive mode switching must not reload the page');
 assert(js.includes("const compactMq=matchMedia('(max-width:760px)')"),'responsive mobile breakpoint missing');
@@ -107,7 +107,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.6.3'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6.4'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -212,4 +212,13 @@ assert(js.includes("styleRange('captionOpacity','배경 불투명도','opacityVa
 assert(js.includes("captionFontNote"),'caption font note missing');
 assert(css.includes('.v42-live-value'),'caption detail live value styling missing');
 console.log('Cutflow v42.6.3 caption detail parity checks passed');
+assert(js.includes("proxyControl(sourceSelect,'이미지·영상'"),'mobile current media selector missing');
+assert(js.includes("section('움직임 · 진입 전환'"),'mobile motion transition section missing');
+assert(js.includes("details('영상 고급 설정'"),'video advanced settings should be separate from transform details');
+assert(js.includes("section('장면 편집'"),'mobile scene editing section missing');
+assert(js.includes("details('상세 설정',transform,'이미지·영상 크기 / 위치'"),'mobile transform details should match desktop role');
+assert(js.includes('v42TransformReset'),'mobile transform reset missing');
+assert(js.includes('data-media-volume'),'mobile video volume presets missing');
+assert(css.includes('.v42-media-volume-presets'),'mobile video volume preset styling missing');
+console.log('Cutflow v42.6.4 image video tab parity checks passed');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
