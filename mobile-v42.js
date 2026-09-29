@@ -76,7 +76,7 @@
 
   const panel=$('v42Panel'),tabs=$('v42Tabs'),stage=$('v42Stage'),ctx=stage.getContext('2d'),fullStage=$('v42FullStage'),fullCtx=fullStage.getContext('2d');
   const proxyMap=new Map(),settingsProxyMap=new Map();
-  let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false;
+  let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false,captionMode='edit';
 
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const key=()=>`p${Math.random().toString(36).slice(2)}`;
@@ -165,12 +165,25 @@
     const grid=$('v42ScenesGrid');if(grid)grid.innerHTML=items.length?items.map((item,i)=>{const t=window.CutflowScene?.thumbnail?.(item,i)||{},src=t.source?.thumb||'';return `<button type="button" data-scene-grid="${i}" aria-current="${i===index}">${src?`<img src="${esc(src)}" alt="">`:'<span class="missing">'+(i+1)+'</span>'}<strong>${String(i+1).padStart(2,'0')}</strong><small>${Number(t.duration||item.duration||0).toFixed(1)}초</small></button>`}).join(''):'<p class="v42-help">장면이 없습니다.</p>';
   }
   function renderCaption(){
-    proxyMap.clear();const {cueRow,cueIndex}=currentRows();
-    if(!cueRow){panel.innerHTML=section('자막','<p class="v42-help">아직 자막 구간이 없습니다. 내레이션 탭에서 대본으로 자막 구간을 만들거나 직접 추가하세요.</p>'+proxyButton($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})+proxyButton($('addCueBtn'),'+ 자막 구간 추가',{wide:true}));return;}
-    const text=qs('[data-action="text"]',cueRow),start=qs('[data-action="start"]',cueRow),end=qs('[data-action="end"]',cueRow),color=qs('[data-action="color"]',cueRow);
-    const core=proxyControl(text,'자막 · [[강조]] 지원',{wide:true})+`<div class="v42-grid2">${proxyControl(start,'시작(초)')}${proxyControl(end,'종료(초)')}</div>`+proxyControl(color,'이 자막 색상')+`<div class="v42-actions">${proxyButton(qs('[data-action="jump"]',cueRow),'현재 자막 재생')}${proxyButton(qs('[data-action="timing-detail"]',cueRow),'정밀 타이밍 조정')}</div><div class="v42-actions">${proxyButton(qs('[data-action="split"]',cueRow),'나누기')}${proxyButton(qs('[data-action="merge"]',cueRow),'다음과 합치기')}${proxyButton(qs('[data-action="delete"]',cueRow),'삭제',{danger:true})}</div>`;
+    proxyMap.clear();
+    const api=window.CutflowCaption,index=api?.currentIndex?.()??-1,state=api?.state?.(index);
+    if(!state){captionMode='edit';panel.innerHTML=section('자막','<p class="v42-help">아직 자막 구간이 없습니다. 내레이션 탭에서 대본으로 자막 구간을 만들거나 직접 추가하세요.</p>'+proxyButton($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})+proxyButton($('addCueBtn'),'+ 자막 구간 추가',{wide:true}));return;}
+    window.CutflowCaptionStyle?.select?.(index);
+    if(captionMode==='timing'){
+      panel.innerHTML=section(`자막 ${index+1} · 정밀 타이밍`,`<button type="button" id="v42TimingBack" class="v42-btn wide">← 자막 편집으로 돌아가기</button><div id="v42TimingHost" class="v42-timing-host"></div>`,'PRECISION TIMING');
+      const host=$('v42TimingHost');window.CutflowTiming?.mount?.(host,index);
+      $('v42TimingBack').onclick=()=>{window.CutflowTiming?.unmount?.(host);captionMode='edit';renderCaption();};
+      return;
+    }
+    const colorOptions=Object.values(window.CaptionStyle?.palette||{}),colors=[...new Set([...colorOptions,state.color||'#ffffff'])];
+    const core=`<label class="v42-field wide"><span>자막 · [[강조]] 지원</span><textarea id="v42CaptionText" data-caption-field="text" rows="3" maxlength="240">${esc(state.text)}</textarea></label>${state.freeEdit?'':`<div class="v42-grid2"><label class="v42-field"><span>시작(초)</span><input data-caption-field="start" type="number" min="0" step="0.01" value="${Number(state.start).toFixed(2)}"></label><label class="v42-field"><span>종료(초)</span><input data-caption-field="end" type="number" min="0.1" step="0.01" value="${Number(state.end).toFixed(2)}"></label></div>`}<label class="v42-field"><span>이 자막 색상</span><select data-caption-field="color">${colors.map(c=>`<option value="${esc(c)}" ${c===state.color?'selected':''}>${esc(c)}</option>`).join('')}</select></label><div class="v42-actions"><button type="button" id="v42CaptionPlay" class="v42-btn">현재 자막 재생</button><button type="button" id="v42CaptionTiming" class="v42-btn">정밀 타이밍 조정</button></div><div class="v42-actions"><button type="button" id="v42CaptionSplit" class="v42-btn">나누기</button><button type="button" id="v42CaptionMerge" class="v42-btn" ${state.segment.position>=state.segment.count?'disabled':''}>다음과 합치기</button><button type="button" id="v42CaptionDelete" class="v42-btn danger">삭제</button></div><p class="v42-help">장면 내 자막 ${state.segment.position}/${state.segment.count} · ${Number(state.end-state.start).toFixed(2)}초</p>`;
     const style=`<div class="v42-grid2">${proxyControl($('captionFont'),'폰트')}${proxyControl($('captionSize'),'크기')}${proxyControl($('captionColor'),'글자색')}${proxyControl($('captionStrokeColor'),'스트로크 색상')}${proxyControl($('captionStroke'),'스트로크 두께')}${proxyControl($('captionBackground'),'배경 사용')}${proxyControl($('captionBackgroundColor'),'배경색')}${proxyControl($('captionOpacity'),'배경 불투명도')}${proxyControl($('captionPadding'),'배경 여백')}${proxyControl($('captionRadius'),'모서리 둥글기')}${proxyControl($('captionPosition'),'자막 위치')}${proxyControl($('captionY'),'세로 위치')}${proxyControl($('captionBold'),'볼드')}${proxyControl($('captionItalic'),'이탤릭')}</div>${palette('captionColor')}${proxyButton($('applyAllCaptionStyle'),'현재 스타일을 전체 자막에 적용',{primary:true,wide:true})}`;
-    panel.innerHTML=section(`자막 ${cueIndex+1}`,core,'현재 선택 장면')+details('자막 스타일',style,'폰트 · 색상 · 스트로크 · 배경 · 위치',true);
+    panel.innerHTML=section(`자막 ${index+1}`,core,'현재 선택 자막')+details('자막 스타일',style,'폰트 · 색상 · 스트로크 · 배경 · 위치',true);
+    $('v42CaptionPlay').onclick=()=>api.play(index);
+    $('v42CaptionTiming').onclick=()=>{captionMode='timing';renderCaption();};
+    $('v42CaptionSplit').onclick=()=>{const input=$('v42CaptionText'),cursor=input?.selectionStart;if(api.split(index,cursor)){captionMode='edit';requestRefresh(true);}};
+    $('v42CaptionMerge').onclick=()=>{if(api.mergeNext(index))requestRefresh(true);};
+    $('v42CaptionDelete').onclick=()=>{if(confirm(`자막 ${index+1}을 삭제할까요?`)&&api.remove(index))requestRefresh(true);};
   }
   function renderMedia(){
     proxyMap.clear();const {item,index}=currentRows();
@@ -338,8 +351,8 @@
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
     const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
   });
-  panel.addEventListener('input',e=>{const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
-  panel.addEventListener('change',e=>{if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
+  panel.addEventListener('input',e=>{const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
+  panel.addEventListener('change',e=>{const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
   panel.addEventListener('click',e=>{
     const sw=e.target.closest('[data-color-target] [data-color]');if(sw){const wrap=sw.closest('[data-color-target]'),el=$(wrap.dataset.colorTarget);if(el){el.value=sw.dataset.color;dispatch(el,'input');dispatch(el,'change');requestRefresh(false);}return;}
     handleAutoClick(e,()=>requestRefresh(true));
@@ -374,7 +387,7 @@
   const endMobileGridDrag=()=>{if(!mobileGridDrag)return;window.CutflowAutoSetup?.setCut?.(mobileGridDrag.index,mobileGridDrag.axis,mobileGridDrag.cutIndex,parseFloat(mobileGridDrag.line.style[mobileGridDrag.axis==='x'?'left':'top'])||0,{commit:true});mobileGridDrag.line.classList.remove('dragging');mobileGridDrag=null;syncSettingsGridMirror();};
   $('v42SettingsBody').addEventListener('pointerup',endMobileGridDrag);
   $('v42SettingsBody').addEventListener('pointercancel',endMobileGridDrag);
-  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
+  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);tab=b.dataset.tab;if(tab!=='caption')captionMode='edit';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
   $('v42AddScene').onclick=()=>$('fileInput')?.click();
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
   $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
@@ -389,6 +402,8 @@
   for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus']){const el=$(id);if(el)new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
   window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
   window.addEventListener('cutflow-scene-updated',()=>requestRefresh(false));
+  window.addEventListener('cutflow-caption-updated',()=>requestRefresh(false));
+  window.addEventListener('cutflow-caption-style-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-auto-status',e=>{const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.text||'';});
   window.addEventListener('cutflow-auto-error',e=>{if(!settingsDialog.open){renderSettings();settingsDialog.showModal();}const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.message?'자동 세팅 중단: '+e.detail.message:'자동 세팅이 중단되었습니다.';});
   window.addEventListener('cutflow-auto-complete',e=>{const detail=e.detail||{};const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent='완료 · 장면 '+(detail.sceneCount||0)+'개 · 자막 '+(detail.cueCount||0)+'개';requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
