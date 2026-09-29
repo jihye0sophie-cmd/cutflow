@@ -98,7 +98,7 @@ assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener miss
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
 assert(html.includes('app.js?v=41.9'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
-assert(html.includes('timing-editor.js?v=42.2.1'),'timing mount cache key missing');
+assert(html.includes('timing-editor.js?v=43'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
 assert(app.includes('captionChanged(index)'),'caption update refresh hook missing');
 assert(styleEditor.includes('window.CutflowCaptionStyle={'),'caption style bridge missing');
@@ -223,4 +223,8 @@ assert(js.includes('v42TransformReset'),'mobile transform reset missing');
 assert(js.includes('data-media-volume'),'mobile video volume presets missing');
 assert(css.includes('.v42-media-volume-presets'),'mobile video volume preset styling missing');
 console.log('Cutflow v42.6.4 image video tab parity checks passed');
+assert(timingEditor.includes('data-caption-edge="start"')&&timingEditor.includes('data-caption-edge="end"'),'timeline v43 caption handles missing');
+assert(timingEditor.includes('data-scene-boundary'),'timeline v43 scene handles missing');
+assert(timingEditor.includes('timing-narration-layer')&&timingEditor.includes('timing-videoaudio-layer')&&timingEditor.includes('timing-bgm-layer'),'timeline v43 audio layers missing');
+assert(timingEditor.includes('pendingCenter')&&timingEditor.includes('snapTime('),'timeline v43 UX features missing');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
