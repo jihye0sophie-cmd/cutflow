@@ -117,6 +117,30 @@ syncTextPositionUI();
   const input=$(id),fallback=id==='titleSize'?86.4:43.2;
   input.value=String(Math.min(Number(input.max),Math.max(Number(input.min),Number(input.value)||fallback)));changed();
 }));
+window.CutflowTypography={
+  state(kind){
+    const p=kind==='channel'?'channel':'title';
+    return {
+      kind:p,font:$(p+'Font').value,size:Number($(p+'Size').value),color:$(p+'Color').value,
+      bold:$(p+'Bold').checked,italic:$(p+'Italic').checked,
+      strokeEnabled:$(p+'StrokeEnabled').checked,strokeWidth:Number($(p+'StrokeWidth').value)||0,
+      x:Number($(p+'X').value),y:Number($(p+'Y').value)
+    };
+  },
+  async update(kind,patch={}){
+    const p=kind==='channel'?'channel':'title';
+    const fields={font:'Font',size:'Size',color:'Color',bold:'Bold',italic:'Italic',strokeEnabled:'StrokeEnabled',strokeWidth:'StrokeWidth',x:'X',y:'Y'};
+    for(const [key,suffix] of Object.entries(fields)){
+      if(patch[key]==null)continue;const el=$(p+suffix);if(!el)continue;
+      if(el.type==='checkbox')el.checked=!!patch[key];else el.value=String(patch[key]);
+      el.dispatchEvent(new Event(['font','size','strokeEnabled','strokeWidth'].includes(key)?'change':'input',{bubbles:true}));
+    }
+    syncTextStrokes();syncTextPositionUI();syncTextStyleNotes();changed();
+    try{await CutRenderer.fonts(project());changed();}catch{}
+    const state=this.state(p);window.dispatchEvent(new CustomEvent('cutflow-typography-updated',{detail:{kind:p,state}}));return state;
+  }
+};
+
 window.CutflowCaptionStyle={
   state(index){
     const cue=cues[index];if(!cue)return null;
