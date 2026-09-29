@@ -1,16 +1,12 @@
-Cutflow v41.3.2 mobile detection stabilization
+Cutflow v41.3.3 mobile activation fix
 
-Replace these three files in the repository root:
+Replace these files in the repository root:
 - index.html
 - mobile-ui.css
 - test-mobile-v41.cjs
 
-Purpose:
-- Fix iPhone/mobile browsers that expose a desktop-sized layout viewport.
-- Activate the existing v41 mobile adapter even when max-width:760px is false.
-- Apply mobile CSS on coarse-pointer touch devices as well.
+This version specifically fixes iPhone/iPad browsers that report a desktop-like layout viewport.
+It forces the existing v41 mobile adapter on mobile user agents / Mac touch iPad mode / small touch devices, and adds a max-device-width CSS fallback.
 
-No feature logic is changed. Existing mobile-ui.js remains unchanged.
-
-Suggested commit:
-fix: force v41.3.2 mobile UI on touch devices
+Suggested commit summary:
+fix: force v41.3.3 mobile layout on iPhone desktop viewport

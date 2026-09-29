@@ -3,7 +3,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="내레이션 없이도 장면·자막·영상 원음을 편집할 수 있는 무료 로컬 MP4 쇼츠 편집기"><title>Cutflow · 쇼츠 컷 편집 스튜디오</title>
 <link rel="stylesheet" href="./assets/fonts/400.css"><link rel="stylesheet" href="./assets/fonts/900.css"><link rel="stylesheet" href="./style.css?v=13"><link rel="stylesheet" href="./studio.css?v=33.1">
-<link rel="stylesheet" href="./studio-tokens.css?v=16"><link rel="stylesheet" href="./mobile-ui.css?v=41.3.2"><link rel="stylesheet" href="./desktop-ui.css?v=41.3"><link rel="stylesheet" href="./timing-editor.css?v=41.3">
+<link rel="stylesheet" href="./studio-tokens.css?v=16"><link rel="stylesheet" href="./mobile-ui.css?v=41.3.3"><link rel="stylesheet" href="./desktop-ui.css?v=41.3"><link rel="stylesheet" href="./timing-editor.css?v=41.3">
 <link rel="stylesheet" href="./mobile-fullscreen.css?v=17">
 <link rel="stylesheet" href="./media-transform.css?v=36.1"><link rel="stylesheet" href="./project-store.css?v=24"><link rel="stylesheet" href="./auto-setup.css?v=35.2"><link rel="stylesheet" href="./history.css?v=40"></head><body>
 <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"></span><div><strong>Cutflow</strong><span>쇼츠 컷 편집 스튜디오</span></div></div><div class="save-state"><span></span>내 PC에서 처리 · API 사용료 없음</div><div class="project-tools"><span id="projectSaveStatus" class="project-save-status">저장 안 됨</span><button id="projectSaveBtn" class="button secondary small" type="button">프로젝트 저장</button><button id="projectOpenBtn" class="button ghost small" type="button">프로젝트 열기</button></div></header>
@@ -56,8 +56,13 @@
 <script src="./bgm-editor.js?v=13"></script><script src="./scene-ui.js?v=36.2"></script><script>
 (()=>{
   const nativeMatchMedia=window.matchMedia.bind(window);
-  const coarseTouch=navigator.maxTouchPoints>0&&nativeMatchMedia('(hover:none) and (pointer:coarse)').matches;
-  if(!coarseTouch)return;
+  const ua=navigator.userAgent||'';
+  const mobileUA=/Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  const ipadDesktop=/Macintosh/i.test(ua)&&(navigator.maxTouchPoints||0)>1;
+  const smallTouch=(navigator.maxTouchPoints||0)>0&&Math.min(screen.width||innerWidth,screen.height||innerHeight)<=820;
+  const forceMobile=mobileUA||ipadDesktop||smallTouch;
+  if(!forceMobile)return;
+  document.documentElement.dataset.cutflowMobile='forced';
   window.__cutflowNativeMatchMedia=nativeMatchMedia;
   window.matchMedia=query=>{
     if(String(query).replace(/\s+/g,'')!=='(max-width:760px)')return nativeMatchMedia(query);
@@ -71,6 +76,6 @@
     };
   };
 })();
-</script><script src="./mobile-ui.js?v=41.3.2"></script><script>
+</script><script src="./mobile-ui.js?v=41.3.3"></script><script>
 if(window.__cutflowNativeMatchMedia){window.matchMedia=window.__cutflowNativeMatchMedia;delete window.__cutflowNativeMatchMedia;}
 </script><script src="./desktop-ui.js?v=41.3"></script><script src="./timing-editor.js?v=41.3"></script><script src="./mobile-fullscreen.js?v=17"></script><script src="./media-transform.js?v=36.1"></script><script src="./project-store.js?v=41"></script><script src="./history.js?v=40"></script><script src="./silence-cut.js?v=36.3"></script><script src="./auto-setup.js?v=39"></script></body></html>

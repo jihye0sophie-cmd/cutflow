@@ -1,6 +1,6 @@
 /* Mobile-only presentation; desktop selectors and editor logic stay unchanged. */
 .mobile-only{display:none}
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
  body.mobile-editor{--ink:#fff;--paper:var(--studio-card);--muted:var(--studio-muted);--line:var(--studio-border);--lime:var(--studio-accent);background:var(--studio-bg);color:#fff;color-scheme:dark;overflow-x:clip}
  .mobile-editor *{box-sizing:border-box}
  .mobile-editor .mobile-only{display:block}
@@ -68,20 +68,20 @@
  @media(prefers-reduced-motion:reduce){.mobile-editor #mobileSheet{animation:none}.mobile-editor .preview-panel .stage{transition:none}}
 }
 
-@media(min-width:761px) and (hover:hover) and (pointer:fine){.mobile-only{display:none!important}}
+@media(min-width:761px) and (min-device-width:821px) and (hover:hover) and (pointer:fine){.mobile-only{display:none!important}}
 
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
 .mobile-editor .cue-row .editor-text{grid-column:1/-1;order:0}.mobile-editor .cue-row .editor-row-heading{order:1}.mobile-editor .cue-row .editor-media{order:1}.mobile-editor .cue-row .editor-motion,.mobile-editor .cue-row .editor-transition{order:2}.mobile-editor .cue-row .editor-start,.mobile-editor .cue-row .editor-end,.mobile-editor .cue-row .editor-trim{order:3}.mobile-editor .cue-row .editor-actions{order:6}
 }
 
-@media(max-width:760px),(hover:none) and (pointer:coarse){.mobile-editor.mobile-input-focus #mobilePreview{position:relative}.mobile-editor #captionStylePanel #applyAllCaptionStyle{font-size:13px;min-height:44px;padding:9px}.mobile-editor #captionStylePanel .style-target{margin-bottom:8px}}
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){.mobile-editor.mobile-input-focus #mobilePreview{position:relative}.mobile-editor #captionStylePanel #applyAllCaptionStyle{font-size:13px;min-height:44px;padding:9px}.mobile-editor #captionStylePanel .style-target{margin-bottom:8px}}
 
-@media(max-width:760px),(hover:none) and (pointer:coarse){.mobile-editor .preview-panel .stage-wrap{margin:0}.mobile-editor .mobile-caption-text .editor-text{display:block}}
-@media(max-width:760px) and (max-height:640px),(hover:none) and (pointer:coarse) and (max-height:640px){.mobile-editor.mobile-sheet-open .topbar{display:none}.mobile-editor.mobile-sheet-open .preview-panel .stage{height:72px}.mobile-editor .preview-panel .stage{height:125px}}
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){.mobile-editor .preview-panel .stage-wrap{margin:0}.mobile-editor .mobile-caption-text .editor-text{display:block}}
+@media(max-width:760px) and (max-height:640px),(max-device-width:820px) and (max-height:640px),(hover:none) and (pointer:coarse) and (max-height:640px){.mobile-editor.mobile-sheet-open .topbar{display:none}.mobile-editor.mobile-sheet-open .preview-panel .stage{height:72px}.mobile-editor .preview-panel .stage{height:125px}}
 
 /* v19: compact mobile typography to match the GPT Sites density.
    Keep form controls at 16px on iOS to avoid Safari focus-zoom. */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
  .mobile-editor .brand strong{font-size:15px}
  .mobile-editor .brand span{font-size:10px}
  .mobile-editor button{font-size:13px}
@@ -120,7 +120,7 @@
  .mobile-editor .caption-style-panel summary span{font-size:10px}
 }
 
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   #mobileProjectBody .title-selection-tools{border-color:var(--studio-border)}
   #mobileProjectBody .title-selection-tools button{background:var(--studio-card);border-color:var(--studio-border);color:#fff}
   #mobileProjectBody .compact-palette .color-swatch{width:34px;height:34px;min-height:34px;background:var(--swatch)}
@@ -130,7 +130,7 @@
 
 /* v20: finish compact mobile typography for form-heavy project settings.
    These rules intentionally override the earlier 16px blanket used by the first mobile pass. */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   /* Script / narration area */
   .mobile-editor #mobileProjectBody #scriptInput,
   .mobile-editor #mobileProjectBody .text-input,
@@ -173,7 +173,7 @@
 
 
 /* v23: mobile-first editing shell. Keep desktop layout and editor logic untouched. */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   .mobile-editor .topbar{position:sticky;top:0;z-index:48;flex-wrap:nowrap;padding:8px 10px;min-height:52px}
   .mobile-editor .project-tools{display:none!important}
   .mobile-editor #mobileSave,.mobile-editor #mobileExport{min-height:36px;padding:7px 10px;font-size:11px;border-radius:8px;margin-left:0}
@@ -205,7 +205,7 @@
 }
 
 /* v32: mobile workspace redesign — large preview + five focused editing tabs. */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   .mobile-editor .app-shell{padding:0 8px calc(18px + env(safe-area-inset-bottom))}
   .mobile-editor .topbar{position:sticky;top:0;z-index:80;min-height:50px;padding:7px 10px;gap:6px}
   .mobile-editor .brand{margin-right:auto}.mobile-editor .brand strong{font-size:15px}.mobile-editor .brand span{font-size:9px}
@@ -316,7 +316,7 @@
   #mobileTools button>span{font-size:11px}
 }
 /* v33 free-edit and video-audio controls */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-duration,
   #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-audio{display:block!important;grid-column:1/-1!important}
   .mobile-editor .editor-duration,.mobile-editor .editor-audio{order:3;grid-column:1/-1}
@@ -330,7 +330,7 @@
 }
 
 /* v33.1 mobile trim/audio ergonomics */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
 .mobile-editor .editor-trim,.mobile-editor .editor-audio{padding:10px!important;border:1px solid var(--studio-border);border-radius:9px;background:var(--studio-card)}
 .mobile-editor .trim-fields,.mobile-editor .video-audio-fades{grid-template-columns:1fr 1fr;gap:8px}
 .mobile-editor .trim-fields input,.mobile-editor .video-audio-fades input{min-height:40px;font-size:16px;padding:8px}
@@ -341,7 +341,7 @@
 }
 
 /* v33.2: scene-tab ordering and deletion controls */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   .mobile-scenes-head-actions{display:flex;align-items:center;gap:5px}
   .mobile-scenes-head-actions button{min-height:34px;padding:5px 8px;font-size:10px}
   #mobileScenesEdit[aria-pressed=true]{background:var(--studio-accent);color:#101114;border-color:var(--studio-accent);font-weight:800}
@@ -357,7 +357,7 @@
 }
 
 /* v34.5 caption editing actions */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
  .mobile-editor .caption-cue-actions{display:flex!important;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--studio-border)}
  .mobile-editor .caption-cue-actions button{flex:1 1 auto;min-height:36px;font-size:11px;padding:7px 9px}
 }
@@ -366,7 +366,7 @@
 .mobile-editor .scene-media-summary{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;padding:9px 10px;border:1px solid var(--studio-border);border-radius:8px;background:rgba(255,255,255,.025)}
 .mobile-editor .scene-media-summary>div{display:flex;align-items:center;justify-content:space-between;gap:8px}.mobile-editor .scene-media-summary strong{font-size:13px;color:#fff}.mobile-editor .scene-media-summary span{font-size:9px;line-height:1.45;color:var(--studio-muted)}
 .mobile-editor .scene-media-duration{grid-column:1/-1}.mobile-editor .scene-media-duration span{display:block;margin-top:4px;font-size:9px;color:var(--studio-muted)}
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   #mobileEditor[data-mode=media] .cue-row.mobile-selected>.caption-row-heading,
   #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.caption-row-heading{display:none!important}
   #mobileEditor[data-mode=media] .cue-row.mobile-selected>.scene-media-summary,
@@ -378,7 +378,7 @@
   #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-motion,
   #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-transition{display:block!important}
 }
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-start,
   #mobileEditor[data-mode=media] .cue-row.mobile-selected>.editor-end,
   #mobileEditor[data-mode=motion] .cue-row.mobile-selected>.editor-start,
@@ -394,7 +394,7 @@
 .mobile-scene-tools small{display:block;margin-top:6px;color:var(--studio-muted);font-size:9px}
 
 /* v38 workflow polish */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
  .mobile-editor .caption-quick-timing{margin-top:10px;padding:11px;border:1px solid var(--studio-border);border-radius:9px;background:var(--studio-input)}
  .mobile-editor .caption-quick-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.mobile-editor .caption-quick-head span{font-size:11px;color:var(--studio-muted)}
  .mobile-editor .caption-quick-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mobile-editor .caption-quick-fields label{display:grid;gap:4px}.mobile-editor .caption-quick-fields input{font-size:16px;min-height:42px}
@@ -402,13 +402,13 @@
  .mobile-editor .media-advanced{grid-column:1/-1;border:1px solid var(--studio-border);border-radius:9px;background:var(--studio-input);overflow:hidden}.mobile-editor .media-advanced>summary{padding:12px;font-weight:700}.mobile-editor .media-advanced>summary span{font-size:10px;color:var(--studio-muted);font-weight:400}.mobile-editor .media-advanced-body{display:grid;gap:12px;padding:0 12px 12px}
  .mobile-scene-card{position:relative}.mobile-scene-badge{position:absolute;z-index:3;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#090b0ddd;color:#fff;border:1px solid #ffffff33;font-size:9px;font-weight:800}.mobile-scene-badge.caption-count{right:4px;top:4px}.mobile-scene-badge.motion-state{left:4px;bottom:4px;color:var(--studio-accent)}
 }
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
  #mobileEditor:not([data-mode=media]) .media-advanced{display:none!important}
  #mobileEditor[data-mode=media] .media-advanced{display:block!important}
 }
 
 /* v41 mobile workflow: persistent scene strip + five direct tools */
-@media (max-width:760px),(hover:none) and (pointer:coarse){
+@media (max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   #mobileSceneStripWrap{display:flex;align-items:stretch;gap:6px;margin:7px 0 9px;padding:6px;background:#101317;border:1px solid var(--studio-border);border-radius:10px;overflow:hidden}
   #mobileSceneStrip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;scroll-snap-type:x proximity}
   #mobileSceneStrip::-webkit-scrollbar{display:none}
@@ -446,7 +446,7 @@
 
 
 /* v41.3 stabilization: the five-tab mobile workflow is authoritative. */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   /* Legacy timing/motion/style/scenes tabs must never leak into the new bar. */
   #mobileTools [data-mobile-tab=timing],
   #mobileTools [data-mobile-tab=motion],
@@ -486,7 +486,7 @@
 
 
 /* v41.3.2 mobile hardening: one active workspace only, including desktop-sized mobile viewports. */
-@media(max-width:760px),(hover:none) and (pointer:coarse){
+@media(max-width:760px),(max-device-width:820px),(hover:none) and (pointer:coarse){
   /* The original desktop hero must never remain in the mobile flow. */
   body.mobile-editor .app-shell>.hero,
   body.mobile-editor .hero[data-mobile-section=hidden]{display:none!important}
