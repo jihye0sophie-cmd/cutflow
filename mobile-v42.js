@@ -200,7 +200,7 @@
     const status=$('audioStatus')?.textContent||'오디오 없음';
     const source=`${proxyControl($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}${proxyControl($('projectCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-actions">${proxyButton($('scriptFileBtn'),'TXT 대본 불러오기')}${proxyButton($('audioBtn'),'내레이션 불러오기')}</div><p class="v42-status">${esc(status)}</p>${proxyButton($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}<div class="v42-silence"><strong>현재 내레이션 무음 줄이기</strong><div class="v42-pills"><label><input type="radio" name="v42Silence" value="soft"><span>부드럽게</span></label><label><input type="radio" name="v42Silence" value="normal" checked><span>보통</span></label><label><input type="radio" name="v42Silence" value="tight"><span>타이트</span></label></div><button id="v42SilenceRun" class="v42-btn wide" type="button">무음 줄이기</button><p id="v42SilenceStatus" class="v42-help">원본은 유지하고 처리본을 사용합니다.</p></div>`;
     panel.innerHTML=section('대본 · 내레이션',source,'SCRIPT & VOICE');
-    $('v42SilenceRun').onclick=async()=>{const statusEl=$('v42SilenceStatus');try{if(typeof audioFile==='undefined'||!audioFile){statusEl.textContent='먼저 내레이션을 불러오세요.';return;}const p=qs('input[name="v42Silence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowSilenceCut.process(audioFile,p,m=>statusEl.textContent=m);if(typeof loadAudio==='function')await loadAudio(result.processedFile);statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}};
+    $('v42SilenceRun').onclick=async()=>{const statusEl=$('v42SilenceStatus');try{const p=qs('input[name="v42Silence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowAutoBridge?.processNarration?.(p,m=>statusEl.textContent=m);if(!result)throw new Error('무음컷을 실행하지 못했습니다.');statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}};
   }
   function syncSettingsProxyState(){
     if(!settingsDialog.open)return;
@@ -337,7 +337,7 @@
     const history=e.target.closest('[data-cutflow-history]');
     if(history){window.CutflowHistory?.[history.dataset.cutflowHistory]?.();setTimeout(syncSettingsProxyState,0);return;}
     const silence=e.target.closest('[data-settings-silence-run]');
-    if(silence){const statusEl=settingsDialog.querySelector('[data-settings-silence-status]');(async()=>{try{if(typeof audioFile==='undefined'||!audioFile){statusEl.textContent='먼저 내레이션을 불러오세요.';return;}const p=settingsDialog.querySelector('input[name="v42SettingsSilence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowSilenceCut.process(audioFile,p,m=>statusEl.textContent=m);if(typeof loadAudio==='function')await loadAudio(result.processedFile);statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}})();return;}
+    if(silence){const statusEl=settingsDialog.querySelector('[data-settings-silence-status]');(async()=>{try{const p=settingsDialog.querySelector('input[name="v42SettingsSilence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowAutoBridge?.processNarration?.(p,m=>statusEl.textContent=m);if(!result)throw new Error('무음컷을 실행하지 못했습니다.');statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);syncSettingsProxyState();}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}})();return;}
     const direct=e.target.closest('[data-direct-click]');if(direct){const source=$(direct.dataset.directClick),fileTarget=fileTargetFor(source);if(fileTarget&&openFileTarget(fileTarget))return;source?.click();return;}
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;settingsProxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>{syncSettingsProxyState();syncSettingsGridMirror();},0);return;}
     handleAutoClick(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});
@@ -375,6 +375,11 @@
   window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
   window.addEventListener('cutflow-auto-complete',()=>{if(settingsDialog.open)settingsDialog.close();requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
   $('projectDialog')?.addEventListener('close',()=>setTimeout(()=>requestRefresh(true),0));
+  for(const id of ['scriptInput','projectCaptionWrap','audioInput','scriptFile','bgmInput','autoNarration','autoGrids','autoSingles','autoBgm']){
+    const el=$(id);if(!el)continue;
+    el.addEventListener(id==='scriptInput'||id==='projectCaptionWrap'?'input':'change',()=>setTimeout(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}},id==='audioInput'?350:40));
+  }
+  window.addEventListener('cutflow-auto-grid-change',()=>{if(settingsDialog.open)syncSettingsGridMirror();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
   window.addEventListener('pageshow',()=>requestRefresh(false));
   setInterval(syncPlayer,200);
