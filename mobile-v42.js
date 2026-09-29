@@ -56,10 +56,8 @@
       </section>
       <nav id="v42Tabs" class="v42-tabs" aria-label="모바일 편집 탭">
         <button type="button" data-tab="caption" aria-pressed="true"><span>T</span>자막</button>
-        <button type="button" data-tab="media"><span>▧</span>미디어</button>
-        <button type="button" data-tab="narration"><span>●</span>내레이션</button>
-        <button type="button" data-tab="template"><span>Aa</span>템플릿</button>
-        <button type="button" data-tab="bgm"><span>♪</span>BGM</button>
+        <button type="button" data-tab="media"><span>▧</span>이미지·영상</button>
+        <button type="button" data-tab="timing"><span>⏱</span>정밀 타이밍</button>
       </nav>
       <section id="v42Panel" class="v42-panel"></section>
     </main>`;
@@ -170,31 +168,46 @@
   function renderCaption(){
     proxyMap.clear();
     const api=window.CutflowCaption,index=api?.currentIndex?.()??-1,state=api?.state?.(index);
-    if(!state){captionMode='edit';panel.innerHTML=section('자막','<p class="v42-help">아직 자막 구간이 없습니다. 내레이션 탭에서 대본으로 자막 구간을 만들거나 직접 추가하세요.</p>'+proxyButton($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})+proxyButton($('addCueBtn'),'+ 자막 구간 추가',{wide:true}));return;}
+    if(!state){panel.innerHTML=section('자막','<p class="v42-help">아직 자막 구간이 없습니다. 프로젝트 설정에서 대본과 내레이션을 불러온 뒤 자막 구간을 만들어 주세요.</p>');return;}
     window.CutflowCaptionStyle?.select?.(index);
-    if(captionMode==='timing'){
-      panel.innerHTML=section(`자막 ${index+1} · 정밀 타이밍`,`<button type="button" id="v42TimingBack" class="v42-btn wide">← 자막 편집으로 돌아가기</button><div id="v42TimingHost" class="v42-timing-host"></div>`,'PRECISION TIMING');
-      const host=$('v42TimingHost');window.CutflowTiming?.mount?.(host,index);
-      $('v42TimingBack').onclick=()=>{window.CutflowTiming?.unmount?.(host);captionMode='edit';renderCaption();};
-      return;
-    }
-    const colorOptions=Object.values(window.CaptionStyle?.palette||{}),colors=[...new Set([...colorOptions,state.color||'#ffffff'])];
-    const selectionPalette=`<div class="v42-selection-colors"><span>선택 글자색</span><div class="v42-palette">${paletteColors.map(([name,color])=>`<button type="button" data-caption-selection-color="${color}" title="${name}" aria-label="${name}" style="--swatch:${color}"></button>`).join('')}</div><label class="v42-selection-picker">직접 선택 <input id="v42CaptionSelectionPicker" type="color" value="#f5e642" aria-label="선택 글자색 직접 선택"></label><button type="button" id="v42CaptionSelectionReset" class="v42-btn">선택 색상 해제</button></div>`;
-    const core=`<label class="v42-field wide"><span>자막 · [[강조]] 지원</span><textarea id="v42CaptionText" data-caption-field="text" rows="3" maxlength="240">${esc(state.text)}</textarea></label>${selectionPalette}${state.freeEdit?'':`<div class="v42-grid2"><label class="v42-field"><span>시작(초)</span><input data-caption-field="start" type="number" min="0" step="0.01" value="${Number(state.start).toFixed(2)}"></label><label class="v42-field"><span>종료(초)</span><input data-caption-field="end" type="number" min="0.1" step="0.01" value="${Number(state.end).toFixed(2)}"></label></div>`}<label class="v42-field"><span>이 자막 색상</span><select data-caption-field="color">${colors.map(c=>`<option value="${esc(c)}" ${c===state.color?'selected':''}>${esc(c)}</option>`).join('')}</select></label><div class="v42-actions"><button type="button" id="v42CaptionPlay" class="v42-btn">현재 자막 재생</button><button type="button" id="v42CaptionTiming" class="v42-btn">정밀 타이밍 조정</button></div><div class="v42-actions"><button type="button" id="v42CaptionSplit" class="v42-btn">나누기</button><button type="button" id="v42CaptionMerge" class="v42-btn" ${state.segment.position>=state.segment.count?'disabled':''}>다음과 합치기</button><button type="button" id="v42CaptionDelete" class="v42-btn danger">삭제</button></div><p class="v42-help">장면 내 자막 ${state.segment.position}/${state.segment.count} · ${Number(state.end-state.start).toFixed(2)}초</p>`;
-    const style=`<div class="v42-grid2">${proxyControl($('captionFont'),'폰트')}${proxyControl($('captionSize'),'크기')}${proxyControl($('captionColor'),'글자색')}${proxyControl($('captionStrokeColor'),'스트로크 색상')}${proxyControl($('captionStroke'),'스트로크 두께')}${proxyControl($('captionBackground'),'배경 사용')}${proxyControl($('captionBackgroundColor'),'배경색')}${proxyControl($('captionOpacity'),'배경 불투명도')}${proxyControl($('captionPadding'),'배경 여백')}${proxyControl($('captionRadius'),'모서리 둥글기')}${proxyControl($('captionPosition'),'자막 위치')}${proxyControl($('captionY'),'세로 위치')}${proxyControl($('captionBold'),'볼드')}${proxyControl($('captionItalic'),'이탤릭')}</div>${palette('captionColor')}${proxyButton($('applyAllCaptionStyle'),'현재 스타일을 전체 자막에 적용',{primary:true,wide:true})}`;
-    panel.innerHTML=section(`자막 ${index+1}`,core,'현재 선택 자막')+details('자막 스타일',style,'폰트 · 색상 · 스트로크 · 배경 · 위치',true);
+    const paletteButtons=paletteColors.map(([name,color])=>`<button type="button" data-caption-color="${color}" title="${name}" aria-label="${name}" style="--swatch:${color}"></button>`).join('');
+    const selectionPalette=paletteColors.map(([name,color])=>`<button type="button" data-caption-selection-color="${color}" title="${name}" aria-label="${name}" style="--swatch:${color}"></button>`).join('');
+    const core=`
+      <label class="v42-field wide"><span>자막 · [[강조]] 지원</span><textarea id="v42CaptionText" data-caption-field="text" rows="3" maxlength="240">${esc(state.text)}</textarea></label>
+      <div class="v42-caption-color-row"><strong>선택 글자색</strong><div class="v42-palette">${selectionPalette}</div><label class="v42-selection-picker">직접 선택 <input id="v42CaptionSelectionPicker" type="color" value="#f5e642" aria-label="선택 글자색 직접 선택"></label><button type="button" id="v42CaptionSelectionReset" class="v42-btn">선택 색상 해제</button></div>
+      <div class="v42-caption-color-row"><strong>이 자막 색상</strong><div class="v42-palette">${paletteButtons}</div><label class="v42-selection-picker">직접 선택 <input id="v42CaptionColorPicker" type="color" value="${esc(state.color||'#ffffff')}" aria-label="이 자막 색상 직접 선택"></label></div>
+      <div class="v42-caption-segment-nav"><span>자막 ${state.segment.position} / ${state.segment.count}</span><div><button type="button" id="v42CaptionPrev" class="v42-btn" ${state.segment.position===1?'disabled':''}>‹ 이전 자막</button><button type="button" id="v42CaptionNext" class="v42-btn" ${state.segment.position===state.segment.count?'disabled':''}>다음 자막 ›</button></div></div>
+      <div class="v42-caption-actions"><button type="button" id="v42CaptionSplit" class="v42-btn">나누기</button><button type="button" id="v42CaptionMerge" class="v42-btn" ${state.segment.position===state.segment.count?'disabled':''}>다음 자막과 합치기</button><button type="button" id="v42CaptionDelete" class="v42-btn danger">구간 삭제</button></div>
+      <div class="v42-caption-timing"><div class="v42-caption-timing-head"><strong>자막 타이밍</strong><span>${Number(state.end-state.start).toFixed(2)}초</span></div>
+      <div class="v42-grid2"><label class="v42-field"><span>시작</span><input data-caption-field="start" type="number" min="0" step="0.01" value="${Number(state.start).toFixed(2)}" ${state.freeEdit?'disabled':''}></label><label class="v42-field"><span>종료</span><input data-caption-field="end" type="number" min="0.1" step="0.01" value="${Number(state.end).toFixed(2)}" ${state.freeEdit?'disabled':''}></label></div>
+      <div class="v42-actions"><button type="button" id="v42CaptionPlay" class="v42-btn">▶ 현재 자막 재생</button><button type="button" id="v42CaptionTiming" class="v42-btn">정밀 타이밍 조정 ›</button></div></div>`;
+    const style=`<div class="v42-grid2">${proxyControl($('captionFont'),'폰트')}${proxyControl($('captionSize'),'크기')}${proxyControl($('captionStrokeColor'),'스트로크 색상')}${proxyControl($('captionStroke'),'스트로크 두께')}${proxyControl($('captionBackground'),'배경 사용')}${proxyControl($('captionBackgroundColor'),'배경색')}${proxyControl($('captionOpacity'),'배경 불투명도')}${proxyControl($('captionPadding'),'배경 여백')}${proxyControl($('captionRadius'),'모서리 둥글기')}${proxyControl($('captionPosition'),'자막 위치')}${proxyControl($('captionY'),'세로 위치')}${proxyControl($('captionBold'),'볼드')}${proxyControl($('captionItalic'),'이탤릭')}</div>${proxyButton($('applyAllCaptionStyle'),'현재 스타일을 전체 자막에 적용',{primary:true,wide:true})}`;
+    panel.innerHTML=section(`자막 · 현재 장면`,core,`자막 ${state.segment.position}/${state.segment.count}`)+details('자막 스타일',style,'폰트 · 스트로크 · 배경 · 위치',false);
+
     const captionText=$('v42CaptionText');
     const rememberCaptionSelection=()=>{if(!captionText)return;captionSelection={index,start:captionText.selectionStart??0,end:captionText.selectionEnd??0};};
     ['select','keyup','mouseup','touchend'].forEach(type=>captionText?.addEventListener(type,rememberCaptionSelection));
     const applySelectedCaptionColor=color=>{rememberCaptionSelection();const sel=captionSelection;if(sel.index!==index||sel.start===sel.end){window.CutflowAutoBridge?.toast?.('색상을 바꿀 글자를 먼저 선택해 주세요.');return;}api.applySelectionColor?.(index,sel.start,sel.end,color);};
     panel.querySelectorAll('[data-caption-selection-color]').forEach(btn=>btn.onclick=()=>applySelectedCaptionColor(btn.dataset.captionSelectionColor));
+    panel.querySelectorAll('[data-caption-color]').forEach(btn=>btn.onclick=()=>api.update(index,{color:btn.dataset.captionColor}));
     $('v42CaptionSelectionPicker').oninput=e=>applySelectedCaptionColor(e.target.value);
     $('v42CaptionSelectionReset').onclick=()=>applySelectedCaptionColor(null);
+    $('v42CaptionColorPicker').oninput=e=>api.update(index,{color:e.target.value});
+    $('v42CaptionPrev').onclick=()=>{if(index>state.segment.first)api.select(index-1);};
+    $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)api.select(index+1);};
     $('v42CaptionPlay').onclick=()=>api.play(index);
-    $('v42CaptionTiming').onclick=()=>{captionMode='timing';renderCaption();};
-    $('v42CaptionSplit').onclick=()=>{const input=$('v42CaptionText'),cursor=input?.selectionStart;if(api.split(index,cursor)){captionMode='edit';requestRefresh(true);}};
+    $('v42CaptionTiming').onclick=()=>{tab='timing';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.tab==='timing')));renderPanel(true);};
+    $('v42CaptionSplit').onclick=()=>{const cursor=captionText?.selectionStart;if(api.split(index,cursor))requestRefresh(true);};
     $('v42CaptionMerge').onclick=()=>{if(api.mergeNext(index))requestRefresh(true);};
-    $('v42CaptionDelete').onclick=()=>{if(confirm(`자막 ${index+1}을 삭제할까요?`)&&api.remove(index))requestRefresh(true);};
+    $('v42CaptionDelete').onclick=()=>{if(confirm(`자막 ${state.segment.position}을 삭제할까요?`)&&api.remove(index))requestRefresh(true);};
+  }
+
+  function renderTiming(){
+    proxyMap.clear();
+    const api=window.CutflowCaption,index=api?.currentIndex?.()??-1,state=api?.state?.(index);
+    if(!state){panel.innerHTML=section('정밀 타이밍','<p class="v42-help">조정할 자막이 없습니다.</p>');return;}
+    panel.innerHTML=section('정밀 타이밍',`<div id="v42TimingHost" class="v42-timing-host"></div>`,`자막 ${state.segment.position}/${state.segment.count}`);
+    window.CutflowTiming?.mount?.($('v42TimingHost'),index);
   }
   function renderMedia(){
     proxyMap.clear();const {item,index}=currentRows();
@@ -339,7 +352,7 @@
     if(!force&&panel.contains(document.activeElement))return;
     panel.hidden=false;panel.dataset.activeTab=tab;
     try{
-      if(tab==='caption')renderCaption(); else if(tab==='media')renderMedia(); else if(tab==='narration')renderNarration(); else if(tab==='template')renderTemplate(); else renderBgm();
+      if(tab==='caption')renderCaption(); else if(tab==='media')renderMedia(); else renderTiming();
       panel.dataset.renderState='ready';
     }catch(error){
       console.error('Cutflow mobile panel render failed',tab,error);
@@ -454,7 +467,7 @@
   const endMobileGridDrag=()=>{if(!mobileGridDrag)return;window.CutflowAutoSetup?.setCut?.(mobileGridDrag.index,mobileGridDrag.axis,mobileGridDrag.cutIndex,parseFloat(mobileGridDrag.line.style[mobileGridDrag.axis==='x'?'left':'top'])||0,{commit:true});mobileGridDrag.line.classList.remove('dragging');mobileGridDrag=null;syncSettingsGridMirror();};
   $('v42SettingsBody').addEventListener('pointerup',endMobileGridDrag);
   $('v42SettingsBody').addEventListener('pointercancel',endMobileGridDrag);
-  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);tab=b.dataset.tab;if(tab!=='caption')captionMode='edit';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
+  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
   $('v42AddScene').onclick=()=>$('fileInput')?.click();
   $('v42Undo').onclick=()=>window.CutflowHistory?.undo?.();
   $('v42Redo').onclick=()=>window.CutflowHistory?.redo?.();
@@ -521,7 +534,7 @@
   const syncAfterProjectRestore=()=>{
     const items=window.CutflowScene?.items?.()||[];
     sceneIndex=Math.max(0,Math.min(sceneIndex,Math.max(0,items.length-1)));
-    lastSceneId=null;captionMode='edit';
+    lastSceneId=null;
     const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);
     requestRefresh(true);
     if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}
