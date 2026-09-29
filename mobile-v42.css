@@ -684,3 +684,13 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
   font-size:9px;
   font-weight:800;
 }
+
+/* v42.6.4 image/video tab desktop parity */
+.v42-media-primary{display:grid;gap:7px}
+.v42-media-subsection{display:grid;gap:7px;padding:8px 0;border-bottom:1px solid #303640}
+.v42-media-subsection:last-child{border-bottom:0}
+.v42-media-subsection>strong{color:#eef1f4;font-size:10px}
+.v42-media-audio-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.v42-media-audio-head>strong{color:#eef1f4;font-size:10px}
+.v42-media-volume-presets{display:flex;gap:5px;flex-wrap:wrap}
+.v42-media-volume-presets .v42-btn{min-width:44px;min-height:30px;padding:4px 7px}
