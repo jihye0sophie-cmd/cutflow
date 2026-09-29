@@ -116,7 +116,9 @@ async function run(){
     if(result.missingSceneCount)throw new Error(`장면이 연결되지 않은 자막이 ${result.missingSceneCount}개 있습니다.`);
     await window.applyTemplateTypography?.($('autoLayout').value,{applyCues:true,notify:false});
     if($('autoCaptionWrap')?.checked){status('자막을 보기 좋게 줄바꿈하는 중…',3);await window.CutflowAutoBridge.autoWrapCaptions?.();}
-    status('BGM을 적용하는 중…',4);if(state.bgm&&!(await window.loadBgmFile?.(state.bgm)))throw new Error('BGM을 읽지 못했습니다.');
+    status('BGM을 적용하는 중…',4);
+    if(state.bgm){if(!(await window.loadBgmFile?.(state.bgm)))throw new Error('BGM을 읽지 못했습니다.');}
+    else window.CutflowBgm?.remove?.();
     status('자동 세팅이 완료되었습니다.',5);$('autoProgress').querySelectorAll('.auto-step').forEach(el=>el.dataset.state='done');
     const complete={cueCount:result.cueCount,sceneCount:result.sceneCount,missingSceneCount:result.missingSceneCount||0,imageCount:files.length};
     emit('cutflow-auto-complete',complete);
