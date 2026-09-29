@@ -10,7 +10,7 @@ const styleEditor=fs.readFileSync('style-editor.js','utf8');
 const timingEditor=fs.readFileSync('timing-editor.js','utf8');
 const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.4.2'),'v42.4 mobile css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.5'),'mobile css cache key missing');
 assert(html.includes('mobile-v42.js?v=42.5.6'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
