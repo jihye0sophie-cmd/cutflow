@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.5.8'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.8'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.10'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.10'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -57,10 +57,10 @@ assert(js.includes("panel.dataset.renderState='ready'"),'mobile panel render sta
 assert(js.includes('v42PanelRetry'),'mobile panel retry fallback missing');
 assert(css.includes('#v42SettingsDialog[open]{display:flex!important'),'iOS settings bottom sheet stability missing');
 assert(css.includes('.v42-panel{min-height:92px'),'mobile editor panel minimum height missing');
-assert(js.includes("section('대본과 내레이션'"),'desktop-parity script/voice settings missing');
-assert(js.includes("section('배경음악 · BGM'"),'desktop-parity BGM settings missing');
-assert(js.includes("section('화면 구성'"),'desktop-parity compose settings missing');
-assert(js.includes("section('출력 설정'"),'desktop-parity export settings missing');
+assert(js.includes("settingsSection('01 SCRIPT & VOICE','대본과 내레이션'"),'desktop-parity script/voice settings missing');
+assert(js.includes("settingsSection('AUDIO','배경음악 · BGM'"),'desktop-parity BGM settings missing');
+assert(js.includes("settingsSection('02 COMPOSE','화면 구성'"),'desktop-parity compose settings missing');
+assert(js.includes("settingsSection('04 EXPORT','출력 설정'"),'desktop-parity export settings missing');
 assert(js.includes('v42-grid-preview')&&js.includes('data-auto-cut'),'mobile auto grid preview/cut controls missing');
 assert(css.includes('#v42SettingsDialog::backdrop{background:#000!important'),'opaque settings backdrop missing');
 assert(css.includes('.v42-grid-preview{position:relative'),'mobile grid preview styling missing');
@@ -103,7 +103,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.5.8'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.5.10'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -150,4 +150,8 @@ assert(autoSetup.includes("else window.CutflowBgm?.remove?.()"),'final audit: st
 assert(js.includes('v42PrevScene')&&js.includes('v42NextScene'),'final audit: scene navigation missing');
 assert(js.includes('v42ScenesGrid')&&js.includes('data-scene-grid'),'final audit: all scenes selection missing');
 assert(html.includes('auto-setup.js?v=39.4'),'final audit: auto setup cache key missing');
-console.log('Cutflow v42.5 final audit checks passed');
+assert(js.includes('v42-settings-utility'),'desktop-like compact settings utility missing');
+assert(js.includes('v42-pc-settings-section'),'desktop-like settings section structure missing');
+assert(css.includes('#v42SettingsDialog .v42-btn:disabled'),'readable disabled settings buttons missing');
+assert(css.includes('.v42-settings-utility-group'),'compact settings toolbar styling missing');
+console.log('Cutflow v42.5.10 desktop-like project settings checks passed');
