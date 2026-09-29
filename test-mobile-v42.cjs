@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.6'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.6.1'),'responsive mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6.2'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.6.2'),'responsive mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'responsive mode switching must not reload the page');
 assert(js.includes("const compactMq=matchMedia('(max-width:760px)')"),'responsive mobile breakpoint missing');
@@ -107,7 +107,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.6'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6.2'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -129,7 +129,7 @@ assert(app.includes('applySelectionColor(index,start,end,color)'),'shared select
 assert(js.includes('data-caption-selection-color'),'mobile instant selected text color palette missing');
 assert(js.includes('v42CaptionSelectionReset'),'mobile selected color reset button missing');
 assert(js.includes('const editingBgm=!!active?.dataset?.bgmField'),'mobile BGM live-edit rerender guard missing');
-assert(css.includes('.v42-selection-colors'),'mobile selected text color styling missing');
+assert(css.includes('.v42-caption-selection-tools'),'mobile selected text color styling missing');
 assert(app.includes("typeof CustomEvent==='function'"),'compose event guard missing');
 assert(html.includes('history.js?v=40.1'),'history cache key missing');
 assert(html.includes('project-store.js?v=41.1'),'project store cache key missing');
@@ -194,10 +194,15 @@ assert(css.includes('margin-top:4px!important'),'compact scene card spacing miss
 assert(js.includes('data-tab="caption"')&&js.includes('data-tab="media"')&&js.includes('data-tab="timing"'),'three mobile editor tabs missing');
 assert(!js.includes('data-tab="narration"')&&!js.includes('data-tab="template"')&&!js.includes('data-tab="bgm"'),'legacy five-tab mobile navigation must be removed');
 assert(js.includes('id="v42CaptionPrev"')&&js.includes('id="v42CaptionNext"'),'mobile previous/next caption controls missing');
-assert(js.includes('data-caption-color'),'mobile current-caption color palette missing');
+assert(!js.includes('data-caption-color'),'current caption color must not appear in mobile caption body');
+assert(js.includes("proxyControl($('captionColor'),'직접 선택'"),'caption base color must live in detailed settings');
+assert(js.includes("proxyControl($('styleScope'),'적용 범위'"),'caption style scope missing from details');
+assert(js.includes("proxyControl($('stylePreset'),'스타일 프리셋'"),'caption style preset missing from details');
 assert(js.includes('function renderTiming()'),'standalone mobile precision timing tab missing');
 assert(js.includes("tab='timing'"),'caption to timing navigation missing');
 assert(app.includes('if(active>=0)return active;'),'shared caption currentIndex must prefer active caption');
 assert(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'),'three-column mobile tab styling missing');
 assert(css.includes('.v42-caption-segment-nav'),'desktop-parity mobile caption navigation styling missing');
+assert(css.includes('.v42-caption-base-color'),'detailed caption base color styling missing');
+console.log('Cutflow v42.6.2 caption tab desktop parity checks passed');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
