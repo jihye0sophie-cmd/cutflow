@@ -1,0 +1,28 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const html=fs.readFileSync('index.html','utf8');
+const js=fs.readFileSync('caption-batch-editor.js','utf8');
+const css=fs.readFileSync('caption-batch-editor.css','utf8');
+const app=fs.readFileSync('app.js','utf8');
+const mobile=fs.readFileSync('mobile-v42.js','utf8');
+const desktop=fs.readFileSync('desktop-ui.js','utf8');
+const build=fs.readFileSync('build.cjs','utf8');
+
+assert.ok(html.includes('caption-batch-editor.js?v=1'),'whole-caption editor script missing');
+assert.ok(html.includes('caption-batch-editor.css?v=1'),'whole-caption editor css missing');
+assert.ok(build.includes("'caption-batch-editor.js','caption-batch-editor.css'"),'build assets missing');
+assert.ok(js.includes('window.CutflowCaptionBatch={'),'shared whole-caption editor API missing');
+assert.ok(js.includes('sceneApi()?.items?.()'),'whole-caption editor must group by logical scenes');
+assert.ok(js.includes('caption-batch-row'),'scene row UI missing');
+assert.ok(js.includes('caption-batch-divider'),'slash divider UI missing');
+assert.ok(!js.includes('start.toFixed')&&!js.includes('end.toFixed'),'whole-caption editor should not show time codes');
+assert.ok(js.includes("api()?.split?.(selected,cursor)"),'cursor split missing');
+assert.ok(js.includes("api()?.mergeNext?.(target)"),'merge previous workflow missing');
+assert.ok(js.includes("api()?.mergeNext?.(selected)"),'merge next workflow missing');
+assert.ok(js.includes("api()?.remove?.(selected)"),'caption delete workflow missing');
+assert.ok(app.includes('const d=c.end-c.start')&&app.includes('d*ratio'),'caption split must stay inside the existing time range');
+assert.ok(app.includes('c.end=next.end'),'caption merge must preserve the combined narration time range');
+assert.ok(desktop.includes('desktopBatchCaptions'),'desktop whole-caption entry missing');
+assert.ok(mobile.includes('v42CaptionBatchOpen'),'mobile whole-caption entry missing');
+assert.ok(css.includes('@media(max-width:760px)'),'mobile whole-caption layout missing');
+assert.ok(css.includes('white-space:nowrap'),'one-line caption rows missing');
+console.log('PASS: shared whole-caption editor v1 is wired for PC/mobile and preserves caption timing ranges.');
