@@ -87,7 +87,7 @@
     return Math.max(.1,num(totalDuration?.(),0),num(sceneEnd,0),num(cueEnd,0));
   };
   const pctAll=(t,duration)=>clamp((num(t)/Math.max(.1,duration))*100,0,100);
-  const tickStep=pps=>pps>=110?.5:pps>=55?1:pps>=28?2:5;
+  const tickStep=pps=>pps>=110 ? .5 : pps>=55 ? 1 : pps>=28 ? 2 : 5;
   const sceneForCueIndex=ci=>sceneItems().findIndex(item=>item?.cueIndices?.includes(ci));
   function timelineTicks(duration,pps){
     const step=tickStep(pps),out=[];
