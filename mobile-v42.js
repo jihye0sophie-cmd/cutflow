@@ -276,10 +276,26 @@
   }
   function renderTemplate(){
     proxyMap.clear();
-    const basic=proxyControl($('layoutSelect'),'영상 템플릿')+proxyControl($('titleInput'),'상단 제목',{wide:true})+proxyControl($('channelInput'),'채널명')+proxyControl($('fitSelect'),'이미지·영상 맞춤')+proxyControl($('templateSelect'),'움직임 프리셋')+proxyButton($('applyTemplateBtn'),'움직임만 전체 적용',{wide:true})+proxyButton($('randomMotionBtn'),'전체 이미지에 랜덤 무빙',{wide:true});
-    const title=`<div class="v42-grid2">${[['titleFont','폰트'],['titleSize','크기'],['titleColor','색상'],['titleBold','볼드'],['titleItalic','이탤릭'],['titleStrokeEnabled','스트로크'],['titleStrokeWidth','스트로크 두께']].map(([id,l])=>proxyControl($(id),l)).join('')}</div>${palette('titleColor')}`;
-    const channel=`<div class="v42-grid2">${[['channelFont','폰트'],['channelSize','크기'],['channelColor','색상'],['channelBold','볼드'],['channelItalic','이탤릭'],['channelStrokeEnabled','스트로크'],['channelStrokeWidth','스트로크 두께']].map(([id,l])=>proxyControl($(id),l)).join('')}</div>${palette('channelColor')}`;
-    panel.innerHTML=section('화면 구성',basic)+details('제목 스타일',title,'폰트 · 크기 · 색상 · B · I · 스트로크')+details('채널명 스타일',channel,'폰트 · 크기 · 색상 · B · I · 스트로크');
+    const compose=window.CutflowCompose?.state?.()||{},title=window.CutflowTypography?.state?.('title')||{},channel=window.CutflowTypography?.state?.('channel')||{};
+    const selectMarkup=(id,value,field)=>{const el=$(id);return `<label class="v42-field"><span>${esc(field.label)}</span><select data-compose-field="${field.key}" ${field.disabled?'disabled':''}>${[...el.options].map(o=>`<option value="${esc(o.value)}" ${o.value===value?'selected':''}>${esc(o.textContent)}</option>`).join('')}</select></label>`;};
+    const fontMarkup=(kind,state)=>{const el=$(kind+'Font');return `<label class="v42-field"><span>폰트</span><select data-typo-kind="${kind}" data-typo-field="font">${[...el.options].map(o=>`<option value="${esc(o.value)}" ${o.value===state.font?'selected':''}>${esc(o.textContent)}</option>`).join('')}</select></label>`;};
+    const typoMarkup=(kind,state)=>{
+      const yMax=kind==='channel'?94:90;
+      return `<div class="v42-grid2">${fontMarkup(kind,state)}
+        <label class="v42-field"><span>크기(px)</span><input data-typo-kind="${kind}" data-typo-field="size" type="number" min="${kind==='channel'?16:24}" max="${kind==='channel'?96:160}" step="0.1" value="${esc(state.size)}"></label>
+        <label class="v42-field"><span>색상</span><input data-typo-kind="${kind}" data-typo-field="color" type="color" value="${esc(state.color)}"></label>
+        <label class="v42-field"><span>가로 위치 ${Number(state.x||0).toFixed(0)}%</span><input data-typo-kind="${kind}" data-typo-field="x" type="range" min="5" max="95" step="1" value="${esc(state.x)}"></label>
+        <label class="v42-field"><span>세로 위치 ${Number(state.y||0).toFixed(0)}%</span><input data-typo-kind="${kind}" data-typo-field="y" type="range" min="0" max="${yMax}" step="1" value="${esc(state.y)}"></label>
+        <label class="v42-check"><input data-typo-kind="${kind}" data-typo-field="bold" type="checkbox" ${state.bold?'checked':''}><span><b>B</b> 볼드</span></label>
+        <label class="v42-check"><input data-typo-kind="${kind}" data-typo-field="italic" type="checkbox" ${state.italic?'checked':''}><span><i>I</i> 이탤릭</span></label>
+        <label class="v42-check"><input data-typo-kind="${kind}" data-typo-field="strokeEnabled" type="checkbox" ${state.strokeEnabled?'checked':''}><span>스트로크 사용</span></label>
+        <label class="v42-field"><span>스트로크 두께</span><input data-typo-kind="${kind}" data-typo-field="strokeWidth" type="range" min="0" max="18" step="0.5" value="${esc(state.strokeWidth)}" ${state.strokeEnabled?'':'disabled'}></label>
+      </div><div class="v42-typo-palette" data-typo-palette="${kind}">${Object.values(window.CaptionStyle?.palette||{}).map(c=>`<button type="button" class="v42-color" data-color="${c}" style="--v42-color:${c}" aria-label="${c}"></button>`).join('')}</div>`;
+    };
+    const basic=`${selectMarkup('layoutSelect',compose.layout,{key:'layout',label:'영상 템플릿'})}<label class="v42-field wide"><span>상단 제목</span><textarea data-compose-field="title" rows="2" maxlength="80">${esc(compose.title||'')}</textarea></label><label class="v42-field"><span>채널명</span><input data-compose-field="channel" maxlength="40" value="${esc(compose.channel||'')}"></label>${selectMarkup('fitSelect',compose.fit,{key:'fit',label:'이미지·영상 맞춤',disabled:compose.fitDisabled})}${selectMarkup('templateSelect',compose.motionPreset,{key:'motionPreset',label:'움직임 프리셋'})}<div class="v42-actions"><button type="button" id="v42ApplyMotionPreset" class="v42-btn wide">움직임만 전체 적용</button><button type="button" id="v42RandomMotion" class="v42-btn wide">전체 이미지 랜덤 무빙</button></div>`;
+    panel.innerHTML=section('화면 구성',basic)+details('제목 스타일',typoMarkup('title',title),'폰트 · 크기 · 색상 · 위치 · B · I · 스트로크',true)+details('채널명 스타일',typoMarkup('channel',channel),'폰트 · 크기 · 색상 · 위치 · B · I · 스트로크',true);
+    $('v42ApplyMotionPreset').onclick=()=>{window.CutflowCompose?.applyMotionPreset?.();requestRefresh(false);};
+    $('v42RandomMotion').onclick=()=>{window.CutflowCompose?.randomMotion?.();requestRefresh(false);};
   }
   function renderBgm(){
     proxyMap.clear();
@@ -329,6 +345,15 @@
     else api.update(index,{[field]:el.value});
     return true;
   }
+  function applyComposeField(el){
+    const field=el?.dataset?.composeField;if(!field||!window.CutflowCompose?.update)return false;
+    window.CutflowCompose.update({[field]:el.value});return true;
+  }
+  function applyTypographyField(el){
+    const kind=el?.dataset?.typoKind,field=el?.dataset?.typoField;if(!kind||!field||!window.CutflowTypography?.update)return false;
+    const value=el.type==='checkbox'?el.checked:['size','strokeWidth','x','y'].includes(field)?Number(el.value):el.value;
+    window.CutflowTypography.update(kind,{[field]:value});return true;
+  }
   function handleAutoInput(e,refresh){
     const card=e.target.closest?.('[data-auto-grid]');
     if(card&&e.target.dataset.autoField){
@@ -351,9 +376,10 @@
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
     const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
   });
-  panel.addEventListener('input',e=>{const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
-  panel.addEventListener('change',e=>{const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
+  panel.addEventListener('input',e=>{if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
+  panel.addEventListener('change',e=>{if(e.target.dataset.composeField){applyComposeField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);setTimeout(()=>requestRefresh(false),0);return;}const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
   panel.addEventListener('click',e=>{
+    const typoColor=e.target.closest('[data-typo-palette] [data-color]');if(typoColor){const kind=typoColor.closest('[data-typo-palette]').dataset.typoPalette;window.CutflowTypography?.update?.(kind,{color:typoColor.dataset.color});requestRefresh(false);return;}
     const sw=e.target.closest('[data-color-target] [data-color]');if(sw){const wrap=sw.closest('[data-color-target]'),el=$(wrap.dataset.colorTarget);if(el){el.value=sw.dataset.color;dispatch(el,'input');dispatch(el,'change');requestRefresh(false);}return;}
     handleAutoClick(e,()=>requestRefresh(true));
   });
@@ -404,6 +430,8 @@
   window.addEventListener('cutflow-scene-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-caption-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-caption-style-updated',()=>requestRefresh(false));
+  window.addEventListener('cutflow-compose-updated',()=>requestRefresh(false));
+  window.addEventListener('cutflow-typography-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-auto-status',e=>{const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.text||'';});
   window.addEventListener('cutflow-auto-error',e=>{if(!settingsDialog.open){renderSettings();settingsDialog.showModal();}const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.message?'자동 세팅 중단: '+e.detail.message:'자동 세팅이 중단되었습니다.';});
   window.addEventListener('cutflow-auto-complete',e=>{const detail=e.detail||{};const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent='완료 · 장면 '+(detail.sceneCount||0)+'개 · 자막 '+(detail.cueCount||0)+'개';requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
