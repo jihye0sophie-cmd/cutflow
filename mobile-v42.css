@@ -277,3 +277,70 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
     padding:7px 9px 9px;
   }
 }
+
+/* v42.5.11 settings accent scope + collapsible quick start */
+#v42SettingsDialog{
+  --v42-accent:var(--studio-accent,#f5e642);
+  --v42-bg:#0d0f12;
+  --v42-card:#171a1f;
+  --v42-border:#30343b;
+  --v42-muted:#9ca4ae;
+}
+#v42SettingsDialog .v42-btn.primary,
+#v42SettingsDialog .v42-pills input:checked+span{
+  background:var(--studio-accent,#f5e642)!important;
+  border-color:var(--studio-accent,#f5e642)!important;
+  color:#111!important;
+  -webkit-text-fill-color:#111!important;
+}
+#v42SettingsDialog .v42-btn.primary:disabled{
+  background:#49451f!important;
+  border-color:#5f5928!important;
+  color:#e0dbad!important;
+  -webkit-text-fill-color:#e0dbad!important;
+}
+#v42SettingsDialog .v42-btn:disabled{
+  color:#b9c0c8!important;
+  -webkit-text-fill-color:#b9c0c8!important;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible{
+  display:block;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+  padding:8px 10px;
+  cursor:pointer;
+  list-style:none;
+  background:#1a1a13;
+  border-bottom:0;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary::-webkit-details-marker{display:none}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary>span{
+  color:var(--studio-accent,#f5e642);
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.11em;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary>strong{
+  color:#f4f6f8;
+  font-size:13px;
+  font-weight:850;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary>em{
+  font-style:normal;
+  color:#d7dce3;
+  font-size:9px;
+  font-weight:700;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible[open]>summary{
+  border-bottom:1px solid #2c323a;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible[open]>summary>em:before{content:"닫기";font-size:9px}
+#v42SettingsDialog .v42-pc-settings-collapsible[open]>summary>em{font-size:0}
+#v42SettingsDialog .v42-pc-settings-collapsible:not([open]) .v42-pc-settings-body{
+  display:none;
+}
