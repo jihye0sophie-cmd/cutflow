@@ -21,12 +21,19 @@ function capacity(){return state.grids.reduce((sum,g)=>sum+normalizeGrid(g).cols
 function gridCapacity(){return state.grids.reduce((sum,g)=>sum+normalizeGrid(g).cols*g.rows,0);}
 function gridName(){return state.grids.length?`${state.grids.length}장 · 분할 ${gridCapacity()}컷`:'선택 안 됨';}
 function singleName(){return state.singles.length?`${state.singles.length}장 선택`:'선택 안 됨';}
+function autoState(){
+  const scriptCount=lines().length,imageCount=capacity(),hasNarration=!!state.narration;
+  const canStart=!state.running&&!!scriptCount&&hasNarration&&imageCount>=scriptCount;
+  const reason=state.running?'자동 세팅 실행 중…':!scriptCount?'대본을 입력해 주세요.':!hasNarration?'내레이션을 선택해 주세요.':imageCount<scriptCount?`이미지가 ${scriptCount-imageCount}장 부족합니다.`:'준비 완료';
+  return {scriptCount,imageCount,hasNarration,running:state.running,canStart,reason};
+}
 function update(){
-  const n=lines().length,c=capacity();$('autoScriptCount').textContent=`${n}개`;$('autoImageCount').textContent=`${c}개`;
+  const info=autoState(),n=info.scriptCount,c=info.imageCount;$('autoScriptCount').textContent=`${n}개`;$('autoImageCount').textContent=`${c}개`;
   $('autoNarrationName').textContent=state.narration?.name||'선택 안 됨';$('autoBgmName').textContent=state.bgm?.name||'선택 안 됨';$('autoGridName').textContent=gridName();if($('autoSingleName'))$('autoSingleName').textContent=singleName();
   const m=$('autoMatch');m.className='auto-match '+(!n||!c?'muted':c<n?'bad':c===n?'good':'warn');
   m.textContent=!n?'대본을 입력하면 필요한 장면 수를 계산합니다.':!c?'그리드 또는 개별 이미지를 추가해 주세요.':c<n?`이미지가 ${n-c}장 부족합니다.`:c===n?'대본 장면 수와 이미지 수가 일치합니다.':`이미지가 ${c-n}장 더 많습니다. 앞에서 ${n}장만 사용합니다.`;
-  $('autoStart').disabled=state.running||!n||!state.narration||c<n;
+  $('autoStart').disabled=!info.canStart;
+  emit('cutflow-auto-state',info);
 }
 function gridMarkup(grid,index){
   normalizeGrid(grid);
@@ -144,6 +151,8 @@ $('autoGridList').addEventListener('pointerdown',e=>{const line=e.target.closest
 $('autoSingleList').addEventListener('click',e=>{const item=e.target.closest('.auto-single-item');if(!item)return;const index=Number(item.dataset.singleIndex),single=state.singles[index];if(e.target.closest('[data-single-remove]')){URL.revokeObjectURL(single.url);state.singles.splice(index,1);renderSingles();update();}});
 window.addEventListener('pointermove',updateDraggedLine,{passive:true});window.addEventListener('pointerup',stopDrag);window.addEventListener('pointercancel',stopDrag);
 window.CutflowAutoSetup={
+  status:()=>autoState(),
+  run,
   grids(){return state.grids.map((g,index)=>{normalizeGrid(g);return {index,name:g.file?.name||`그리드 ${index+1}`,url:g.url,width:g.width,height:g.height,cols:g.cols,rows:g.rows,gap:g.gap,xCuts:[...g.xCuts],yCuts:[...g.yCuts]};});},
   singles(){return state.singles.map((g,index)=>({index,name:g.file?.name||`이미지 ${index+1}`,url:g.url,width:g.width,height:g.height}));},
   setGrid(index,patch={}){const g=state.grids[index];if(!g)return false;let reset=false;if(patch.cols!=null){const v=clamp(Number(patch.cols)||1,1,12);reset=reset||v!==g.cols;g.cols=v;}if(patch.rows!=null){const v=clamp(Number(patch.rows)||1,1,12);reset=reset||v!==g.rows;g.rows=v;}if(patch.gap!=null)g.gap=clamp(Number(patch.gap)||0,0,40);if(reset)resetCuts(g);normalizeGrid(g);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;},
@@ -151,5 +160,5 @@ window.CutflowAutoSetup={
   resetGrid(index){const g=state.grids[index];if(!g)return false;resetCuts(g);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;},
   removeGrid(index){const g=state.grids[index];if(!g)return false;URL.revokeObjectURL(g.url);state.grids.splice(index,1);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;}
 };
-$('autoStart').onclick=run;updateSilenceInfo();renderGrids();renderSingles();update();
+$('autoStart').onclick=run;updateSilenceInfo();renderGrids();renderSingles();update();emit('cutflow-auto-ready',autoState());
 })();
