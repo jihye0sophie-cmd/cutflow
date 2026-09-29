@@ -4,8 +4,8 @@ const js=fs.readFileSync('mobile-v42.js','utf8');
 const css=fs.readFileSync('mobile-v42.css','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.2'),'v42.2 mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.2'),'v42.2 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.3'),'v42.3 mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.3'),'v42.3 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -14,7 +14,7 @@ assert(!js.includes('v42 MOBILE'),'separate mobile branding must not appear');
 assert(js.includes('쇼츠 컷 편집 스튜디오'),'Cutflow product subtitle missing');
 assert(js.includes('v42AllScenes')&&js.includes('v42ScenesGrid'),'all scenes mobile sheet missing');
 for(const tab of ['caption','media','narration','template','bgm'])assert(js.includes(`data-tab="${tab}"`),`missing ${tab} tab`);
-assert(js.includes("section('쇼츠 자동 세팅'")&&js.includes("'v42-quick-start'"),'auto setup must be prominent in narration');
+assert(js.includes("section('쇼츠 자동 세팅'")&&js.includes("'v42-quick-start'"),'auto setup must exist in settings');
 for(const id of ['autoTitle','autoChannel','autoLayout','autoScript','autoCaptionWrap','autoNarrationBtn','autoGridBtn','autoSingleBtn','autoBgmBtn','autoStart'])assert(js.includes(id),`auto setup bridge missing ${id}`);
 assert(js.includes('autoGridMirror')&&js.includes('data-auto-field="cols"')&&js.includes('data-auto-field="rows"')&&js.includes('data-auto-field="gap"'),'mobile grid split controls missing');
 assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto setup silence presets missing');
@@ -27,8 +27,14 @@ assert(js.includes('bgmVolume')&&js.includes('bgmFadeIn')&&js.includes('bgmFadeO
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'Cutflow yellow accent token missing');
 assert(!css.includes('#d9ff38'),'old green accent must be removed');
 assert(css.includes('.v42-preview-card{position:sticky'),'sticky preview missing');
-assert(css.includes('.v42-tabs{position:sticky;bottom:0'),'sticky five-tab bar missing');
+assert(css.includes('.v42-tabs{position:fixed')&&css.includes('bottom:max(6px,env(safe-area-inset-bottom))'),'fixed five-tab bar missing');
 assert(css.includes('#v42ScenesDialog'),'all scenes bottom sheet styling missing');
 assert(css.includes('.v42-section.v42-quick-start'),'auto setup visual emphasis missing');
+
+assert(js.includes('id="v42Settings"')&&js.includes("settingsDialog.id='v42SettingsDialog'"),'mobile settings sheet missing');
+assert(js.includes('data-direct-click="uploadBtn"')&&js.includes('data-direct-click="demoBtn"'),'settings quick actions missing');
+assert(js.includes('autoSetupMarkup(settingsProxyMap)'),'auto setup must live in settings sheet');
+assert(js.includes('class="v42-fullscreen-icon"')&&!js.includes('>전체화면</button>'),'preview fullscreen must be an icon control');
+assert(css.includes('#v42SettingsDialog'),'settings bottom sheet styling missing');
 assert(build.includes("'mobile-v42.js','mobile-v42.css'")&&!build.includes("'mobile-ui.js','mobile-ui.css'"),'build must publish v42 only');
-console.log('Cutflow v42.2 unified mobile UI checks passed');
+console.log('Cutflow v42.3 mobile polish checks passed');

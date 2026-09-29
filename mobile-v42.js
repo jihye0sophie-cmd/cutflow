@@ -30,6 +30,7 @@
     <header class="v42-head">
       <div class="v42-brand"><span class="v42-brand-mark" aria-hidden="true"></span><div><strong>Cutflow</strong><small>쇼츠 컷 편집 스튜디오</small></div></div>
       <div class="v42-head-actions">
+        <button type="button" id="v42Settings" class="v42-icon-btn" aria-label="설정" title="설정">⚙</button>
         <button type="button" data-click="projectOpenBtn">열기</button>
         <button type="button" data-click="projectSaveBtn">저장</button>
         <button type="button" class="primary" data-click="exportBtn">내보내기</button>
@@ -37,10 +38,11 @@
     </header>
     <main class="v42-main">
       <section class="v42-preview-card">
-        <div class="v42-preview-head"><strong>미리보기</strong><div><span id="v42TimeLabel">0:00.0 / 0:00.0</span><button id="v42Fullscreen" type="button">전체화면</button></div></div>
+        <div class="v42-preview-head"><strong>미리보기</strong><span id="v42TimeLabel">0:00.0 / 0:00.0</span></div>
         <div class="v42-stage-wrap"><canvas id="v42Stage" width="360" height="640" aria-label="모바일 영상 미리보기"></canvas></div>
         <div class="v42-player">
           <button type="button" class="play" data-click="playBtn" aria-label="재생">▶</button>
+          <button type="button" id="v42Fullscreen" class="v42-fullscreen-icon" aria-label="전체화면 미리보기" title="전체화면 미리보기">⛶</button>
         </div>
         <input id="v42Scrubber" class="v42-scrubber" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
         <div class="v42-scene-nav"><button type="button" id="v42PrevScene">이전</button><strong id="v42SceneLabel">장면 0 / 0</strong><button type="button" id="v42NextScene">다음</button></div>
@@ -67,17 +69,21 @@
   scenesDialog.id='v42ScenesDialog';
   scenesDialog.innerHTML='<div class="v42-sheet-head"><strong>전체 장면</strong><button type="button" id="v42ScenesClose">×</button></div><div id="v42ScenesGrid" class="v42-scenes-grid"></div>';
   document.body.append(scenesDialog);
+  const settingsDialog=document.createElement('dialog');
+  settingsDialog.id='v42SettingsDialog';
+  settingsDialog.innerHTML='<div class="v42-sheet-head"><div><strong>프로젝트 설정</strong><small>Cutflow</small></div><button type="button" id="v42SettingsClose" aria-label="닫기">×</button></div><div id="v42SettingsBody" class="v42-settings-body"></div>';
+  document.body.append(settingsDialog);
 
   const panel=$('v42Panel'),tabs=$('v42Tabs'),stage=$('v42Stage'),ctx=stage.getContext('2d'),fullStage=$('v42FullStage'),fullCtx=fullStage.getContext('2d');
-  const proxyMap=new Map();
+  const proxyMap=new Map(),settingsProxyMap=new Map();
   let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false;
 
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const key=()=>`p${Math.random().toString(36).slice(2)}`;
   const dispatch=(el,type)=>el.dispatchEvent(new Event(type,{bubbles:true}));
-  function proxyControl(el,label,{wide=false}={}){
+  function proxyControl(el,label,{wide=false,map=proxyMap}={}){
     if(!el)return '';
-    const k=key();proxyMap.set(k,el);
+    const k=key();map.set(k,el);
     const cls=wide?' wide':'';
     if(el.tagName==='SELECT'){
       return `<label class="v42-field${cls}"><span>${esc(label)}</span><select data-proxy="${k}">${[...el.options].map(o=>`<option value="${esc(o.value)}" ${o.selected?'selected':''}>${esc(o.textContent)}</option>`).join('')}</select></label>`;
@@ -88,9 +94,9 @@
     const attrs=[el.min&&`min="${esc(el.min)}"`,el.max&&`max="${esc(el.max)}"`,el.step&&`step="${esc(el.step)}"`].filter(Boolean).join(' ');
     return `<label class="v42-field${cls}"><span>${esc(label)}</span><input data-proxy="${k}" type="${type}" value="${esc(el.value)}" ${attrs}></label>`;
   }
-  function proxyButton(el,label,{primary=false,danger=false,wide=false}={}){
+  function proxyButton(el,label,{primary=false,danger=false,wide=false,map=proxyMap}={}){
     if(!el)return '';
-    const k=key();proxyMap.set(k,el);
+    const k=key();map.set(k,el);
     return `<button type="button" data-proxy-click="${k}" class="v42-btn ${primary?'primary ':''}${danger?'danger ':''}${wide?'wide':''}" ${el.disabled?'disabled':''}>${esc(label)}</button>`;
   }
   function section(title,body,sub='',extra=''){
@@ -155,14 +161,26 @@
     $('v42MergeScene').onclick=()=>window.CutflowScene?.mergeNext?.(index);
     $('v42DeleteScene').onclick=()=>{if(confirm(`장면 ${index+1}을 삭제할까요?`))window.CutflowScene?.remove?.(index);};
   }
+  function autoSetupMarkup(map=proxyMap){
+    const preset=document.querySelector('input[name="autoSilencePreset"]:checked')?.value||'normal';
+    const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map});
+    const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map});
+    return `${pc($('autoTitle'),'영상 제목',{wide:true})}${pc($('autoChannel'),'채널명')}${pc($('autoLayout'),'영상 템플릿')}${pc($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}${pc($('autoCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-file-actions">${pb($('autoNarrationBtn'),'내레이션 선택')}${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}${pb($('autoBgmBtn'),'BGM 선택')}</div><div class="v42-auto-files"><span><b>내레이션</b>${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</span><span><b>그리드</b>${esc($('autoGridName')?.textContent||'선택 안 됨')}</span><span><b>개별 이미지</b>${esc($('autoSingleName')?.textContent||'선택 안 됨')}</span></div><div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>${details('그리드 분할 설정',autoGridMirror(),'열 · 행 · 분할 여백')}<div class="v42-auto-check"><span>대본 장면 <strong>${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong>${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div><p class="v42-auto-match">${esc($('autoMatch')?.textContent||'')}</p>${pb($('autoStart'),'쇼츠 자동 세팅 시작',{primary:true,wide:true})}`;
+  }
   function renderNarration(){
     proxyMap.clear();
-    const preset=document.querySelector('input[name="autoSilencePreset"]:checked')?.value||'normal';
-    const quick=`${proxyControl($('autoTitle'),'영상 제목',{wide:true})}${proxyControl($('autoChannel'),'채널명')}${proxyControl($('autoLayout'),'영상 템플릿')}${proxyControl($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}${proxyControl($('autoCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-file-actions">${proxyButton($('autoNarrationBtn'),'내레이션 선택')}${proxyButton($('autoGridBtn'),'+ 그리드 이미지')}${proxyButton($('autoSingleBtn'),'+ 개별 이미지')}${proxyButton($('autoBgmBtn'),'BGM 선택')}</div><div class="v42-auto-files"><span><b>내레이션</b>${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</span><span><b>그리드</b>${esc($('autoGridName')?.textContent||'선택 안 됨')}</span><span><b>개별 이미지</b>${esc($('autoSingleName')?.textContent||'선택 안 됨')}</span></div><div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>${details('그리드 분할 설정',autoGridMirror(),'열 · 행 · 분할 여백')}<div class="v42-auto-check"><span>대본 장면 <strong>${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong>${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div><p class="v42-auto-match">${esc($('autoMatch')?.textContent||'')}</p>${proxyButton($('autoStart'),'쇼츠 자동 세팅 시작',{primary:true,wide:true})}`;
     const status=$('audioStatus')?.textContent||'오디오 없음';
     const source=`${proxyControl($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}${proxyControl($('projectCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-actions">${proxyButton($('scriptFileBtn'),'TXT 대본 불러오기')}${proxyButton($('audioBtn'),'내레이션 불러오기')}</div><p class="v42-status">${esc(status)}</p>${proxyButton($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}<div class="v42-silence"><strong>현재 내레이션 무음 줄이기</strong><div class="v42-pills"><label><input type="radio" name="v42Silence" value="soft"><span>부드럽게</span></label><label><input type="radio" name="v42Silence" value="normal" checked><span>보통</span></label><label><input type="radio" name="v42Silence" value="tight"><span>타이트</span></label></div><button id="v42SilenceRun" class="v42-btn wide" type="button">무음 줄이기</button><p id="v42SilenceStatus" class="v42-help">원본은 유지하고 처리본을 사용합니다.</p></div>`;
-    panel.innerHTML=section('쇼츠 자동 세팅',quick,'QUICK START','v42-quick-start')+section('대본 · 내레이션',source,'SCRIPT & VOICE');
+    panel.innerHTML=section('대본 · 내레이션',source,'SCRIPT & VOICE');
     $('v42SilenceRun').onclick=async()=>{const statusEl=$('v42SilenceStatus');try{if(typeof audioFile==='undefined'||!audioFile){statusEl.textContent='먼저 내레이션을 불러오세요.';return;}const p=qs('input[name="v42Silence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowSilenceCut.process(audioFile,p,m=>statusEl.textContent=m);if(typeof loadAudio==='function')await loadAudio(result.processedFile);statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}};
+  }
+  function renderSettings(){
+    settingsProxyMap.clear();
+    const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map:settingsProxyMap});
+    const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
+    const quickActions=`<div class="v42-settings-actions"><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">이미지·영상 추가</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플로 시작</button></div>`;
+    const project=`${pc($('layoutSelect'),'영상 템플릿')}${pc($('titleInput'),'상단 제목',{wide:true})}${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}${pc($('resolutionSelect'),'출력 해상도')}`;
+    $('v42SettingsBody').innerHTML=section('빠른 시작',quickActions,'PROJECT')+section('프로젝트 설정',project,'PC와 동일한 기본 설정')+section('쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'QUICK START','v42-quick-start');
   }
   function renderTemplate(){
     proxyMap.clear();
@@ -193,18 +211,29 @@
     requestAnimationFrame(mirrorStage);
   }
 
+  function proxyInput(e,map){const k=e.target.dataset.proxy,el=map.get(k);if(!el)return false;if(el.type==='checkbox')el.checked=e.target.checked;else el.value=e.target.value;dispatch(el,'input');return true;}
+  function proxyChange(e,map){const k=e.target.dataset.proxy,el=map.get(k);if(!el)return false;if(el.type==='checkbox')el.checked=e.target.checked;else el.value=e.target.value;dispatch(el,'change');return true;}
+  function handleAutoInput(e,refresh){const card=e.target.closest?.('[data-auto-grid]');if(card&&e.target.dataset.autoField){const i=Number(card.dataset.autoGrid),row=$('autoGridList')?.querySelectorAll('.auto-grid-item')?.[i];const sel={cols:'[data-grid-cols]',rows:'[data-grid-rows]',gap:'[data-grid-gap]'}[e.target.dataset.autoField],target=row?.querySelector(sel);if(target){target.value=e.target.value;dispatch(target,'input');setTimeout(refresh,0);}return true;}if(e.target.name==='v42AutoSilence'){const target=document.querySelector(`input[name="autoSilencePreset"][value="${e.target.value}"]`);if(target){target.checked=true;dispatch(target,'change');setTimeout(refresh,0);}return true;}return false;}
+  function handleAutoClick(e,refresh){const action=e.target.closest?.('[data-auto-action]');if(!action)return false;const card=action.closest('[data-auto-grid]'),i=Number(card?.dataset.autoGrid),row=$('autoGridList')?.querySelectorAll('.auto-grid-item')?.[i];if(!row)return true;const target=action.dataset.autoAction==='reset'?row.querySelector('[data-grid-reset]'):row.querySelector('[data-grid-remove]');target?.click();setTimeout(refresh,0);return true;}
+
   app.addEventListener('click',e=>{
     const click=e.target.closest('[data-click]');if(click){$(click.dataset.click)?.click();return;}
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
     const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
   });
-  panel.addEventListener('input',e=>{const k=e.target.dataset.proxy,el=proxyMap.get(k);if(!el)return;if(el.type==='checkbox')el.checked=e.target.checked;else el.value=e.target.value;dispatch(el,'input');});
-  panel.addEventListener('change',e=>{const k=e.target.dataset.proxy,el=proxyMap.get(k);if(!el)return;if(el.type==='checkbox')el.checked=e.target.checked;else el.value=e.target.value;dispatch(el,'change');setTimeout(()=>requestRefresh(false),0);});
+  panel.addEventListener('input',e=>{proxyInput(e,proxyMap);});
+  panel.addEventListener('change',e=>{if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
   panel.addEventListener('click',e=>{
     const sw=e.target.closest('[data-color-target] [data-color]');if(sw){const wrap=sw.closest('[data-color-target]'),el=$(wrap.dataset.colorTarget);if(el){el.value=sw.dataset.color;dispatch(el,'input');dispatch(el,'change');requestRefresh(false);}return;}
-    const action=e.target.closest('[data-auto-action]');if(action){const card=action.closest('[data-auto-grid]'),i=Number(card?.dataset.autoGrid),row=$('autoGridList')?.querySelectorAll('.auto-grid-item')?.[i];if(!row)return;const target=action.dataset.autoAction==='reset'?row.querySelector('[data-grid-reset]'):row.querySelector('[data-grid-remove]');target?.click();setTimeout(()=>requestRefresh(true),0);}
+    handleAutoClick(e,()=>requestRefresh(true));
   });
-  panel.addEventListener('input',e=>{const card=e.target.closest('[data-auto-grid]');if(card&&e.target.dataset.autoField){const i=Number(card.dataset.autoGrid),row=$('autoGridList')?.querySelectorAll('.auto-grid-item')?.[i];const sel={cols:'[data-grid-cols]',rows:'[data-grid-rows]',gap:'[data-grid-gap]'}[e.target.dataset.autoField],target=row?.querySelector(sel);if(target){target.value=e.target.value;dispatch(target,'input');setTimeout(()=>requestRefresh(true),0);}}if(e.target.name==='v42AutoSilence'){const target=document.querySelector(`input[name="autoSilencePreset"][value="${e.target.value}"]`);if(target){target.checked=true;dispatch(target,'change');setTimeout(()=>requestRefresh(false),0);}}});
+  panel.addEventListener('input',e=>{handleAutoInput(e,()=>requestRefresh(true));});
+  $('v42Settings').onclick=()=>{renderSettings();settingsDialog.showModal();};
+  $('v42SettingsClose').onclick=()=>settingsDialog.close();
+  settingsDialog.addEventListener('cancel',e=>{e.preventDefault();settingsDialog.close();});
+  $('v42SettingsBody').addEventListener('click',e=>{const direct=e.target.closest('[data-direct-click]');if(direct){$(direct.dataset.directClick)?.click();return;}const proxy=e.target.closest('[data-proxy-click]');if(proxy){settingsProxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(renderSettings,0);return;}handleAutoClick(e,renderSettings);});
+  $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,renderSettings);});
+  $('v42SettingsBody').addEventListener('change',e=>{if(proxyChange(e,settingsProxyMap))setTimeout(renderSettings,0);handleAutoInput(e,renderSettings);});
   tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);panel.scrollIntoView({block:'start',behavior:'smooth'});});
   $('v42AddScene').onclick=()=>$('fileInput')?.click();
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
@@ -217,7 +246,7 @@
   $('v42Scrubber').addEventListener('input',e=>{const s=$('scrubber');if(s){s.value=e.target.value;dispatch(s,'input');}});
   $('v42Scrubber').addEventListener('change',e=>{const s=$('scrubber');if(s){s.value=e.target.value;dispatch(s,'change');}});
 
-  for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo']){const el=$(id);if(el)new MutationObserver(()=>requestRefresh(false)).observe(el,{subtree:true,childList:true,attributes:true});}
+  for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo']){const el=$(id);if(el)new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open)renderSettings();}).observe(el,{subtree:true,childList:true,attributes:true});}
   window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);});
   setInterval(syncPlayer,200);
   renderSceneStrip();renderPanel(true);syncPlayer();mirrorStage();
