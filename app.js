@@ -269,7 +269,7 @@ function applyRandomMotion(){
   scenes.forEach(s=>{if(s.type==='image')s.motion=choose();});
   cues.forEach(c=>{delete c.motion;delete c.transition;delete c.transform;});
   renderCues();toast('장면별로 겹치지 않는 랜덤 무빙을 적용했습니다. 자막을 나눠도 효과는 유지됩니다.');
-  window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{reason:'random-motion'}}));
+  if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{reason:'random-motion'}}));
   return true;
 }
 $('randomMotionBtn').onclick=applyRandomMotion;
@@ -373,10 +373,10 @@ window.CutflowCompose={
       if(patch[key]==null)continue;const el=$(id);if(!el)continue;el.value=String(patch[key]);
       el.dispatchEvent(new Event(key==='motionPreset'?'change':'input',{bubbles:true}));
     }
-    window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{state:this.state()}}));
+    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{state:this.state()}}));
     return this.state();
   },
-  applyMotionPreset(){applyRhythm();window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{reason:'motion-preset',state:this.state()}}));return true;},
+  applyMotionPreset(){applyRhythm();if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{reason:'motion-preset',state:this.state()}}));return true;},
   randomMotion(){return applyRandomMotion();}
 };
 
