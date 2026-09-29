@@ -42,10 +42,14 @@
         <div class="v42-stage-wrap"><canvas id="v42Stage" width="360" height="640" aria-label="모바일 영상 미리보기"></canvas></div>
         <div class="v42-player">
           <button type="button" id="v42Play" class="play" aria-label="재생">▶</button>
-          <button type="button" id="v42Fullscreen" class="v42-fullscreen-icon" aria-label="전체화면 미리보기" title="전체화면 미리보기">⛶</button>
+          <div class="v42-preview-tools">
+            <button type="button" id="v42Undo" data-history-control="1" aria-label="실행 취소" title="실행 취소" disabled>↶</button>
+            <button type="button" id="v42Redo" data-history-control="1" aria-label="다시 실행" title="다시 실행" disabled>↷</button>
+            <button type="button" id="v42Fullscreen" aria-label="전체화면 미리보기" title="전체화면 미리보기">⛶</button>
+          </div>
         </div>
         <input id="v42Scrubber" class="v42-scrubber" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
-        <div class="v42-scene-nav"><button type="button" id="v42PrevScene">이전</button><strong id="v42SceneLabel">장면 0 / 0</strong><button type="button" id="v42NextScene">다음</button></div>
+        <div class="v42-scene-nav"><button type="button" id="v42PrevScene" aria-label="이전 장면" title="이전 장면">‹</button><strong id="v42SceneLabel">0 / 0</strong><button type="button" id="v42NextScene" aria-label="다음 장면" title="다음 장면">›</button></div>
       </section>
       <section class="v42-scenes-card">
         <div class="v42-scenes-head"><strong>장면</strong><button id="v42AllScenes" type="button">전체 장면</button></div>
@@ -164,8 +168,8 @@
   }
   function renderSceneStrip(){
     const {items,index}=currentScene(),root=$('v42SceneStrip');
-    root.innerHTML=items.length?items.map((item,i)=>{const t=window.CutflowScene?.thumbnail?.(item,i)||{},src=t.source?.thumb||'';return `<button type="button" data-scene="${i}" aria-current="${i===index}">${src?`<img src="${esc(src)}" alt="">`:'<span class="missing">'+(i+1)+'</span>'}<b>${String(i+1).padStart(2,'0')}</b><small>${Number(t.duration||item.duration||0).toFixed(1)}s</small></button>`}).join(''):'<p class="v42-empty-strip">장면을 추가해 주세요.</p>';
-    $('v42SceneLabel').textContent=`장면 ${items.length?index+1:0} / ${items.length}`;
+    root.innerHTML=items.length?items.map((item,i)=>{const t=window.CutflowScene?.thumbnail?.(item,i)||{},src=t.source?.thumb||'';return `<button type="button" data-scene="${i}" aria-current="${i===index}" aria-label="장면 ${i+1}">${src?`<img src="${esc(src)}" alt="">`:'<span class="missing">'+(i+1)+'</span>'}</button>`}).join(''):'<p class="v42-empty-strip">장면을 추가해 주세요.</p>';
+    $('v42SceneLabel').textContent=`${items.length?index+1:0} / ${items.length}`;
     const grid=$('v42ScenesGrid');if(grid)grid.innerHTML=items.length?items.map((item,i)=>{const t=window.CutflowScene?.thumbnail?.(item,i)||{},src=t.source?.thumb||'';return `<button type="button" data-scene-grid="${i}" aria-current="${i===index}">${src?`<img src="${esc(src)}" alt="">`:'<span class="missing">'+(i+1)+'</span>'}<strong>${String(i+1).padStart(2,'0')}</strong><small>${Number(t.duration||item.duration||0).toFixed(1)}초</small></button>`}).join(''):'<p class="v42-help">장면이 없습니다.</p>';
   }
   function renderCaption(){
@@ -264,7 +268,7 @@
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
     const settingsSection=(step,title,body,extra='')=>`<section class="v42-pc-settings-section ${extra}"><header><span>${esc(step)}</span><strong>${esc(title)}</strong></header><div class="v42-pc-settings-body">${body}</div></section>`;
     const collapsibleSettingsSection=(step,title,body,extra='')=>`<details class="v42-pc-settings-section v42-pc-settings-collapsible ${extra}"><summary><span>${esc(step)}</span><strong>${esc(title)}</strong><em>열기</em></summary><div class="v42-pc-settings-body">${body}</div></details>`;
-    const quickActions=`<div class="v42-settings-utility"><div class="v42-settings-utility-group"><span>PROJECT</span><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">+ 이미지·영상</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플 시작</button></div><div class="v42-settings-utility-group"><span>HISTORY</span><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="undo" ${window.CutflowHistory?.canUndo?'':'disabled'}>↶ 실행 취소</button><button type="button" class="v42-btn" data-history-control="1" data-cutflow-history="redo" ${window.CutflowHistory?.canRedo?'':'disabled'}>↷ 다시 실행</button></div></div>`;
+    const quickActions=`<div class="v42-settings-utility"><div class="v42-settings-utility-group"><span>PROJECT</span><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">+ 이미지·영상</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플 시작</button></div></div>`;
     const source=`${pc($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}${pc($('projectCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-actions">${pb($('scriptFileBtn'),'TXT 대본 불러오기')}${pb($('audioBtn'),'내레이션 불러오기')}</div><p class="v42-status">${esc($('audioStatus')?.textContent||'오디오 없음')}</p>${pb($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}<div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills"><label><input type="radio" name="v42SettingsSilence" value="soft"><span>부드럽게</span></label><label><input type="radio" name="v42SettingsSilence" value="normal" checked><span>보통</span></label><label><input type="radio" name="v42SettingsSilence" value="tight"><span>타이트</span></label></div><button type="button" class="v42-btn wide" data-settings-silence-run>무음 줄이기</button><p class="v42-help" data-settings-silence-status>원본은 유지하고 처리본을 사용합니다.</p></div>`;
     const bgm=`<div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div><p class="v42-status">${esc($('bgmStatus')?.textContent||'음악 없음')}</p><div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인')}${pc($('bgmFadeOut'),'페이드 아웃')}</div>`;
     const project=`${pc($('layoutSelect'),'영상 템플릿')}${pc($('titleInput'),'상단 제목',{wide:true})}<div class="v42-grid2">${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}</div><div class="v42-actions">${pb($('applyTemplateBtn'),'움직임 전체 적용')}${pb($('randomMotionBtn'),'랜덤 무빙')}</div>`;
@@ -440,6 +444,10 @@
   $('v42SettingsBody').addEventListener('pointercancel',endMobileGridDrag);
   tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);tab=b.dataset.tab;if(tab!=='caption')captionMode='edit';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
   $('v42AddScene').onclick=()=>$('fileInput')?.click();
+  $('v42Undo').onclick=()=>window.CutflowHistory?.undo?.();
+  $('v42Redo').onclick=()=>window.CutflowHistory?.redo?.();
+  const syncPreviewHistory=()=>{const undo=$('v42Undo'),redo=$('v42Redo');if(undo)undo.disabled=!window.CutflowHistory?.canUndo;if(redo)redo.disabled=!window.CutflowHistory?.canRedo;};
+  syncPreviewHistory();
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
   $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
   $('v42AllScenes').onclick=()=>{renderSceneStrip();scenesDialog.showModal();};
@@ -507,7 +515,7 @@
   };
   window.addEventListener('cutflow-project-restored',syncAfterProjectRestore);
   window.addEventListener('cutflow-project-loaded',syncAfterProjectRestore);
-  window.addEventListener('cutflow-history-updated',()=>{if(settingsDialog.open)syncSettingsProxyState();});
+  window.addEventListener('cutflow-history-updated',()=>{syncPreviewHistory();if(settingsDialog.open)syncSettingsProxyState();});
   for(const id of ['scriptInput','projectCaptionWrap','audioInput','scriptFile','bgmInput','autoNarration','autoGrids','autoSingles','autoBgm']){
     const el=$(id);if(!el)continue;
     el.addEventListener(id==='scriptInput'||id==='projectCaptionWrap'?'input':'change',()=>setTimeout(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}},id==='audioInput'?350:40));
