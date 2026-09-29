@@ -240,23 +240,40 @@
     window.CutflowTiming?.mount?.($('v42TimingHost'),index);
   }
   function renderMedia(){
-    proxyMap.clear();const {item,index}=currentRows();
-    if(!item){panel.innerHTML=section('미디어','<p class="v42-help">장면을 먼저 추가해 주세요.</p>'+proxyButton($('uploadBtn'),'이미지·영상 추가',{primary:true,wide:true}));return;}
+    proxyMap.clear();const {item,index,mediaRow}=currentRows();
+    if(!item){panel.innerHTML=section('이미지·영상','<p class="v42-help">장면을 먼저 추가해 주세요.</p>'+proxyButton($('uploadBtn'),'이미지·영상 추가',{primary:true,wide:true}));return;}
     const state=window.CutflowScene?.state?.(index);
-    if(!state){panel.innerHTML=section('미디어','<p class="v42-help">현재 장면 정보를 불러오지 못했습니다.</p>');return;}
-    const thumb=window.CutflowScene?.thumbnail?.(item,index)?.source?.thumb||'';
+    if(!state){panel.innerHTML=section('이미지·영상','<p class="v42-help">현재 장면 정보를 불러오지 못했습니다.</p>');return;}
     const opts=(rows,value)=>rows.map(([v,l])=>`<option value="${esc(v)}" ${v===value?'selected':''}>${esc(l)}</option>`).join('');
     const field=(label,name,type,value,attrs='')=>`<label class="v42-field"><span>${esc(label)}</span><input data-media-field="${name}" type="${type}" value="${esc(value)}" ${attrs}></label>`;
-    const mediaHead=`<div class="v42-media-summary">${thumb?`<img src="${esc(thumb)}" alt="">`:''}<div><strong>장면 ${index+1}</strong><small>${state.type==='video'?'영상':'이미지'} · ${Number(state.duration||0).toFixed(2)}초</small></div></div><input id="v42ReplaceInput" type="file" accept="image/*,video/*" hidden><button type="button" id="v42ReplaceBtn" class="v42-btn primary wide">이미지·영상 교체</button>`;
-    const primary=`<div class="v42-grid2"><label class="v42-field"><span>움직임</span><select data-media-field="motion">${opts(state.motionOptions,state.motion)}</select></label><label class="v42-field"><span>진입 전환</span><select data-media-field="transition">${opts(state.transitionOptions,state.transition)}</select></label></div>`;
-    const sceneActions=`<div class="v42-actions"><button class="v42-btn" id="v42SplitScene">장면 나누기</button><button class="v42-btn" id="v42MergeScene">다음과 합치기</button><button class="v42-btn danger" id="v42DeleteScene">삭제</button></div><p class="v42-help">나누기는 현재 재생 위치를 기준으로 합니다. 장면 경계에 있으면 가운데에서 나눕니다.</p>`;
-    let advanced=`<div class="v42-grid3">${field('Scale (%)','scale','number',Number(state.transform.scale).toFixed(1),'min="10" max="500" step="1"')}${field('Position X (%)','x','number',Number(state.transform.x).toFixed(1),'min="-200" max="200" step="1"')}${field('Position Y (%)','y','number',Number(state.transform.y).toFixed(1),'min="-200" max="200" step="1"')}</div>`;
+    const sourceSelect=mediaRow?.querySelector('[data-action="media"]');
+    const durationInput=mediaRow?.querySelector('[data-action="scene-duration"]');
+    const mediaBlock=`<div class="v42-media-primary">${sourceSelect?proxyControl(sourceSelect,'이미지·영상',{wide:true}):`<label class="v42-field wide"><span>이미지·영상</span><input value="${esc(state.name||'현재 장면')}" disabled></label>`}<input id="v42ReplaceInput" type="file" accept="image/*,video/*" hidden><button type="button" id="v42ReplaceBtn" class="v42-btn primary wide">이미지·영상 교체</button></div>`;
+    const effects=`<div class="v42-grid2"><label class="v42-field"><span>움직임</span><select data-media-field="motion">${opts(state.motionOptions,state.motion)}</select></label><label class="v42-field"><span>진입 전환</span><select data-media-field="transition">${opts(state.transitionOptions,state.transition)}</select></label></div>`;
+    const duration=durationInput?proxyControl(durationInput,'장면 길이 (초)',{wide:true}):'';
+    let videoAdvanced='';
     if(state.type==='video'){
-      advanced+=`<div class="v42-grid2">${field('Trim 시작','trimStart','number',state.trimStart.toFixed(2),`min="0" max="${Math.max(0,state.trimEnd-.04).toFixed(2)}" step="0.01"`)}${field('Trim 끝','trimEnd','number',state.trimEnd.toFixed(2),`min="${Math.min(state.sourceDuration,state.trimStart+.04).toFixed(2)}" max="${state.sourceDuration.toFixed(2)}" step="0.01"`)}</div><label class="v42-check"><input data-media-field="mediaMuted" type="checkbox" ${state.mediaMuted?'checked':''}><span>영상 원음 음소거</span></label>${field('영상 원음 볼륨 (%)','mediaVolume','range',state.mediaVolume,'min="0" max="100" step="1"')}<div class="v42-grid2">${field('원음 Fade In','mediaFadeIn','number',state.mediaFadeIn.toFixed(1),'min="0" max="10" step="0.1"')}${field('원음 Fade Out','mediaFadeOut','number',state.mediaFadeOut.toFixed(1),'min="0" max="10" step="0.1"')}</div>`;
+      const used=Math.max(0,state.trimEnd-state.trimStart).toFixed(2);
+      videoAdvanced=details('영상 고급 설정',`
+        <div class="v42-media-subsection"><strong>영상 Trim</strong><div class="v42-grid2">${field('시작 (초)','trimStart','number',state.trimStart.toFixed(2),`min="0" max="${Math.max(0,state.trimEnd-.04).toFixed(2)}" step="0.01"`)}${field('끝 (초)','trimEnd','number',state.trimEnd.toFixed(2),`min="${Math.min(state.sourceDuration,state.trimStart+.04).toFixed(2)}" max="${state.sourceDuration.toFixed(2)}" step="0.01"`)}</div><p class="v42-help">사용 ${used}초 / 원본 ${state.sourceDuration.toFixed(2)}초</p></div>
+        <div class="v42-media-subsection"><div class="v42-media-audio-head"><strong>영상 원음</strong><label class="v42-check"><input data-media-field="mediaMuted" type="checkbox" ${state.mediaMuted?'checked':''}><span>음소거</span></label></div>
+        <label class="v42-field"><span>볼륨 <b class="v42-live-value">${Math.round(state.mediaVolume)}%</b></span><input data-media-field="mediaVolume" type="range" min="0" max="100" step="1" value="${state.mediaVolume}"></label>
+        <div class="v42-media-volume-presets" aria-label="영상 원음 빠른 볼륨">${[0,25,50,75,100].map(v=>`<button type="button" class="v42-btn" data-media-volume="${v}">${v}${v===100?'%':''}</button>`).join('')}</div>
+        <div class="v42-grid2">${field('페이드 인 (초)','mediaFadeIn','number',state.mediaFadeIn.toFixed(1),'min="0" max="10" step="0.1"')}${field('페이드 아웃 (초)','mediaFadeOut','number',state.mediaFadeOut.toFixed(1),'min="0" max="10" step="0.1"')}</div><p class="v42-help">내레이션·BGM과 별도로 영상 원음을 조절합니다.</p></div>`,'Trim · 원음 · Fade',false);
     }
-    panel.innerHTML=section('이미지·영상',mediaHead)+section('움직임 · 진입 전환',primary)+section('장면 편집',sceneActions)+details('상세 설정',advanced,'크기 · 위치 · Trim · 원음 · Fade');
+    const sceneActions=`<div class="v42-caption-actions"><button class="v42-btn" id="v42SplitScene">장면 나누기</button><button class="v42-btn" id="v42MergeScene" ${index>=(window.CutflowScene?.items?.().length||1)-1?'disabled':''}>다음 장면과 합치기</button><button class="v42-btn danger" id="v42DeleteScene">장면 삭제</button></div><p class="v42-help">장면 나누기는 현재 재생 위치를 기준으로 합니다.</p>`;
+    const transform=`<div class="v42-grid3">${field('Scale (%)','scale','number',Number(state.transform.scale).toFixed(1),'min="10" max="500" step="1"')}${field('Position X (%)','x','number',Number(state.transform.x).toFixed(1),'min="-200" max="200" step="1"')}${field('Position Y (%)','y','number',Number(state.transform.y).toFixed(1),'min="-200" max="200" step="1"')}</div><button type="button" id="v42TransformReset" class="v42-btn wide">크기·위치 초기화</button><p class="v42-help">현재 장면에만 적용됩니다.</p>`;
+    panel.innerHTML=
+      section('이미지·영상',mediaBlock)+
+      section('움직임 · 진입 전환',effects)+
+      (duration?section('장면 길이',duration):'')+
+      videoAdvanced+
+      section('장면 편집',sceneActions)+
+      details('상세 설정',transform,'이미지·영상 크기 / 위치',false);
     $('v42ReplaceBtn').onclick=()=>$('v42ReplaceInput').click();
     $('v42ReplaceInput').onchange=async e=>{const f=e.target.files?.[0];if(f&&window.CutflowScene?.replace)await window.CutflowScene.replace(f);e.target.value='';requestRefresh(true);};
+    panel.querySelectorAll('[data-media-volume]').forEach(btn=>btn.onclick=()=>{window.CutflowScene?.update?.(index,{mediaVolume:Number(btn.dataset.mediaVolume)});requestRefresh(false);});
+    $('v42TransformReset').onclick=()=>{window.CutflowScene?.update?.(index,{transform:{scale:100,x:0,y:0}});requestRefresh(false);};
     $('v42SplitScene').onclick=()=>{const start=window.CutflowScene?.start?.(index)||0,duration=window.CutflowScene?.state?.(index)?.duration||0;let at=typeof currentTime==='function'?currentTime():start;if(!(at>start+.1&&at<start+duration-.1))at=start+duration/2;window.CutflowScene?.split?.(index,at);};
     $('v42MergeScene').onclick=()=>window.CutflowScene?.mergeNext?.(index);
     $('v42DeleteScene').onclick=()=>{if(confirm(`장면 ${index+1}을 삭제할까요?`))window.CutflowScene?.remove?.(index);};
