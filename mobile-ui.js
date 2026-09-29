@@ -1,4 +1,4 @@
-/* v32 mobile presentation adapter. Desktop controls/events/project data remain authoritative. */
+/* v41 mobile presentation adapter. Desktop controls/events/project data remain authoritative. */
 (()=>{
   const mq=matchMedia('(max-width:760px)');
   let enabled=false,index=0,selectedId=null,mode='caption',lastEditMode='caption',hadMedia=false,lastStroke=15,captionWasOpen=false,sceneEdit=false,narrationSceneWarningShown=false;
@@ -8,27 +8,20 @@
   shell.id='mobileStudio';shell.className='mobile-only';
   shell.innerHTML=`
     <div id="mobilePreview"></div>
-    <details id="mobileProject">
-      <summary>프로젝트 설정 <span>대본 · 음성 · 템플릿 · 제목 · BGM</span></summary>
-      <div id="mobileProjectBody">
-        <div id="mobileProjectQuick" class="mobile-project-quick"><button id="mobileProjectOpen" type="button">저장된 프로젝트 열기</button></div>
-        <div id="mobileProjectGroups"></div>
-      </div>
-    </details>
+    <section id="mobileSceneStripWrap" aria-label="장면 바로가기">
+      <div id="mobileSceneStrip"></div><button id="mobileStripAdd" type="button" aria-label="장면 추가">＋</button>
+    </section>
     <nav id="mobileTools" aria-label="모바일 편집 도구"></nav>
     <div id="mobileEditor">
-      <p id="mobileEmpty">장면을 추가하면 내레이션 없이도 이미지·영상과 자막을 직접 편집할 수 있습니다.</p>
-      <div id="mobileSceneActions" class="mobile-scene-tools"><strong>장면 편집</strong><div><button id="mobileSceneSplit" type="button">나누기</button><button id="mobileSceneMerge" type="button">다음과 합치기</button><button id="mobileSceneDelete" type="button" class="danger">삭제</button></div><small>나누기는 현재 재생 위치 기준</small></div><div id="mobileEditorBody"></div>
-      <section id="mobileScenesPane" hidden>
-        <div class="mobile-scenes-head"><strong>전체 장면</strong><div class="mobile-scenes-head-actions"><button id="mobileScenesEdit" type="button">순서 편집</button><button id="mobileScenesAdd" type="button">+ 장면 추가</button></div></div>
-        <div id="mobileSceneGrid"></div>
-      </section>
+      <p id="mobileEmpty">장면을 추가하면 이미지·영상과 자막을 직접 편집할 수 있습니다.</p>
+      <div id="mobileSceneActions" class="mobile-scene-tools"><strong>장면 편집</strong><div><button id="mobileSceneSplit" type="button">나누기</button><button id="mobileSceneMerge" type="button">다음과 합치기</button><button id="mobileSceneDelete" type="button" class="danger">삭제</button></div><small>나누기는 현재 재생 위치 기준</small></div>
+      <div id="mobileEditorBody"></div>
     </div>`;
   q('.app-shell').prepend(shell);
 
   const nav=q('#mobileTools');
   nav.innerHTML=[
-    ['caption','T','자막'],['media','▧','미디어'],['motion','✧','움직임'],['style','Aa','스타일'],['scenes','▦','장면']
+    ['caption','T','자막'],['media','▧','미디어'],['narration','🎙','내레이션'],['template','Aa','템플릿'],['bgm','♪','BGM']
   ].map(([key,icon,name])=>`<button type="button" data-mobile-tab="${key}" aria-pressed="${key==='caption'}"><span aria-hidden="true">${icon}</span>${name}</button>`).join('');
 
   const mobileNav=document.createElement('div');
@@ -36,9 +29,13 @@
   mobileNav.innerHTML='<button id="mobilePrev" type="button" aria-label="이전 장면">‹</button><strong id="mobileSceneCount">장면 0 / 0</strong><button id="mobileNext" type="button" aria-label="다음 장면">›</button>';
   q('.preview-panel').append(mobileNav);
 
-  const settingsButton=document.createElement('button');settingsButton.id='mobileSettings';settingsButton.className='mobile-only';settingsButton.type='button';settingsButton.setAttribute('aria-label','프로젝트 설정');settingsButton.textContent='⚙';q('.topbar').append(settingsButton);
+  const openButton=document.createElement('button');openButton.id='mobileOpen';openButton.className='mobile-only';openButton.type='button';openButton.textContent='열기';q('.topbar').append(openButton);
   const saveButton=document.createElement('button');saveButton.id='mobileSave';saveButton.className='mobile-only';saveButton.type='button';saveButton.textContent='저장';q('.topbar').append(saveButton);
   const exportButton=document.createElement('button');exportButton.id='mobileExport';exportButton.className='mobile-only';exportButton.type='button';exportButton.textContent='내보내기';q('.topbar').append(exportButton);
+
+  const outputDialog=document.createElement('dialog');outputDialog.id='mobileOutputDialog';outputDialog.className='mobile-only';outputDialog.innerHTML='<div class="mobile-output-head"><strong>영상 내보내기</strong><button id="mobileOutputClose" type="button" aria-label="닫기">×</button></div><div id="mobileOutputBody"></div>';document.body.append(outputDialog);
+
+  const silenceBox=document.createElement('section');silenceBox.id='mobileSilenceCut';silenceBox.className='mobile-only mobile-silence-cut';silenceBox.innerHTML=`<div class="mobile-section-title"><strong>내레이션 무음컷</strong><span>원본 유지 · 처리본 사용</span></div><div class="mobile-silence-presets" role="radiogroup" aria-label="무음 제거 강도"><label><input type="radio" name="mobileSilencePreset" value="soft"><span>부드럽게</span></label><label><input type="radio" name="mobileSilencePreset" value="normal" checked><span>보통</span></label><label><input type="radio" name="mobileSilencePreset" value="tight"><span>타이트</span></label></div><button id="mobileSilenceRun" type="button" class="button secondary wide">현재 내레이션 무음 줄이기</button><p id="mobileSilenceStatus" class="field-help">기본 강도: 보통</p>`;
 
   const replaceButton=document.createElement('button');replaceButton.id='mobileReplace';replaceButton.type='button';replaceButton.textContent='이미지·영상 교체';replaceButton.className='mobile-only';
   const replaceInput=document.createElement('input');replaceInput.type='file';replaceInput.accept='image/*,video/*';replaceInput.hidden=true;document.body.append(replaceInput);
@@ -51,13 +48,12 @@
   function setTab(tab){nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTab===tab)));}
 
   function sceneStatus(item){const count=(item?.cueIndices||[]).length;const motion={zoomIn:'Z+',zoomOut:'Z−',panLeft:'←',panRight:'→',panUp:'↑',panDown:'↓',still:'●'}[item?.motion]||'';return `${count>1?`<span class="mobile-scene-badge caption-count">${count}</span>`:''}${motion?`<span class="mobile-scene-badge motion-state">${motion}</span>`:''}`;}
-
-  function buildGrid(){
-    const list=items();
-    const edit=$('mobileScenesEdit');if(edit){edit.textContent=sceneEdit?'완료':'순서 편집';edit.setAttribute('aria-pressed',String(sceneEdit));}
-    $('mobileSceneGrid').classList.toggle('scene-editing',sceneEdit);
-    $('mobileSceneGrid').innerHTML=list.length?list.map((item,i)=>{const {source,duration}=CutflowScene.thumbnail(item,i);return `<div class="mobile-scene-item" data-mobile-scene-item="${i}"><button type="button" class="mobile-scene-card" data-mobile-scene="${i}" aria-label="장면 ${i+1} 선택" aria-current="${i===index?'true':'false'}">${source?.thumb?`<img src="${esc(source.thumb)}" alt="">`:'<span class="mobile-missing">컷 없음</span>'}<span class="mobile-grid-number">${String(i+1).padStart(2,'0')}</span><span class="mobile-grid-duration">${duration.toFixed(1)}초</span>${sceneStatus(item)}</button>${sceneEdit?`<div class="mobile-scene-actions"><button type="button" data-scene-move="-1" data-index="${i}" aria-label="장면 ${i+1} 앞으로 이동" ${i===0?'disabled':''}>←</button><button type="button" data-scene-move="1" data-index="${i}" aria-label="장면 ${i+1} 뒤로 이동" ${i===list.length-1?'disabled':''}>→</button><button type="button" class="danger" data-scene-delete="${i}" aria-label="장면 ${i+1} 삭제">삭제</button></div>`:''}</div>`;}).join(''):'<p class="mobile-scenes-empty">장면을 먼저 추가해 주세요.</p>';
+  function buildStrip(){
+    const list=items(),strip=$('mobileSceneStrip');
+    strip.innerHTML=list.map((item,i)=>{const {source,duration}=CutflowScene.thumbnail(item,i);return `<button type="button" class="mobile-strip-card" data-mobile-strip="${i}" aria-current="${i===index?'true':'false'}" aria-label="장면 ${i+1}">${source?.thumb?`<img src="${esc(source.thumb)}" alt="">`:'<span class="mobile-strip-missing">${i+1}</span>'}<b>${String(i+1).padStart(2,'0')}</b><small>${duration.toFixed(1)}s</small>${sceneStatus(item)}</button>`}).join('');
+    requestAnimationFrame(()=>{const active=strip.querySelector('[aria-current="true"]');if(!active)return;const sr=strip.getBoundingClientRect(),ar=active.getBoundingClientRect();if(ar.left<sr.left||ar.right>sr.right){strip.scrollTo({left:Math.max(0,strip.scrollLeft+(ar.left+ar.width/2)-(sr.left+sr.width/2)),behavior:'smooth'});}});
   }
+
 
   function confirmNarrationSceneEdit(){
     if(!audioBuffer||items().every(item=>item.freeEdit)||narrationSceneWarningShown)return true;
@@ -84,10 +80,9 @@
     const cueIndex=cues.length?CutflowScene.cueIndex(index):index;
     const selectedCueIndex=cues.length&&['media','motion'].includes(mode)?(list[index]?.firstCueIndex??cueIndex):cueIndex;
     document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const rowIndex=Number(row.dataset.index),on=cues.length?row.classList.contains('cue-row')&&rowIndex===selectedCueIndex:rowIndex===index;row.classList.toggle('mobile-selected',on);row.draggable=false;const fold=row.querySelector('.mobile-caption-text');if(fold)fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY'));});
-    $('mobileScenesPane').hidden=mode!=='scenes';
-    if(mode==='scenes')buildGrid();else sceneEdit=false;
-    if(mode==='style'&&cues.length&&cueIndex>=0){window.selectStyleCue?.(cueIndex);$('captionStylePanel').open=true;}else $('captionStylePanel').open=false;
-    if(scenes.length&&!hadMedia){$('mobileProject').open=false;document.body.classList.remove('mobile-project-open');hadMedia=true;}if(!scenes.length)hadMedia=false;
+    buildStrip();
+    if(mode==='caption'&&cues.length&&cueIndex>=0){window.selectStyleCue?.(cueIndex);}
+    $('captionStylePanel').open=mode==='caption'&&$('captionStylePanel').open;
     syncStroke();viewport();
   }
 
@@ -99,12 +94,14 @@
     move($('scrubber'),q('.player-controls'));
     const controls=q('.player-controls');if(controls&&$('scrubber'))controls.insertBefore($('scrubber'),controls.querySelector('.timecode'));
 
-    const groups=$('mobileProjectGroups');groups.innerHTML='';
-    const specs=[['대본 · 음성','내레이션과 자막 구간',q('.hero'),q('.source-panel')],['템플릿 · 제목 · 채널명','화면 전체 스타일',q('.setup-panel')],['배경음악 · BGM','음악 · 볼륨 · 페이드',q('.bgm-panel')],['영상 출력','해상도 · MP4 저장',q('.export-panel')]];
-    specs.forEach(([title,desc,...nodes])=>{const d=document.createElement('details');d.className='mobile-project-group';d.innerHTML=`<summary><strong>${title}</strong><span>${desc}</span></summary><div class="mobile-project-group-body"></div>`;groups.append(d);nodes.forEach(n=>move(n,d.lastElementChild));});
-
+    move(q('.hero'),$('mobileEditorBody'));
     move(q('.timeline-panel'),$('mobileEditorBody'));
     move($('captionStylePanel'),$('mobileEditorBody'));
+    move(q('.source-panel'),$('mobileEditorBody'));q('.source-panel')?.append(silenceBox);
+    move(q('.auto-setup'),$('mobileEditorBody'));
+    move(q('.setup-panel'),$('mobileEditorBody'));
+    move(q('.bgm-panel'),$('mobileEditorBody'));
+    move(q('.export-panel'),$('mobileOutputBody'));
     q('.timeline-panel')?.prepend(replaceButton);
     $('captionStylePanel').open=false;
     sync();
@@ -114,7 +111,7 @@
     if(!enabled)return;enabled=false;
     document.body.classList.remove('mobile-editor','mobile-compact','mobile-keyboard','mobile-input-focus','mobile-project-open');
     for(const [node,marker] of slots)marker.replaceWith(node);slots.clear();
-    $('mobileProjectGroups').innerHTML='';document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);document.querySelectorAll('.mobile-caption-text').forEach(fold=>fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY')));$('captionStylePanel').open=captionWasOpen;
+document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);document.querySelectorAll('.mobile-caption-text').forEach(fold=>fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY')));$('captionStylePanel').open=captionWasOpen;
   }
 
   window.addEventListener('cutflow-scene',e=>{if(enabled){index=e.detail;selectedId=items()[index]?.id;sync();}});
@@ -123,19 +120,16 @@
   $('mobileSceneSplit').onclick=async()=>{await CutflowScene.split(index,currentTime());sync();};
   $('mobileSceneMerge').onclick=()=>{if(confirm('다음 장면과 합칠까요? 같은 미디어의 연속 장면만 합칠 수 있습니다.')){CutflowScene.mergeNext(index);sync();}};
   $('mobileSceneDelete').onclick=()=>{if(!confirmNarrationSceneEdit())return;if(confirm(`장면 ${index+1}을 삭제할까요?`)){CutflowScene.remove(index);sync();}};
-  settingsButton.onclick=()=>{const open=!document.body.classList.contains('mobile-project-open');document.body.classList.toggle('mobile-project-open',open);$('mobileProject').open=open;if(open)pause();};
-  $('mobileProject').addEventListener('toggle',()=>{if(enabled&&!$('mobileProject').open)document.body.classList.remove('mobile-project-open');});
-  saveButton.onclick=()=>$('projectSaveBtn').click();$('mobileProjectOpen').onclick=()=>$('projectOpenBtn').click();exportButton.onclick=()=>$('exportBtn').click();
-  $('mobileScenesAdd').onclick=()=>$('fileInput').click();$('mobileScenesEdit').onclick=()=>{sceneEdit=!sceneEdit;buildGrid();};
+  openButton.onclick=()=>$('projectOpenBtn').click();
+  saveButton.onclick=()=>$('projectSaveBtn').click();exportButton.onclick=()=>{pause();outputDialog.showModal();};$('mobileOutputClose').onclick=()=>outputDialog.close();
+  $('mobileStripAdd').onclick=()=>$('fileInput').click();
+  $('mobileSceneStrip').onclick=e=>{const target=e.target.closest('[data-mobile-strip]');if(target)select(Number(target.dataset.mobileStrip));};
+  $('mobileSilenceRun').onclick=async()=>{const btn=$('mobileSilenceRun'),status=$('mobileSilenceStatus');if(!audioFile){status.textContent='먼저 내레이션 오디오를 불러오세요.';return;}const preset=document.querySelector('input[name="mobileSilencePreset"]:checked')?.value||'normal';btn.disabled=true;try{const result=await window.CutflowSilenceCut.process(audioFile,preset,msg=>status.textContent=msg);await loadAudio(result.processedFile);status.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초 · 처리본 사용 중`;window.CutflowProjects?.markDirty?.();}catch(err){status.textContent=`무음컷 실패: ${err.message}`;}finally{btn.disabled=false;}};
 
-  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;if(tab!=='scenes')lastEditMode=tab;mode=tab;if(mode==='style'&&cues.length){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));};
-  $('mobileSceneGrid').onclick=e=>{
-    const move=e.target.closest('[data-scene-move]');if(move){const from=Number(move.dataset.index),to=from+Number(move.dataset.sceneMove);if(confirmNarrationSceneEdit()&&CutflowScene.move(from,to)){index=to;selectedId=items()[to]?.id;buildGrid();}return;}
-    const del=e.target.closest('[data-scene-delete]');if(del){const at=Number(del.dataset.sceneDelete);if(!confirmNarrationSceneEdit())return;const name=`장면 ${at+1}`;if(confirm(`${name}을 삭제할까요? 삭제 후 뒤 장면의 시간이 자동으로 다시 계산됩니다.`)){CutflowScene.remove(at);index=Math.min(at,Math.max(0,items().length-1));selectedId=items()[index]?.id||null;buildGrid();}return;}
-    const target=e.target.closest('[data-mobile-scene]');if(target){select(Number(target.dataset.mobileScene));if(!sceneEdit){mode=lastEditMode;sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));}else buildGrid();}
-  };
+  nav.onclick=e=>{const tab=e.target.closest('[data-mobile-tab]')?.dataset.mobileTab;if(!tab)return;lastEditMode=tab;mode=tab;sync();requestAnimationFrame(()=>q('#mobileEditor')?.scrollIntoView({block:'start',behavior:'smooth'}));};
 
-  $('cueList').addEventListener('click',e=>{if(enabled&&e.target.closest('[data-action="style"]')){e.stopImmediatePropagation();mode='style';sync();}},true);
+
+  $('cueList').addEventListener('click',e=>{if(enabled&&e.target.closest('[data-action="style"]')){e.stopImmediatePropagation();mode='caption';$('captionStylePanel').open=true;sync();}},true);
   $('styleCue').addEventListener('change',()=>{if(enabled){const cueIndex=cues.findIndex(c=>c.id===$('styleCue').value),sceneIndex=CutflowScene.sceneIndexForCue(cueIndex);if(sceneIndex>=0){index=sceneIndex;selectedId=items()[index]?.id;}sync();}});
   $('mobileCaptionStroke').oninput=()=>{const control=$('captionStroke');control.value=$('mobileCaptionStroke').checked?lastStroke:0;control.dispatchEvent(new Event('input',{bubbles:true}));};
 
@@ -156,7 +150,7 @@
   window.visualViewport?.addEventListener('resize',viewport);window.addEventListener('resize',viewport);
   new MutationObserver(()=>sync()).observe($('cueList'),{childList:true});
   new MutationObserver(()=>sync()).observe($('sceneList'),{childList:true});
-  new MutationObserver(()=>{if(!enabled)return;const active=CutflowScene.index();if(active>=0&&active!==index){index=active;selectedId=items()[index]?.id;if(cues.length&&mode==='style'){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();}else if(cues.length){sync();}}).observe($('nowPlaying'),{childList:true});
+  new MutationObserver(()=>{if(!enabled)return;const active=CutflowScene.index();if(active>=0&&active!==index){index=active;selectedId=items()[index]?.id;if(cues.length&&mode==='caption'){const cueIndex=CutflowScene.cueIndex(index);if(cueIndex>=0)window.selectStyleCue?.(cueIndex);}sync();}else if(cues.length){sync();}}).observe($('nowPlaying'),{childList:true});
   new MutationObserver(()=>{if(enabled)exportButton.disabled=$('exportBtn').disabled;}).observe($('exportBtn'),{attributes:true,attributeFilter:['disabled']});
   const saveStatus=$('projectSaveStatus');if(saveStatus)new MutationObserver(()=>{if(!enabled)return;const state=saveStatus.dataset.state;saveButton.textContent=state==='saved'?'✓ 저장됨':state==='busy'?'저장 중…':'저장';saveButton.dataset.state=state||'';}).observe(saveStatus,{childList:true,attributes:true,attributeFilter:['data-state']});
   if(mq.matches)activate();viewport();

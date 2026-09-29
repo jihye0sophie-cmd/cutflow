@@ -197,3 +197,9 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - The existing **내레이션에 맞춤** action now prioritizes detected pauses and soft energy valleys, with text-length fallback when no reliable break exists.
 - Auto Setup uses the same alignment engine after silence-cut processing, so the first timeline starts closer to the spoken rhythm.
 - Existing v38 workflow/UI, scene grouping, silence cut, media controls, project storage, and export behavior are preserved.
+
+## v40 - Undo / Redo
+- Global undo/redo across captions, scenes, timing, transforms, styles, BGM, narration/media changes, and project controls.
+- Keyboard: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z redo, Ctrl+Y redo on Windows.
+- PC/mobile header buttons show enabled state and restore complete project snapshots without duplicating media file bytes in memory.
+- Loading a saved project resets the edit history so history never crosses project boundaries.

@@ -1,0 +1,12 @@
+const fs=require('node:fs'),assert=require('node:assert');
+const js=fs.readFileSync('mobile-ui.js','utf8'),css=fs.readFileSync('mobile-ui.css','utf8'),desk=fs.readFileSync('desktop-ui.js','utf8'),html=fs.readFileSync('index.html','utf8');
+for(const key of ["['caption','T','자막']","['media','▧','미디어']","['narration','🎙','내레이션']","['template','Aa','템플릿']","['bgm','♪','BGM']"])assert(js.includes(key),'missing mobile tab '+key);
+assert(js.includes('mobileSceneStrip')&&js.includes('data-mobile-strip'),'persistent scene strip missing');
+assert(js.includes("move(q('.source-panel'),$('mobileEditorBody'))")&&js.includes("move(q('.auto-setup'),$('mobileEditorBody'))"),'narration/script/auto setup not wired');
+assert(js.includes('mobileSilenceRun')&&js.includes('CutflowSilenceCut.process'),'mobile silence cut missing');
+assert(js.includes("move(q('.setup-panel'),$('mobileEditorBody'))")&&js.includes("move(q('.bgm-panel'),$('mobileEditorBody'))"),'template/BGM tabs missing');
+assert(js.includes("openButton.onclick=()=>$('projectOpenBtn').click()")&&js.includes('outputDialog.showModal()'),'top open/export flow missing');
+assert(css.includes('#mobileTools{grid-template-columns:repeat(5')&&css.includes('#mobileSceneStripWrap'),'v41 mobile css missing');
+assert(desk.includes('id="desktopOpen"')&&desk.includes('프로젝트 설정'),'desktop compact header/settings missing');
+assert(html.includes('mobile-ui.js?v=41')&&html.includes('desktop-ui.js?v=41'),'v41 cache keys missing');
+console.log('v41 mobile workflow checks passed');

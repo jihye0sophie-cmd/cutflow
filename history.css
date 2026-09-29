@@ -1,0 +1,7 @@
+/* v40 global undo/redo controls */
+.cutflow-history-button{min-width:34px!important;width:34px;padding:0!important;font-size:20px!important;line-height:1;font-weight:700;white-space:nowrap}
+.cutflow-history-button:disabled{opacity:.34;cursor:not-allowed}
+.history-v40-ready #undoCuesBtn{display:none!important}
+@media(min-width:761px){.desktop-editor .cutflow-history-button{height:34px;border:1px solid var(--studio-border);background:var(--studio-card);color:#fff;border-radius:8px}}
+@media(max-width:760px){.mobile-editor .topbar{gap:6px}.mobile-editor .cutflow-history-button{height:38px;min-height:38px!important;border:1px solid var(--studio-border);background:var(--studio-card);color:#fff;border-radius:9px}.mobile-editor .cutflow-history-button+ .cutflow-history-button{margin-left:-2px}}
+@media(max-width:380px){.mobile-editor .brand span{display:none}.mobile-editor .topbar{padding-inline:8px;gap:4px}.mobile-editor .cutflow-history-button{width:30px;min-width:30px!important}.mobile-editor #mobileSave{padding-inline:7px}.mobile-editor #mobileExport{padding-inline:8px}}
