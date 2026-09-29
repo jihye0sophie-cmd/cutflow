@@ -7,7 +7,7 @@ const mobile=fs.readFileSync('mobile-v42.js','utf8');
 const desktop=fs.readFileSync('desktop-ui.js','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
 
-assert.ok(html.includes('caption-batch-editor.js?v=1'),'whole-caption editor script missing');
+assert.ok(html.includes('caption-batch-editor.js?v=1.1'),'whole-caption editor script missing');
 assert.ok(html.includes('caption-batch-editor.css?v=1'),'whole-caption editor css missing');
 assert.ok(build.includes("'caption-batch-editor.js','caption-batch-editor.css'"),'build assets missing');
 assert.ok(js.includes('window.CutflowCaptionBatch={'),'shared whole-caption editor API missing');
@@ -25,4 +25,6 @@ assert.ok(desktop.includes('desktopBatchCaptions'),'desktop whole-caption entry 
 assert.ok(mobile.includes('v42CaptionBatchOpen'),'mobile whole-caption entry missing');
 assert.ok(css.includes('@media(max-width:760px)'),'mobile whole-caption layout missing');
 assert.ok(css.includes('white-space:nowrap'),'one-line caption rows missing');
+assert.ok(js.includes("dialog.addEventListener('cancel',()=>{commitDraft();})"),'batch editor must commit draft on cancel');
+assert.ok(js.includes("String(state.text||'').trim()"),'deleted caption gaps should be hidden from compact batch rows');
 console.log('PASS: shared whole-caption editor v1 is wired for PC/mobile and preserves caption timing ranges.');
