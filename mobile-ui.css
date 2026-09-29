@@ -534,3 +534,15 @@ body.mobile-editor #mobileSceneNav{display:flex!important}
 body.mobile-editor #mobileOpen,body.mobile-editor #mobileSave,body.mobile-editor #mobileExport{display:inline-flex!important}
 body.mobile-editor .desktop-only{display:none!important}
 body.desktop-editor #mobileStudio,body.desktop-editor .mobile-only{display:none!important}
+
+
+/* v41.3.6 fail-safe: once mobile mode is active, legacy root panels may not remain in the page flow. */
+body.mobile-editor>.app-shell{max-width:100%!important}
+body.mobile-editor #mobileStudio{display:block!important}
+body.mobile-editor .app-shell>#mobileStudio~.hero,
+body.mobile-editor .app-shell>#mobileStudio~.auto-setup,
+body.mobile-editor .app-shell>#mobileStudio~.source-panel,
+body.mobile-editor .app-shell>#mobileStudio~.bgm-panel,
+body.mobile-editor .app-shell>#mobileStudio~.workspace,
+body.mobile-editor .app-shell>#mobileStudio~.timeline-panel,
+body.mobile-editor .app-shell>#mobileStudio~.export-panel{display:none!important}

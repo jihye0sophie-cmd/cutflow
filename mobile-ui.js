@@ -52,7 +52,7 @@
 
   const strokeToggle=document.createElement('label');strokeToggle.className='mobile-only mobile-stroke-toggle';strokeToggle.innerHTML='<input id="mobileCaptionStroke" type="checkbox"> 스트로크 사용';$('captionStroke').closest('label').before(strokeToggle);
 
-  function move(node,target){if(!node)return;if(!slots.has(node)){const marker=document.createComment('mobile-original-position');node.before(marker);slots.set(node,marker);}target.append(node);}
+  function move(node,target){if(!node||!target)return;if(!slots.has(node)){const marker=document.createComment('mobile-original-position');node.before(marker);slots.set(node,marker);}target.append(node);}
   function items(){return CutflowScene.items();}
   function select(i){if(!enabled)return;const list=items();if(i<0||i>=list.length)return;CutflowScene.select(i);}
   function setTab(tab){const active=tab==='timing'?'caption':tab;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTab===active)));}
@@ -77,7 +77,7 @@
   $('captionStylePanel').addEventListener('change',()=>queueMicrotask(syncStroke));
 
   function sync(){
-    if(!enabled)return;
+    if(!enabled||!window.CutflowScene||typeof window.CutflowScene.items!=='function')return;
     const list=items(),found=list.findIndex(item=>item.id===selectedId);
     index=found>=0?found:Math.min(index,Math.max(0,list.length-1));selectedId=list[index]?.id||null;
     $('mobileSceneCount').textContent=`장면 ${list.length?index+1:0} / ${list.length}`;
@@ -110,33 +110,57 @@
   }
 
   let activateRetry=0;
-  function activate(){
-    if(enabled)return;
+  function recordMobileError(error,stage){
+    const message=String(error?.stack||error?.message||error||'unknown mobile error');
+    window.CutflowUI.lastMobileError={stage,message,time:Date.now()};
+    try{console.error('[Cutflow mobile]',stage,error);}catch{}
+  }
+  function syncSceneState(){
+    if(!enabled)return;
     if(!window.CutflowScene||typeof window.CutflowScene.index!=='function'||typeof window.CutflowScene.items!=='function'){
-      if(activateRetry++<60)setTimeout(activate,50);
+      if(activateRetry++<120)setTimeout(syncSceneState,50);
       return;
     }
+    try{
+      activateRetry=0;
+      index=CutflowScene.index();selectedId=items()[index]?.id;
+      sync();
+    }catch(error){
+      recordMobileError(error,'scene-sync');
+      if(activateRetry++<120)setTimeout(syncSceneState,100);
+    }
+  }
+  function activate(){
+    if(enabled)return;
     activateRetry=0;
     const parts=markMobileSections();
-    enabled=true;document.body.classList.add('mobile-editor');document.body.classList.remove('desktop-editor');
+    enabled=true;
+    document.body.classList.add('mobile-editor');
+    document.body.classList.remove('desktop-editor');
     window.CutflowUI.mobileActive=true;
     window.dispatchEvent(new Event('cutflow-mobile-activate'));
-    index=CutflowScene.index();selectedId=items()[index]?.id;captionWasOpen=$('captionStylePanel').open;
-    move(q('.preview-panel'),$('mobilePreview'));
-    move($('scrubber'),q('.player-controls'));
-    const controls=q('.player-controls');if(controls&&$('scrubber'))controls.insertBefore($('scrubber'),controls.querySelector('.timecode'));
 
-    move(parts.hero,$('mobileEditorBody'));
-    move(parts.timeline,$('mobileEditorBody'));
-    move(parts.captionStyle,$('mobileEditorBody'));
-    move(parts.source,$('mobileEditorBody'));parts.source?.append(silenceBox);
-    move(parts.autoSetup,$('mobileEditorBody'));
-    move(parts.setup,$('mobileEditorBody'));
-    move(parts.bgm,$('mobileEditorBody'));
-    move(q('.export-panel'),$('mobileOutputBody'));
-    q('.timeline-panel')?.prepend(replaceButton);
-    $('captionStylePanel').open=false;
-    sync();
+    // v41.3.6: build the mobile layout BEFORE reading project/scene state.
+    // A scene-sync error must never leave the legacy desktop page exposed on mobile.
+    try{
+      captionWasOpen=$('captionStylePanel')?.open||false;
+      move(q('.preview-panel'),$('mobilePreview'));
+      move($('scrubber'),q('.player-controls'));
+      const controls=q('.player-controls');if(controls&&$('scrubber'))controls.insertBefore($('scrubber'),controls.querySelector('.timecode'));
+      move(parts.hero,$('mobileEditorBody'));
+      move(parts.timeline,$('mobileEditorBody'));
+      move(parts.captionStyle,$('mobileEditorBody'));
+      move(parts.source,$('mobileEditorBody'));parts.source?.append(silenceBox);
+      move(parts.autoSetup,$('mobileEditorBody'));
+      move(parts.setup,$('mobileEditorBody'));
+      move(parts.bgm,$('mobileEditorBody'));
+      move(q('.export-panel'),$('mobileOutputBody'));
+      q('.timeline-panel')?.prepend(replaceButton);
+      if($('captionStylePanel'))$('captionStylePanel').open=false;
+    }catch(error){
+      recordMobileError(error,'layout-bootstrap');
+    }
+    syncSceneState();
   }
 
   function deactivate(){

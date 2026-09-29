@@ -1,0 +1,20 @@
+Cutflow v41.3.6 FULL SITE
+
+This package is based on the latest successfully deployed v41.3.5 GitHub Pages artifact.
+It includes the complete deployable site and the v41.3.6 mobile bootstrap fix.
+
+Upload/replace the contents of this ZIP at the repository root.
+Keep existing repository management files that are not included here, especially:
+.github/workflows/pages.yml
+package.json
+package-lock.json
+build.cjs
+vite.config.mjs
+
+Primary v41.3.6 changes:
+- mobile-ui.js: mobile layout is moved first; scene state sync runs afterward with retry/error isolation.
+- mobile-ui.css: fail-safe hides legacy root panels whenever mobile-editor is active.
+- index.html: cache keys updated to v41.3.6.
+
+Commit summary:
+fix: make v41.3.6 mobile layout bootstrap fail-safe
