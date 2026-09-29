@@ -42,7 +42,7 @@
 
   const strokeToggle=document.createElement('label');strokeToggle.className='mobile-only mobile-stroke-toggle';strokeToggle.innerHTML='<input id="mobileCaptionStroke" type="checkbox"> 스트로크 사용';$('captionStroke').closest('label').before(strokeToggle);
 
-  function move(node,target,section=''){if(!node||!target)return;if(!slots.has(node)){const marker=document.createComment('mobile-original-position');node.before(marker);slots.set(node,marker);}if(section)node.dataset.mobileSection=section;target.append(node);}
+  function move(node,target){if(!node)return;if(!slots.has(node)){const marker=document.createComment('mobile-original-position');node.before(marker);slots.set(node,marker);}target.append(node);}
   function items(){return CutflowScene.items();}
   function select(i){if(!enabled)return;const list=items();if(i<0||i>=list.length)return;CutflowScene.select(i);}
   function setTab(tab){const active=tab==='timing'?'caption':tab;nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTab===active)));}
@@ -91,19 +91,18 @@
     if(enabled)return;
     window.dispatchEvent(new Event('cutflow-mobile-activate'));
     index=CutflowScene.index();selectedId=items()[index]?.id;captionWasOpen=$('captionStylePanel').open;enabled=true;document.body.classList.add('mobile-editor');
-    move(q('.preview-panel'),$('mobilePreview'),'preview');
+    move(q('.preview-panel'),$('mobilePreview'));
     move($('scrubber'),q('.player-controls'));
     const controls=q('.player-controls');if(controls&&$('scrubber'))controls.insertBefore($('scrubber'),controls.querySelector('.timecode'));
 
-    // Keep the original landing hero out of the mobile editor. Mobile starts from the preview + scene strip.
-    const hero=q('.hero');if(hero)hero.dataset.mobileSection='hidden';
-    move(q('.timeline-panel'),$('mobileEditorBody'),'editor');
-    move($('captionStylePanel'),$('mobileEditorBody'),'caption-style');
-    move(q('.source-panel'),$('mobileEditorBody'),'narration');q('.source-panel')?.append(silenceBox);
-    move(q('.auto-setup'),$('mobileEditorBody'),'narration');
-    move(q('.setup-panel'),$('mobileEditorBody'),'template');
-    move(q('.bgm-panel'),$('mobileEditorBody'),'bgm');
-    move(q('.export-panel'),$('mobileOutputBody'),'export');
+    move(q('.hero'),$('mobileEditorBody'));
+    move(q('.timeline-panel'),$('mobileEditorBody'));
+    move($('captionStylePanel'),$('mobileEditorBody'));
+    move(q('.source-panel'),$('mobileEditorBody'));q('.source-panel')?.append(silenceBox);
+    move(q('.auto-setup'),$('mobileEditorBody'));
+    move(q('.setup-panel'),$('mobileEditorBody'));
+    move(q('.bgm-panel'),$('mobileEditorBody'));
+    move(q('.export-panel'),$('mobileOutputBody'));
     q('.timeline-panel')?.prepend(replaceButton);
     $('captionStylePanel').open=false;
     sync();
@@ -112,7 +111,7 @@
   function deactivate(){
     if(!enabled)return;enabled=false;
     document.body.classList.remove('mobile-editor','mobile-compact','mobile-keyboard','mobile-input-focus','mobile-project-open');
-    for(const [node,marker] of slots){delete node.dataset.mobileSection;marker.replaceWith(node);}slots.clear();const hero=q('.hero');if(hero)delete hero.dataset.mobileSection;
+    for(const [node,marker] of slots)marker.replaceWith(node);slots.clear();
 document.querySelectorAll('.scene-row').forEach(row=>row.draggable=true);document.querySelectorAll('.mobile-caption-text').forEach(fold=>fold.replaceWith(...Array.from(fold.children).filter(n=>n.tagName!=='SUMMARY')));$('captionStylePanel').open=captionWasOpen;
   }
 
