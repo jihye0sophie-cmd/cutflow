@@ -81,6 +81,18 @@
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const key=()=>`p${Math.random().toString(36).slice(2)}`;
   const dispatch=(el,type)=>el.dispatchEvent(new Event(type,{bubbles:true}));
+  const fileButtonTargets={
+    uploadBtn:'fileInput',
+    scriptFileBtn:'scriptFile',
+    audioBtn:'audioInput',
+    bgmBtn:'bgmInput',
+    autoNarrationBtn:'autoNarration',
+    autoGridBtn:'autoGrids',
+    autoSingleBtn:'autoSingles',
+    autoBgmBtn:'autoBgm'
+  };
+  const fileTargetFor=el=>fileButtonTargets[el?.id]||'';
+  const openFileTarget=id=>{const input=$(id);if(input?.type==='file'){input.click();return true;}return false;};
   function proxyControl(el,label,{wide=false,map=proxyMap}={}){
     if(!el)return '';
     const k=key();map.set(k,el);
@@ -97,7 +109,8 @@
   function proxyButton(el,label,{primary=false,danger=false,wide=false,map=proxyMap}={}){
     if(!el)return '';
     const k=key();map.set(k,el);
-    return `<button type="button" data-proxy-click="${k}" class="v42-btn ${primary?'primary ':''}${danger?'danger ':''}${wide?'wide':''}" ${el.disabled?'disabled':''}>${esc(label)}</button>`;
+    const fileTarget=fileTargetFor(el);
+    return `<button type="button" data-proxy-click="${k}" ${fileTarget?`data-file-target="${fileTarget}"`:''} class="v42-btn ${primary?'primary ':''}${danger?'danger ':''}${wide?'wide':''}" ${el.disabled?'disabled':''}>${esc(label)}</button>`;
   }
   function section(title,body,sub='',extra=''){
     return `<section class="v42-section ${extra}"><div class="v42-section-head"><strong>${esc(title)}</strong>${sub?`<small>${esc(sub)}</small>`:''}</div>${body}</section>`;
@@ -306,8 +319,8 @@
   }
 
   app.addEventListener('click',e=>{
-    const click=e.target.closest('[data-click]');if(click){$(click.dataset.click)?.click();return;}
-    const proxy=e.target.closest('[data-proxy-click]');if(proxy){proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
+    const click=e.target.closest('[data-click]');if(click){const source=$(click.dataset.click),fileTarget=fileTargetFor(source);if(fileTarget&&openFileTarget(fileTarget))return;source?.click();return;}
+    const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
     const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
   });
   panel.addEventListener('input',e=>{proxyInput(e,proxyMap);});
@@ -325,8 +338,8 @@
     if(history){window.CutflowHistory?.[history.dataset.cutflowHistory]?.();setTimeout(syncSettingsProxyState,0);return;}
     const silence=e.target.closest('[data-settings-silence-run]');
     if(silence){const statusEl=settingsDialog.querySelector('[data-settings-silence-status]');(async()=>{try{if(typeof audioFile==='undefined'||!audioFile){statusEl.textContent='먼저 내레이션을 불러오세요.';return;}const p=settingsDialog.querySelector('input[name="v42SettingsSilence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowSilenceCut.process(audioFile,p,m=>statusEl.textContent=m);if(typeof loadAudio==='function')await loadAudio(result.processedFile);statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}})();return;}
-    const direct=e.target.closest('[data-direct-click]');if(direct){$(direct.dataset.directClick)?.click();return;}
-    const proxy=e.target.closest('[data-proxy-click]');if(proxy){settingsProxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>{syncSettingsProxyState();syncSettingsGridMirror();},0);return;}
+    const direct=e.target.closest('[data-direct-click]');if(direct){const source=$(direct.dataset.directClick),fileTarget=fileTargetFor(source);if(fileTarget&&openFileTarget(fileTarget))return;source?.click();return;}
+    const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;settingsProxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>{syncSettingsProxyState();syncSettingsGridMirror();},0);return;}
     handleAutoClick(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});
   });
   $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});});
