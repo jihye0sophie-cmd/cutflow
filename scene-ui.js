@@ -41,8 +41,57 @@
     if(!cues.length)return -1;const group=logicalItems()[sceneIndex];if(!group)return -1;const active=activeCueIndex();return group.cueIndices.includes(active)?active:group.firstCueIndex;
   };
 
+  const sourceForIndex=index=>{
+    const list=logicalItems(),item=list[index];
+    if(!item)return {list,item:null,scene:null};
+    const scene=cues.length?(item.source||scenes.find(s=>s.id===item.sceneId)):item;
+    return {list,item,scene};
+  };
+  const inspect=index=>{
+    const {item,scene}=sourceForIndex(index);if(!item||!scene)return null;
+    const transform=CutRenderer.transform(scene.transform);
+    return {
+      index,type:scene.type,name:scene.name||'',duration:Number(item.duration||scene.duration||0),
+      motion:scene.motion||'still',transition:scene.transition||'cut',
+      transform:{scale:transform.scale*100,x:transform.x*100,y:transform.y*100},
+      trimStart:Number(scene.trimStart||0),trimEnd:Number(scene.trimEnd??scene.sourceDuration)||0,
+      sourceDuration:Number(scene.sourceDuration)||0,mediaMuted:!!scene.mediaMuted,
+      mediaVolume:Math.round((scene.mediaVolume??0)*100),
+      mediaFadeIn:Number(scene.mediaFadeIn||0),mediaFadeOut:Number(scene.mediaFadeOut||0),
+      motionOptions:Object.entries(motionLabels),transitionOptions:Object.entries(transitionLabels)
+    };
+  };
+  const patchScene=(index,patch={})=>{
+    const {item,scene}=sourceForIndex(index);if(!item||!scene||exporting||loading)return false;
+    pause();if(cues.length)rememberCues();
+    const group=cues.length?item:null;
+    if(patch.motion!=null&&Object.prototype.hasOwnProperty.call(motionLabels,patch.motion)){scene.motion=patch.motion;if(group)for(const ci of group.cueIndices)delete cues[ci].motion;}
+    if(patch.transition!=null&&Object.prototype.hasOwnProperty.call(transitionLabels,patch.transition)){scene.transition=patch.transition;if(group)for(const ci of group.cueIndices)delete cues[ci].transition;}
+    if(patch.transform){const t=CutRenderer.transform(scene.transform),p=patch.transform;scene.transform=CutRenderer.transform({
+      scale:p.scale!=null?Number(p.scale)/100:t.scale,
+      x:p.x!=null?Number(p.x)/100:t.x,
+      y:p.y!=null?Number(p.y)/100:t.y
+    });if(group)for(const ci of group.cueIndices)delete cues[ci].transform;}
+    if(scene.type==='video'){
+      let trimChanged=false;
+      if(patch.trimStart!=null){scene.trimStart=Math.max(0,Math.min((scene.trimEnd??scene.sourceDuration)-.04,Number(patch.trimStart)||0));trimChanged=true;}
+      if(patch.trimEnd!=null){scene.trimEnd=Math.max((scene.trimStart||0)+.04,Math.min(scene.sourceDuration,Number(patch.trimEnd)||scene.sourceDuration));trimChanged=true;}
+      if(patch.mediaMuted!=null)scene.mediaMuted=!!patch.mediaMuted;
+      if(patch.mediaVolume!=null)scene.mediaVolume=Math.max(0,Math.min(1,Number(patch.mediaVolume)/100));
+      const available=Math.max(0,(scene.trimEnd??scene.sourceDuration)-(scene.trimStart||0));
+      if(patch.mediaFadeIn!=null)scene.mediaFadeIn=Math.max(0,Math.min(available,Number(patch.mediaFadeIn)||0));
+      if(patch.mediaFadeOut!=null)scene.mediaFadeOut=Math.max(0,Math.min(available,Number(patch.mediaFadeOut)||0));
+      if(trimChanged&&group){for(const ci of group.cueIndices){delete cues[ci].trimStart;delete cues[ci].trimEnd;cues[ci].mediaOffset=Math.max(0,cues[ci].start-group.start);}if(group.freeEdit)setSceneGroupDuration(group.firstCueIndex,Math.max(.1,available));}
+    }
+    if(cues.length)renderCues();else{renderScenes();changed();}
+    window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state:inspect(index)}}));
+    return inspect(index);
+  };
+
   window.CutflowScene={
     items:logicalItems,
+    state:inspect,
+    update:patchScene,
     index(){
       const list=logicalItems();if(!list.length)return 0;
       if(cues.length){const ci=activeCueIndex(),si=sceneIndexForCue(ci);return Math.max(0,si>=0?si:0);}
@@ -106,13 +155,21 @@
       changed();this.select(index);toast('다음 장면과 합쳤습니다. 현재 장면의 효과 설정을 유지합니다.');return true;
     },
     async replace(file){
-      if(!file)return;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;const oldIds=new Set(scenes.map(s=>s.id));await addFiles([file],{createFreeCues:false});const added=scenes.find(s=>!oldIds.has(s.id));if(!added)return;if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
+      if(!file)return false;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;const oldIds=new Set(scenes.map(s=>s.id));await addFiles([file],{createFreeCues:false});const added=scenes.find(s=>!oldIds.has(s.id));if(!added)return false;if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
       if(withCues&&group){
         const previous=scenes.find(s=>s.id===group.sceneId),addedIndex=scenes.indexOf(added),previousIndex=previous?scenes.indexOf(previous):-1;
-        if(previous&&previousIndex>=0){const keptId=previous.id;scenes[previousIndex]={...added,id:keptId,duration:group.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:previous.mediaVolume,mediaMuted:previous.mediaMuted,mediaFadeIn:previous.mediaFadeIn,mediaFadeOut:previous.mediaFadeOut};if(addedIndex>=0&&addedIndex!==previousIndex)scenes.splice(scenes.indexOf(added),1);try{previous.audioElement?.pause();previous.element.src='';}catch{}if(previous.url)URL.revokeObjectURL(previous.url);}
-        else{group.cueIndices.forEach(ci=>{cues[ci].sceneId=added.id;});}
-        renderCues();this.select(sceneIndex);
-      }else if(group){const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target];scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition};scenes.splice(scenes.indexOf(added),1);renderScenes();this.select(target);}}
+        if(previous&&previousIndex>=0){
+          const keptId=previous.id,sameVideo=previous.type==='video'&&added.type==='video';
+          scenes[previousIndex]={...added,id:keptId,duration:group.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,
+            mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,
+            mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};
+          if(addedIndex>=0&&addedIndex!==previousIndex)scenes.splice(scenes.indexOf(added),1);try{previous.audioElement?.pause();previous.element.src='';}catch{}if(previous.url)URL.revokeObjectURL(previous.url);
+        }else{group.cueIndices.forEach(ci=>{cues[ci].sceneId=added.id;});}
+        renderCues();changed();this.select(sceneIndex);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:sceneIndex,state:inspect(sceneIndex)}}));return true;
+      }else if(group){
+        const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target],sameVideo=previous.type==='video'&&added.type==='video';scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};scenes.splice(scenes.indexOf(added),1);renderScenes();changed();this.select(target);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:target,state:inspect(target)}}));return true;}
+      }
+      return false;
     }
   };
 })();
