@@ -263,13 +263,16 @@ async function exportVideo(){
 }
 $('uploadBtn').onclick=$('addMoreBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>addFiles(e.target.files);
 $('audioBtn').onclick=()=>$('audioInput').click();$('audioInput').onchange=e=>loadAudio(e.target.files[0]);$('scriptFileBtn').onclick=()=>$('scriptFile').click();$('scriptFile').onchange=async e=>{if(e.target.files[0]){$('scriptInput').value=await e.target.files[0].text();$('scriptInput').dispatchEvent(new Event('input',{bubbles:true}));changed();}e.target.value='';};
-$('randomMotionBtn').onclick=()=>{
+function applyRandomMotion(){
   pause();if(cues.length)rememberCues();let previous=[];
   const choose=()=>{const pool=Object.keys(motionLabels).filter(m=>m!=='still'&&!previous.includes(m));const next=pool[Math.floor(Math.random()*pool.length)];previous=[...previous,next].slice(-2);return next;};
   scenes.forEach(s=>{if(s.type==='image')s.motion=choose();});
   cues.forEach(c=>{delete c.motion;delete c.transition;delete c.transform;});
   renderCues();toast('장면별로 겹치지 않는 랜덤 무빙을 적용했습니다. 자막을 나눠도 효과는 유지됩니다.');
-};
+  window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{reason:'random-motion'}}));
+  return true;
+}
+$('randomMotionBtn').onclick=applyRandomMotion;
 $('buildCuesBtn').onclick=async()=>{buildCues();if(cues.length&&$('projectCaptionWrap')?.checked)await autoWrapCaptions();};$('fitCutsBtn').onclick=()=>fitCuts();$('applyTemplateBtn').onclick=applyRhythm;$('demoBtn').onclick=demo;
 $('playBtn').onclick=play;$('prevBtn').onclick=()=>navigateCut(-1);$('nextBtn').onclick=()=>navigateCut(1);$('scrubber').oninput=e=>jump(totalDuration()*Number(e.target.value)/1000);
 $('waveform').onclick=e=>{if(audioBuffer)jump((e.clientX-e.target.getBoundingClientRect().left)/e.target.clientWidth*audioBuffer.duration);};
@@ -361,6 +364,21 @@ async function autoWrapCaptions(){
   if(changedCount){changed();renderCues();}
   return changedCount;
 }
+
+window.CutflowCompose={
+  state(){return {layout:$('layoutSelect').value,title:$('titleInput').value,channel:$('channelInput').value,fit:$('fitSelect').value,motionPreset:$('templateSelect').value,fitDisabled:$('fitSelect').disabled};},
+  update(patch={}){
+    const map={layout:'layoutSelect',title:'titleInput',channel:'channelInput',fit:'fitSelect',motionPreset:'templateSelect'};
+    for(const [key,id] of Object.entries(map)){
+      if(patch[key]==null)continue;const el=$(id);if(!el)continue;el.value=String(patch[key]);
+      el.dispatchEvent(new Event(key==='motionPreset'?'change':'input',{bubbles:true}));
+    }
+    window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{state:this.state()}}));
+    return this.state();
+  },
+  applyMotionPreset(){applyRhythm();window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{reason:'motion-preset',state:this.state()}}));return true;},
+  randomMotion(){return applyRandomMotion();}
+};
 
 window.CutflowAutoBridge={
   scriptLines,
