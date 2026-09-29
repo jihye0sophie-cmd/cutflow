@@ -232,6 +232,9 @@
   document.addEventListener('pointermove',moveDrag);
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
   window.addEventListener('cutflow-scene',()=>requestAnimationFrame(renderAll));
+  window.addEventListener('cutflow-scene-updated',()=>requestAnimationFrame(renderAll));
+  window.addEventListener('cutflow-bgm-updated',()=>requestAnimationFrame(renderAll));
+  window.addEventListener('cutflow-project-restored',()=>requestAnimationFrame(()=>{pendingCenter=true;renderAll();}));
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying'),{childList:true});
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
