@@ -50,3 +50,17 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 
 /* v42.4 mobile stabilization */
 .v42-auto-files i{font-style:normal;color:#d7dce3}.v42-settings-actions [data-cutflow-history]{min-height:40px}.v42-settings-actions [data-cutflow-history]:disabled{opacity:.35}
+
+/* v42.4.1 mobile stability: iOS bottom sheets + tab panel visibility */
+#v42SettingsDialog[open]{display:flex!important;flex-direction:column;overflow:hidden;height:min(88dvh,calc(100dvh - max(12px,env(safe-area-inset-top))));max-height:none!important}
+#v42SettingsDialog>.v42-sheet-head{flex:0 0 auto;position:relative;z-index:2;background:var(--v42-bg);border-bottom:1px solid var(--v42-border)}
+#v42SettingsDialog .v42-settings-body{flex:1 1 auto;min-height:0;max-height:none!important;overflow-y:auto!important;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+#v42ScenesDialog[open]{display:flex!important;flex-direction:column;overflow:hidden;max-height:82dvh}
+#v42ScenesDialog>.v42-sheet-head{flex:0 0 auto}
+#v42ScenesDialog .v42-scenes-grid{overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+.v42-panel{min-height:92px;scroll-margin-bottom:calc(72px + env(safe-area-inset-bottom))}
+.v42-panel[data-render-state="error"]{border-color:#6a3b3f}
+.v42-tabs{touch-action:manipulation}
+@supports(height:100svh){
+  #v42SettingsDialog[open]{height:min(88svh,calc(100svh - max(12px,env(safe-area-inset-top))))}
+}
