@@ -13,7 +13,7 @@ const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
 assert(html.includes('mobile-v42.css?v=42.5.13'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.13'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.js?v=42.5.14'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -156,6 +156,10 @@ assert(css.includes('#v42SettingsDialog .v42-btn:disabled'),'readable disabled s
 assert(css.includes('.v42-settings-utility-group'),'compact settings toolbar styling missing');
 assert(js.includes('collapsibleSettingsSection'),'collapsible mobile settings helper missing');
 assert(js.includes("collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅'"),'auto setup must be collapsed by default');
+const projectPos=js.indexOf('quickActions+');
+const autoPos=js.indexOf("collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅'");
+const scriptPos=js.indexOf("settingsSection('01 SCRIPT & VOICE','대본과 내레이션'");
+assert(projectPos>=0&&autoPos>projectPos&&scriptPos>autoPos,'auto setup should appear directly after project utility');
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'settings dialog accent scope missing');
 assert(css.includes('.v42-pc-settings-collapsible'),'collapsible auto setup styles missing');
 assert(css.includes('#v42SettingsDialog .v42-btn.primary'),'settings primary contrast override missing');
