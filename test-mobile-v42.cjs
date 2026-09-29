@@ -98,7 +98,7 @@ assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener miss
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
 assert(html.includes('app.js?v=41.9'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
-assert(html.includes('timing-editor.js?v=42.2'),'timing mount cache key missing');
+assert(html.includes('timing-editor.js?v=42.2.1'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
 assert(app.includes('captionChanged(index)'),'caption update refresh hook missing');
 assert(styleEditor.includes('window.CutflowCaptionStyle={'),'caption style bridge missing');
