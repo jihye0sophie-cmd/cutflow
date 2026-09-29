@@ -4,8 +4,8 @@ const js=fs.readFileSync('mobile-v42.js','utf8');
 const css=fs.readFileSync('mobile-v42.css','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.4'),'v42.4 mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.4'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.4.1'),'v42.4 mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.4.1'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -44,4 +44,9 @@ assert(js.includes('followSelectedScene')&&js.includes('cutflow-auto-complete'),
 assert(js.includes('data-cutflow-history="undo"')&&js.includes('data-cutflow-history="redo"'),'mobile undo/redo controls missing');
 assert(html.includes('auto-setup.js?v=39.1'),'auto setup mobile completion cache key missing');
 assert(css.includes('.v42-panel{margin-top:8px;padding:8px;margin-bottom:0}'),'duplicate bottom spacing must be removed');
-console.log('Cutflow v42.4 mobile stabilization checks passed');
+assert(js.includes('function ensurePanelVisible()'),'tab panel visibility helper missing');
+assert(js.includes("panel.dataset.renderState='ready'"),'mobile panel render state missing');
+assert(js.includes('v42PanelRetry'),'mobile panel retry fallback missing');
+assert(css.includes('#v42SettingsDialog[open]{display:flex!important'),'iOS settings bottom sheet stability missing');
+assert(css.includes('.v42-panel{min-height:92px'),'mobile editor panel minimum height missing');
+console.log('Cutflow v42.4.1 mobile stabilization checks passed');
