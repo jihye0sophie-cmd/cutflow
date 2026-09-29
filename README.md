@@ -191,3 +191,9 @@ GitHub Pages 공식 안내: https://docs.github.com/en/pages/getting-started-wit
 - Numeric scene/caption start/end fields remain available for precise sync work.
 - “내레이션에 맞춤” redistributes captions inside the current scene using text-length weighting.
 - Existing caption, media, motion, scene split/merge, project save, auto setup, silence-cut and export paths remain unchanged.
+
+## v39 — narration-aware caption timing
+- Automatically aligns initial caption/scene boundaries to natural pauses in narration when possible.
+- The existing **내레이션에 맞춤** action now prioritizes detected pauses and soft energy valleys, with text-length fallback when no reliable break exists.
+- Auto Setup uses the same alignment engine after silence-cut processing, so the first timeline starts closer to the spoken rhythm.
+- Existing v38 workflow/UI, scene grouping, silence cut, media controls, project storage, and export behavior are preserved.

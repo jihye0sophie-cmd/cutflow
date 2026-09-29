@@ -5,7 +5,7 @@ const rhythms={reference:{motions:['zoom-in','still','zoom-out','still','pan-lef
 const autoMotionPool=Object.keys(motionLabels).filter(m=>m!=='still');
 let autoMotionRecent=[];
 function chooseAutoMotion(){const available=autoMotionPool.filter(m=>!autoMotionRecent.includes(m));const pool=available.length?available:autoMotionPool;const next=pool[Math.floor(Math.random()*pool.length)];autoMotionRecent=[...autoMotionRecent,next].slice(-2);return next;}
-let scenes=[],cues=[],audioBuffer=null,audioUrl=null,audioName='',audioFile=null,silences=[],envelope=[],cueHistory=[];
+let scenes=[],cues=[],audioBuffer=null,audioUrl=null,audioName='',audioFile=null,silences=[],envelope=[],cueHistory=[],timingAnalysis=null;
 let titleColorRanges=[],lastTitleText='';
 let playRequest=0;
 let previewMediaAudio=null;
@@ -193,9 +193,11 @@ function waveform(time=0){const canvas=$('waveform'),ctx=canvas.getContext('2d')
 function analyzeAudio(buffer){
   const data=buffer.getChannelData(0),sr=buffer.sampleRate,hop=Math.max(1,Math.floor(sr*.02));const rms=[];let peak=0;
   for(let i=0;i<data.length;i+=hop){let sum=0;for(let j=i;j<Math.min(data.length,i+hop);j++)sum+=data[j]*data[j];const v=Math.sqrt(sum/hop);rms.push(v);peak=Math.max(peak,v);}
-  const threshold=Math.max(.001,peak*.07);silences=[];let begin=null;
-  rms.forEach((v,i)=>{if(v<threshold){if(begin===null)begin=i*.02;}else if(begin!==null){if(i*.02-begin>=.14)silences.push((begin+i*.02)/2);begin=null;}});
+  timingAnalysis=window.CutflowTimingAlign?.analyze?.(buffer)||null;
+  silences=(timingAnalysis?.pauses||[]).map(p=>p.time);
+  if(!silences.length){const threshold=Math.max(.001,peak*.07);let begin=null;rms.forEach((v,i)=>{if(v<threshold){if(begin===null)begin=i*.02;}else if(begin!==null){if(i*.02-begin>=.14)silences.push((begin+i*.02)/2);begin=null;}});}
   envelope=Array.from({length:360},(_,i)=>{const from=Math.floor(i*rms.length/360),to=Math.max(from+1,Math.floor((i+1)*rms.length/360));return Math.max(...rms.slice(from,to),0)/(peak||1);});
+  window.CutflowTimingData=timingAnalysis;
 }
 async function loadAudio(file){
   if(!file)return;pause();loading++;stats();$('audioStatus').textContent='오디오 읽는 중…';let context;
@@ -207,11 +209,17 @@ function scriptLines(text){let lines=text.split(/\r?\n/).map(s=>s.trim()).filter
 function buildCues(){
   const lines=scriptLines($('scriptInput').value);if(!audioBuffer||!lines.length){toast('대본과 내레이션 오디오를 모두 넣어 주세요.');return;}
   if(lines.length>audioBuffer.duration/.1){toast('자막 구간이 너무 많습니다. 대본의 줄 수를 줄여 주세요.');return;}
-  pause();rememberCues();const inheritedStyle=window.newCueStyle?.()||{};const total=audioBuffer.duration,weights=lines.map(s=>Math.max(1,s.replace(/\[\[|\]\]|\s/g,'').length)),sum=weights.reduce((a,b)=>a+b,0);let weight=0,last=0;
-  cues=lines.map((text,i)=>{weight+=weights[i];let end=i===lines.length-1?total:total*weight/sum;
-    if(i<lines.length-1){const near=silences.filter(t=>t>last+.12&&Math.abs(t-end)<Math.min(.8,total/lines.length*.35)).sort((a,b)=>Math.abs(a-end)-Math.abs(b-end));if(near.length)end=near[0];}
-    end=Math.max(last+.1,Math.min(total-(lines.length-i-1)*.1,end));const cue={id:uid(),start:last,end,text,color:'white',...structuredClone(inheritedStyle)};last=end;return cue;});
-  offset=0;renderCues();toast('자막 시간 초안을 만들었습니다. 음성을 들으며 조정해 주세요.');
+  pause();rememberCues();const inheritedStyle=window.newCueStyle?.()||{};const total=audioBuffer.duration;
+  const aligned=window.CutflowTimingAlign?.alignTexts?.(lines,0,total,timingAnalysis?.candidates||[]);
+  let boundaries=aligned?.boundaries;
+  if(!Array.isArray(boundaries)||boundaries.length!==lines.length+1){
+    const weights=lines.map(s=>Math.max(1,s.replace(/\[\[|\]\]|\s/g,'').length)),sum=weights.reduce((a,b)=>a+b,0);let weight=0;boundaries=[0];
+    for(let i=0;i<lines.length-1;i++){weight+=weights[i];boundaries.push(total*weight/sum);}boundaries.push(total);
+  }
+  cues=lines.map((text,i)=>({id:uid(),start:boundaries[i],end:boundaries[i+1],text,color:'white',...structuredClone(inheritedStyle)}));
+  offset=0;renderCues();
+  const matched=(aligned?.pauseHits||0)+(aligned?.valleyHits||0),fallback=aligned?.fallbackCount||0;
+  toast(matched?`자막 시간 초안을 음성 쉼 ${matched}곳에 맞췄습니다.${fallback?` ${fallback}곳은 문장 길이 기준으로 배분했습니다.`:''}`:'자막 시간 초안을 문장 길이에 맞춰 만들었습니다. 음성을 들으며 조정해 주세요.');
 }
 function fitCuts(message=true){
   if(!scenes.length)return;pause();if(cues.length){rememberCues();cues.forEach((c,i)=>{c.sceneId=scenes[i]?.id;c.mediaOffset=0;});renderCues();}else if(audioBuffer){scenes.forEach(s=>s.duration=audioBuffer.duration/scenes.length);renderScenes();}offset=0;if(message)toast('자막 1개에 컷 1개씩 순서대로 연결했습니다. 부족한 컷은 해당 구간에서 선택해 주세요.');
@@ -287,7 +295,7 @@ function captureControls(){const out={};for(const id of savedControlIds){const e
 function restoreControls(values={}){for(const [id,value] of Object.entries(values)){const el=$(id);if(!el)continue;if(el.type==='checkbox')el.checked=!!value;else el.value=value;}lastTitleText=$('titleInput').value||'';$('fitSelect').disabled=$('layoutSelect').value==='fullscreen';$('layoutDescription').textContent=$('layoutSelect').value==='framed'?'노란 제목 · 중앙 이미지 · 하단 자막과 채널명':$('layoutSelect').value==='fullscreen'?'이미지·영상 전체 채우기 · 자막 오버레이':'노란 제목 · 세로 확장 영상 · 강조 자막과 채널명';}
 function cleanSceneState(scene){const {id,name,type,sourceDuration,trimStart,trimEnd,duration,motion,transition,transform,mediaVolume,mediaMuted,mediaFadeIn,mediaFadeOut}=scene;return {id,name,type,sourceDuration,trimStart,trimEnd:trimEnd??sourceDuration,duration,motion,transition,transform,mediaVolume:mediaVolume??0,mediaMuted:!!mediaMuted,mediaFadeIn:mediaFadeIn??0,mediaFadeOut:mediaFadeOut??0};}
 function mediaBytes(){const bgm=window.bgmSnapshot?.();return scenes.reduce((n,s)=>n+(s.file?.size||0),0)+(audioFile?.size||0)+(bgm?.file?.size||0);}
-async function clearProjectMedia(){pause();for(const s of scenes){try{s.audioElement?.pause();s.element.src='';}catch{}if(s.url)URL.revokeObjectURL(s.url);}scenes=[];cues=[];cueHistory=[];if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=null;audioBuffer=null;audioFile=null;audioName='';$('narration').removeAttribute('src');$('narration').load();silences=[];envelope=[];await window.restoreBgmSnapshot?.(null,{silent:true});}
+async function clearProjectMedia(){pause();for(const s of scenes){try{s.audioElement?.pause();s.element.src='';}catch{}if(s.url)URL.revokeObjectURL(s.url);}scenes=[];cues=[];cueHistory=[];if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=null;audioBuffer=null;audioFile=null;audioName='';$('narration').removeAttribute('src');$('narration').load();silences=[];envelope=[];timingAnalysis=null;window.CutflowTimingData=null;await window.restoreBgmSnapshot?.(null,{silent:true});}
 const cloneProjectData=value=>{if(value==null)return value;try{if(typeof structuredClone==='function')return structuredClone(value);}catch{}return JSON.parse(JSON.stringify(value));};
 function autoWrapCaptionText(text,style={}){
   const raw=String(text||'').replace(/\s*\n\s*/g,' ').replace(/\s+/g,' ').trim();
@@ -331,7 +339,7 @@ window.CutflowAutoBridge={
 
 window.CutflowProjectBridge={
   version:1,
-  capture(){return {schemaVersion:1,appVersion:'35.1',controls:captureControls(),titleColorRanges:cloneProjectData(titleColorRanges),cues:cloneProjectData(cues),scenes:scenes.map(s=>({meta:cleanSceneState(s),file:s.file})),narration:audioFile?{file:audioFile,name:audioName}:null,bgm:window.bgmSnapshot?.()||null,playhead:currentTime(),estimatedMediaBytes:mediaBytes()};},
+  capture(){return {schemaVersion:1,appVersion:'39',controls:captureControls(),titleColorRanges:cloneProjectData(titleColorRanges),cues:cloneProjectData(cues),scenes:scenes.map(s=>({meta:cleanSceneState(s),file:s.file})),narration:audioFile?{file:audioFile,name:audioName}:null,bgm:window.bgmSnapshot?.()||null,playhead:currentTime(),estimatedMediaBytes:mediaBytes()};},
   async restore(data){if(!data||data.schemaVersion!==1)throw new Error('지원하지 않는 프로젝트 형식입니다.');loading++;stats();try{await clearProjectMedia();restoreControls(data.controls);titleColorRanges=cloneProjectData(data.titleColorRanges||[]);lastTitleText=$('titleInput').value||'';for(const saved of data.scenes||[]){if(!saved?.file)continue;const file=saved.file instanceof File?saved.file:new File([saved.file],saved.meta?.name||'media',{type:saved.file.type||''});const scene=await makeScene(file);Object.assign(scene,saved.meta||{});scene.file=file;scenes.push(scene);}cues=cloneProjectData(data.cues||[]);normalizeSceneSettingsFromCues();if(data.narration?.file){const f=data.narration.file instanceof File?data.narration.file:new File([data.narration.file],data.narration.name||'narration.wav',{type:data.narration.file.type||'audio/wav'});await loadAudio(f);}await window.restoreBgmSnapshot?.(data.bgm||null,{silent:true});offset=Math.max(0,Math.min(Number(data.playhead)||0,totalDuration()));renderScenes();renderCues();waveform(offset);window.syncStyleEditor?.();window.syncTextStyleNotes?.();await CutRenderer.fonts(project());dirty=true;return true;}finally{loading--;stats();}},
   hasWork(){return !!(scenes.length||audioBuffer||window.bgmProject?.().buffer||$('scriptInput').value||$('titleInput').value);},
   nameSuggestion(){return ($('titleInput').value||'').replace(/\s+/g,' ').trim().slice(0,60)||`Cutflow ${new Date().toLocaleDateString('ko-KR')}`;},
