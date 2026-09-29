@@ -1,7 +1,7 @@
 /* v37 timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
 (()=>{
   const q=id=>document.getElementById(id);
-  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1;
+  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,lastCenteredCueId=null;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const num=(n,d=0)=>Number.isFinite(Number(n))?Number(n):d;
   const fmt=n=>num(n).toFixed(2);
@@ -35,25 +35,39 @@
     for(let k=1;k<list.length;k++){const boundary=(list[k-1].end+list[k].start)/2;list[k-1].end=boundary;list[k].start=boundary;}
     updateOffsets({...item,start:newStart,end:newEnd});
   };
-  const setSceneBoundary=(side,value,{commit=true}={})=>{
-    const list=sceneItems(),i=sceneIndex(),item=list[i];if(!item||!cues.length)return false;
+  const setSceneBoundaryAt=(i,side,value,{commit=true}={})=>{
+    const list=sceneItems(),item=list[i];if(!item||!cues.length)return false;
     value=num(value,side==='start'?item.start:item.end);
     if(side==='start'){
       if(i===0)return false;const prev=list[i-1],min=prev.start+.1,max=item.end-.1;value=clamp(value,min,max);
       rescaleGroup(prev,prev.start,value);rescaleGroup(item,value,item.end);
     }else{
-      const next=list[i+1];const min=item.start+.1,max=next?next.end-.1:Math.max(item.start+.1,audioBuffer?.duration||item.end+60);
+      const next=list[i+1],min=item.start+.1,max=next?next.end-.1:Math.max(item.start+.1,audioBuffer?.duration||item.end+60);
       value=clamp(value,min,max);rescaleGroup(item,item.start,value);if(next)rescaleGroup(next,value,next.end);
     }
     if(commit){changed();renderCues();window.CutflowScene.select(Math.min(i,sceneItems().length-1));}
     return true;
   };
+  const setSceneBoundary=(side,value,options)=>setSceneBoundaryAt(sceneIndex(),side,value,options);
   const setCaptionBoundary=(leftIndex,value,{commit=true}={})=>{
     const items=sceneItems(),item=items.find(g=>g?.cueIndices?.includes(leftIndex));if(!item)return false;
     const pos=item.cueIndices.indexOf(leftIndex),rightIndex=item.cueIndices[pos+1];if(rightIndex==null)return false;
     const left=cues[leftIndex],right=cues[rightIndex],min=left.start+.08,max=right.end-.08;value=clamp(num(value,left.end),min,max);
     left.end=value;right.start=value;updateOffsets(item);
     if(commit){changed();renderCues();const si=items.indexOf(item);if(si>=0)window.CutflowScene.select(si);}
+    return true;
+  };
+  const setCaptionEdge=(cueIndex,side,value,{commit=true}={})=>{
+    const items=sceneItems(),item=items.find(g=>g?.cueIndices?.includes(cueIndex)),cue=cues[cueIndex];if(!item||!cue)return false;
+    const si=items.indexOf(item),pos=item.cueIndices.indexOf(cueIndex);
+    if(side==='start'){
+      if(pos===0){if(si===0){cue.start=clamp(num(value,cue.start),0,cue.end-.08);updateOffsets(item);}else setSceneBoundaryAt(si,'start',value,{commit:false});}
+      else setCaptionBoundary(item.cueIndices[pos-1],value,{commit:false});
+    }else{
+      if(pos===item.cueIndices.length-1)setSceneBoundaryAt(si,'end',value,{commit:false});
+      else setCaptionBoundary(cueIndex,value,{commit:false});
+    }
+    if(commit){changed();renderCues();window.CutflowScene.select(Math.max(0,si));}
     return true;
   };
   const redistribute=()=>{
@@ -72,13 +86,7 @@
   };
   const changeSelectedTime=(side,value)=>{
     const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;
-    const pos=item.cueIndices.indexOf(sel.index);rememberCues();
-    if(side==='start'){
-      if(pos===0)setSceneBoundary('start',value,{commit:false});else setCaptionBoundary(item.cueIndices[pos-1],value,{commit:false});
-    }else{
-      if(pos===item.cueIndices.length-1)setSceneBoundary('end',value,{commit:false});else setCaptionBoundary(sel.index,value,{commit:false});
-    }
-    changed();renderCues();window.CutflowScene.select(sceneIndex());renderAll();
+    rememberCues();setCaptionEdge(sel.index,side,value,{commit:false});changed();renderCues();window.CutflowScene.select(sceneForCueIndex(sel.index));renderAll();
   };
   function waveform(canvas,start,end){
     if(!canvas)return;const r=canvas.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}const ctx=canvas.getContext('2d');ctx.clearRect(0,0,w,h);ctx.fillStyle='#20262d';ctx.fillRect(0,0,w,h);if(!audioBuffer){ctx.fillStyle='#69727e';ctx.font=`${12*dpr}px sans-serif`;ctx.fillText('내레이션 없음',12*dpr,h/2);return;}const data=audioBuffer.getChannelData(0),sr=audioBuffer.sampleRate,duration=end-start;ctx.strokeStyle='#8f9aa7';ctx.lineWidth=Math.max(1,dpr);ctx.beginPath();const columns=Math.max(1,Math.floor(w));for(let x=0;x<columns;x++){const t0=start+(x/columns)*duration,t1=start+((x+1)/columns)*duration,a=Math.max(0,Math.floor(t0*sr)),b=Math.min(data.length,Math.max(a+1,Math.ceil(t1*sr)));let peak=0;const step=Math.max(1,Math.floor((b-a)/8));for(let j=a;j<b;j+=step)peak=Math.max(peak,Math.abs(data[j]||0));const y=peak*h*.44;ctx.moveTo(x,h/2-y);ctx.lineTo(x,h/2+y);}ctx.stroke();}
