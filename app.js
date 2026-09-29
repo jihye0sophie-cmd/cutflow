@@ -174,6 +174,14 @@ function navigateCut(direction){
   const starts=cues.length?cues.map(c=>c.start):scenes.map((s,i)=>sceneStart(i));const time=currentTime();const next=direction>0?starts.find(t=>t>time+.01):starts.filter(t=>t<time-.01).at(-1);jump(next??(direction>0?totalDuration():0));
 }
 function jump(time){pause();offset=Math.max(0,Math.min(totalDuration(),time));if(audioBuffer)$('narration').currentTime=Math.min(offset,audioBuffer.duration);dirty=true;}
+window.CutflowPlayer={
+  state(){return {playing,currentTime:currentTime(),duration:totalDuration(),progress:totalDuration()?currentTime()/totalDuration():0,exporting,loading:!!loading};},
+  toggle(){return play();},
+  play(){if(!playing)return play();return true;},
+  pause(){pause();return true;},
+  seek(time){jump(Number(time)||0);return this.state();},
+  seekProgress(progress){jump(totalDuration()*Math.max(0,Math.min(1,Number(progress)||0)));return this.state();}
+};
 async function tick(){
   const time=currentTime();
   if(playing&&time>=totalDuration()){pause();offset=totalDuration();}
@@ -252,13 +260,21 @@ async function demo(){
 }
 function applyRhythm(){pause();const rhythm=rhythms[$('templateSelect').value];scenes.forEach((s,i)=>{if(s.type==='image')s.motion=rhythm.motions[i%rhythm.motions.length];s.transition=i?rhythm.transitions[i%rhythm.transitions.length]:'cut';});cues.forEach(c=>{delete c.motion;delete c.transition;delete c.transform;delete c.trimStart;delete c.trimEnd;});renderCues();toast('길이는 유지하고 장면별 움직임·전환만 적용했습니다.');}
 async function exportVideo(){
-  if(exporting||loading||!scenes.length||cues.some(c=>!scenes.some(s=>s.id===c.sceneId)))return;
-  pause();exporting=true;$('exportDialog').showModal();$('downloadLink').hidden=true;$('closeExportBtn').hidden=true;$('cancelExportBtn').hidden=false;$('exportProgress').value=0;if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}stats();
+  const emit=(type,detail={})=>{if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent(type,{detail}));};
+  if(exporting||loading){emit('cutflow-export-error',{message:exporting?'이미 MP4를 만들고 있습니다.':'미디어를 불러오는 중입니다.'});return false;}
+  if(!scenes.length){emit('cutflow-export-error',{message:'먼저 이미지나 영상을 추가해 주세요.'});toast('먼저 이미지나 영상을 추가해 주세요.');return false;}
+  const missing=cues.filter(c=>!scenes.some(s=>s.id===c.sceneId)).length;if(missing){emit('cutflow-export-error',{message:`장면이 연결되지 않은 자막이 ${missing}개 있습니다.`});toast('장면이 연결되지 않은 자막을 먼저 확인해 주세요.');return false;}
+  pause();exporting=true;const mobile=window.CutflowUI?.mode==='mobile';
+  if(!mobile)$('exportDialog').showModal();$('downloadLink').hidden=true;$('closeExportBtn').hidden=true;$('cancelExportBtn').hidden=false;$('exportProgress').value=0;if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}stats();
   const token={cancelled:false};window.currentExport=token;let wakeLock;
+  const width=Number($('resolutionSelect').value),filename=`Cutflow_${new Date().toISOString().slice(0,10)}_${width}p.mp4`;
+  emit('cutflow-export-start',{width,filename});
   try{while(rendering)await new Promise(r=>setTimeout(r,20));await CutRenderer.fonts(project());try{wakeLock=await navigator.wakeLock?.request('screen');}catch{}
-    const blob=await CutEncoder.exportMP4(project(),Number($('resolutionSelect').value),token,(progress,message)=>{$('exportProgress').value=progress;$('exportStatus').textContent=message;});
-    if(token.cancelled)throw new Error('취소되었습니다.');downloadUrl=URL.createObjectURL(blob);const link=$('downloadLink');link.href=downloadUrl;link.download=`Cutflow_${new Date().toISOString().slice(0,10)}.mp4`;link.hidden=false;$('exportProgress').value=1;$('exportStatus').textContent='MP4 완성. 다운로드 버튼을 눌러 저장하세요.';toast('MP4 파일을 만들었습니다.');
-  }catch(error){$('exportStatus').textContent=token.cancelled?'저장을 취소했습니다. 편집 내용은 유지됩니다.':`저장 실패: ${error.message}`;}
+    const blob=await CutEncoder.exportMP4(project(),width,token,(progress,message)=>{$('exportProgress').value=progress;$('exportStatus').textContent=message;emit('cutflow-export-progress',{progress,message,width});});
+    if(token.cancelled)throw new Error('취소되었습니다.');downloadUrl=URL.createObjectURL(blob);const link=$('downloadLink');link.href=downloadUrl;link.download=filename;link.hidden=false;$('exportProgress').value=1;$('exportStatus').textContent='MP4 완성. 다운로드 버튼을 눌러 저장하세요.';
+    if(window.CutflowExport){window.CutflowExport.lastBlob=blob;window.CutflowExport.lastFilename=filename;}
+    emit('cutflow-export-complete',{blob,filename,width,size:blob.size});toast('MP4 파일을 만들었습니다.');return {blob,filename,width};
+  }catch(error){const message=token.cancelled?'저장을 취소했습니다. 편집 내용은 유지됩니다.':`저장 실패: ${error.message}`;$('exportStatus').textContent=message;emit(token.cancelled?'cutflow-export-cancelled':'cutflow-export-error',{message,error});return false;}
   finally{await wakeLock?.release();exporting=false;window.currentExport=null;$('cancelExportBtn').hidden=true;$('closeExportBtn').hidden=false;dirty=true;stats();}
 }
 $('uploadBtn').onclick=$('addMoreBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=e=>addFiles(e.target.files);
@@ -328,7 +344,8 @@ window.CutflowCaption={
     changed();renderCues();window.dispatchEvent(new CustomEvent('cutflow-caption-updated',{detail:{index:Math.min(index,cues.length-1),state:captionState(Math.min(index,cues.length-1))}}));return true;
   }
 };
-$('exportBtn').onclick=exportVideo;$('cancelExportBtn').onclick=()=>{if(window.currentExport){window.currentExport.cancelled=true;CutEncoder.cancel();$('exportStatus').textContent='취소하는 중…';}};$('closeExportBtn').onclick=()=>$('exportDialog').close();$('exportDialog').addEventListener('cancel',e=>{if(exporting){e.preventDefault();$('cancelExportBtn').click();}});
+window.CutflowExport={start:exportVideo,cancel(){if(window.currentExport){window.currentExport.cancelled=true;CutEncoder.cancel();$('exportStatus').textContent='취소하는 중…';return true;}return false;},get busy(){return exporting},lastBlob:null,lastFilename:''};
+$('exportBtn').onclick=exportVideo;$('cancelExportBtn').onclick=()=>window.CutflowExport.cancel();$('closeExportBtn').onclick=()=>$('exportDialog').close();$('exportDialog').addEventListener('cancel',e=>{if(exporting){e.preventDefault();$('cancelExportBtn').click();}});
 
 const savedControlIds=['scriptInput','projectCaptionWrap','layoutSelect','titleInput','titleFont','titleSize','titleColor','titleBold','titleItalic','titleStrokeEnabled','titleStrokeWidth','titleX','titleY','channelInput','channelFont','channelSize','channelColor','channelBold','channelItalic','channelStrokeEnabled','channelStrokeWidth','channelX','channelY','fitSelect','templateSelect','resolutionSelect'];
 function captureControls(){const out={};for(const id of savedControlIds){const el=$(id);if(!el)continue;out[id]=el.type==='checkbox'?el.checked:el.value;}return out;}
