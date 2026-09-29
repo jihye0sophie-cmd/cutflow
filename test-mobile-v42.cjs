@@ -12,8 +12,8 @@ const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
 
-assert(html.includes('mobile-v42.css?v=42.5.16'),'mobile css cache key missing');
-assert(html.includes('mobile-v42.js?v=42.5.16'),'v42.4 mobile js cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6'),'mobile css cache key missing');
+assert(html.includes('mobile-v42.js?v=42.6'),'v42.4 mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'mobile/desktop mode must stay locked after startup');
 assert(js.includes("window.CutflowUI.mode=lockedMobile?'mobile':'desktop'"),'locked device mode missing');
@@ -70,7 +70,7 @@ assert(js.includes("audioBtn:'audioInput'"),'narration direct file picker mappin
 assert(js.includes("bgmBtn:'bgmInput'"),'BGM direct file picker mapping missing');
 assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapping missing');
 assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
-assert(html.includes('app.js?v=41.8'),'shared app bridge cache key missing');
+assert(html.includes('app.js?v=41.9'),'shared app bridge cache key missing');
 assert(app.includes('async processNarration('),'shared narration processing bridge missing');
 assert(app.includes('async buildProjectCues()'),'shared cue building bridge missing');
 assert(app.includes("scriptInput').dispatchEvent(new Event('input'"),'TXT import must dispatch input');
@@ -92,7 +92,7 @@ assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'vid
 assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
 assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener missing');
 assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
-assert(html.includes('app.js?v=41.8'),'caption bridge cache key missing');
+assert(html.includes('app.js?v=41.9'),'caption bridge cache key missing');
 assert(html.includes('style-editor.js?v=34.4'),'caption style bridge cache key missing');
 assert(html.includes('timing-editor.js?v=41.4'),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
@@ -103,7 +103,7 @@ assert(timingEditor.includes('externalPanel?.isConnected'),'external timing pane
 assert(js.includes("captionMode='timing'"),'mobile caption timing subview missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(html.includes('mobile-v42.css?v=42.5.16'),'template typography css cache key missing');
+assert(html.includes('mobile-v42.css?v=42.6'),'template typography css cache key missing');
 assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
@@ -187,4 +187,13 @@ assert(css.includes('height:min(24dvh,220px)!important'),'compact preview height
 assert(css.includes('flex:0 0 44px!important'),'compact scene thumbnail size missing');
 assert(css.includes('flex:0 0 36px!important'),'ultra-compact scene thumbnail size missing');
 assert(css.includes('margin-top:4px!important'),'compact scene card spacing missing');
+assert(js.includes('data-tab="caption"')&&js.includes('data-tab="media"')&&js.includes('data-tab="timing"'),'three mobile editor tabs missing');
+assert(!js.includes('data-tab="narration"')&&!js.includes('data-tab="template"')&&!js.includes('data-tab="bgm"'),'legacy five-tab mobile navigation must be removed');
+assert(js.includes('id="v42CaptionPrev"')&&js.includes('id="v42CaptionNext"'),'mobile previous/next caption controls missing');
+assert(js.includes('data-caption-color'),'mobile current-caption color palette missing');
+assert(js.includes('function renderTiming()'),'standalone mobile precision timing tab missing');
+assert(js.includes("tab='timing'"),'caption to timing navigation missing');
+assert(app.includes('if(active>=0)return active;'),'shared caption currentIndex must prefer active caption');
+assert(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'),'three-column mobile tab styling missing');
+assert(css.includes('.v42-caption-segment-nav'),'desktop-parity mobile caption navigation styling missing');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
