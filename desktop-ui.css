@@ -203,3 +203,10 @@
   #desktopEditor[data-mode=image] #desktopSceneActions{display:block!important}
   #desktopEditor[data-mode=image] #desktopMediaDetails{display:block!important}
 }
+
+/* Whole-caption editor entry */
+@media(min-width:761px){
+  #desktopBatchCaptions{margin-left:auto!important;flex:0 0 auto!important;max-width:none!important;background:#20252b!important;color:#fff!important;border-color:#3b434c!important;font-weight:700}
+  #desktopBatchCaptions:hover{border-color:var(--studio-accent)!important}
+  #desktopEditor:not([data-mode=caption]) #desktopBatchCaptions{display:none!important}
+}
