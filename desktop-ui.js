@@ -21,6 +21,20 @@
   const cueIndex=cues.length?CutflowScene.cueIndex(i):i;
   const selectedCueIndex=cues.length&&mode==='image'?(item?.firstCueIndex??cueIndex):cueIndex;
   document.querySelectorAll('.cue-row,.scene-row').forEach(row=>{const rowIndex=Number(row.dataset.index),selected=cues.length?row.classList.contains('cue-row')&&rowIndex===selectedCueIndex:rowIndex===i;row.classList.toggle('desktop-selected',selected);});
+  // Keep the image/video tab in the practical edit order:
+  // media + motion + transition -> scene tools -> collapsed size/position details.
+  // The source cue rows are rebuilt frequently, so create this lightweight
+  // replacement control inside the current media block on every sync as needed.
+  document.querySelectorAll('.desktop-inline-replace').forEach(button=>button.remove());
+  if(mode==='image'&&item){
+   const selectedRow=document.querySelector('.cue-row.desktop-selected,.scene-row.desktop-selected');
+   const mediaBlock=selectedRow?.querySelector('.editor-media');
+   if(mediaBlock){
+    const inlineReplace=document.createElement('button');
+    inlineReplace.type='button';inlineReplace.className='desktop-inline-replace';inlineReplace.textContent='이미지·영상 교체';
+    inlineReplace.disabled=loading>0||exporting;inlineReplace.onclick=()=>file.click();mediaBlock.prepend(inlineReplace);
+   }
+  }
   const sceneChanged=i!==lastIndex;
   const next=JSON.stringify(list.map((item,j)=>{const {source,duration}=CutflowScene.thumbnail(item,j);return [item.id,source?.thumb,duration]}));
   const edit=$('desktopSceneEdit');if(edit){edit.textContent=sceneEdit?'편집 완료':'순서 편집';edit.setAttribute('aria-pressed',String(sceneEdit));}

@@ -173,3 +173,20 @@
   .timing-caption-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important}
   .timing-caption-nav button{white-space:nowrap;padding-inline:8px!important}
 }
+
+
+/* v41.2: image/video tab follows the actual editing frequency. */
+@media(min-width:761px){
+  #desktopEditor[data-mode=image] #desktopReplace{display:none!important}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media,
+  #desktopEditor[data-mode=image] .scene-row.desktop-selected>.editor-media{position:relative;padding-top:46px}
+  #desktopEditor[data-mode=image] .desktop-inline-replace{position:absolute;right:12px;top:10px;width:auto;min-height:32px;padding:6px 10px;white-space:nowrap}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media:before,
+  #desktopEditor[data-mode=image] .scene-row.desktop-selected>.editor-media:before{content:'이미지·영상';position:absolute;left:12px;top:17px;color:var(--studio-muted);font-size:12px;font-weight:700}
+  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media>label,
+  #desktopEditor[data-mode=image] .scene-row.desktop-selected>.editor-media>label{display:none}
+  /* Primary controls stay above the scene actions; transform remains only in the collapsed details below. */
+  #desktopEditor[data-mode=image] #desktopEditorBody{order:1}
+  #desktopEditor[data-mode=image] #desktopSceneActions{order:2}
+  #desktopEditor[data-mode=image] #desktopMediaDetails{order:3}
+}
