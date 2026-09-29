@@ -101,3 +101,179 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 #v42PreviewDialog:fullscreen{width:100vw;height:100vh;background:#000}
 #v42PreviewDialog:fullscreen #v42FullStage{height:calc(100vh - 52px)}
 @supports(height:100svh){#v42PreviewDialog{height:100svh}#v42FullStage{height:calc(100svh - 52px)}}
+
+/* v42.5.10 project settings desktop-parity layout */
+#v42SettingsDialog .v42-settings-body{
+  padding:8px 8px calc(22px + env(safe-area-inset-bottom));
+}
+#v42SettingsDialog .v42-settings-utility{
+  display:grid;
+  gap:6px;
+  margin-bottom:8px;
+}
+#v42SettingsDialog .v42-settings-utility-group{
+  display:grid;
+  grid-template-columns:74px 1fr 1fr;
+  align-items:center;
+  gap:6px;
+  padding:7px 8px;
+  border:1px solid #303640;
+  border-radius:9px;
+  background:#15181d;
+}
+#v42SettingsDialog .v42-settings-utility-group>span{
+  color:#aeb6c0;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+#v42SettingsDialog .v42-settings-utility-group .v42-btn{
+  min-height:36px;
+  padding:7px 8px;
+  font-size:10px;
+}
+#v42SettingsDialog .v42-pc-settings-section{
+  margin:0 0 8px;
+  overflow:hidden;
+  border:1px solid #303640;
+  border-radius:10px;
+  background:#171a1f;
+}
+#v42SettingsDialog .v42-pc-settings-section>header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+  padding:8px 10px;
+  border-bottom:1px solid #2c323a;
+  background:#14171b;
+}
+#v42SettingsDialog .v42-pc-settings-section>header>span{
+  flex:0 0 auto;
+  color:var(--v42-accent);
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.11em;
+}
+#v42SettingsDialog .v42-pc-settings-section>header>strong{
+  color:#f4f6f8;
+  font-size:13px;
+  font-weight:850;
+}
+#v42SettingsDialog .v42-pc-settings-body{
+  padding:8px 10px 10px;
+}
+#v42SettingsDialog .v42-pc-settings-body>.v42-field:first-child{
+  margin-top:0;
+}
+#v42SettingsDialog .v42-pc-settings-body>.v42-field:last-child{
+  margin-bottom:0;
+}
+#v42SettingsDialog .v42-field{
+  margin:6px 0;
+  gap:4px;
+}
+#v42SettingsDialog .v42-field>span,
+#v42SettingsDialog .v42-check span{
+  color:#d7dce3;
+  font-size:10px;
+}
+#v42SettingsDialog .v42-field input:not([type=range]):not([type=color]),
+#v42SettingsDialog .v42-field textarea,
+#v42SettingsDialog .v42-field select{
+  min-height:38px;
+  padding:7px 8px;
+  border-color:#3c434d;
+  background:#0f1216!important;
+  color:#f7f8fa!important;
+  font-size:15px;
+}
+#v42SettingsDialog .v42-field textarea{
+  min-height:110px;
+}
+#v42SettingsDialog .v42-actions{
+  gap:6px;
+  margin-top:6px;
+}
+#v42SettingsDialog .v42-btn{
+  min-height:38px;
+  color:#f5f7f9;
+  border-color:#414852;
+  background:#1b1f25;
+  font-size:10px;
+  font-weight:700;
+}
+#v42SettingsDialog .v42-btn:disabled{
+  opacity:1!important;
+  color:#9da6b1!important;
+  border-color:#323943!important;
+  background:#181c21!important;
+  -webkit-text-fill-color:#9da6b1!important;
+}
+#v42SettingsDialog .v42-btn.primary:disabled{
+  color:#d7d3a8!important;
+  border-color:#595323!important;
+  background:#49451f!important;
+  -webkit-text-fill-color:#d7d3a8!important;
+}
+#v42SettingsDialog .v42-btn.danger:disabled{
+  color:#b99195!important;
+  border-color:#493136!important;
+  background:#251b1e!important;
+}
+#v42SettingsDialog .v42-status{
+  margin:6px 0;
+  padding:7px 8px;
+  color:#cbd2da;
+  border:1px solid #252b32;
+  background:#101318;
+}
+#v42SettingsDialog .v42-help{
+  margin:6px 0;
+  color:#9fa8b3;
+}
+#v42SettingsDialog .v42-silence{
+  margin-top:8px;
+  padding-top:8px;
+}
+#v42SettingsDialog .v42-silence>strong{
+  color:#eef1f4;
+}
+#v42SettingsDialog .v42-pills{
+  margin:6px 0;
+}
+#v42SettingsDialog .v42-pills span{
+  padding:7px 3px;
+  color:#d6dbe1;
+  font-size:9px;
+}
+#v42SettingsDialog .v42-pills input:checked+span{
+  color:#111;
+}
+#v42SettingsDialog .v42-grid2{
+  gap:6px;
+}
+#v42SettingsDialog .v42-grid3{
+  gap:6px;
+}
+#v42SettingsDialog .v42-quick-start{
+  border-color:#5d5729;
+}
+#v42SettingsDialog .v42-quick-start>header{
+  background:#1a1a13;
+}
+@media(max-width:390px){
+  #v42SettingsDialog .v42-settings-utility-group{
+    grid-template-columns:62px 1fr 1fr;
+    padding:6px;
+  }
+  #v42SettingsDialog .v42-settings-utility-group>span{
+    font-size:7px;
+  }
+  #v42SettingsDialog .v42-pc-settings-section>header{
+    padding:7px 9px;
+  }
+  #v42SettingsDialog .v42-pc-settings-body{
+    padding:7px 9px 9px;
+  }
+}
