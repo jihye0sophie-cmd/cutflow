@@ -299,8 +299,23 @@
   }
   function renderBgm(){
     proxyMap.clear();
-    const controls=`<div class="v42-actions">${proxyButton($('bgmBtn'),'음악 파일 추가',{primary:true})}${proxyButton($('bgmRemove'),'음악 제거',{danger:true})}</div><p class="v42-status">${esc($('bgmStatus')?.textContent||'음악 없음')}</p><div class="v42-grid2">${proxyControl($('bgmStart'),'음악 시작 지점')}${proxyControl($('bgmVolume'),'BGM 볼륨')}${proxyControl($('bgmRepeat'),'음악이 짧을 때')}${proxyControl($('bgmFadeIn'),'페이드 인')}${proxyControl($('bgmFadeOut'),'페이드 아웃')}</div><p class="v42-help">${esc($('bgmSummary')?.textContent||'')}</p>`;
+    const api=window.CutflowBgm,state=api?.state?.()||{loaded:false,name:'',duration:0,start:0,volume:0,repeat:'stop',fadeIn:0,fadeOut:0,summary:'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.'};
+    const repeat=$('bgmRepeat');
+    const controls=`<input id="v42BgmInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac" hidden>
+      <div class="v42-actions"><button type="button" id="v42BgmAdd" class="v42-btn primary">음악 파일 추가</button><button type="button" id="v42BgmRemove" class="v42-btn danger" ${state.loaded?'':'disabled'}>음악 제거</button></div>
+      <p class="v42-status">${state.loaded?esc(state.name)+' · '+Number(state.duration).toFixed(2)+'초':'음악 없음'}</p>
+      <div class="v42-grid2">
+        <label class="v42-field"><span>음악 시작 지점</span><input data-bgm-field="start" type="number" min="0" max="${Math.max(0,(state.duration||0)-.01).toFixed(2)}" step="0.01" value="${Number(state.start||0).toFixed(2)}" ${state.loaded?'':'disabled'}></label>
+        <label class="v42-field"><span>BGM 볼륨 ${Math.round(state.volume||0)}%</span><input data-bgm-field="volume" type="range" min="0" max="100" step="1" value="${Math.round(state.volume||0)}" ${state.loaded?'':'disabled'}></label>
+        <label class="v42-field"><span>음악이 짧을 때</span><select data-bgm-field="repeat" ${state.loaded?'':'disabled'}>${repeat?[...repeat.options].map(o=>`<option value="${esc(o.value)}" ${o.value===state.repeat?'selected':''}>${esc(o.textContent)}</option>`).join(''):''}</select></label>
+        <label class="v42-field"><span>페이드 인</span><input data-bgm-field="fadeIn" type="number" min="0" max="30" step="0.1" value="${Number(state.fadeIn||0).toFixed(1)}" ${state.loaded?'':'disabled'}></label>
+        <label class="v42-field"><span>페이드 아웃</span><input data-bgm-field="fadeOut" type="number" min="0" max="30" step="0.1" value="${Number(state.fadeOut||0).toFixed(1)}" ${state.loaded?'':'disabled'}></label>
+      </div>
+      <p class="v42-help">${esc(state.summary||'')}</p>`;
     panel.innerHTML=section('배경음악 · BGM',controls);
+    $('v42BgmAdd').onclick=()=>$('v42BgmInput').click();
+    $('v42BgmInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;const btn=$('v42BgmAdd');btn.disabled=true;btn.textContent='음악 읽는 중…';const ok=await api?.load?.(file);e.target.value='';if(!ok){btn.disabled=false;btn.textContent='음악 파일 추가';window.CutflowAutoBridge?.toast?.('음악을 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');return;}requestRefresh(true);};
+    $('v42BgmRemove').onclick=()=>{api?.remove?.();requestRefresh(true);};
   }
   function renderPanel(force=false){
     if(!force&&panel.contains(document.activeElement))return;
@@ -354,6 +369,11 @@
     const value=el.type==='checkbox'?el.checked:['size','strokeWidth','x','y'].includes(field)?Number(el.value):el.value;
     window.CutflowTypography.update(kind,{[field]:value});return true;
   }
+  function applyBgmField(el){
+    const field=el?.dataset?.bgmField;if(!field||!window.CutflowBgm?.update)return false;
+    const value=field==='repeat'?el.value:Number(el.value);
+    window.CutflowBgm.update({[field]:value});return true;
+  }
   function handleAutoInput(e,refresh){
     const card=e.target.closest?.('[data-auto-grid]');
     if(card&&e.target.dataset.autoField){
@@ -376,8 +396,8 @@
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
     const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
   });
-  panel.addEventListener('input',e=>{if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
-  panel.addEventListener('change',e=>{if(e.target.dataset.composeField){applyComposeField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);setTimeout(()=>requestRefresh(false),0);return;}const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
+  panel.addEventListener('input',e=>{if(e.target.dataset.bgmField&&['volume'].includes(e.target.dataset.bgmField)){applyBgmField(e.target);return;}if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
+  panel.addEventListener('change',e=>{if(e.target.dataset.bgmField){applyBgmField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.composeField){applyComposeField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);setTimeout(()=>requestRefresh(false),0);return;}const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
   panel.addEventListener('click',e=>{
     const typoColor=e.target.closest('[data-typo-palette] [data-color]');if(typoColor){const kind=typoColor.closest('[data-typo-palette]').dataset.typoPalette;window.CutflowTypography?.update?.(kind,{color:typoColor.dataset.color});requestRefresh(false);return;}
     const sw=e.target.closest('[data-color-target] [data-color]');if(sw){const wrap=sw.closest('[data-color-target]'),el=$(wrap.dataset.colorTarget);if(el){el.value=sw.dataset.color;dispatch(el,'input');dispatch(el,'change');requestRefresh(false);}return;}
@@ -432,6 +452,7 @@
   window.addEventListener('cutflow-caption-style-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-compose-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-typography-updated',()=>requestRefresh(false));
+  window.addEventListener('cutflow-bgm-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-auto-status',e=>{const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.text||'';});
   window.addEventListener('cutflow-auto-error',e=>{if(!settingsDialog.open){renderSettings();settingsDialog.showModal();}const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.message?'자동 세팅 중단: '+e.detail.message:'자동 세팅이 중단되었습니다.';});
   window.addEventListener('cutflow-auto-complete',e=>{const detail=e.detail||{};const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent='완료 · 장면 '+(detail.sceneCount||0)+'개 · 자막 '+(detail.cueCount||0)+'개';requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
