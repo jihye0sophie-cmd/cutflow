@@ -89,3 +89,15 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 .v42-typo-palette .v42-color:active{transform:scale(.96)}
 .v42-field input[type="range"][data-typo-field]{width:100%}
 .v42-check input[data-typo-field]{accent-color:var(--v42-accent)}
+
+/* v42.5.8 preview + export */
+#v42ExportDialog{position:fixed;inset:auto 0 0!important;width:100%;max-width:620px!important;margin:0 auto;padding:0;border:1px solid var(--v42-border);border-bottom:0;border-radius:18px 18px 0 0;background:#0d0f12;color:#fff}
+#v42ExportDialog::backdrop{background:#000d}
+.v42-export-body{padding:14px 12px calc(18px + env(safe-area-inset-bottom))}
+.v42-export-body progress{display:block;width:100%;height:10px;accent-color:var(--v42-accent);margin-bottom:12px}
+.v42-export-result{margin:8px 0 12px;padding:9px;border:1px solid #30343b;border-radius:8px;background:#15181d;color:#cfd4da;font-size:10px}
+#v42ExportDialog .v42-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+#v42ExportDialog .v42-btn{display:flex;align-items:center;justify-content:center;min-height:42px;text-decoration:none}
+#v42PreviewDialog:fullscreen{width:100vw;height:100vh;background:#000}
+#v42PreviewDialog:fullscreen #v42FullStage{height:calc(100vh - 52px)}
+@supports(height:100svh){#v42PreviewDialog{height:100svh}#v42FullStage{height:calc(100svh - 52px)}}
