@@ -405,19 +405,18 @@ async function autoWrapCaptions(){
   return changedCount;
 }
 
+const composeState=()=>({layout:$('layoutSelect').value,title:$('titleInput').value,channel:$('channelInput').value,fit:$('fitSelect').value,motionPreset:$('templateSelect').value,fitDisabled:$('fitSelect').disabled});
 window.CutflowCompose={
-  state(){return {layout:$('layoutSelect').value,title:$('titleInput').value,channel:$('channelInput').value,fit:$('fitSelect').value,motionPreset:$('templateSelect').value,fitDisabled:$('fitSelect').disabled};},
   update(patch={}){
     const map={layout:'layoutSelect',title:'titleInput',channel:'channelInput',fit:'fitSelect',motionPreset:'templateSelect'};
     for(const [key,id] of Object.entries(map)){
       if(patch[key]==null)continue;const el=$(id);if(!el)continue;el.value=String(patch[key]);
       el.dispatchEvent(new Event(key==='motionPreset'?'change':'input',{bubbles:true}));
     }
-    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{state:this.state()}}));
-    return this.state();
-  },
-  applyMotionPreset(){applyRhythm();if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{reason:'motion-preset',state:this.state()}}));return true;},
-  randomMotion(){return applyRandomMotion();}
+    const state=composeState();
+    if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-compose-updated',{detail:{state}}));
+    return state;
+  }
 };
 
 window.CutflowAutoBridge={
