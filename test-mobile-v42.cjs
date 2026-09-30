@@ -122,8 +122,8 @@ assert(new RegExp('bgm-editor\\.js\\?v=[^"\\x27]+').test(html),'BGM bridge cache
 assert(bgmEditor.includes('window.CutflowBgm={'),'shared BGM bridge missing');
 assert(bgmEditor.includes("cutflow-bgm-updated"),'BGM update event missing');
 assert(js.includes('function applyBgmField('),'mobile BGM direct field bridge missing');
-assert(js.includes('v42BgmInput')&&js.includes('v42BgmAdd')&&js.includes('v42BgmRemove'),'mobile BGM direct file controls missing');
-assert(js.includes('data-bgm-field="start"')&&js.includes('data-bgm-field="volume"')&&js.includes('data-bgm-field="repeat"'),'mobile BGM fields missing');
+assert(js.includes("pb($('bgmBtn'),'음악 파일 추가')")&&js.includes("pb($('bgmRemove'),'음악 제거'"),'mobile BGM direct file controls missing');
+assert(js.includes("pc($('bgmStart'),'음악 시작 지점 (초)')")&&js.includes("pc($('bgmVolume'),'BGM 볼륨')")&&js.includes("pc($('bgmRepeat'),'음악이 짧을 때')"),'mobile BGM fields missing');
 assert(js.includes("'cutflow-bgm-updated'"),'mobile BGM refresh listener missing');
 assert(app.includes("selectNavigationCue(target,false)"),'segment caption navigation must not scroll');
 assert(!app.includes('data-action="selection-apply">선택 글자에 적용'),'selection apply button should be removed');
