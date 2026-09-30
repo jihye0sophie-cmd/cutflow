@@ -164,6 +164,11 @@
       </article>`;
     }).join('');
   }
+  function autoSingleMirror(){
+    const singles=window.CutflowAutoSetup?.singles?.()||[];
+    if(!singles.length)return '<p class="v42-auto-empty">분할 없이 그대로 사용할 개별 이미지를 추가할 수 있습니다.</p>';
+    return `<div class="v42-auto-single-list">${singles.map(s=>`<article class="v42-auto-single-item" data-auto-single="${s.index}"><img src="${esc(s.url||'')}" alt=""><div><strong>${esc(s.name)}</strong><small>개별 이미지 · 장면 1컷</small></div><button type="button" class="v42-grid-remove" data-auto-single-action="remove" aria-label="개별 이미지 제거">×</button></article>`).join('')}</div>`;
+  }
   function currentScene(){
     const api=window.CutflowScene;if(!api?.items)return {items:[],item:null,index:0};
     const items=api.items()||[];
@@ -316,14 +321,16 @@
         </div>
         <div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>
       </section>
-      <section class="v42-auto-flow-section">
-        <header><div><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div></header>
-        <div class="v42-file-actions">${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}</div>
-        <div class="v42-auto-files">
-          <span><b>그리드</b><i data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</i></span>
-          <span><b>개별 이미지</b><i data-auto-status="single">${esc($('autoSingleName')?.textContent||'선택 안 됨')}</i></span>
+      <section class="v42-auto-flow-section v42-auto-images-section">
+        <header class="v42-auto-images-head"><div><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div><div class="v42-auto-image-buttons">${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}</div></header>
+        <div class="v42-auto-source-block">
+          <div class="v42-auto-source-title"><strong>그리드 분할 이미지</strong><small data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</small></div>
+          <div class="v42-auto-grid-inline" data-settings-grid-mirror>${autoGridMirror()}</div>
         </div>
-        <div class="v42-auto-grid-inline" data-settings-grid-mirror>${autoGridMirror()}</div>
+        <div class="v42-auto-source-block v42-auto-single-block">
+          <div class="v42-auto-source-title"><strong>개별 이미지</strong><small data-auto-status="single">${esc($('autoSingleName')?.textContent||'선택 안 됨')}</small></div>
+          <div data-settings-single-mirror>${autoSingleMirror()}</div>
+        </div>
       </section>
       <div class="v42-auto-check"><span>대본 장면 <strong data-auto-status="script-count">${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong data-auto-status="image-count">${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div>
       <p class="v42-auto-match" data-auto-status="match">${esc($('autoMatch')?.textContent||'')}</p>
@@ -369,11 +376,11 @@
   }
   function syncSettingsGridMirror(){
     if(!settingsDialog.open)return;
-    const host=settingsDialog.querySelector('[data-settings-grid-mirror]');
-    if(!host)return;
+    const gridHost=settingsDialog.querySelector('[data-settings-grid-mirror]');
+    const singleHost=settingsDialog.querySelector('[data-settings-single-mirror]');
     const active=document.activeElement;
-    if(active&&host.contains(active))return;
-    host.innerHTML=autoGridMirror();
+    if(gridHost&&!(active&&gridHost.contains(active)))gridHost.innerHTML=autoGridMirror();
+    if(singleHost&&!(active&&singleHost.contains(active)))singleHost.innerHTML=autoSingleMirror();
   }
   function renderSettings(){
     settingsProxyMap.clear();
@@ -564,11 +571,19 @@
     return false;
   }
   function handleAutoClick(e,refresh){
+    const singleAction=e.target.closest?.('[data-auto-single-action]');
+    if(singleAction){
+      const card=singleAction.closest('[data-auto-single]'),i=Number(card?.dataset.autoSingle);
+      if(Number.isFinite(i)&&singleAction.dataset.autoSingleAction==='remove')window.CutflowAutoSetup?.removeSingle?.(i);
+      syncSettingsGridMirror();setTimeout(refresh,0);return true;
+    }
     const action=e.target.closest?.('[data-auto-action]');if(!action)return false;
     const card=action.closest('[data-auto-grid]'),i=Number(card?.dataset.autoGrid);
-    if(action.dataset.autoAction==='reset')window.CutflowAutoSetup?.resetGrid?.(i);
-    else window.CutflowAutoSetup?.removeGrid?.(i);
-    setTimeout(refresh,0);return true;
+    if(Number.isFinite(i)){
+      if(action.dataset.autoAction==='reset')window.CutflowAutoSetup?.resetGrid?.(i);
+      else if(action.dataset.autoAction==='remove')window.CutflowAutoSetup?.removeGrid?.(i);
+    }
+    syncSettingsGridMirror();setTimeout(refresh,0);return true;
   }
 
   app.addEventListener('click',e=>{
