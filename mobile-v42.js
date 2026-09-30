@@ -706,6 +706,11 @@
   $('v42Redo').onclick=()=>window.CutflowHistory?.redo?.();
   const syncPreviewHistory=()=>{const undo=$('v42Undo'),redo=$('v42Redo');if(undo)undo.disabled=!window.CutflowHistory?.canUndo;if(redo)redo.disabled=!window.CutflowHistory?.canRedo;};
   syncPreviewHistory();
+  let suppressMobileClickUntil=0;
+  document.addEventListener('click',e=>{
+    if(performance.now()>=suppressMobileClickUntil)return;
+    e.preventDefault();e.stopImmediatePropagation();
+  },true);
   const bindMobileTap=(el,handler)=>{
     if(!el)return;
     let lastPointer=0;
@@ -747,6 +752,7 @@
   }
   function closePreviewFullscreen(){
     window.CutflowPlayer?.pause?.();
+    suppressMobileClickUntil=performance.now()+550;
     previewDialog.hidden=true;
     document.body.classList.remove('v42-preview-lock');
     setSourcePreviewSize(window.CutflowUI?.mobileActive?540:1080,window.CutflowUI?.mobileActive?960:1920);
@@ -779,9 +785,13 @@
   };
 
   for(const id of ['cueList','sceneList','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus']){const el=$(id);if(el)new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
-  window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
-  window.addEventListener('cutflow-scene-updated',()=>requestRefresh(false));
-  window.addEventListener('cutflow-caption-updated',()=>requestRefresh(false));
+  window.addEventListener('cutflow-scene',e=>{
+    sceneIndex=Number(e.detail)||0;lastSceneId=null;
+    if(tab==='timing'){renderSceneStrip();syncPlayer();requestAnimationFrame(()=>followSelectedScene('smooth'));return;}
+    requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));
+  });
+  window.addEventListener('cutflow-scene-updated',()=>{if(tab==='timing'){renderSceneStrip();syncPlayer();return;}requestRefresh(false);});
+  window.addEventListener('cutflow-caption-updated',()=>{if(tab==='timing'){renderSceneStrip();syncPlayer();return;}requestRefresh(false);});
   window.addEventListener('cutflow-caption-style-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-compose-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-typography-updated',()=>requestRefresh(false));
