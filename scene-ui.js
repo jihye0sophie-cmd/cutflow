@@ -1,6 +1,6 @@
 /* Logical-scene helpers. A scene can own multiple caption cues without duplicating media. */
 (()=>{
-  const releaseScene=scene=>{if(!scene)return;try{scene.audioElement?.pause();if(scene.element)scene.element.src='';}catch{}if(scene.url)URL.revokeObjectURL(scene.url);};
+  const releaseScene=scene=>{if(!scene)return;try{scene.audioElement?.pause();if(scene.audioElement){scene.audioElement.removeAttribute('src');scene.audioElement.load?.();scene.audioElement=null;}if(scene.element){scene.element.removeAttribute?.('src');scene.element.src='';}}catch{}if(scene.url){URL.revokeObjectURL(scene.url);scene.url='';}};
   const sceneSettings=scene=>({
     duration:scene.duration,motion:scene.motion,transition:scene.transition,
     transform:cloneProjectData(scene.transform||null),mediaVolume:scene.mediaVolume,
@@ -167,7 +167,7 @@
         }else{group.cueIndices.forEach(ci=>{cues[ci].sceneId=added.id;});}
         renderCues();changed();this.select(sceneIndex);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:sceneIndex,state:inspect(sceneIndex)}}));return true;
       }else if(group){
-        const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target],sameVideo=previous.type==='video'&&added.type==='video';scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};scenes.splice(scenes.indexOf(added),1);renderScenes();changed();this.select(target);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:target,state:inspect(target)}}));return true;}
+        const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target],sameVideo=previous.type==='video'&&added.type==='video';scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};scenes.splice(scenes.indexOf(added),1);releaseScene(previous);renderScenes();changed();this.select(target);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:target,state:inspect(target)}}));return true;}
       }
       return false;
     }
