@@ -190,7 +190,7 @@ assert(js.includes('syncPreviewHistory'),'preview history state sync missing');
 assert(!js.includes('<span>HISTORY</span><button'),'history must be removed from settings utility');
 assert(css.includes('.v42-preview-tools'),'compact preview tool cluster missing');
 assert(css.includes('height:clamp(250px,38dvh,360px)!important'),'canonical preview height missing');
-assert(css.includes('margin-top:4px!important'),'compact scene card spacing missing');
+assert(css.includes('margin-top:3px!important')&&css.includes('padding:3px 4px!important'),'compact scene card spacing missing');
 assert(js.includes('data-tab="caption"')&&js.includes('data-tab="media"')&&js.includes('data-tab="timing"'),'three mobile editor tabs missing');
 assert(!js.includes('data-tab="narration"')&&!js.includes('data-tab="template"')&&!js.includes('data-tab="bgm"'),'legacy five-tab mobile navigation must be removed');
 assert(js.includes('id="v42CaptionPrev"')&&js.includes('id="v42CaptionNext"'),'mobile previous/next caption controls missing');
