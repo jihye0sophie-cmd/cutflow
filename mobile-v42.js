@@ -1,6 +1,4 @@
-/* Cutflow v42 mobile shell.
-   Mobile UI is independent from the desktop DOM. Existing controls remain authoritative
-   and are only mirrored/proxied here; no desktop panel is moved into the mobile shell. */
+/* Mobile shell. Existing core controls remain authoritative and are mirrored/proxied here; no desktop panel is moved into the mobile shell. */
 (()=>{
   'use strict';
   const $=id=>document.getElementById(id);
