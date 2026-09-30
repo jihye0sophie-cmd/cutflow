@@ -180,12 +180,17 @@ window.CutflowPlayer={
   play(){if(!playing)return play();return true;},
   pause(){pause();return true;},
   seek(time){jump(Number(time)||0);return this.state();},
-  seekProgress(progress){jump(totalDuration()*Math.max(0,Math.min(1,Number(progress)||0)));return this.state();}
+  seekProgress(progress){jump(totalDuration()*Math.max(0,Math.min(1,Number(progress)||0)));return this.state();},
+  invalidate(){dirty=true;return true;}
 };
-async function tick(){
+let lastPreviewRenderAt=0;
+async function tick(frameNow=performance.now()){
   const time=currentTime();
   if(playing&&time>=totalDuration()){pause();offset=totalDuration();}
-  if(!exporting&&!rendering&&(dirty||playing)){
+  const mobilePlayback=playing&&window.CutflowUI?.mobileActive===true;
+  const frameDue=!mobilePlayback||frameNow-lastPreviewRenderAt>=33;
+  if(!exporting&&!rendering&&(dirty||(playing&&frameDue))){
+    if(mobilePlayback)lastPreviewRenderAt=frameNow;
     rendering=true;dirty=false;
     try{await CutRenderer.draw($('stage'),project(),time);}catch(error){pause();toast(error.message);}finally{rendering=false;}
     $('currentTime').textContent=timeText(time);$('scrubber').value=totalDuration()?1000*time/totalDuration():0;
