@@ -142,14 +142,6 @@ window.CutflowTypography={
   }
 };
 
-window.CutflowCaptionStyle={
-  state(index){
-    const cue=cues[index];if(!cue)return null;
-    const style=CaptionStyle.resolve(cue,project());
-    return {index,...style};
-  },
-  select(index){selectStyleCue(index,false);return this.state(index);}
-};
 window.syncStyleEditor=syncStyleEditor;window.selectStyleCue=selectStyleCue;
 syncStyleEditor();syncTextStyleNotes();
 
