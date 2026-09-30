@@ -82,7 +82,7 @@ document.addEventListener('pointerup',()=>activeStyleGesture=null);
 $('captionPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(button)applyCaptionStyle({color:button.dataset.color});};
 $('titlePalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('titleColor').value=button.dataset.color;changed();};
 $('channelPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('channelColor').value=button.dataset.color;changed();};
-$('titleSelectionPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('titleSelectionColor').value=button.dataset.color;};
+$('titleSelectionPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('titleSelectionColor').value=button.dataset.color;$('titleSelectionApply')?.click();};
 $('captionPosition').onchange=e=>{if(e.target.value!=='custom')applyCaptionStyle({y:e.target.value==='default'?null:Number(e.target.value)});};
 $('stylePreset').onchange=e=>{const preset=CaptionStyle.presets[e.target.value];if(preset){const current=CaptionStyle.resolve(styleCue(),project());applyCaptionStyle({...preset,font:current.font,y:current.y});}};
 $('styleScope').onchange=()=>{
