@@ -66,6 +66,18 @@ if(!mobileCss.includes('.v42-full-controls')){
   fail('persistent fullscreen playback bar styles are missing');
 }else pass('persistent fullscreen playback bar exists');
 
+if(/for\(const id of \[[^\]]*nowPlaying/.test(mobile)){
+  fail('mobile UI must not observe nowPlaying because playback rewrites it every frame');
+}else pass('mobile playback status is not tied to a frame-by-frame MutationObserver');
+
+if(!mobile.includes('setSourcePreviewSize(1080,1920)')){
+  fail('fullscreen open path no longer switches the source preview to 1080 x 1920');
+}else pass('fullscreen open path switches to native 1080 x 1920');
+
+if(!mobile.includes("setSourcePreviewSize(window.CutflowUI?.mobileActive?540:1080,window.CutflowUI?.mobileActive?960:1920)")){
+  fail('fullscreen close path no longer restores the normal mobile preview size');
+}else pass('fullscreen close path restores the normal mobile preview size');
+
 if(process.exitCode){
   console.error('\nStatic audit failed.');
   process.exit(process.exitCode);
