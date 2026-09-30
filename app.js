@@ -72,7 +72,6 @@ function syncPreviewMediaAudio(time,force=false){
   if(force||Math.abs((el.currentTime||0)-target)>.22){try{el.currentTime=target;}catch{}}
   if(el.paused)el.play().catch(()=>{});
 }
-function shiftFollowingCues(index,delta){if(!delta)return;for(let j=index+1;j<cues.length;j++){cues[j].start+=delta;cues[j].end+=delta;}}
 function setSceneGroupDuration(cueIndex,nextDuration){
   const seg=captionSegmentInfo(cueIndex),group=cues.slice(seg.first,seg.last+1),oldDuration=seg.total;
   nextDuration=Math.max(.1,Math.min(600,Number(nextDuration)||oldDuration));if(!group.length||Math.abs(nextDuration-oldDuration)<.0001)return;
