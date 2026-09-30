@@ -2310,3 +2310,33 @@ body.v42-mobile .v42-stage-wrap canvas{
   flex:0 0 auto!important;
   min-height:52px!important;
 }
+
+/* v42.10.6 canonical fullscreen layout: header / 1080p canvas / controls */
+#v42PreviewDialog.v42-preview-overlay{
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  grid-template-columns:1fr!important;
+}
+#v42PreviewDialog.v42-preview-overlay .v42-full-head{
+  grid-row:1!important;
+}
+#v42PreviewDialog.v42-preview-overlay .v42-full-stage-wrap{
+  grid-row:2!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+}
+#v42PreviewDialog.v42-preview-overlay .v42-full-controls{
+  grid-row:3!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#v42PreviewDialog.v42-preview-overlay #v42FullPlay{
+  display:grid!important;
+  place-items:center!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
