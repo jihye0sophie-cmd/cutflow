@@ -838,3 +838,59 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
     font-size:8px;
   }
 }
+
+
+/* v42.6.7 compact icon-only mobile edit dock */
+body.v42-mobile .v42-main{
+  padding-bottom:calc(54px + env(safe-area-inset-bottom))!important;
+}
+body.v42-mobile .v42-tabs{
+  position:fixed;
+  left:50%;
+  bottom:max(4px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  z-index:150;
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:2px!important;
+  width:min(210px,calc(100% - 28px))!important;
+  height:42px!important;
+  margin:0!important;
+  padding:3px!important;
+  border:1px solid var(--v42-border)!important;
+  border-radius:12px!important;
+  background:color-mix(in srgb,var(--v42-bg) 97%,transparent)!important;
+  box-shadow:0 -5px 18px #0007!important;
+  backdrop-filter:blur(14px);
+}
+body.v42-mobile .v42-tabs button{
+  display:grid!important;
+  place-items:center!important;
+  min-width:0!important;
+  min-height:34px!important;
+  height:34px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:9px!important;
+  background:transparent!important;
+  color:#8f98a3!important;
+  font-size:0!important;
+  line-height:1!important;
+}
+body.v42-mobile .v42-tabs button svg{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  pointer-events:none;
+}
+body.v42-mobile .v42-tabs button[aria-pressed=true]{
+  background:#252a30!important;
+  color:var(--v42-accent)!important;
+}
+body.v42-mobile .v42-tabs button:active{
+  transform:scale(.94);
+}
