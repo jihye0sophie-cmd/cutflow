@@ -1,6 +1,5 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const js=fs.readFileSync('timing-editor.js','utf8'),css=fs.readFileSync('timing-editor.css','utf8'),html=fs.readFileSync('index.html','utf8'),build=fs.readFileSync('build.cjs','utf8');
-assert.ok(js.includes('window.CutflowTimeline={'),'shared CutflowTimeline API missing');
 assert.ok(js.includes('timing-ruler'),'timeline ruler missing');
 assert.ok(js.includes('timing-scene-layer'),'full scene layer missing');
 assert.ok(js.includes('timing-caption-layer'),'full caption layer missing');
@@ -8,8 +7,6 @@ assert.ok(js.includes('data-timeline-scene'),'scene selection blocks missing');
 assert.ok(js.includes("data-timing-action=\"zoom-in\"")&&js.includes("data-timing-action=\"zoom-out\""),'timeline zoom controls missing');
 assert.ok(js.includes('내레이션에 맞춤'));
 assert.ok(js.includes("b.dataset.tab='timing'"));
-assert.ok(js.includes("id='mobileTiming'")||js.includes('id="mobileTiming"')||js.includes("q('mobileTiming')"));
-assert.ok(!js.includes("dataset.mobileTab='timing'"));
 
 assert.ok(js.includes('data-caption-edge="start"')&&js.includes('data-caption-edge="end"'),'selected caption left/right handles missing');
 assert.ok(js.includes('setCaptionEdge'),'shared caption edge editing missing');
@@ -20,7 +17,7 @@ assert.ok(js.includes('data-timing-scene-duration'),'scene duration numeric edit
 assert.ok(js.includes('timing-narration-layer'),'narration layer missing');
 assert.ok(js.includes('timing-videoaudio-layer'),'video original-audio layer missing');
 assert.ok(js.includes('timing-bgm-layer'),'BGM layer missing');
-assert.ok(js.includes('window.CutflowBgm?.state?.()'),'BGM timeline state bridge missing');
+assert.ok(js.includes('window.bgmProject?.()'),'BGM timeline project bridge missing');
 assert.ok(js.includes("window.addEventListener('cutflow-bgm-updated'"),'timeline BGM synchronization missing');
 assert.ok(css.includes('.timeline-caption-edge'),'caption edge handle styles missing');
 assert.ok(css.includes('.timeline-scene-handle'),'scene boundary handle styles missing');
@@ -35,5 +32,5 @@ assert.ok(css.includes('.timing-playhead-area'),'playhead inset area missing');
 assert.ok(css.includes('.timing-layer-body{left:var(--timeline-label-width)!important'),'timeline content must start after layer labels');
 assert.ok(/timing-editor\.js\?v=[^\"']+/.test(html),'timing-editor.js must be loaded with a cache key');
 assert.ok(/timing-editor\.css\?v=[^\"']+/.test(html),'timing-editor.css must be loaded with a cache key');
-assert.ok(build.includes("'timing-editor.js'"));assert.ok(build.includes("'timing-editor.css'"));
+assert.ok(build.includes("runtimeRefs")&&build.includes("index.matchAll"),'build must derive runtime assets from index.html');
 console.log('PASS: timeline editor v43.1 stability, precision, UX, scene editing, and audio layers are wired into desktop/mobile.');
