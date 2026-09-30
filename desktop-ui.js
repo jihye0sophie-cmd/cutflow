@@ -25,7 +25,8 @@
    if(caption&&details.nextElementSibling!==caption)scroll.insertBefore(caption,details.nextSibling);
   }
  }
- function sync(){
+ function revealCutflowUI(){document.body.classList.remove('cutflow-booting');document.body.classList.add('cutflow-ready');}
+function sync(){
   if(!enabled)return;const list=CutflowScene.items(),i=CutflowScene.index(),item=list[i];
   $('desktopSceneTitle').textContent=item?`장면 ${i+1}`:'장면을 추가하세요';$('desktopSceneCount').textContent=`장면 ${item?i+1:0} / ${list.length}`;$('desktopSceneTotal').textContent=`전체 장면 ${list.length}`;
   const begin=item?CutflowScene.start(i):0,duration=item?(cues.length?item.end-item.start:item.duration):0;$('desktopSceneTime').textContent=item?`${begin.toFixed(2)} – ${(begin+duration).toFixed(2)}초 (${duration.toFixed(2)}초)`:'';
@@ -102,5 +103,5 @@
  if(typeof mq.addEventListener==='function')mq.addEventListener('change',syncDesktopMode);else if(typeof mq.addListener==='function')mq.addListener(syncDesktopMode);
  for(const id of ['cueList','sceneList'])new MutationObserver(sync).observe($(id),{childList:true});
  let previewLabel='';new MutationObserver(()=>{const value=$('nowPlaying').textContent;if(value!==previewLabel){previewLabel=value;sync();}}).observe($('nowPlaying'),{childList:true});
- new MutationObserver(sync).observe($('exportBtn'),{attributes:true,attributeFilter:['disabled']});syncDesktopMode();
+ new MutationObserver(sync).observe($('exportBtn'),{attributes:true,attributeFilter:['disabled']});syncDesktopMode();requestAnimationFrame(()=>revealCutflowUI());
 })();
