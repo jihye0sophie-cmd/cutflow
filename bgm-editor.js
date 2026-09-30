@@ -41,12 +41,7 @@ window.loadBgmFile=loadBgmFile;
 window.bgmSnapshot=bgmSnapshot;window.restoreBgmSnapshot=restoreBgmSnapshot;
 
 window.CutflowBgm={
-  state(){
-    const p=bgmProject(),summary=$('bgmSummary')?.textContent||'';
-    return {loaded:!!bgmBuffer,name:bgmName,duration:bgmBuffer?.duration||0,start:p.start,volume:Math.round(p.volume*100),repeat:p.loop?'loop':'stop',fadeIn:p.fadeIn,fadeOut:p.fadeOut,summary};
-  },
-  async load(file){const ok=await loadBgmFile(file);if(ok)toast('BGM을 추가했습니다. 미리보기 재생으로 함께 들어보세요.');return ok?this.state():false;},
-  remove(){pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed();syncBgm();return this.state();},
+  remove(){pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed();syncBgm();return true;},
   update(patch={}){
     if(!bgmBuffer)return false;pause();
     if(patch.start!=null)$('bgmStart').value=String(Math.min(Math.max(0,Number(patch.start)||0),Math.max(0,bgmBuffer.duration-.01)));
@@ -54,10 +49,8 @@ window.CutflowBgm={
     if(patch.repeat!=null)$('bgmRepeat').value=patch.repeat==='loop'?'loop':'stop';
     if(patch.fadeIn!=null)$('bgmFadeIn').value=String(Math.max(0,Math.min(30,Number(patch.fadeIn)||0)));
     if(patch.fadeOut!=null)$('bgmFadeOut').value=String(Math.max(0,Math.min(30,Number(patch.fadeOut)||0)));
-    CutAudio.invalidate();changed();syncBgm();return this.state();
-  },
-  snapshot:bgmSnapshot,
-  async restore(snapshot,options){await restoreBgmSnapshot(snapshot,options);return this.state();}
+    CutAudio.invalidate();changed();syncBgm();return true;
+  }
 };
 
 window.bgmProject=bgmProject;window.syncBgm=syncBgm;syncBgm();
