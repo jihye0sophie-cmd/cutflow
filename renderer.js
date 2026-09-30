@@ -147,10 +147,16 @@ window.CutRenderer = (() => {
     drawText(ctx,project.channel,{x:w*((project.channelX??50)/100-.46),y:h*((project.channelY??((fullscreen||portrait?.92:.817)*100))/100),w:w*.92,h:h*.06,size:(project.channelSize||43.2)*w/1080,italic:!!project.channelItalic,color:project.channelColor||'#dddddd',weight:project.channelBold===false?400:900,font:project.channelFont||'noto',...textStroke(project,'channel',fullscreen||portrait,w/1080)});
     return loc;
   }
+  let fontSignature='',fontPromise=Promise.resolve();
   async function fonts(project){
     const text=[project.title,project.channel,...project.cues.map(c=>c.text)].join('')||'가나다';
-    const ids=new Set([project.titleFont||'noto',project.channelFont||'noto',...project.cues.map(c=>window.CaptionStyle.resolve(c,project).font)]);
-    await Promise.all([...ids].map(id=>window.CutFonts.ensure(id,text)));await document.fonts.ready;
+    const ids=[...new Set([project.titleFont||'noto',project.channelFont||'noto',...project.cues.map(c=>window.CaptionStyle.resolve(c,project).font)])];
+    const signature=ids.join('|')+'::'+text;
+    if(signature!==fontSignature){
+      fontSignature=signature;
+      fontPromise=(async()=>{await Promise.all(ids.map(id=>window.CutFonts.ensure(id,text)));await document.fonts.ready;})();
+    }
+    await fontPromise;
   }
   return {draw,locate,motion,cutDuration,fonts,transform,mediaRect,mediaGeometry};
 })();
