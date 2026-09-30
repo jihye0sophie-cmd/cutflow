@@ -148,7 +148,7 @@ function syncBasicsFromProject(){
   if(!$('autoChannel').value)$('autoChannel').value=$('channelInput').value||'';
   $('autoLayout').value=$('layoutSelect').value||'fullscreen';
 }
-$('autoToggle').onclick=()=>{const open=$('autoPanel').hidden;if(open)syncBasicsFromProject();$('autoPanel').hidden=!open;$('autoToggle').setAttribute('aria-expanded',String(open));};
+$('autoToggle').onclick=()=>{const open=$('autoPanel').hidden;if(open)syncBasicsFromProject();$('autoPanel').hidden=!open;$('autoToggle').setAttribute('aria-expanded',String(open));$('autoToggle').closest('.auto-setup')?.classList.toggle('is-open',open);};
 $('autoScript').addEventListener('input',update);
 $('autoNarrationBtn').onclick=()=>$('autoNarration').click();$('autoNarration').onchange=e=>{state.narration=e.target.files[0]||null;state.processedNarration=null;update();};
 document.querySelectorAll('input[name="autoSilencePreset"]').forEach(el=>el.addEventListener('change',()=>{state.processedNarration=null;updateSilenceInfo();}));
