@@ -213,7 +213,16 @@
     const dt=q('desktopTabs');if(dt&&!dt.querySelector('[data-tab="timing"]')){const b=document.createElement('button');b.type='button';b.dataset.tab='timing';b.textContent='정밀 타이밍';dt.append(b);}
     const de=q('desktopEditor');if(de&&!q('desktopTiming')){const p=document.createElement('section');p.id='desktopTiming';p.className='timing-panel';p.innerHTML='<div class="timing-track"></div><div class="timing-controls"></div>';de.insertBefore(p,q('desktopEditorScroll'));}
   }
-  function renderPanel(panel){if(!panel)return;const item=sceneItem(),track=panel.querySelector('.timing-track'),controls=panel.querySelector('.timing-controls');renderTrack(track,item);controls.innerHTML=editorMarkup(item);}
+  function renderPanel(panel){
+    if(!panel)return;
+    const verticalOwner=panel.closest('.v42-panel')||panel.closest('#desktopTiming'),verticalScroll=verticalOwner?.scrollTop||0,windowScroll=window.scrollY||0;
+    const item=sceneItem(),track=panel.querySelector('.timing-track'),controls=panel.querySelector('.timing-controls');
+    renderTrack(track,item);controls.innerHTML=editorMarkup(item);
+    requestAnimationFrame(()=>{
+      if(verticalOwner)verticalOwner.scrollTop=verticalScroll;
+      if(externalPanel===panel&&Math.abs((window.scrollY||0)-windowScroll)>2)window.scrollTo({top:windowScroll,left:0,behavior:'auto'});
+    });
+  }
   function renderAll(){
     ensureUI();const targets=new Set();
     if(externalPanel?.isConnected)targets.add(externalPanel);
