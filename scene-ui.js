@@ -88,10 +88,36 @@
     return inspect(index);
   };
 
+  let transformGestureIndex=-1;
+  const beginTransformGesture=index=>{
+    const {scene}=sourceForIndex(index);if(!scene||exporting||loading)return false;
+    pause();rememberCues();transformGestureIndex=index;return inspect(index);
+  };
+  const previewTransformGesture=(index,transform={})=>{
+    if(index!==transformGestureIndex)return false;
+    const {item,scene}=sourceForIndex(index);if(!item||!scene||exporting)return false;
+    const current=CutRenderer.transform(scene.transform);
+    scene.transform=CutRenderer.transform({
+      scale:transform.scale!=null?Number(transform.scale)/100:current.scale,
+      x:transform.x!=null?Number(transform.x)/100:current.x,
+      y:transform.y!=null?Number(transform.y)/100:current.y
+    });
+    if(cues.length)for(const ci of item.cueIndices)delete cues[ci].transform;
+    dirty=true;
+    return inspect(index);
+  };
+  const commitTransformGesture=index=>{
+    if(index!==transformGestureIndex)return false;
+    transformGestureIndex=-1;changed();
+    const state=inspect(index);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state}}));return state;
+  };
+  const cancelTransformGesture=()=>{transformGestureIndex=-1;};
+
   window.CutflowScene={
     items:logicalItems,
     state:inspect,
     update:patchScene,
+    beginTransformGesture,previewTransformGesture,commitTransformGesture,cancelTransformGesture,
     index(){
       const list=logicalItems();if(!list.length)return 0;
       if(cues.length){const ci=activeCueIndex(),si=sceneIndexForCue(ci);return Math.max(0,si>=0?si:0);}
