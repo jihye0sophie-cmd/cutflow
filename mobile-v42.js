@@ -94,6 +94,14 @@
   const setMobileActive=(next,{initial=false}={})=>{
     next=!!next;
     const prev=!!window.CutflowUI.mobileActive;
+    const sourcePreview=$('stage');
+    if(sourcePreview){
+      const targetW=next?540:1080,targetH=next?960:1920;
+      if(sourcePreview.width!==targetW||sourcePreview.height!==targetH){
+        sourcePreview.width=targetW;sourcePreview.height=targetH;
+        window.CutflowPlayer?.invalidate?.();
+      }
+    }
     window.CutflowUI.mobileActive=next;
     window.CutflowUI.mode=next?'mobile':'desktop';
     document.body.classList.toggle('v42-mobile',next);
@@ -550,8 +558,13 @@
     const mobilePlay=$('v42Play');if(mobilePlay)mobilePlay.textContent=label;
     const fullPlay=$('v42FullPlay');if(fullPlay)fullPlay.textContent=label;
   }
-  function mirrorStage(){
-    const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(!previewDialog.hidden){fullCtx.clearRect(0,0,fullStage.width,fullStage.height);fullCtx.drawImage(src,0,0,fullStage.width,fullStage.height);}}catch{}}
+  let lastMirrorAt=0;
+  function mirrorStage(frameNow=performance.now()){
+    if(frameNow-lastMirrorAt>=33){
+      lastMirrorAt=frameNow;
+      const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(!previewDialog.hidden){fullCtx.clearRect(0,0,fullStage.width,fullStage.height);fullCtx.drawImage(src,0,0,fullStage.width,fullStage.height);}}catch{}}
+      syncPlayer();
+    }
     requestAnimationFrame(mirrorStage);
   }
 
