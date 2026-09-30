@@ -673,16 +673,19 @@
   syncPreviewHistory();
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
   $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
-  async function openPreviewFullscreen(){
-    previewDialog.showModal();
-    try{if(previewDialog.requestFullscreen&&!document.fullscreenElement)await previewDialog.requestFullscreen();}catch{}
+  function openPreviewFullscreen(){
+    if(!previewDialog.open)previewDialog.showModal();
+    previewDialog.classList.add('v42-preview-open');
+    syncPlayer();
   }
-  async function closePreviewFullscreen(){
-    try{if(document.fullscreenElement===previewDialog)await document.exitFullscreen();}catch{}
+  function closePreviewFullscreen(){
+    previewDialog.classList.remove('v42-preview-open');
     if(previewDialog.open)previewDialog.close();
   }
-  $('v42Fullscreen').onclick=openPreviewFullscreen;$('v42FullClose').onclick=closePreviewFullscreen;$('v42FullPlay').onclick=()=>window.CutflowPlayer?.toggle?.();previewDialog.addEventListener('cancel',e=>{e.preventDefault();closePreviewFullscreen();});
-  document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&previewDialog.open)previewDialog.close();});
+  $('v42Fullscreen').onclick=openPreviewFullscreen;
+  $('v42FullClose').onclick=closePreviewFullscreen;
+  $('v42FullPlay').onclick=e=>{e.preventDefault();e.stopPropagation();window.CutflowPlayer?.toggle?.();requestAnimationFrame(syncPlayer);};
+  previewDialog.addEventListener('cancel',e=>{e.preventDefault();closePreviewFullscreen();});
   $('v42Scrubber').addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
   $('v42Scrubber').addEventListener('change',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
 
