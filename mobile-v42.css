@@ -1702,3 +1702,151 @@ body.v42-mobile .v42-panel{
     height:clamp(220px,34dvh,300px)!important;
   }
 }
+
+/* v42.9.2 mobile playback controls, scrubber, editor fill */
+body.v42-mobile .v42-main{
+  padding-bottom:0!important;
+}
+
+/* Larger, touch-friendly previous / play / next buttons. */
+body.v42-mobile .v42-player{
+  min-height:38px!important;
+  height:38px!important;
+  margin:2px 0 0!important;
+}
+body.v42-mobile .v42-transport{
+  gap:6px!important;
+}
+body.v42-mobile .v42-transport button{
+  width:38px!important;
+  min-width:38px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0!important;
+  border:1px solid #3a4049!important;
+  background:#1b1f24!important;
+  color:#eef1f4!important;
+  border-radius:8px!important;
+  font-size:20px!important;
+  font-weight:800!important;
+  line-height:1!important;
+}
+body.v42-mobile .v42-transport .play{
+  width:44px!important;
+  min-width:44px!important;
+  height:36px!important;
+  min-height:36px!important;
+  background:var(--v42-accent)!important;
+  border-color:var(--v42-accent)!important;
+  color:#111!important;
+  font-size:15px!important;
+}
+
+/* Consistent 3px scrubber line with a yellow thumb on iPhone and other browsers. */
+body.v42-mobile .v42-scrubber{
+  --v42-progress:0%;
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  display:block!important;
+  width:100%!important;
+  height:14px!important;
+  min-height:14px!important;
+  margin:-7px 0 -2px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:
+    linear-gradient(to right,
+      var(--v42-accent) 0,
+      var(--v42-accent) var(--v42-progress),
+      #434a54 var(--v42-progress),
+      #434a54 100%) center / 100% 3px no-repeat!important;
+}
+body.v42-mobile .v42-scrubber::-webkit-slider-runnable-track{
+  -webkit-appearance:none;
+  height:3px!important;
+  border:0!important;
+  background:transparent!important;
+}
+body.v42-mobile .v42-scrubber::-webkit-slider-thumb{
+  -webkit-appearance:none!important;
+  width:14px!important;
+  height:14px!important;
+  margin-top:-5.5px!important;
+  border:2px solid #11151a!important;
+  border-radius:50%!important;
+  background:var(--v42-accent)!important;
+  box-shadow:0 0 0 1px rgba(245,230,66,.35)!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-track{
+  height:3px!important;
+  border:0!important;
+  background:#434a54!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-progress{
+  height:3px!important;
+  background:var(--v42-accent)!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-thumb{
+  width:14px!important;
+  height:14px!important;
+  border:2px solid #11151a!important;
+  border-radius:50%!important;
+  background:var(--v42-accent)!important;
+}
+
+/* The editor owns every remaining pixel below the fixed preview/scene area. */
+body.v42-mobile .v42-panel{
+  flex:1 1 0!important;
+  height:auto!important;
+  min-height:0!important;
+  margin-top:3px!important;
+  padding:7px 7px calc(54px + env(safe-area-inset-bottom))!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  touch-action:pan-y!important;
+  overscroll-behavior-y:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+body.v42-mobile .v42-tabs{
+  pointer-events:auto;
+}
+
+/* Fullscreen preview always has a visible playback control. */
+#v42PreviewDialog .v42-full-stage-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:calc(100dvh - 52px);
+  overflow:hidden;
+  background:#000;
+}
+#v42PreviewDialog #v42FullStage{
+  height:100%!important;
+  max-height:100%!important;
+}
+#v42PreviewDialog .v42-full-play{
+  position:absolute;
+  left:50%;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  z-index:5;
+  width:52px;
+  height:52px;
+  padding:0;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:50%;
+  background:rgba(13,15,18,.78);
+  color:#fff;
+  font-size:20px;
+  font-weight:800;
+  backdrop-filter:blur(8px);
+}
+#v42PreviewDialog:fullscreen .v42-full-stage-wrap{
+  height:calc(100vh - 52px);
+}
+@supports(height:100svh){
+  #v42PreviewDialog .v42-full-stage-wrap{height:calc(100svh - 52px)}
+}
