@@ -1,6 +1,6 @@
 /* Desktop presentation only. Reparents original controls; no copied editing model. */
 (()=>{
- const q=s=>document.querySelector(s),mq=matchMedia('(min-width:761px)'),slots=new Map();
+ const q=s=>document.querySelector(s),mq=matchMedia('(min-width:820px)'),slots=new Map();
  let enabled=false,mode='caption',captionOpen=false,signature='',lastIndex=-1,sceneEdit=false,dragIndex=null,narrationSceneWarningShown=false,sceneFollowRaf=0;
  const mobileMode=()=>!!(window.CutflowUI?.mobileActive||window.CutflowUI?.isMobileDevice?.());
  const shell=document.createElement('section');shell.id='desktopStudio';shell.className='desktop-only';
