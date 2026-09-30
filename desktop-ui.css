@@ -173,8 +173,7 @@
   #desktopEditor[data-mode=image] .desktop-media-details{display:block}
   #desktopMediaDetailsBody{padding:0}
   #desktopMediaDetailsBody #mediaTransform{margin:0;background:var(--studio-input);padding:14px}
-  #desktopMediaDetailsBody #mediaTransform legend{padding:0 6px;color:#fff;font-size:14px;font-weight:800}
-  #desktopMediaDetailsBody #mediaTransform p{margin-top:10px;padding:10px 12px;border-radius:8px;background:#15191e;color:var(--studio-muted);line-height:1.55}
+    #desktopMediaDetailsBody #mediaTransform p{margin-top:10px;padding:10px 12px;border-radius:8px;background:#15191e;color:var(--studio-muted);line-height:1.55}
 }
 
 
