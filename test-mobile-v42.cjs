@@ -47,7 +47,7 @@ assert(js.includes('data-direct-click="uploadBtn"')&&js.includes('data-direct-cl
 assert(js.includes('autoSetupMarkup(settingsProxyMap)'),'auto setup must live in settings sheet');
 assert(js.includes('id="v42Fullscreen"')&&js.includes('>⛶</button>')&&!js.includes('>전체화면</button>'),'preview fullscreen must be an icon control');
 assert(css.includes('#v42SettingsDialog'),'settings bottom sheet styling missing');
-assert(build.includes("'mobile-v42.js','mobile-v42.css'")&&!build.includes("'mobile-ui.js','mobile-ui.css'"),'build must publish v42 only');
+assert(build.includes('runtimeRefs')&&build.includes('index.matchAll')&&!html.includes('mobile-ui.js')&&!html.includes('mobile-ui.css'),'build must publish only current index runtime');
 assert(!js.includes("panel.scrollIntoView({block:'start',behavior:'smooth'})"),'tab click must not force page scroll');
 assert(js.includes('syncSettingsProxyState')&&js.includes('syncSettingsGridMirror'),'settings sheet must update in place');
 assert(!js.includes('if(settingsDialog.open)renderSettings()'),'settings mutations must not rebuild the whole sheet');
