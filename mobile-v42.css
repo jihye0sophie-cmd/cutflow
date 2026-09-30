@@ -1889,3 +1889,54 @@ body.v42-mobile .v42-transport .play{
   font-size:15px!important;
   line-height:1!important;
 }
+
+/* v42.9.4 iOS layout + browser chrome stabilization */
+body.v42-mobile #mobileAppV42{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100dvh!important;
+  min-height:100dvh!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+}
+body.v42-mobile .v42-main{
+  flex:1 1 0!important;
+  min-height:0!important;
+  height:auto!important;
+  overflow:hidden!important;
+}
+body.v42-mobile .v42-preview-card,
+body.v42-mobile .v42-scenes-card{
+  flex:0 0 auto!important;
+}
+body.v42-mobile .v42-panel{
+  flex:1 1 0!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-y!important;
+}
+
+/* Keep the page edge itself dark so Safari has no yellow page color to sample behind its chrome. */
+html,
+body,
+body.v42-mobile,
+body.v42-mobile #mobileAppV42{
+  background:#0d0f12!important;
+}
+body.v42-mobile::before,
+body.v42-mobile::after{
+  content:"";
+  position:fixed;
+  left:0;
+  right:0;
+  height:max(1px,env(safe-area-inset-bottom));
+  background:#0d0f12;
+  pointer-events:none;
+  z-index:140;
+}
+body.v42-mobile::before{top:0}
+body.v42-mobile::after{bottom:0}
