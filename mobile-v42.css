@@ -1310,10 +1310,14 @@ body.v42-mobile .v42-tabs button:active{
   opacity:1!important;
 }
 #v42SettingsDialog .v42-auto-start-row [data-auto-start]:disabled{
-  background:#706c2d!important;
-  border-color:#706c2d!important;
-  color:#111318!important;
+  background:var(--v42-accent)!important;
+  border-color:var(--v42-accent)!important;
+  color:#111!important;
+  -webkit-text-fill-color:#111!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
   opacity:1!important;
+  filter:brightness(.52) saturate(.9);
   cursor:not-allowed;
 }
 @media(max-width:430px){
@@ -1355,9 +1359,13 @@ body.v42-mobile .v42-tabs button:active{
   opacity:1!important;
 }
 #v42SettingsDialog .v42-pc-settings-section:last-of-type .v42-btn.primary:disabled{
-  background:#706c2d!important;
-  border-color:#706c2d!important;
-  color:#111318!important;
+  background:var(--v42-accent)!important;
+  border-color:var(--v42-accent)!important;
+  color:#111!important;
+  -webkit-text-fill-color:#111!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
   opacity:1!important;
+  filter:brightness(.52) saturate(.9);
   cursor:not-allowed!important;
 }
