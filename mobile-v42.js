@@ -374,13 +374,13 @@
     settingsDialog.querySelector('[data-cutflow-history="undo"]')?.toggleAttribute('disabled',!window.CutflowHistory?.canUndo);
     settingsDialog.querySelector('[data-cutflow-history="redo"]')?.toggleAttribute('disabled',!window.CutflowHistory?.canRedo);
   }
-  function syncSettingsGridMirror(){
+  function syncSettingsGridMirror(force=false){
     if(!settingsDialog.open)return;
     const gridHost=settingsDialog.querySelector('[data-settings-grid-mirror]');
     const singleHost=settingsDialog.querySelector('[data-settings-single-mirror]');
     const active=document.activeElement;
-    if(gridHost&&!(active&&gridHost.contains(active)))gridHost.innerHTML=autoGridMirror();
-    if(singleHost&&!(active&&singleHost.contains(active)))singleHost.innerHTML=autoSingleMirror();
+    if(gridHost&&(force||!(active&&gridHost.contains(active))))gridHost.innerHTML=autoGridMirror();
+    if(singleHost&&(force||!(active&&singleHost.contains(active))))singleHost.innerHTML=autoSingleMirror();
   }
   function renderSettings(){
     settingsProxyMap.clear();
@@ -574,16 +574,20 @@
     const singleAction=e.target.closest?.('[data-auto-single-action]');
     if(singleAction){
       const card=singleAction.closest('[data-auto-single]'),i=Number(card?.dataset.autoSingle);
-      if(Number.isFinite(i)&&singleAction.dataset.autoSingleAction==='remove')window.CutflowAutoSetup?.removeSingle?.(i);
-      syncSettingsGridMirror();setTimeout(refresh,0);return true;
+      let changed=false;
+      if(Number.isFinite(i)&&singleAction.dataset.autoSingleAction==='remove')changed=!!window.CutflowAutoSetup?.removeSingle?.(i);
+      if(changed){singleAction.blur?.();syncSettingsGridMirror(true);}
+      setTimeout(refresh,0);return true;
     }
     const action=e.target.closest?.('[data-auto-action]');if(!action)return false;
     const card=action.closest('[data-auto-grid]'),i=Number(card?.dataset.autoGrid);
+    let changed=false;
     if(Number.isFinite(i)){
-      if(action.dataset.autoAction==='reset')window.CutflowAutoSetup?.resetGrid?.(i);
-      else if(action.dataset.autoAction==='remove')window.CutflowAutoSetup?.removeGrid?.(i);
+      if(action.dataset.autoAction==='reset')changed=!!window.CutflowAutoSetup?.resetGrid?.(i);
+      else if(action.dataset.autoAction==='remove')changed=!!window.CutflowAutoSetup?.removeGrid?.(i);
     }
-    syncSettingsGridMirror();setTimeout(refresh,0);return true;
+    if(changed){action.blur?.();syncSettingsGridMirror(true);}
+    setTimeout(refresh,0);return true;
   }
 
   app.addEventListener('click',e=>{
@@ -713,7 +717,7 @@
     const el=$(id);if(!el)continue;
     el.addEventListener(id==='scriptInput'||id==='projectCaptionWrap'?'input':'change',()=>setTimeout(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}},id==='audioInput'?350:40));
   }
-  window.addEventListener('cutflow-auto-grid-change',()=>{if(settingsDialog.open){syncSettingsGridMirror();syncSettingsProxyState();}});
+  window.addEventListener('cutflow-auto-grid-change',()=>{if(settingsDialog.open){syncSettingsGridMirror(true);syncSettingsProxyState();}});
   window.addEventListener('cutflow-auto-state',()=>{if(settingsDialog.open)syncSettingsProxyState();});
   window.addEventListener('cutflow-auto-ready',()=>{if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
