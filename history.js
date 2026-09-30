@@ -56,10 +56,7 @@
   async function undo(){if(!past.length||busy)return false;const entry=past.pop();const ok=await restore(entry,'undo');if(!ok)past.push(entry);update();return ok;}
   async function redo(){if(!future.length||busy)return false;const entry=future.pop();const ok=await restore(entry,'redo');if(!ok)future.push(entry);update();return ok;}
   function reset(){past=[];future=[];pending=null;update();}
-  function controls(){
-    const legacy=$('undoCuesBtn');if(legacy)legacy.hidden=true;
-    update();
-  }
+  function controls(){update();}
   function labelFor(target){
     if(!target)return '편집';
     const text=(target.getAttribute?.('aria-label')||target.textContent||'').trim().replace(/\s+/g,' ');
