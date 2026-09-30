@@ -1384,3 +1384,173 @@ body.v42-mobile .v42-tabs button:active{
   stroke-linejoin:round;
   pointer-events:none;
 }
+
+/* v42.9 fixed mobile editing workspace: large preview + independently scrolling editor */
+body.v42-mobile{
+  overflow:hidden!important;
+}
+body.v42-mobile #mobileAppV42{
+  height:100dvh;
+  min-height:0!important;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+body.v42-mobile .v42-head{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto;
+}
+body.v42-mobile .v42-main{
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+  max-width:620px;
+  margin:0 auto;
+  padding:6px 8px calc(50px + env(safe-area-inset-bottom))!important;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Preview is a true fixed workspace region now, not sticky. */
+body.v42-mobile .v42-preview-card{
+  position:relative!important;
+  top:auto!important;
+  z-index:1!important;
+  flex:0 0 auto;
+  padding:6px!important;
+  border-radius:10px;
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-preview-head{
+  min-height:18px;
+  padding:0 2px 4px;
+}
+body.v42-mobile .v42-preview-head strong{font-size:10px}
+body.v42-mobile .v42-preview-head span{font-size:8px}
+
+/* CapCut-like larger 9:16 canvas. */
+body.v42-mobile .v42-stage-wrap{
+  min-height:0;
+  border-radius:8px;
+}
+body.v42-mobile .v42-stage-wrap canvas{
+  height:clamp(280px,46dvh,440px)!important;
+  width:auto!important;
+  max-width:100%!important;
+  max-height:none!important;
+}
+
+/* Compress transport controls so the extra room goes to the image itself. */
+body.v42-mobile .v42-player{
+  min-height:34px!important;
+  height:34px;
+  margin-top:4px!important;
+}
+body.v42-mobile .v42-player .play{
+  width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  font-size:14px!important;
+}
+body.v42-mobile .v42-preview-tools{
+  gap:4px!important;
+}
+body.v42-mobile .v42-preview-tools button{
+  width:30px!important;
+  min-width:30px!important;
+  height:30px!important;
+  min-height:30px!important;
+  padding:0!important;
+  font-size:14px!important;
+}
+body.v42-mobile .v42-scrubber{
+  margin:4px 0 3px!important;
+  height:3px!important;
+}
+body.v42-mobile .v42-scene-nav{
+  grid-template-columns:58px 1fr 58px!important;
+  gap:5px!important;
+}
+body.v42-mobile .v42-scene-nav button{
+  min-height:25px!important;
+  height:25px!important;
+  padding:2px 7px!important;
+}
+body.v42-mobile .v42-scene-nav strong{
+  font-size:9px!important;
+}
+
+/* Compact fixed scene strip directly below the preview. */
+body.v42-mobile .v42-scenes-card{
+  flex:0 0 auto;
+  margin-top:5px!important;
+  padding:5px!important;
+}
+body.v42-mobile .v42-scenes-row{
+  gap:5px!important;
+}
+body.v42-mobile .v42-scene-strip{
+  gap:5px!important;
+}
+body.v42-mobile .v42-scene-strip>button{
+  flex-basis:48px!important;
+  width:48px!important;
+  height:54px!important;
+  padding:2px!important;
+}
+body.v42-mobile .v42-scene-strip img,
+body.v42-mobile .v42-scene-strip .missing{
+  height:34px!important;
+}
+body.v42-mobile .v42-scene-strip b{
+  left:4px!important;
+  top:4px!important;
+  font-size:7px!important;
+}
+body.v42-mobile .v42-scene-strip small{
+  font-size:7px!important;
+}
+body.v42-mobile .v42-add-scene{
+  flex:0 0 38px!important;
+  width:38px!important;
+  min-height:54px!important;
+  height:54px!important;
+  font-size:18px!important;
+}
+
+/* Only the editor panel scrolls. The preview and scene strip never move. */
+body.v42-mobile .v42-panel{
+  flex:1 1 auto;
+  min-height:110px;
+  margin-top:5px!important;
+  margin-bottom:0!important;
+  padding:7px 7px calc(52px + env(safe-area-inset-bottom))!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
+}
+
+/* Keep the compact 3-icon edit dock above the scrolling panel. */
+body.v42-mobile .v42-tabs{
+  bottom:max(4px,env(safe-area-inset-bottom))!important;
+}
+
+/* Short phones get a slightly smaller fixed preview while keeping it larger than before. */
+@media(max-height:740px){
+  body.v42-mobile .v42-stage-wrap canvas{
+    height:clamp(250px,42dvh,330px)!important;
+  }
+  body.v42-mobile .v42-preview-head{
+    display:none!important;
+  }
+  body.v42-mobile .v42-player{
+    margin-top:3px!important;
+  }
+  body.v42-mobile .v42-scenes-card{
+    margin-top:4px!important;
+  }
+}
