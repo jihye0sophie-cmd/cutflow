@@ -101,7 +101,9 @@ async function applyProjectBasics(){
 async function run(){
   if(state.running)return;const script=lines();state.silencePreset=silencePreset();
   if(!script.length||!state.narration||capacity()<script.length)return;
-  if(window.CutflowProjectBridge?.hasWork?.()&&!confirm('자동 세팅을 시작하면 현재 대본·내레이션·장면 구성이 새 입력으로 교체됩니다. 계속할까요?'))return;
+  const bridge=window.CutflowProjectBridge,hadWork=!!bridge?.hasWork?.();
+  if(hadWork&&!confirm('자동 세팅을 시작하면 현재 대본·내레이션·장면 구성이 새 입력으로 교체됩니다. 계속할까요?'))return;
+  const rollback=hadWork?bridge?.capture?.():null;
   state.running=true;update();$('autoProgress').hidden=false;
   try{
     status('장면 이미지를 준비하는 중…',0);let files=[];
@@ -130,7 +132,15 @@ async function run(){
     const complete={cueCount:result.cueCount,sceneCount:result.sceneCount,missingSceneCount:result.missingSceneCount||0,imageCount:files.length};
     emit('cutflow-auto-complete',complete);
     if(window.CutflowUI?.mode!=='mobile')setTimeout(()=>document.querySelector('.workspace')?.scrollIntoView({behavior:'smooth',block:'start'}),250);
-  }catch(e){status(`자동 세팅 중단: ${e.message}`,0);emit('cutflow-auto-error',{message:e.message});window.CutflowAutoBridge?.toast?.(e.message);}
+  }catch(e){
+    let rollbackError=null;
+    if(rollback&&bridge?.restore){
+      try{await bridge.restore(rollback,{history:true});window.CutflowHistory?.reset?.();}
+      catch(error){rollbackError=error;console.error('Cutflow auto setup rollback failed',error);}
+    }
+    const message=rollbackError?`자동 세팅 중단: ${e.message} · 이전 프로젝트 복원에도 실패했습니다.`:`자동 세팅 중단: ${e.message}${rollback?' · 이전 프로젝트를 복원했습니다.':''}`;
+    status(message,0);emit('cutflow-auto-error',{message,error:e,rolledBack:!!rollback&&!rollbackError});window.CutflowAutoBridge?.toast?.(message);
+  }
   finally{state.running=false;update();}
 }
 function syncBasicsFromProject(){
