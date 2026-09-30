@@ -173,5 +173,5 @@
 
   window.addEventListener('cutflow-caption-updated',()=>{if(dialog?.open)render({focus:false});});
   window.addEventListener('cutflow-project-restored',()=>{if(dialog?.open){selected=-1;draft='';render();}});
-  window.CutflowCaptionBatch={open,close(){if(dialog?.open){commitDraft();dialog.close();}},render,groups:sceneGroups};
+  window.CutflowCaptionBatch={open};
 })();
