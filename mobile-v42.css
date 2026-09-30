@@ -1850,3 +1850,42 @@ body.v42-mobile .v42-tabs{
 @supports(height:100svh){
   #v42PreviewDialog .v42-full-stage-wrap{height:calc(100svh - 52px)}
 }
+
+/* v42.9.3 sharpen mobile header + circular play button */
+body.v42-mobile .v42-head,
+body.v42-mobile .v42-head *{
+  filter:none!important;
+  -webkit-filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  text-shadow:none!important;
+  box-shadow:none;
+}
+body.v42-mobile .v42-head{
+  background:#0d0f12!important;
+  opacity:1!important;
+  transform:none!important;
+}
+body.v42-mobile .v42-head button{
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-head button.primary{
+  box-shadow:none!important;
+}
+
+/* Main preview play button: circular and easier to recognize/tap. */
+body.v42-mobile .v42-transport .play{
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  border-radius:50%!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  background:var(--v42-accent)!important;
+  border:1px solid var(--v42-accent)!important;
+  color:#111!important;
+  font-size:15px!important;
+  line-height:1!important;
+}
