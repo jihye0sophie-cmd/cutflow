@@ -1089,3 +1089,26 @@ body.v42-mobile .v42-tabs button:active{
   #v42SettingsDialog .v42-auto-images-head{display:grid!important;grid-template-columns:1fr;align-items:start!important}
   #v42SettingsDialog .v42-auto-image-buttons{min-width:0;width:100%;margin-top:7px}
 }
+
+/* v42.7.4 grid empty state + reliable delete UI */
+#v42SettingsDialog .v42-auto-grid-empty{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:58px;
+  margin-top:6px;
+  padding:12px;
+  border:1px dashed #343a43;
+  border-radius:8px;
+  background:#101318;
+  color:#9fa8b3;
+  text-align:center;
+  font-size:9px;
+  line-height:1.5;
+}
+#v42SettingsDialog [data-auto-grid-delete]{
+  touch-action:manipulation;
+  cursor:pointer;
+  position:relative;
+  z-index:4;
+}
