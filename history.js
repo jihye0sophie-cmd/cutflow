@@ -3,7 +3,6 @@
   const MAX=40;
   let past=[],future=[],pending=null,applying=false,busy=false,seq=0;
   const bridge=()=>window.CutflowProjectBridge;
-  const $=id=>document.getElementById(id);
   const cloneFileSig=file=>file?{name:file.name||'',size:Number(file.size)||0,lastModified:Number(file.lastModified)||0,type:file.type||''}:null;
   function fingerprint(snapshot){
     if(!snapshot)return '';
@@ -56,7 +55,6 @@
   async function undo(){if(!past.length||busy)return false;const entry=past.pop();const ok=await restore(entry,'undo');if(!ok)past.push(entry);update();return ok;}
   async function redo(){if(!future.length||busy)return false;const entry=future.pop();const ok=await restore(entry,'redo');if(!ok)future.push(entry);update();return ok;}
   function reset(){past=[];future=[];pending=null;update();}
-  function controls(){update();}
   function labelFor(target){
     if(!target)return '편집';
     const text=(target.getAttribute?.('aria-label')||target.textContent||'').trim().replace(/\s+/g,' ');
@@ -77,5 +75,5 @@
     if(e.ctrlKey&&!e.metaKey&&!e.altKey&&key==='y'){e.preventDefault();e.stopImmediatePropagation();redo();return;}
   },true);
   window.CutflowHistory={begin,commit,undo,redo,reset,get applying(){return applying},get busy(){return busy},get canUndo(){return past.length>0},get canRedo(){return future.length>0}};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',controls,{once:true});else queueMicrotask(controls);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update,{once:true});else queueMicrotask(update);
 })();
