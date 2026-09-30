@@ -44,7 +44,9 @@ assert(js.includes('bgmVolume')&&js.includes('bgmFadeIn')&&js.includes('bgmFadeO
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'Cutflow yellow accent token missing');
 assert(!css.includes('#d9ff38'),'old green accent must be removed');
 assert(css.includes('body.v42-mobile .v42-preview-card{')&&css.includes('position:relative!important'),'fixed-shell preview ownership missing');
-assert(css.includes('.v42-tabs{\n  position:fixed')&&css.includes('bottom:max(4px,env(safe-area-inset-bottom))!important'),'fixed three-tab bar missing');
+assert(css.includes('.v42-tabs{\n  position:fixed')&&css.includes('bottom:calc(max(8px,env(safe-area-inset-bottom)) + 14px)!important'),'lifted fixed three-tab bar missing');
+assert(css.includes('background:rgba(13,15,18,.76)!important')&&css.includes('backdrop-filter:blur(18px) saturate(135%)!important'),'translucent mobile dock styling missing');
+assert(!css.includes('body.v42-mobile.v42-standalone .v42-tabs{\n  bottom:6px!important'),'legacy standalone dock override must stay removed');
 assert(css.includes('.v42-section.v42-quick-start'),'auto setup visual emphasis missing');
 
 assert(js.includes('id="v42Settings"')&&js.includes("settingsDialog.id='v42SettingsDialog'"),'mobile settings sheet missing');
