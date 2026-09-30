@@ -148,22 +148,6 @@ window.CutflowCaptionStyle={
     const style=CaptionStyle.resolve(cue,project());
     return {index,...style};
   },
-  async update(index,patch={}){
-    const cue=cues[index];if(!cue)return false;
-    styleCueId=cue.id;rememberCues();cue.style={...cue.style,...patch};if(patch.color)cue.color=patch.color;
-    jump(cue.start);renderCues();changed();syncStyleEditor();
-    try{await CutRenderer.fonts(project());changed();}catch{}
-    window.dispatchEvent(new CustomEvent('cutflow-caption-style-updated',{detail:{index,state:this.state(index)}}));
-    return this.state(index);
-  },
-  async applyAll(index){
-    const cue=cues[index];if(!cue)return false;
-    const style={...CaptionStyle.resolve(cue,project())};rememberCues();
-    cues.forEach(c=>{c.style={...c.style,...style};if(style.color)c.color=style.color;});
-    renderCues();changed();syncStyleEditor();toast(`${cues.length}개 자막에 현재 스타일을 적용했습니다.`);
-    window.dispatchEvent(new CustomEvent('cutflow-caption-style-updated',{detail:{index,state:this.state(index),all:true}}));
-    return true;
-  },
   select(index){selectStyleCue(index,false);return this.state(index);}
 };
 window.syncStyleEditor=syncStyleEditor;window.selectStyleCue=selectStyleCue;
