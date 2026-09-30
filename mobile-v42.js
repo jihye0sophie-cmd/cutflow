@@ -307,10 +307,9 @@
         <header><strong>대본 · 내레이션 · BGM</strong></header>
         ${pc($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}
         ${pc($('autoCaptionWrap'),'자막 자동 줄바꿈')}
-        <div class="v42-file-actions">${pb($('autoNarrationBtn'),'내레이션 선택')}${pb($('autoBgmBtn'),'BGM 선택 · 선택사항')}</div>
-        <div class="v42-auto-files">
-          <span><b>내레이션</b><i data-auto-status="narration">${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</i></span>
-          <span><b>BGM</b><i>${esc($('autoBgmName')?.textContent||'선택 안 됨')}</i></span>
+        <div class="v42-auto-audio-picks">
+          <div><span class="pick-button">${pb($('autoNarrationBtn'),'내레이션 선택')}</span><small data-auto-status="narration">${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</small></div>
+          <div><span class="pick-button">${pb($('autoBgmBtn'),'BGM 선택')}</span><small data-auto-status="bgm">${esc($('autoBgmName')?.textContent||'선택 안 됨')}<em> · 선택사항</em></small></div>
         </div>
         <div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>
       </section>
@@ -348,6 +347,7 @@
     const autoRunText=(!$('autoProgress')?.hidden||autoInfo.running)?($('autoStatus')?.textContent||''):(autoInfo.canStart?'준비 완료 · 자동 세팅을 시작할 수 있습니다.':autoInfo.reason||'');
     const statusMap={
       narration:$('autoNarrationName')?.textContent||'선택 안 됨',
+      bgm:($('autoBgmName')?.textContent||'선택 안 됨')+' · 선택사항',
       grid:$('autoGridName')?.textContent||'선택 안 됨',
       single:$('autoSingleName')?.textContent||'선택 안 됨',
       'silence-info':$('autoSilenceInfo')?.textContent||'',
@@ -370,8 +370,7 @@
     if(!host)return;
     const active=document.activeElement;
     if(active&&host.contains(active))return;
-    const wasOpen=!!host.querySelector(':scope > details')?.open;
-    host.innerHTML=details('그리드 분할 설정',autoGridMirror(),'열 · 행 · 분할 여백',wasOpen);
+    host.innerHTML=autoGridMirror();
   }
   function renderSettings(){
     settingsProxyMap.clear();
@@ -402,18 +401,40 @@
       <div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div>
       <div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점 (초)')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인 (초)')}${pc($('bgmFadeOut'),'페이드 아웃 (초)')}</div>
       <p class="v42-help">${esc($('bgmSummary')?.textContent||'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.')}</p>`;
+    const stylePalette=(target)=>Object.values(window.CaptionStyle?.palette||{white:'#ffffff',yellow:'#f5e642',lime:'#c9ff57',sky:'#8ed1f5',red:'#e95a55',orange:'#ee9b45'}).map(c=>`<button type="button" data-settings-color-target="${target}" data-color="${c}" style="--swatch:${c}" aria-label="${c}"></button>`).join('');
     const titleStyle=`
-      <div class="v42-grid2">${pc($('titleFont'),'폰트')}${pc($('titleSize'),'크기 (px)')}${pc($('titleColor'),'색상 · 직접 선택')}${pc($('titleX'),'가로 위치')}${pc($('titleY'),'세로 위치')}${pc($('titleBold'),'볼드')}${pc($('titleItalic'),'이탤릭')}${pc($('titleStrokeEnabled'),'스트로크 사용')}${pc($('titleStrokeWidth'),'스트로크 두께')}</div>`;
+      <div class="v42-pc-typo-grid">
+        <div class="full">${pc($('titleFont'),'폰트')}</div>
+        ${pc($('titleSize'),'크기 (px)')}
+        <div class="v42-typo-color"><span>색상 · 직접 선택</span><div class="v42-settings-palette">${stylePalette('titleColor')}</div>${pc($('titleColor'),'직접 선택')}</div>
+        ${pc($('titleX'),'가로 위치')}${pc($('titleY'),'세로 위치')}
+        <div class="full v42-inline-checks">${pc($('titleBold'),'볼드')}${pc($('titleItalic'),'이탤릭')}</div>
+        <div class="full v42-selection-style">
+          <strong>선택 글자색</strong>
+          <div class="v42-selection-row"><div class="v42-settings-palette">${stylePalette('titleSelectionColor')}</div>${pc($('titleSelectionColor'),'직접 선택')}${pb($('titleSelectionApply'),'선택 글자에 적용')}${pb($('titleSelectionReset'),'선택 색상 해제')}</div>
+          <small>제목에서 글자를 드래그한 뒤 적용하세요.</small>
+        </div>
+        <div class="full v42-stroke-row">${pc($('titleStrokeEnabled'),'스트로크 사용')}${pc($('titleStrokeWidth'),'두께')}</div>
+      </div>
+      <p class="v42-help">${esc($('titleFontNote')?.textContent||'')}</p>`;
     const channelStyle=`
-      <div class="v42-grid2">${pc($('channelFont'),'폰트')}${pc($('channelSize'),'크기 (px)')}${pc($('channelColor'),'색상 · 직접 선택')}${pc($('channelX'),'가로 위치')}${pc($('channelY'),'세로 위치')}${pc($('channelBold'),'볼드')}${pc($('channelItalic'),'이탤릭')}${pc($('channelStrokeEnabled'),'스트로크 사용')}${pc($('channelStrokeWidth'),'스트로크 두께')}</div>`;
+      <div class="v42-pc-typo-grid">
+        <div class="full">${pc($('channelFont'),'폰트')}</div>
+        ${pc($('channelSize'),'크기 (px)')}
+        <div class="v42-typo-color"><span>색상 · 직접 선택</span><div class="v42-settings-palette">${stylePalette('channelColor')}</div>${pc($('channelColor'),'직접 선택')}</div>
+        ${pc($('channelX'),'가로 위치')}${pc($('channelY'),'세로 위치')}
+        <div class="full v42-inline-checks">${pc($('channelBold'),'볼드')}${pc($('channelItalic'),'이탤릭')}</div>
+        <div class="full v42-stroke-row">${pc($('channelStrokeEnabled'),'스트로크 사용')}${pc($('channelStrokeWidth'),'두께')}</div>
+      </div>
+      <p class="v42-help">${esc($('channelFontNote')?.textContent||'')}</p>`;
     const project=`
       <label class="v42-field"><span>화면 비율</span><div class="v42-format-lock">9:16 <small>세로형 고정</small></div></label>
       ${pc($('layoutSelect'),'영상 템플릿')}
       <p class="v42-help">${esc($('layoutDescription')?.textContent||'')}</p>
-      ${pc($('titleInput'),'상단 제목',{wide:true})}
-      <details class="v42-settings-details" open><summary>제목 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${titleStyle}</div></details>
+      <div class="v42-compose-title">${pc($('titleInput'),'상단 제목',{wide:true})}</div>
+      <details class="v42-settings-details v42-pc-style-card" open><summary>제목 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${titleStyle}</div></details>
       ${pc($('channelInput'),'채널명 · 모든 템플릿',{wide:true})}
-      <details class="v42-settings-details" open><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>
+      <details class="v42-settings-details v42-pc-style-card" open><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>
       ${pc($('fitSelect'),'이미지·영상 맞춤')}
       ${pc($('templateSelect'),'움직임 프리셋')}
       <div class="v42-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>
@@ -568,6 +589,8 @@
   $('v42SettingsClose').onclick=()=>settingsDialog.close();
   settingsDialog.addEventListener('cancel',e=>{e.preventDefault();settingsDialog.close();});
   $('v42SettingsBody').addEventListener('click',e=>{
+    const settingsColor=e.target.closest('[data-settings-color-target][data-color]');
+    if(settingsColor){const source=$(settingsColor.dataset.settingsColorTarget);if(source){source.value=settingsColor.dataset.color;dispatch(source,'input');dispatch(source,'change');syncSettingsProxyState();}return;}
     const history=e.target.closest('[data-cutflow-history]');
     if(history){window.CutflowHistory?.[history.dataset.cutflowHistory]?.();setTimeout(syncSettingsProxyState,0);return;}
     const autoStart=e.target.closest('[data-auto-start]');
@@ -579,6 +602,7 @@
     handleAutoClick(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});
   });
   $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});});
+  $('v42SettingsBody').addEventListener('select',e=>{const k=e.target?.dataset?.proxy,source=k?settingsProxyMap.get(k):null;if(source===$('titleInput')&&typeof source.setSelectionRange==='function')source.setSelectionRange(e.target.selectionStart||0,e.target.selectionEnd||0);},true);
   $('v42SettingsBody').addEventListener('change',e=>{proxyChange(e,settingsProxyMap);setTimeout(syncSettingsProxyState,0);});
   let mobileGridDrag=null;
   $('v42SettingsBody').addEventListener('pointerdown',e=>{
