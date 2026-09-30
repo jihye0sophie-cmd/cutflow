@@ -78,7 +78,7 @@
   previewDialog.setAttribute('role','dialog');
   previewDialog.setAttribute('aria-modal','true');
   previewDialog.setAttribute('aria-label','전체화면 미리보기');
-  previewDialog.innerHTML='<div class="v42-full-head"><strong>전체화면 미리보기</strong><button type="button" id="v42FullClose" aria-label="닫기">×</button></div><div class="v42-full-stage-wrap"><canvas id="v42FullStage" width="360" height="640"></canvas><button type="button" id="v42FullPlay" class="v42-full-play" aria-label="재생/일시정지">▶</button></div>';
+  previewDialog.innerHTML='<div class="v42-full-head"><strong>전체화면 미리보기</strong><button type="button" id="v42FullClose" aria-label="닫기">×</button></div><div class="v42-full-stage-wrap"><canvas id="v42FullStage" width="1080" height="1920"></canvas></div><div class="v42-full-controls"><button type="button" id="v42FullPlay" class="v42-full-play" aria-label="재생/일시정지">▶</button></div>';
   document.body.append(previewDialog);
   const exportDialogV42=document.createElement('dialog');
   exportDialogV42.id='v42ExportDialog';
@@ -562,7 +562,7 @@
   function mirrorStage(frameNow=performance.now()){
     if(frameNow-lastMirrorAt>=33){
       lastMirrorAt=frameNow;
-      const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(!previewDialog.hidden){fullCtx.clearRect(0,0,fullStage.width,fullStage.height);fullCtx.drawImage(src,0,0,fullStage.width,fullStage.height);}}catch{}}
+      const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(!previewDialog.hidden){fullCtx.clearRect(0,0,1080,1920);fullCtx.drawImage(src,0,0,1080,1920);}}catch{}}
       syncPlayer();
     }
     requestAnimationFrame(mirrorStage);
@@ -713,7 +713,17 @@
   };
   bindMobileTap($('v42PrevScene'),()=>selectAdjacentScene(-1));
   bindMobileTap($('v42NextScene'),()=>selectAdjacentScene(1));
+  function setSourcePreviewSize(width,height){
+    const sourcePreview=$('stage');
+    if(!sourcePreview)return;
+    if(sourcePreview.width!==width||sourcePreview.height!==height){
+      sourcePreview.width=width;
+      sourcePreview.height=height;
+      window.CutflowPlayer?.invalidate?.();
+    }
+  }
   function openPreviewFullscreen(){
+    setSourcePreviewSize(1080,1920);
     previewDialog.hidden=false;
     previewDialog.classList.add('v42-preview-open');
     document.body.classList.add('v42-preview-lock');
@@ -721,9 +731,12 @@
     requestAnimationFrame(()=>$('v42FullPlay')?.focus?.({preventScroll:true}));
   }
   function closePreviewFullscreen(){
+    window.CutflowPlayer?.pause?.();
     previewDialog.classList.remove('v42-preview-open');
     previewDialog.hidden=true;
     document.body.classList.remove('v42-preview-lock');
+    setSourcePreviewSize(window.CutflowUI?.mobileActive?540:1080,window.CutflowUI?.mobileActive?960:1920);
+    requestAnimationFrame(()=>{syncPlayer();window.CutflowPlayer?.invalidate?.();});
   }
   bindMobileTap($('v42Fullscreen'),openPreviewFullscreen);
   bindMobileTap($('v42FullClose'),closePreviewFullscreen);
