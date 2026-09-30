@@ -694,3 +694,147 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 .v42-media-audio-head>strong{color:#eef1f4;font-size:10px}
 .v42-media-volume-presets{display:flex;gap:5px;flex-wrap:wrap}
 .v42-media-volume-presets .v42-btn{min-width:44px;min-height:30px;padding:4px 7px}
+
+
+/* v42.6.6 mobile project settings — desktop visual parity */
+#v42SettingsDialog .v42-sheet-head{
+  height:52px;
+  padding:0 14px;
+  background:var(--studio-card,#171a1f)!important;
+  border-bottom:1px solid var(--studio-border,#30343b)!important;
+}
+#v42SettingsDialog .v42-sheet-head strong{font-size:14px}
+#v42SettingsDialog .v42-settings-body{
+  padding:10px 10px calc(24px + env(safe-area-inset-bottom))!important;
+}
+#v42SettingsDialog .v42-settings-top-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  margin-bottom:8px;
+}
+#v42SettingsDialog .v42-settings-source-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-bottom:10px;
+}
+#v42SettingsDialog .v42-settings-top-actions .v42-btn,
+#v42SettingsDialog .v42-settings-source-actions .v42-btn{
+  min-width:0;
+  min-height:34px;
+  padding:6px 7px;
+  font-size:9px;
+}
+#v42SettingsDialog .v42-pc-settings-section{
+  margin-bottom:10px;
+  border-radius:9px;
+  background:var(--studio-card,#171a1f);
+}
+#v42SettingsDialog .v42-pc-settings-section>header{
+  min-height:46px;
+  padding:9px 11px;
+  justify-content:space-between;
+  background:var(--studio-card,#171a1f);
+}
+#v42SettingsDialog .v42-pc-settings-section>header>div{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  min-width:0;
+}
+#v42SettingsDialog .v42-pc-settings-section>header>div>span{
+  flex:0 0 auto;
+  color:#aeb6c0;
+  font-size:7px;
+  font-weight:850;
+  letter-spacing:.12em;
+}
+#v42SettingsDialog .v42-pc-settings-section>header>div>strong{
+  color:#fff;
+  font-size:13px;
+  font-weight:850;
+}
+#v42SettingsDialog .v42-pc-settings-section>header>small{
+  flex:0 1 auto;
+  max-width:48%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#cfd5dc;
+  font-size:8px;
+}
+#v42SettingsDialog .v42-pc-settings-body{
+  padding:10px 11px 12px;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-height:46px;
+  padding:9px 11px;
+  background:var(--studio-card,#171a1f);
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary>div{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary>div>span{
+  color:#aeb6c0;
+  font-size:7px;
+  font-weight:850;
+  letter-spacing:.12em;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary>div>strong{
+  color:#fff;
+  font-size:13px;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible>summary>em{
+  color:#cfd5dc;
+  font-size:9px;
+}
+#v42SettingsDialog .v42-pc-settings-collapsible[open]>summary>em{font-size:0}
+#v42SettingsDialog .v42-pc-settings-collapsible[open]>summary>em:before{content:"자동 세팅 닫기";font-size:9px}
+#v42SettingsDialog .v42-settings-file-row{
+  display:grid;
+  margin:6px 0;
+}
+#v42SettingsDialog .v42-settings-file-row .v42-btn{
+  width:100%;
+}
+#v42SettingsDialog .v42-settings-waveform{
+  margin:7px 0 9px;
+  overflow:hidden;
+  border:1px solid #3a4049;
+  border-radius:7px;
+  background:#eef1e8;
+}
+#v42SettingsDialog .v42-settings-waveform img{
+  display:block;
+  width:100%;
+  height:54px;
+  object-fit:fill;
+}
+#v42SettingsDialog .v42-field textarea{
+  min-height:88px!important;
+}
+#v42SettingsDialog .v42-help{
+  margin:8px 0 0;
+  font-size:8px;
+  line-height:1.55;
+}
+#v42SettingsDialog .v42-grid2{
+  gap:8px;
+}
+@media(max-width:390px){
+  #v42SettingsDialog .v42-settings-top-actions{
+    grid-template-columns:1fr 1fr 1fr;
+    gap:4px;
+  }
+  #v42SettingsDialog .v42-settings-top-actions .v42-btn{
+    padding:5px 4px;
+    font-size:8px;
+  }
+}
