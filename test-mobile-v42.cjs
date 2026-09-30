@@ -63,7 +63,7 @@ assert(css.includes('.v42-panel{min-height:92px'),'mobile editor panel minimum h
 assert(js.includes("settingsSection('01 SCRIPT & VOICE','대본과 내레이션'"),'desktop-parity script/voice settings missing');
 assert(js.includes("settingsSection('AUDIO','배경음악 · BGM'"),'desktop-parity BGM settings missing');
 assert(js.includes("settingsSection('02 COMPOSE','화면 구성'"),'desktop-parity compose settings missing');
-assert(js.includes("settingsSection('04 EXPORT','출력 설정'"),'desktop-parity export settings missing');
+assert(js.includes("settingsSection('03 EXPORT','완성한 쇼츠를 MP4로.'"),'desktop-parity export settings missing');
 assert(js.includes('v42-grid-preview')&&js.includes('data-auto-cut'),'mobile auto grid preview/cut controls missing');
 assert(css.includes('#v42SettingsDialog::backdrop{background:#000!important'),'opaque settings backdrop missing');
 assert(css.includes('.v42-grid-preview{position:relative'),'mobile grid preview styling missing');
