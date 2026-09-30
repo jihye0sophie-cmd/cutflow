@@ -46,6 +46,8 @@ const retiredMarkers=[
   ['timing-editor.js','mobileEditor',read('timing-editor.js')],
   ['timing-editor.js','mobileTiming',read('timing-editor.js')],
   ['index.html','history.css',index],
+  ['index.html','undoCuesBtn',index],
+  ['app.js','cueHistory',read('app.js')],
 ];
 for(const [file,marker,source] of retiredMarkers){
   if(source.includes(marker))fail(`retired marker "${marker}" returned in ${file}`);
