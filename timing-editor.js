@@ -1,7 +1,7 @@
 /* Timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
 (()=>{
   const q=id=>document.getElementById(id);
-  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,lastCenteredCueId=null;
+  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,timelineScrollLeft=0;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const num=(n,d=0)=>Number.isFinite(Number(n))?Number(n):d;
   const fmt=n=>num(n).toFixed(2);
@@ -125,7 +125,7 @@
     if(!host)return;
     const list=timelineRanges(),duration=timelineDuration();
     if(!list.length){host.innerHTML='<p class="timing-empty">장면을 먼저 추가해 주세요.</p>';return;}
-    const previousScroll=host.querySelector('.timing-scroll')?.scrollLeft||0;
+    const liveScroller=host.querySelector('.timing-scroll');if(liveScroller)timelineScrollLeft=liveScroller.scrollLeft;
     const activeScene=sceneIndex(),selectedCue=cues.findIndex(c=>c.id===selectedCueId),selected=cues[selectedCue];
     const pps=40*timelineZoom,canvasWidth=Math.max(320,Math.ceil(duration*pps));
     const scenesMarkup=list.map((g,i)=>`<button type="button" class="timeline-scene-block ${i===activeScene?'active':''}" data-timeline-scene="${i}" style="left:${pctAll(g.start,duration)}%;width:${Math.max(.25,pctAll(g.end,duration)-pctAll(g.start,duration))}%"><b>장면 ${i+1}</b><span>${fmt(g.end-g.start)}s</span></button>`).join('');
@@ -133,14 +133,14 @@
       `<button type="button" class="timing-handle scene timeline-scene-handle end" data-scene-boundary="${list.length-1}" data-boundary-side="end" style="left:${pctAll(list.at(-1).end,duration)}%" aria-label="마지막 장면 종료 조절"></button>`;
     const captionsMarkup=(cues||[]).map((c,i)=>`<button type="button" class="timeline-caption-block ${i===selectedCue?'active':''}" data-timing-cue="${i}" style="left:${pctAll(c.start,duration)}%;width:${Math.max(.25,pctAll(c.end,duration)-pctAll(c.start,duration))}%"><b>${esc((c.text||'자막 '+(i+1)).replace(/\s+/g,' ').slice(0,28))}</b><span>${fmt(c.end-c.start)}s</span></button>`).join('');
     const captionHandles=selected?`<button type="button" class="timing-handle caption timeline-caption-edge start" data-caption-edge="start" data-cue-index="${selectedCue}" style="left:${pctAll(selected.start,duration)}%" aria-label="선택 자막 시작 조절"></button><button type="button" class="timing-handle caption timeline-caption-edge end" data-caption-edge="end" data-cue-index="${selectedCue}" style="left:${pctAll(selected.end,duration)}%" aria-label="선택 자막 종료 조절"></button>`:'';
-    const narrationDuration=Math.min(duration,num(audioBuffer?.duration,0));
-    const narrationMarkup=narrationDuration>0?`<div class="timeline-audio-block narration" style="left:0;width:${pctAll(narrationDuration,duration)}%"><b>내레이션</b><span>${esc(audioName||'Narration')} · ${fmt(narrationDuration)}s</span></div>`:'<span class="timeline-layer-empty">내레이션 없음</span>';
-    const videoMarkup=list.map((g,i)=>{const st=window.CutflowScene?.state?.(i);if(st?.type!=='video')return '';const muted=st.mediaMuted||st.mediaVolume<=0;return `<div class="timeline-audio-block video ${muted?'muted':''}" style="left:${pctAll(g.start,duration)}%;width:${Math.max(.25,pctAll(g.end,duration)-pctAll(g.start,duration))}%"><b>장면 ${i+1} 원음</b><span>${muted?'음소거':st.mediaVolume+'%'}</span></div>`;}).join('')||'<span class="timeline-layer-empty">영상 원음 없음</span>';
-    const bgmProjectState=window.bgmProject?.(),bgmLoaded=!!bgmProjectState?.buffer,bgmStart=Math.max(0,num(bgmProjectState?.start,0)),bgmLoop=!!bgmProjectState?.loop,bgmSourceDuration=Math.max(0,num(bgmProjectState?.buffer?.duration,0)),bgmLength=bgmLoaded?Math.min(duration,bgmLoop?duration:Math.max(0,bgmSourceDuration-bgmStart)):0;
-    const bgmMarkup=bgmLength>0?`<div class="timeline-audio-block bgm" style="left:0;width:${pctAll(bgmLength,duration)}%"><b>BGM</b><span>${bgmLoop?'반복':fmt(bgmLength)+'s'}</span></div>`:'<span class="timeline-layer-empty">BGM 없음</span>';
     host.innerHTML=`
       <div class="timing-toolbar">
-        <div class="timing-play-tools"><button type="button" data-timing-action="toggle-play">▶/Ⅱ</button><strong data-timeline-clock>${fmt(currentTime())} / ${fmt(duration)}</strong></div>
+        <div class="timing-play-tools">
+          <button type="button" data-timing-action="prev-scene" aria-label="이전 장면">‹</button>
+          <button type="button" data-timing-action="toggle-play" aria-label="재생 또는 일시정지">▶/Ⅱ</button>
+          <button type="button" data-timing-action="next-scene" aria-label="다음 장면">›</button>
+          <strong data-timeline-clock>${fmt(currentTime())} / ${fmt(duration)}</strong>
+        </div>
         <div class="timing-zoom-tools"><label class="timing-snap-toggle"><input type="checkbox" data-timing-action="snap" ${snapEnabled?'checked':''}> 스냅</label><span>타임라인</span><button type="button" data-timing-action="zoom-out" aria-label="축소">−</button><b>${Math.round(timelineZoom*100)}%</b><button type="button" data-timing-action="zoom-in" aria-label="확대">＋</button></div>
       </div>
       <div class="timing-scroll">
@@ -148,18 +148,22 @@
           <div class="timing-ruler">${timelineTicks(duration,pps)}</div>
           <div class="timing-layer timing-scene-layer"><span class="timing-layer-label">장면</span><div class="timing-layer-body">${scenesMarkup}${sceneHandles}</div></div>
           <div class="timing-layer timing-caption-layer"><span class="timing-layer-label">자막</span><div class="timing-layer-body">${captionsMarkup}${captionHandles}</div></div>
-          <div class="timing-layer timing-narration-layer"><span class="timing-layer-label">내레이션</span><div class="timing-layer-body">${narrationMarkup}</div></div>
-          <div class="timing-layer timing-videoaudio-layer"><span class="timing-layer-label">영상 원음</span><div class="timing-layer-body">${videoMarkup}</div></div>
-          <div class="timing-layer timing-bgm-layer"><span class="timing-layer-label">BGM</span><div class="timing-layer-body">${bgmMarkup}</div></div>
           <div class="timing-playhead-area"><div class="timing-playhead" style="left:${pctAll(currentTime(),duration)}%"></div><button type="button" class="timing-playhead-grip" data-timeline-playhead style="left:${pctAll(currentTime(),duration)}%" aria-label="재생 위치 드래그"></button></div>
         </div>
       </div>`;
     host.dataset.windowStart='0';host.dataset.windowEnd=String(duration);
     const scroller=host.querySelector('.timing-scroll');
     if(scroller){
-      const shouldCenter=selected&&(pendingCenter||lastCenteredCueId!==selected.id);
-      if(shouldCenter){const center=((selected.start+selected.end)/2)*pps;requestAnimationFrame(()=>{scroller.scrollLeft=Math.max(0,center-scroller.clientWidth/2);});lastCenteredCueId=selected.id;pendingCenter=false;}
-      else scroller.scrollLeft=Math.min(previousScroll,Math.max(0,scroller.scrollWidth-scroller.clientWidth));
+      const maxScroll=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
+      if(selected&&pendingCenter){
+        const center=((selected.start+selected.end)/2)*pps;
+        requestAnimationFrame(()=>{timelineScrollLeft=Math.max(0,Math.min(maxScroll,center-scroller.clientWidth/2));scroller.scrollLeft=timelineScrollLeft;});
+        pendingCenter=false;
+      }else{
+        timelineScrollLeft=Math.max(0,Math.min(maxScroll,timelineScrollLeft));
+        scroller.scrollLeft=timelineScrollLeft;
+      }
+      scroller.addEventListener('scroll',()=>{timelineScrollLeft=scroller.scrollLeft;},{passive:true});
     }
   }
   function editorMarkup(item){
@@ -181,13 +185,20 @@
   }
   function visiblePanel(){if(externalPanel?.isConnected)return externalPanel;if(q('desktopEditor')?.dataset.mode==='timing')return q('desktopTiming');return null;}
   function selectCaption(delta){const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;const pos=item.cueIndices.indexOf(sel.index),target=item.cueIndices[clamp(pos+delta,0,item.cueIndices.length-1)],cue=cues[target];if(cue){selectedCueId=cue.id;jump(cue.start);renderAll();}}
+  function selectSceneRelative(delta){
+    const list=sceneItems(),target=clamp(sceneIndex()+delta,0,Math.max(0,list.length-1));if(!list.length||target===sceneIndex())return;
+    const item=list[target],cue=cues?.[item?.firstCueIndex];selectedCueId=cue?.id||null;pendingCenter=true;
+    window.CutflowScene?.select?.(target);renderAll();
+  }
   function handleAction(e){
     const panel=e.target.closest('.timing-panel');if(!panel)return;
     const sceneBtn=e.target.closest('[data-timeline-scene]');if(sceneBtn){window.CutflowScene?.select?.(Number(sceneBtn.dataset.timelineScene));renderAll();return;}
     const cueBtn=e.target.closest('[data-timing-cue]');if(cueBtn){const i=Number(cueBtn.dataset.timingCue);if(cues[i]){selectedCueId=cues[i].id;pendingCenter=true;jump(cues[i].start);renderAll();}return;}
     const action=e.target.closest('[data-timing-action]')?.dataset.timingAction;
     if(action){
-      if(action==='toggle-play')window.CutflowPlayer?.toggle?.();
+      if(action==='prev-scene')selectSceneRelative(-1);
+      else if(action==='toggle-play')window.CutflowPlayer?.toggle?.();
+      else if(action==='next-scene')selectSceneRelative(1);
       else if(action==='zoom-out'){timelineZoom=clamp(timelineZoom-.25,.5,3);pendingCenter=true;renderAll();}
       else if(action==='zoom-in'){timelineZoom=clamp(timelineZoom+.25,.5,3);pendingCenter=true;renderAll();}
       else if(action==='snap'){snapEnabled=!!e.target.checked;renderAll();}
