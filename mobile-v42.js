@@ -422,7 +422,8 @@
       <p class="v42-help">내레이션을 사용할 때는 대본 분량과 음성의 무음 구간으로 시간을 추정합니다. 내레이션이 없다면 장면을 추가하고 자막과 장면 길이를 직접 입력할 수 있습니다.</p>`;
     const bgm=`
       <div class="v42-actions v42-compact-actions v42-bgm-actions">${pb($('bgmBtn'),'음악 파일 추가')}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div>
-      <div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점 (초)')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인 (초)')}${pc($('bgmFadeOut'),'페이드 아웃 (초)')}</div>
+      <div class="v42-grid2">${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmVolume'),'BGM 볼륨')}</div>
+      <div class="v42-grid3">${pc($('bgmStart'),'음악 시작 지점 (초)')}${pc($('bgmFadeIn'),'페이드 인 (초)')}${pc($('bgmFadeOut'),'페이드 아웃 (초)')}</div>
       <p class="v42-help">${esc($('bgmSummary')?.textContent||'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.')}</p>`;
     const stylePalette=(target)=>Object.values(window.CaptionStyle?.palette||{white:'#ffffff',yellow:'#f5e642',lime:'#c9ff57',sky:'#8ed1f5',red:'#e95a55',orange:'#ee9b45'}).map(c=>`<button type="button" data-settings-color-target="${target}" data-color="${c}" style="--swatch:${c}" aria-label="${c}"></button>`).join('');
     const titleStyle=`
@@ -451,13 +452,12 @@
       </div>
       <p class="v42-help">${esc($('channelFontNote')?.textContent||'')}</p>`;
     const project=`
-      <label class="v42-field"><span>화면 비율</span><div class="v42-format-lock">9:16 <small>세로형 고정</small></div></label>
-      ${pc($('layoutSelect'),'영상 템플릿')}
+      <div class="v42-grid2"><label class="v42-field"><span>화면 비율</span><div class="v42-format-lock">9:16 <small>세로형 고정</small></div></label>${pc($('layoutSelect'),'영상 템플릿')}</div>
       <p class="v42-help">${esc($('layoutDescription')?.textContent||'')}</p>
       <div class="v42-compose-title">${pc($('titleInput'),'상단 제목',{wide:true})}</div>
-      <details class="v42-settings-details v42-pc-style-card" open><summary>제목 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${titleStyle}</div></details>
-      ${pc($('channelInput'),'채널명 · 모든 템플릿',{wide:true})}
-      <details class="v42-settings-details v42-pc-style-card" open><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>
+      <details class="v42-settings-details v42-pc-style-card"><summary>제목 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${titleStyle}</div></details>
+      ${pc($('channelInput'),'채널명',{wide:true})}
+      <details class="v42-settings-details v42-pc-style-card"><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>
       ${pc($('fitSelect'),'이미지·영상 맞춤')}
       ${pc($('templateSelect'),'움직임 프리셋')}
       <div class="v42-actions v42-compact-actions v42-motion-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>
