@@ -37,16 +37,20 @@
       <section class="v42-preview-card">
         <div class="v42-preview-head"><strong>미리보기</strong><span id="v42TimeLabel">0:00.0 / 0:00.0</span></div>
         <div class="v42-stage-wrap"><canvas id="v42Stage" width="360" height="640" aria-label="모바일 영상 미리보기"></canvas></div>
+        <input id="v42Scrubber" class="v42-scrubber" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
         <div class="v42-player">
-          <button type="button" id="v42Play" class="play" aria-label="재생">▶</button>
+          <div class="v42-transport">
+            <button type="button" id="v42PrevScene" aria-label="이전 장면" title="이전 장면">‹</button>
+            <button type="button" id="v42Play" class="play" aria-label="재생">▶</button>
+            <button type="button" id="v42NextScene" aria-label="다음 장면" title="다음 장면">›</button>
+          </div>
           <div class="v42-preview-tools">
             <button type="button" id="v42Undo" data-history-control="1" aria-label="실행 취소" title="실행 취소" disabled>↶</button>
             <button type="button" id="v42Redo" data-history-control="1" aria-label="다시 실행" title="다시 실행" disabled>↷</button>
             <button type="button" id="v42Fullscreen" aria-label="전체화면 미리보기" title="전체화면 미리보기">⛶</button>
           </div>
         </div>
-        <input id="v42Scrubber" class="v42-scrubber" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
-        <div class="v42-scene-nav"><button type="button" id="v42PrevScene" aria-label="이전 장면" title="이전 장면">‹</button><strong id="v42SceneLabel">0 / 0</strong><button type="button" id="v42NextScene" aria-label="다음 장면" title="다음 장면">›</button></div>
+        <div class="v42-scene-nav"><strong id="v42SceneLabel">0 / 0</strong></div>
       </section>
       <section class="v42-scenes-card" aria-label="장면 목록">
         <div class="v42-scenes-row"><div id="v42SceneStrip" class="v42-scene-strip"></div><button id="v42AddScene" type="button" class="v42-add-scene" aria-label="장면 추가">＋</button></div>
