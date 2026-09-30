@@ -130,7 +130,7 @@
  .desktop-scene-card{position:relative}.scene-status-badge{position:absolute;z-index:2;display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#0b0e11dd;color:#fff;font-size:10px;font-weight:800;border:1px solid #ffffff33}.scene-status-badge.caption-count{right:4px;top:4px}.scene-status-badge.motion-state{left:4px;bottom:4px;color:var(--studio-accent)}
 }
 @media(min-width:761px) and (max-width:900px){
- .desktop-editor .brand span{display:none}.desktop-editor .topbar{padding-inline:10px}.desktop-editor .desktop-header-actions button{padding-inline:8px}.desktop-editor #desktopExport{padding-inline:10px}
+ .desktop-editor .topbar{padding-inline:10px}.desktop-editor .desktop-header-actions button{padding-inline:8px}.desktop-editor #desktopExport{padding-inline:10px}
 }
 @media(min-width:761px){
  #desktopEditor:not([data-mode=image]) .media-advanced{display:none!important}
