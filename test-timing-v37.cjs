@@ -11,17 +11,14 @@ assert.ok(js.includes("b.dataset.tab='timing'"));
 assert.ok(js.includes('data-caption-edge="start"')&&js.includes('data-caption-edge="end"'),'selected caption left/right handles missing');
 assert.ok(js.includes('setCaptionEdge'),'shared caption edge editing missing');
 assert.ok(js.includes('snapTime(')&&js.includes('snapEnabled'),'timeline snapping missing');
-assert.ok(js.includes('pendingCenter')&&js.includes('lastCenteredCueId'),'selected-caption auto centering missing');
+assert.ok(js.includes('pendingCenter')&&js.includes('timelineScrollLeft'),'timeline centering/scroll preservation missing');
 assert.ok(js.includes('data-scene-boundary'),'scene boundary handles missing');
 assert.ok(js.includes('data-timing-scene-duration'),'scene duration numeric editor missing');
-assert.ok(js.includes('timing-narration-layer'),'narration layer missing');
-assert.ok(js.includes('timing-videoaudio-layer'),'video original-audio layer missing');
-assert.ok(js.includes('timing-bgm-layer'),'BGM layer missing');
-assert.ok(js.includes('window.bgmProject?.()'),'BGM timeline project bridge missing');
-assert.ok(js.includes("window.addEventListener('cutflow-bgm-updated'"),'timeline BGM synchronization missing');
+assert.ok(!js.includes('timing-narration-layer')&&!js.includes('timing-videoaudio-layer')&&!js.includes('timing-bgm-layer'),'non-editable audio tracks should be removed from precision timing');
+assert.ok(js.includes('data-timing-action="prev-scene"')&&js.includes('data-timing-action="next-scene"'),'previous/next scene timing controls missing');
 assert.ok(css.includes('.timeline-caption-edge'),'caption edge handle styles missing');
 assert.ok(css.includes('.timeline-scene-handle'),'scene boundary handle styles missing');
-assert.ok(css.includes('.timeline-audio-block'),'audio layer styles missing');
+assert.ok(!css.includes('.timeline-audio-block'),'retired audio layer styles should be removed');
 
 assert.ok(!js.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'playback must not rebuild the timing DOM');
 assert.ok(js.includes("targets.forEach(renderPanel)"),'timeline should render only active timing panels');
@@ -33,4 +30,4 @@ assert.ok(css.includes('.timing-layer-body{left:var(--timeline-label-width)!impo
 assert.ok(/timing-editor\.js\?v=[^\"']+/.test(html),'timing-editor.js must be loaded with a cache key');
 assert.ok(/timing-editor\.css\?v=[^\"']+/.test(html),'timing-editor.css must be loaded with a cache key');
 assert.ok(build.includes("runtimeRefs")&&build.includes("index.matchAll"),'build must derive runtime assets from index.html');
-console.log('PASS: timeline editor v43.1 stability, precision, UX, scene editing, and audio layers are wired into desktop/mobile.');
+console.log('PASS: precision timing keeps scene/caption editing simple, stable, and scroll-safe.');
