@@ -175,9 +175,7 @@ function jump(time){pause();offset=Math.max(0,Math.min(totalDuration(),time));if
 window.CutflowPlayer={
   state(){return {playing,currentTime:currentTime(),duration:totalDuration(),progress:totalDuration()?currentTime()/totalDuration():0,exporting,loading:!!loading};},
   toggle(){return play();},
-  play(){if(!playing)return play();return true;},
   pause(){pause();return true;},
-  seek(time){jump(Number(time)||0);return this.state();},
   seekProgress(progress){jump(totalDuration()*Math.max(0,Math.min(1,Number(progress)||0)));return this.state();},
   invalidate(){dirty=true;return true;}
 };
