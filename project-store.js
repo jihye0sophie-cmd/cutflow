@@ -21,6 +21,7 @@ async function load(id){
   if(dirty&&!confirm('현재 작업에 저장하지 않은 변경사항이 있습니다. 다른 프로젝트를 불러올까요?'))return;
   const r=await get(id);if(!r)return alert('저장된 프로젝트를 찾지 못했습니다.');
   const previous=bridge().hasWork?.()?bridge().capture?.():null;
+  const previousStore={currentId,currentName,dirty};
   busy=true;status('프로젝트 불러오는 중…','busy');closeDialog();
   try{
     await bridge().restore(await hydrate(r));
@@ -33,7 +34,10 @@ async function load(id){
       try{await bridge().restore(previous,{history:true});window.CutflowHistory?.reset?.();}
       catch(error){rollbackError=error;console.error('Cutflow project load rollback failed',error);}
     }
-    status('불러오기 실패','error');
+    if(previous&&!rollbackError){
+      currentId=previousStore.currentId;currentName=previousStore.currentName;dirty=previousStore.dirty;
+      status(currentId?`${currentName} · ${dirty?'저장 안 됨':'저장됨'}`:'저장 안 됨',dirty?'dirty':currentId?'saved':'dirty');
+    }else status('불러오기 실패','error');
     alert(rollbackError?'프로젝트를 불러오지 못했고 이전 작업 복원에도 실패했습니다.':previous?'프로젝트를 불러오지 못해 이전 작업을 복원했습니다.':(e?.message||'프로젝트를 불러오지 못했습니다.'));
   }finally{busy=false}
 }
