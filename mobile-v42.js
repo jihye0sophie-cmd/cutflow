@@ -410,9 +410,9 @@
     const stylePalette=(target)=>Object.values(window.CaptionStyle?.palette||{white:'#ffffff',yellow:'#f5e642',lime:'#c9ff57',sky:'#8ed1f5',red:'#e95a55',orange:'#ee9b45'}).map(c=>`<button type="button" data-settings-color-target="${target}" data-color="${c}" style="--swatch:${c}" aria-label="${c}"></button>`).join('');
     const titleStyle=`
       <div class="v42-pc-typo-grid">
-        <div class="full">${pc($('titleFont'),'폰트')}</div>
-        ${pc($('titleSize'),'크기 (px)')}
-        <div class="v42-typo-color"><span>색상 · 직접 선택</span><div class="v42-settings-palette">${stylePalette('titleColor')}</div>${pc($('titleColor'),'직접 선택')}</div>
+        <div class="v42-typo-font">${pc($('titleFont'),'폰트')}</div>
+        <div class="v42-typo-size">${pc($('titleSize'),'크기 (px)')}</div>
+        <div class="full v42-typo-color-row"><span>색상 · 직접 선택</span><div class="v42-settings-palette">${stylePalette('titleColor')}</div>${pc($('titleColor'),'직접 선택')}</div>
         ${pc($('titleX'),'가로 위치')}${pc($('titleY'),'세로 위치')}
         <div class="full v42-inline-checks">${pc($('titleBold'),'볼드')}${pc($('titleItalic'),'이탤릭')}</div>
         <div class="full v42-selection-style">
@@ -425,9 +425,9 @@
       <p class="v42-help">${esc($('titleFontNote')?.textContent||'')}</p>`;
     const channelStyle=`
       <div class="v42-pc-typo-grid">
-        <div class="full">${pc($('channelFont'),'폰트')}</div>
-        ${pc($('channelSize'),'크기 (px)')}
-        <div class="v42-typo-color"><span>색상 · 직접 선택</span><div class="v42-settings-palette">${stylePalette('channelColor')}</div>${pc($('channelColor'),'직접 선택')}</div>
+        <div class="v42-typo-font">${pc($('channelFont'),'폰트')}</div>
+        <div class="v42-typo-size">${pc($('channelSize'),'크기 (px)')}</div>
+        <div class="full v42-typo-color-row"><span>색상 · 직접 선택</span><div class="v42-settings-palette">${stylePalette('channelColor')}</div>${pc($('channelColor'),'직접 선택')}</div>
         ${pc($('channelX'),'가로 위치')}${pc($('channelY'),'세로 위치')}
         <div class="full v42-inline-checks">${pc($('channelBold'),'볼드')}${pc($('channelItalic'),'이탤릭')}</div>
         <div class="full v42-stroke-row">${pc($('channelStrokeEnabled'),'스트로크 사용')}${pc($('channelStrokeWidth'),'두께')}</div>
