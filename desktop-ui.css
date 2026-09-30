@@ -36,7 +36,7 @@
  .desktop-editor #desktopProject{width:min(850px,calc(100vw - 48px));max-width:850px;max-height:88dvh;padding:0;background:var(--studio-bg);color:#fff;border:1px solid var(--studio-border);border-radius:12px}.desktop-editor #desktopProject>header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--studio-card);position:sticky;top:0;z-index:2}.desktop-editor #desktopProject h2{font-size:18px;margin:0}#desktopProjectBody{padding:20px}.desktop-editor #desktopProject .panel{padding:20px;margin:0 0 16px;background:var(--studio-card);border:1px solid var(--studio-border);box-shadow:none}.desktop-editor #desktopProject .hero{margin:0 0 16px;padding:0;min-height:0;display:block}.desktop-editor #desktopProject .hero>div:first-child,.desktop-editor #desktopProject .hero-actions p{display:none}.desktop-editor #desktopProject .hero-actions{display:flex;gap:10px;justify-content:flex-start}.desktop-editor #desktopProject .setup-panel{width:100%}.desktop-editor .text-style-panel{background:var(--studio-input);border-color:var(--studio-border)}.desktop-editor .text-style-panel summary{color:#fff}.desktop-editor .count-pill,.desktop-editor .format-lock{background:var(--studio-input);color:#fff}.desktop-editor .button.primary,.desktop-editor .button.secondary{background:var(--studio-accent);color:#111;border-color:var(--studio-accent)}.desktop-editor .export-panel{flex-wrap:wrap}.desktop-editor dialog{background:var(--studio-card);color:#fff;border-color:var(--studio-border)}
  @media(max-width:1000px){.desktop-editor .topbar{padding:12px 16px}.desktop-editor .brand span{display:none}.desktop-workspace{grid-template-columns:minmax(260px,35%) minmax(0,1fr)}#desktopEditor{padding:14px}.desktop-current{align-items:flex-start;flex-direction:column;gap:0}.desktop-current p{margin:4px 0 0}.desktop-editor .caption-style-grid{grid-template-columns:1fr}.desktop-editor .editor-row-heading{flex-wrap:wrap}.desktop-editor .app-shell{padding:0 12px 12px}}
 }
-@media(min-width:761px){#desktopManage{display:flex;gap:12px;margin-bottom:16px}.desktop-editor .stage-wrap{flex-basis:0}.desktop-editor .editor-row-heading{border-color:var(--studio-border)}}
+@media(min-width:761px){.desktop-editor .stage-wrap{flex-basis:0}.desktop-editor .editor-row-heading{border-color:var(--studio-border)}}
 /* free-edit and video-audio controls */
 @media(min-width:761px){
  .desktop-editor .editor-audio{grid-column:1/-1!important}
@@ -234,8 +234,6 @@
   color:var(--studio-accent);
 }
 
-/* project settings top actions parity */
-.desktop-editor #desktopProject #desktopManage:empty{display:none}
 .desktop-editor #desktopProject .hero-actions{
   display:grid!important;
   grid-template-columns:repeat(3,minmax(0,1fr));
