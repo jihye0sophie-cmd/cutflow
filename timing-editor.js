@@ -136,8 +136,8 @@
     const narrationDuration=Math.min(duration,num(audioBuffer?.duration,0));
     const narrationMarkup=narrationDuration>0?`<div class="timeline-audio-block narration" style="left:0;width:${pctAll(narrationDuration,duration)}%"><b>내레이션</b><span>${esc(audioName||'Narration')} · ${fmt(narrationDuration)}s</span></div>`:'<span class="timeline-layer-empty">내레이션 없음</span>';
     const videoMarkup=list.map((g,i)=>{const st=window.CutflowScene?.state?.(i);if(st?.type!=='video')return '';const muted=st.mediaMuted||st.mediaVolume<=0;return `<div class="timeline-audio-block video ${muted?'muted':''}" style="left:${pctAll(g.start,duration)}%;width:${Math.max(.25,pctAll(g.end,duration)-pctAll(g.start,duration))}%"><b>장면 ${i+1} 원음</b><span>${muted?'음소거':st.mediaVolume+'%'}</span></div>`;}).join('')||'<span class="timeline-layer-empty">영상 원음 없음</span>';
-    const bgm=window.CutflowBgm?.state?.(),bgmLength=bgm?.loaded?Math.min(duration,bgm.repeat==='loop'?duration:Math.max(0,bgm.duration-bgm.start)):0;
-    const bgmMarkup=bgmLength>0?`<div class="timeline-audio-block bgm" style="left:0;width:${pctAll(bgmLength,duration)}%"><b>BGM</b><span>${esc(bgm.name||'BGM')} · ${bgm.repeat==='loop'?'반복':fmt(bgmLength)+'s'}</span></div>`:'<span class="timeline-layer-empty">BGM 없음</span>';
+    const bgmProjectState=window.bgmProject?.(),bgmLoaded=!!bgmProjectState?.buffer,bgmStart=Math.max(0,num(bgmProjectState?.start,0)),bgmLoop=!!bgmProjectState?.loop,bgmSourceDuration=Math.max(0,num(bgmProjectState?.buffer?.duration,0)),bgmLength=bgmLoaded?Math.min(duration,bgmLoop?duration:Math.max(0,bgmSourceDuration-bgmStart)):0;
+    const bgmMarkup=bgmLength>0?`<div class="timeline-audio-block bgm" style="left:0;width:${pctAll(bgmLength,duration)}%"><b>BGM</b><span>${bgmLoop?'반복':fmt(bgmLength)+'s'}</span></div>`:'<span class="timeline-layer-empty">BGM 없음</span>';
     host.innerHTML=`
       <div class="timing-toolbar">
         <div class="timing-play-tools"><button type="button" data-timing-action="toggle-play">▶/Ⅱ</button><strong data-timeline-clock>${fmt(currentTime())} / ${fmt(duration)}</strong></div>
