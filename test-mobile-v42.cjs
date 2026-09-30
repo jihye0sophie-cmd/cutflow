@@ -16,8 +16,8 @@ assert(new RegExp('mobile-v42\\.css\\?v=[^"\\x27]+').test(html),'mobile css cach
 assert(new RegExp('mobile-v42\\.js\\?v=[^"\\x27]+').test(html),'responsive mobile js cache key missing');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'responsive mode switching must not reload the page');
-assert(js.includes("const compactMq=matchMedia('(max-width:760px)')"),'responsive mobile breakpoint missing');
-assert(js.includes('window.CutflowUI.mobileActive=!!(deviceMobile||compactMq.matches)'),'responsive mobileActive initialization missing');
+assert(js.includes("const compactMq=matchMedia('(max-width:819px)')"),'responsive mobile breakpoint missing');
+assert(js.includes("window.CutflowUI.mobileActive=compactMq.matches"),'responsive mobileActive initialization missing');
 assert(js.includes("window.CutflowUI.mode=next?'mobile':'desktop'"),'dynamic CutflowUI mode update missing');
 assert(js.includes("cutflow-mobile-activate")&&js.includes("cutflow-mobile-deactivate"),'responsive mode events missing');
 assert(js.includes("app.id='mobileAppV42'"),'independent mobile app missing');
