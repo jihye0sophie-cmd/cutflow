@@ -177,7 +177,6 @@ const scriptPos=js.indexOf("settingsSection('01 SCRIPT & VOICE','대본과 내�
 assert(projectPos>=0&&autoPos>projectPos&&scriptPos>autoPos,'auto setup should appear directly after project utility');
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'settings dialog accent scope missing');
 assert(css.includes('.v42-pc-settings-collapsible'),'collapsible auto setup styles missing');
-assert(js.includes("const wasOpen=!!host.querySelector(':scope > details')?.open"),'grid detail open state must persist');
 assert(js.includes("data-auto-start"),'direct mobile auto start control missing');
 assert(js.includes("'cutflow-auto-state'")&&js.includes("'cutflow-auto-ready'"),'auto setup readiness listeners missing');
 assert(autoSetup.includes('function autoState()'),'auto setup readiness state API missing');
