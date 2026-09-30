@@ -71,7 +71,7 @@
   document.body.append(app);
   const previewDialog=document.createElement('dialog');
   previewDialog.id='v42PreviewDialog';
-  previewDialog.innerHTML='<div class="v42-full-head"><strong>전체화면 미리보기</strong><button type="button" id="v42FullClose">×</button></div><canvas id="v42FullStage" width="360" height="640"></canvas>';
+  previewDialog.innerHTML='<div class="v42-full-head"><strong>전체화면 미리보기</strong><button type="button" id="v42FullClose">×</button></div><div class="v42-full-stage-wrap"><canvas id="v42FullStage" width="360" height="640"></canvas><button type="button" id="v42FullPlay" class="v42-full-play" aria-label="재생/일시정지">▶</button></div>';
   document.body.append(previewDialog);
   const exportDialogV42=document.createElement('dialog');
   exportDialogV42.id='v42ExportDialog';
@@ -532,9 +532,15 @@
   }
   function syncPlayer(){
     const state=window.CutflowPlayer?.state?.(),m=$('v42Scrubber');
-    if(state&&m&&document.activeElement!==m){m.min='0';m.max='1000';m.value=String(Math.round((state.progress||0)*1000));}
+    if(state&&m){
+      const progress=Math.max(0,Math.min(1,Number(state.progress)||0));
+      if(document.activeElement!==m){m.min='0';m.max='1000';m.value=String(Math.round(progress*1000));}
+      m.style.setProperty('--v42-progress',`${progress*100}%`);
+    }
     const ct=$('currentTime')?.textContent||'0:00.0',et=$('endTime')?.textContent||'0:00.0';$('v42TimeLabel').textContent=`${ct} / ${et}`;
-    const mobilePlay=qs('.v42-player .play');if(mobilePlay)mobilePlay.textContent=state?.playing?'Ⅱ':'▶';
+    const label=state?.playing?'Ⅱ':'▶';
+    const mobilePlay=$('v42Play');if(mobilePlay)mobilePlay.textContent=label;
+    const fullPlay=$('v42FullPlay');if(fullPlay)fullPlay.textContent=label;
   }
   function mirrorStage(){
     const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(previewDialog.open){fullCtx.clearRect(0,0,fullStage.width,fullStage.height);fullCtx.drawImage(src,0,0,fullStage.width,fullStage.height);}}catch{}}
@@ -673,7 +679,7 @@
     try{if(document.fullscreenElement===previewDialog)await document.exitFullscreen();}catch{}
     if(previewDialog.open)previewDialog.close();
   }
-  $('v42Fullscreen').onclick=openPreviewFullscreen;$('v42FullClose').onclick=closePreviewFullscreen;previewDialog.addEventListener('cancel',e=>{e.preventDefault();closePreviewFullscreen();});
+  $('v42Fullscreen').onclick=openPreviewFullscreen;$('v42FullClose').onclick=closePreviewFullscreen;$('v42FullPlay').onclick=()=>window.CutflowPlayer?.toggle?.();previewDialog.addEventListener('cancel',e=>{e.preventDefault();closePreviewFullscreen();});
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&previewDialog.open)previewDialog.close();});
   $('v42Scrubber').addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
   $('v42Scrubber').addEventListener('change',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
