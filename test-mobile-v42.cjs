@@ -35,6 +35,9 @@ assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X 
 assert(js.includes("details('영상 고급 설정'")&&js.includes("field('시작 (초)','trimStart'")&&js.includes('data-media-field="mediaVolume"')&&js.includes("field('페이드 인 (초)','mediaFadeIn'"),'video advanced controls missing');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
 assert(js.includes('layoutSelect')&&js.includes('titleInput')&&js.includes('channelInput'),'template workflow missing');
+assert(js.includes('<div class="v42-grid2"><label class="v42-field"><span>화면 비율</span>')&&js.includes("pc($('layoutSelect'),'영상 템플릿')"),'compose ratio/template row missing');
+assert(js.includes("pc($('channelInput'),'채널명',{wide:true})")&&!js.includes("pc($('channelInput'),'채널명 · 모든 템플릿'"),'channel label cleanup missing');
+assert(js.includes('<details class="v42-settings-details v42-pc-style-card"><summary>제목 스타일')&&js.includes('<details class="v42-settings-details v42-pc-style-card"><summary>채널명 스타일'),'title/channel style cards must default closed');
 assert(js.includes('bgmVolume')&&js.includes('bgmFadeIn')&&js.includes('bgmFadeOut'),'BGM workflow missing');
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'Cutflow yellow accent token missing');
 assert(!css.includes('#d9ff38'),'old green accent must be removed');
@@ -124,6 +127,7 @@ assert(bgmEditor.includes("cutflow-bgm-updated"),'BGM update event missing');
 assert(js.includes('function applyBgmField('),'mobile BGM direct field bridge missing');
 assert(js.includes("pb($('bgmBtn'),'음악 파일 추가')")&&js.includes("pb($('bgmRemove'),'음악 제거'"),'mobile BGM direct file controls missing');
 assert(js.includes("pc($('bgmStart'),'음악 시작 지점 (초)')")&&js.includes("pc($('bgmVolume'),'BGM 볼륨')")&&js.includes("pc($('bgmRepeat'),'음악이 짧을 때')"),'mobile BGM fields missing');
+assert(js.includes('<div class="v42-grid2">${pc($(\'bgmRepeat\'),\'음악이 짧을 때\')}${pc($(\'bgmVolume\'),\'BGM 볼륨\')}</div>')&&js.includes('<div class="v42-grid3">${pc($(\'bgmStart\'),\'음악 시작 지점 (초)\')}${pc($(\'bgmFadeIn\'),\'페이드 인 (초)\')}${pc($(\'bgmFadeOut\'),\'페이드 아웃 (초)\')}</div>'),'mobile BGM row order missing');
 assert(js.includes("'cutflow-bgm-updated'"),'mobile BGM refresh listener missing');
 assert(app.includes("selectNavigationCue(target,false)"),'segment caption navigation must not scroll');
 assert(!app.includes('data-action="selection-apply">선택 글자에 적용'),'selection apply button should be removed');
