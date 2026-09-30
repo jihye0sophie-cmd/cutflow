@@ -149,3 +149,17 @@ body.mobile-editor .auto-grid-preview .auto-cut-y,
 .auto-audio-pick .button{width:100%}
 .auto-audio-pick .auto-file-name{display:block;text-align:center;font-size:11px}
 @media(max-width:760px){.auto-audio-picks{grid-template-columns:1fr 1fr;gap:7px}.auto-audio-pick .auto-file-name{font-size:10px}}
+
+/* v35.4 Quick Start script / narration+BGM layout */
+.auto-column-title{display:block;margin-bottom:1px;color:#fff;font-size:13px;font-weight:800}
+.auto-script-column,.auto-audio-column{align-content:start}
+.auto-audio-column{display:grid;gap:10px}
+.auto-audio-column .auto-audio-picks{grid-template-columns:1fr 1fr;gap:10px}
+.auto-audio-column .auto-audio-pick .button{min-height:42px}
+.auto-audio-column .auto-file-name{min-height:16px;text-align:center}
+body.desktop-editor .auto-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+body.desktop-editor .auto-script-column textarea{min-height:142px}
+@media(max-width:760px){
+  .auto-column-title{font-size:12px}
+  .auto-audio-column .auto-audio-picks{grid-template-columns:1fr 1fr}
+}
