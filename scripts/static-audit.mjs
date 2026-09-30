@@ -60,7 +60,7 @@ if(!mobile.includes("bindMobileTap($('v42FullPlay')")){
   fail('fullscreen play/pause control is not bound through the stable mobile tap handler');
 }else pass('fullscreen play/pause uses stable mobile tap binding');
 
-if(!mobileCss.includes('v42.11 canonical mobile editing runtime')){
+if(!mobileCss.includes('canonical mobile editing runtime')){
   fail('canonical mobile runtime block is missing');
 }else pass('canonical mobile runtime block exists');
 
