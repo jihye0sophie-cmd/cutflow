@@ -165,7 +165,7 @@
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.media-advanced{display:block!important;}
   
 
-  /* Scene edit comes after the primary media controls. */
+  /* Scene edit stays at the bottom of the image/video tab. */
   #desktopSceneActions{margin-top:12px;margin-bottom:12px}
 
   /* Size/position is a frequent control, so keep it visible in the image tab. */
@@ -187,10 +187,10 @@
   #desktopEditor[data-mode=image] .scene-row.desktop-selected>.editor-media:before{content:'이미지·영상';position:absolute;left:12px;top:17px;color:var(--studio-muted);font-size:12px;font-weight:700}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media>label,
   #desktopEditor[data-mode=image] .scene-row.desktop-selected>.editor-media>label{display:none}
-  /* Primary controls stay above the scene actions; transform stays visible below. */
+  /* Primary controls -> size/position -> scene edit. */
   #desktopEditor[data-mode=image] #desktopEditorBody{order:1}
-  #desktopEditor[data-mode=image] #desktopSceneActions{order:2}
-  #desktopEditor[data-mode=image] #desktopMediaDetails{order:3}
+  #desktopEditor[data-mode=image] #desktopMediaDetails{order:2}
+  #desktopEditor[data-mode=image] #desktopSceneActions{order:3}
 }
 
 
