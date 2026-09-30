@@ -513,9 +513,16 @@
   }
   let lastMirrorAt=0;
   function mirrorStage(frameNow=performance.now()){
-    if(frameNow-lastMirrorAt>=33){
+    const mobileActive=window.CutflowUI?.mobileActive===true,fullOpen=!previewDialog.hidden;
+    if((mobileActive||fullOpen)&&frameNow-lastMirrorAt>=33){
       lastMirrorAt=frameNow;
-      const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(!previewDialog.hidden){fullCtx.clearRect(0,0,1080,1920);fullCtx.drawImage(src,0,0,1080,1920);}}catch{}}
+      const src=$('stage');
+      if(src){
+        try{
+          if(mobileActive&&ctx){ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);}
+          if(fullOpen){fullCtx.clearRect(0,0,1080,1920);fullCtx.drawImage(src,0,0,1080,1920);}
+        }catch{}
+      }
       syncPlayer();
     }
     requestAnimationFrame(mirrorStage);
@@ -760,6 +767,5 @@
   window.addEventListener('cutflow-auto-ready',()=>{if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
   window.addEventListener('pageshow',()=>requestRefresh(false));
-  setInterval(syncPlayer,200);
   renderSceneStrip();renderPanel(true);syncPlayer();mirrorStage();requestAnimationFrame(()=>revealCutflowUI());
 })();
