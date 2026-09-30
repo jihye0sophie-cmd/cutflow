@@ -323,7 +323,7 @@
         <div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>
       </section>
       <section class="v42-auto-flow-section v42-auto-images-section">
-        <header class="v42-auto-images-head"><div><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div><div class="v42-auto-image-buttons">${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}</div></header>
+        <header class="v42-auto-images-head"><div class="v42-auto-images-title"><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div><div class="v42-auto-image-buttons">${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}</div></header>
         <div class="v42-auto-source-block">
           <div class="v42-auto-source-title"><strong>그리드 분할 이미지</strong><small data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</small></div>
           <div class="v42-auto-grid-inline" data-settings-grid-mirror>${autoGridMirror()}</div>
@@ -336,7 +336,7 @@
       <div class="v42-auto-check"><span>대본 장면 <strong data-auto-status="script-count">${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong data-auto-status="image-count">${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div>
       <p class="v42-auto-match" data-auto-status="match">${esc($('autoMatch')?.textContent||'')}</p>
       <p class="v42-status" data-auto-status="run">${esc(runText)}</p>
-      <button type="button" data-auto-start class="v42-btn primary wide" ${info.canStart?'':'disabled'}>쇼츠 자동 세팅 시작</button>`;
+      <div class="v42-auto-start-row"><button type="button" data-auto-start class="v42-btn primary" ${info.canStart?'':'disabled'}>쇼츠 자동 세팅 시작</button></div>`;
   }
   function renderNarration(){
     proxyMap.clear();
