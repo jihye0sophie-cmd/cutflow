@@ -1940,3 +1940,41 @@ body.v42-mobile::after{
 }
 body.v42-mobile::before{top:0}
 body.v42-mobile::after{bottom:0}
+
+/* v42.9.5 uniform mobile scrubber track */
+body.v42-mobile .v42-stage-wrap{
+  position:relative!important;
+  z-index:1!important;
+}
+body.v42-mobile .v42-scrubber{
+  position:relative!important;
+  z-index:3!important;
+  display:block!important;
+  width:100%!important;
+  height:14px!important;
+  min-height:14px!important;
+  margin:-1px 0 -2px!important;
+  padding:0!important;
+  background:
+    linear-gradient(to right,
+      var(--v42-accent) 0,
+      var(--v42-accent) var(--v42-progress),
+      #434a54 var(--v42-progress),
+      #434a54 100%) center / 100% 3px no-repeat!important;
+}
+body.v42-mobile .v42-scrubber::-webkit-slider-runnable-track{
+  height:3px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-track{
+  height:3px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-progress{
+  height:3px!important;
+  background:transparent!important;
+}
