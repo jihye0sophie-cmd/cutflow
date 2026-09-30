@@ -12,7 +12,7 @@ function updateSilenceInfo(){
 
 function evenCuts(count){return Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)*100/count);}
 function normalizeGrid(grid){
-  grid.cols=clamp(Number(grid.cols)||4,1,12);grid.rows=clamp(Number(grid.rows)||2,1,12);grid.gap=clamp(Number.isFinite(Number(grid.gap))?Number(grid.gap):6,0,40);
+  grid.cols=clamp(Number(grid.cols)||4,1,12);grid.rows=clamp(Number(grid.rows)||1,1,12);grid.gap=clamp(Number.isFinite(Number(grid.gap))?Number(grid.gap):8,0,40);
   if(!Array.isArray(grid.xCuts)||grid.xCuts.length!==grid.cols-1)grid.xCuts=evenCuts(grid.cols);
   if(!Array.isArray(grid.yCuts)||grid.yCuts.length!==grid.rows-1)grid.yCuts=evenCuts(grid.rows);
   return grid;
@@ -42,9 +42,9 @@ function gridMarkup(grid,index){
   const gapXPct=grid.width?grid.gap/grid.width*100:0,gapYPct=grid.height?grid.gap/grid.height*100:0;
   return `<article class="auto-grid-item" data-grid-index="${index}">
     <div class="auto-grid-item-head"><div><strong>${esc(grid.file.name)}</strong><span>${grid.cols}×${grid.rows} · ${grid.cols*grid.rows}장</span></div><button type="button" class="auto-grid-remove" data-grid-remove aria-label="이미지 제거">×</button></div>
-    <div class="auto-grid-controls"><label>열<input data-grid-cols type="number" min="1" max="12" value="${grid.cols}"></label><span>×</span><label>행<input data-grid-rows type="number" min="1" max="12" value="${grid.rows}"></label><label>분할 여백(px)<input data-grid-gap type="number" min="0" max="40" step="1" value="${grid.gap}"></label><button type="button" class="button ghost small" data-grid-reset>균등 분할로 초기화</button></div>
+    <div class="auto-grid-controls"><label>열<input data-grid-cols type="number" min="1" max="12" value="${grid.cols}"></label><span>×</span><label>행<input data-grid-rows type="number" min="1" max="12" value="${grid.rows}"></label><label>분할 여백(px)<input data-grid-gap type="number" min="0" max="40" step="1" value="${grid.gap}"></label><button type="button" class="button ghost small" data-grid-reset>초기화</button></div>
     <div class="auto-grid-preview" style="aspect-ratio:${grid.width||4}/${grid.height||2};--cut-gap-x:${gapXPct}%;--cut-gap-y:${gapYPct}%"><img src="${grid.url}" alt="${esc(grid.file.name)} 분할 미리보기">${x}${y}</div>
-    <p class="auto-grid-help">노란 띠가 실제 분할 시 제거되는 여백입니다. 기본 6px이며, 경계가 맞지 않으면 띠의 중심을 마우스나 손가락으로 움직여 조정하세요.</p>
+    <p class="auto-grid-help">노란 띠가 실제 분할 시 제거되는 여백입니다. 기본 8px이며, 경계가 맞지 않으면 띠의 중심을 마우스나 손가락으로 움직여 조정하세요.</p>
   </article>`;
 }
 function renderGrids(){
@@ -62,7 +62,7 @@ async function addSingleFiles(files){
 }
 async function imageInfo(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>res({url,width:im.naturalWidth,height:im.naturalHeight});im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error(`${file.name}을 읽지 못했습니다.`))};im.src=url;});}
 async function addGridFiles(files){
-  for(const file of files){try{const info=await imageInfo(file);state.grids.push({file,cols:4,rows:2,gap:6,xCuts:evenCuts(4),yCuts:evenCuts(2),...info});}catch(e){window.CutflowAutoBridge?.toast?.(e.message);}}
+  for(const file of files){try{const info=await imageInfo(file);state.grids.push({file,cols:4,rows:1,gap:8,xCuts:evenCuts(4),yCuts:evenCuts(1),...info});}catch(e){window.CutflowAutoBridge?.toast?.(e.message);}}
   renderGrids();
 }
 function resetCuts(grid){grid.xCuts=evenCuts(grid.cols);grid.yCuts=evenCuts(grid.rows);}
