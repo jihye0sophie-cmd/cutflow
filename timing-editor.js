@@ -242,15 +242,26 @@
       drag={kind:'playhead',start,end,rect,pointerId:e.pointerId,scene:sceneIndex(),el:playhead};
       playhead.setPointerCapture?.(e.pointerId);e.preventDefault();return;
     }
-    const h=e.target.closest('.timing-handle');if(!h||h.disabled)return;
-    const canvas=h.closest('.timing-canvas'),body=h.closest('.timing-layer-body'),start=num(canvas?.dataset.windowStart,0),end=num(canvas?.dataset.windowEnd,timelineDuration()),rect=(body||canvas)?.getBoundingClientRect();
-    if(!canvas||!rect)return;rememberCues();
-    if(h.dataset.captionEdge){
-      const cueIndex=Number(h.dataset.cueIndex);drag={kind:'caption-edge',cueIndex,side:h.dataset.captionEdge,start,end,rect,pointerId:e.pointerId,scene:sceneForCueIndex(cueIndex),el:h};
-    }else if(h.dataset.sceneBoundary!=null){
-      drag={kind:'scene',scene:Number(h.dataset.sceneBoundary),side:h.dataset.boundarySide||'start',start,end,rect,pointerId:e.pointerId,el:h};
-    }else return;
-    h.setPointerCapture?.(e.pointerId);e.preventDefault();
+    const h=e.target.closest('.timing-handle');
+    if(h&&!h.disabled){
+      const canvas=h.closest('.timing-canvas'),body=h.closest('.timing-layer-body'),start=num(canvas?.dataset.windowStart,0),end=num(canvas?.dataset.windowEnd,timelineDuration()),rect=(body||canvas)?.getBoundingClientRect();
+      if(!canvas||!rect)return;rememberCues();
+      if(h.dataset.captionEdge){
+        const cueIndex=Number(h.dataset.cueIndex);drag={kind:'caption-edge',cueIndex,side:h.dataset.captionEdge,start,end,rect,pointerId:e.pointerId,scene:sceneForCueIndex(cueIndex),el:h};
+      }else if(h.dataset.sceneBoundary!=null){
+        drag={kind:'scene',scene:Number(h.dataset.sceneBoundary),side:h.dataset.boundarySide||'start',start,end,rect,pointerId:e.pointerId,el:h};
+      }else return;
+      h.setPointerCapture?.(e.pointerId);e.preventDefault();return;
+    }
+    const canvas=e.target.closest('[data-timeline-seek]');
+    if(canvas&&!e.target.closest('button,input,select,textarea')){
+      const body=canvas.querySelector('.timing-scene-layer .timing-layer-body'),start=num(canvas.dataset.windowStart,0),end=num(canvas.dataset.windowEnd,timelineDuration()),rect=(body||canvas).getBoundingClientRect();
+      if(!rect)return;
+      const raw=start+clamp((e.clientX-rect.left)/Math.max(1,rect.width),0,1)*(end-start),t=snapTime(raw,40*timelineZoom);
+      drag={kind:'playhead',start,end,rect,pointerId:e.pointerId,scene:sceneIndex(),el:canvas};
+      jump(t);updatePlayheadFeedback(t);
+      canvas.setPointerCapture?.(e.pointerId);e.preventDefault();
+    }
   }
   function moveDrag(e){
     if(!drag)return;
