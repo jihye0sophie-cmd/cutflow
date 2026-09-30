@@ -1196,3 +1196,66 @@ body.v42-mobile .v42-tabs button:active{
     gap:6px;
   }
 }
+
+/* v42.7.9 project settings button density */
+#v42SettingsDialog .v42-left-file-action{
+  display:flex!important;
+  justify-content:flex-start!important;
+}
+#v42SettingsDialog .v42-left-file-action .v42-btn{
+  width:auto!important;
+  min-width:118px;
+  padding-left:12px;
+  padding-right:12px;
+}
+#v42SettingsDialog .v42-compact-actions{
+  display:flex!important;
+  justify-content:flex-start!important;
+  align-items:center;
+  gap:7px!important;
+}
+#v42SettingsDialog .v42-compact-actions .v42-btn{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:118px;
+  padding-left:12px;
+  padding-right:12px;
+}
+#v42SettingsDialog .v42-bgm-actions .v42-btn.danger{
+  min-width:78px!important;
+  padding-left:10px;
+  padding-right:10px;
+}
+#v42SettingsDialog .v42-motion-actions .v42-btn{
+  min-width:138px;
+}
+#v42SettingsDialog .v42-fitcuts-action{
+  display:flex;
+  justify-content:flex-start;
+  margin-top:6px;
+}
+#v42SettingsDialog .v42-fitcuts-action .v42-btn{
+  width:auto!important;
+  min-width:190px;
+  padding-left:14px;
+  padding-right:14px;
+}
+#v42SettingsDialog .v42-selection-row [data-proxy-click]{
+  min-width:auto!important;
+}
+#v42SettingsDialog .v42-selection-row [data-proxy-click]{
+  padding-left:12px;
+  padding-right:12px;
+}
+#v42SettingsDialog .v42-pc-settings-section:last-of-type .v42-grid2{
+  grid-template-columns:minmax(0,1fr) minmax(145px,.72fr);
+  align-items:end;
+}
+#v42SettingsDialog .v42-pc-settings-section:last-of-type .v42-btn.primary{
+  min-height:42px!important;
+  height:42px!important;
+  background:var(--v42-accent)!important;
+  border-color:var(--v42-accent)!important;
+  color:#111!important;
+  font-weight:850;
+}
