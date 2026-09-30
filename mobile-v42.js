@@ -566,7 +566,7 @@
     let changed=false;
     if(Number.isFinite(i)){
       if(action.dataset.autoAction==='reset')changed=!!window.CutflowAutoSetup?.resetGrid?.(i);
-      else if(action.dataset.autoAction==='remove')changed=false;
+      else if(action.dataset.autoAction==='remove')changed=!!window.CutflowAutoSetup?.removeGrid?.(i);
     }
     if(changed){action.blur?.();syncSettingsGridMirror(true);}
     setTimeout(refresh,0);return true;
