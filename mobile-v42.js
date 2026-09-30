@@ -303,15 +303,18 @@
         <div class="v42-auto-title">${pc($('autoTitle'),'영상 제목',{wide:true})}</div>
         <div class="v42-grid2">${pc($('autoChannel'),'채널명')}${pc($('autoLayout'),'영상 템플릿')}</div>
       </div>
-      <section class="v42-auto-flow-section">
-        <header><strong>대본 · 내레이션 · BGM</strong></header>
+      <section class="v42-auto-flow-section v42-auto-script-section">
+        <header><strong>대본 · 한 줄이 한 장면</strong></header>
         ${pc($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}
-        ${pc($('autoCaptionWrap'),'자막 자동 줄바꿈')}
+        ${pc($('autoCaptionWrap'),'자막 보기 좋게 자동 줄바꿈')}
+      </section>
+      <section class="v42-auto-flow-section v42-auto-audio-section">
+        <header><strong>내레이션·BGM</strong></header>
         <div class="v42-auto-audio-picks">
           <div><span class="pick-button">${pb($('autoNarrationBtn'),'내레이션 선택')}</span><small data-auto-status="narration">${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</small></div>
           <div><span class="pick-button">${pb($('autoBgmBtn'),'BGM 선택')}</span><small data-auto-status="bgm">${esc($('autoBgmName')?.textContent||'선택 안 됨')}<em> · 선택사항</em></small></div>
         </div>
-        <div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>
+        <div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>
       </section>
       <section class="v42-auto-flow-section">
         <header><div><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div></header>
