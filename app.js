@@ -367,7 +367,7 @@ window.CutflowCaption={
     changed();renderCues();window.dispatchEvent(new CustomEvent('cutflow-caption-updated',{detail:{index:Math.min(index,cues.length-1),state:captionState(Math.min(index,cues.length-1))}}));return true;
   }
 };
-window.CutflowExport={start:exportVideo,cancel(){if(window.currentExport){window.currentExport.cancelled=true;CutEncoder.cancel();$('exportStatus').textContent='취소하는 중…';return true;}return false;},get busy(){return exporting},lastBlob:null,lastFilename:''};
+window.CutflowExport={start:exportVideo,cancel(){if(window.currentExport){window.currentExport.cancelled=true;CutEncoder.cancel();$('exportStatus').textContent='취소하는 중…';return true;}return false;},get busy(){return exporting}};
 $('exportBtn').onclick=exportVideo;$('cancelExportBtn').onclick=()=>window.CutflowExport.cancel();$('closeExportBtn').onclick=()=>$('exportDialog').close();$('exportDialog').addEventListener('cancel',e=>{if(exporting){e.preventDefault();$('cancelExportBtn').click();}});
 
 const savedControlIds=['scriptInput','projectCaptionWrap','layoutSelect','titleInput','titleFont','titleSize','titleColor','titleBold','titleItalic','titleStrokeEnabled','titleStrokeWidth','titleX','titleY','channelInput','channelFont','channelSize','channelColor','channelBold','channelItalic','channelStrokeEnabled','channelStrokeWidth','channelX','channelY','fitSelect','templateSelect','resolutionSelect'];
