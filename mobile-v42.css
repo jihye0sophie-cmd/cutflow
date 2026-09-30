@@ -810,8 +810,7 @@ body.v42-mobile .v42-main{
 }
 
 /* canonical mobile editing runtime
-   Consolidated from v42.9–v42.10.6. Keep new mobile runtime fixes here instead
-   of appending competing overrides. */
+   Edit these owning rules in place instead of appending competing overrides. */
 body.v42-mobile{
   overflow:hidden!important;
   background:#0d0f12!important;
