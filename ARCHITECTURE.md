@@ -26,7 +26,7 @@ This document is the maintenance baseline for the current stable editor. The goa
 
 ## CSS ownership
 
-- `mobile-v42.css`: mobile-only layout and project-settings presentation. The `v42.11 canonical mobile editing runtime` section is the source of truth for header, preview, scrubber, transport, scene strip, editor scrolling, Safari safe areas and fullscreen preview.
+- `mobile-v42.css`: mobile-only layout and project-settings presentation. The `canonical mobile editing runtime` section is the source of truth for header, preview, scrubber, transport, scene strip, editor scrolling, Safari safe areas and fullscreen preview.
 - `desktop-ui.css`: desktop shell and desktop editor layout.
 - `timing-editor.css`: shared timing editor.
 - `auto-setup.css`: Quick Start internals shared by PC/mobile where appropriate.
