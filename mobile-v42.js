@@ -4,21 +4,15 @@
   const $=id=>document.getElementById(id);
   const qs=(s,r=document)=>r.querySelector(s);
   const qsa=(s,r=document)=>[...r.querySelectorAll(s)];
-  const ua=navigator.userAgent||'';
-  const mobileUA=/Android|iPhone|iPad|iPod|Mobile/i.test(ua) || navigator.userAgentData?.mobile===true;
-  const ipadDesktop=/Macintosh/i.test(ua)&&(navigator.maxTouchPoints||0)>1;
-  const coarse=matchMedia('(hover:none) and (pointer:coarse)').matches;
-  const touchPoints=navigator.maxTouchPoints||0;
-  const physicalShort=Math.min(screen.width||9999,screen.height||9999);
-  const desktopOS=/Windows NT|X11|CrOS/i.test(ua);
-  const touchHandheld=!desktopOS&&coarse&&touchPoints>0&&physicalShort<=900;
-  const deviceMobile=!!(mobileUA||ipadDesktop||touchHandheld);
-  const compactMq=matchMedia('(max-width:760px)');
+  // Responsive mode is based on viewport width, not device identity.
+  // This lets phones switch to the desktop workspace in landscape and
+  // desktop browsers switch to the mobile workspace when the window is narrow.
+  const compactMq=matchMedia('(max-width:819px)');
   const standaloneMode=window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
   document.body.classList.toggle('v42-standalone',!!standaloneMode);
   window.CutflowUI=window.CutflowUI||{};
-  window.CutflowUI.isMobileDevice=()=>deviceMobile;
-  window.CutflowUI.mobileActive=!!(deviceMobile||compactMq.matches);
+  window.CutflowUI.isMobileDevice=()=>compactMq.matches;
+  window.CutflowUI.mobileActive=compactMq.matches;
   window.CutflowUI.mode=window.CutflowUI.mobileActive?'mobile':'desktop';
 
   const app=document.createElement('div');
@@ -115,11 +109,11 @@
       const desktopExport=$('exportDialog');try{if(desktopExport?.open)desktopExport.close();}catch{}
     }
     if(initial||prev===next)return;
-    window.dispatchEvent(new CustomEvent(next?'cutflow-mobile-activate':'cutflow-mobile-deactivate',{detail:{responsive:!deviceMobile,width:innerWidth}}));
+    window.dispatchEvent(new CustomEvent(next?'cutflow-mobile-activate':'cutflow-mobile-deactivate',{detail:{responsive:true,width:innerWidth}}));
     if(next){requestAnimationFrame(()=>{requestRefresh(true);syncPreviewHistory();});}
   };
-  const syncResponsiveMode=()=>setMobileActive(deviceMobile||compactMq.matches);
-  setMobileActive(deviceMobile||compactMq.matches,{initial:true});
+  const syncResponsiveMode=()=>setMobileActive(compactMq.matches);
+  setMobileActive(compactMq.matches,{initial:true});
   if(typeof compactMq.addEventListener==='function')compactMq.addEventListener('change',syncResponsiveMode);
   else if(typeof compactMq.addListener==='function')compactMq.addListener(syncResponsiveMode);
   const proxyMap=new Map(),settingsProxyMap=new Map();
