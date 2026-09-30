@@ -1,7 +1,7 @@
 /* Global undo / redo history. Uses the project bridge so scene, caption, style, timing, media, narration and BGM edits restore together without duplicating media bytes. */
 (()=>{
   const MAX=40;
-  let past=[],future=[],pending=null,applying=false,busy=false,seq=0;
+  let past=[],future=[],pending=null,applying=false,busy=false;
   const bridge=()=>window.CutflowProjectBridge;
   const cloneFileSig=file=>file?{name:file.name||'',size:Number(file.size)||0,lastModified:Number(file.lastModified)||0,type:file.type||''}:null;
   function fingerprint(snapshot){
@@ -16,14 +16,12 @@
   function capture(){try{return bridge()?.capture?.()||null}catch(error){console.warn('Cutflow history capture failed',error);return null}}
   function update(){
     const canUndo=!busy&&past.length>0,canRedo=!busy&&future.length>0;
-    document.querySelectorAll('[data-cutflow-history="undo"]').forEach(b=>{b.disabled=!canUndo;b.setAttribute('aria-disabled',String(!canUndo));});
-    document.querySelectorAll('[data-cutflow-history="redo"]').forEach(b=>{b.disabled=!canRedo;b.setAttribute('aria-disabled',String(!canRedo));});
     if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-history-updated',{detail:{canUndo,canRedo,busy}}));
   }
   function begin(label='편집'){
     if(applying||busy||!bridge())return;
     const snapshot=capture();if(!snapshot)return;
-    pending={snapshot,signature:fingerprint(snapshot),label,seq:++seq};
+    pending={snapshot,signature:fingerprint(snapshot),label};
   }
   function commit(){
     if(applying||busy||!pending)return;
@@ -38,7 +36,7 @@
   async function restore(entry,direction){
     if(!entry||busy||applying||!bridge())return false;
     const current=capture();if(!current)return false;
-    const currentEntry={snapshot:current,signature:fingerprint(current),label:direction==='undo'?'다시 실행':'실행 취소',seq:++seq};
+    const currentEntry={snapshot:current,signature:fingerprint(current),label:direction==='undo'?'다시 실행':'실행 취소'};
     busy=true;applying=true;pending=null;update();
     try{
       if(direction==='undo')future.push(currentEntry);else{past.push(currentEntry);if(past.length>MAX)past.shift();}
@@ -66,9 +64,9 @@
     if(/이미지|영상|미디어|무빙|움직임|전환|Trim|볼륨|페이드/.test(text))return '장면 효과';
     return text.slice(0,24)||'편집';
   }
-  document.addEventListener('pointerdown',e=>{if(e.target.closest?.('[data-history-control]'))return;begin(labelFor(e.target));},true);
-  document.addEventListener('focusin',e=>{const t=e.target;if(t.closest?.('[data-history-control]'))return;if(t.matches?.('input:not([type=file]),textarea,select,[contenteditable=true]'))begin(labelFor(t));},true);
-  document.addEventListener('dragstart',e=>{if(e.target.closest?.('[data-history-control]'))return;begin(labelFor(e.target));},true);
+  document.addEventListener('pointerdown',e=>begin(labelFor(e.target)),true);
+  document.addEventListener('focusin',e=>{const t=e.target;if(t.matches?.('input:not([type=file]),textarea,select,[contenteditable=true]'))begin(labelFor(t));},true);
+  document.addEventListener('dragstart',e=>begin(labelFor(e.target)),true);
   document.addEventListener('keydown',e=>{
     const mod=(e.ctrlKey||e.metaKey)&&!e.altKey,key=String(e.key).toLowerCase();
     if(mod&&key==='z'){e.preventDefault();e.stopImmediatePropagation();if(e.shiftKey)redo();else undo();return;}
