@@ -1,5 +1,4 @@
-/* v40 global undo / redo history. Uses the existing project bridge so scene, caption,
-   style, timing, media, narration and BGM edits restore together without duplicating media bytes. */
+/* Global undo / redo history. Uses the project bridge so scene, caption, style, timing, media, narration and BGM edits restore together without duplicating media bytes. */
 (()=>{
   const MAX=40;
   let past=[],future=[],pending=null,applying=false,busy=false,seq=0;
