@@ -81,7 +81,6 @@ function setSceneGroupDuration(cueIndex,nextDuration){
   const delta=nextDuration-oldDuration;for(let j=seg.last+1;j<cues.length;j++){cues[j].start+=delta;cues[j].end+=delta;}
   const scene=scenes.find(x=>x.id===cues[seg.first]?.sceneId);if(scene)scene.duration=nextDuration;
 }
-function syncFreeCueDurationToTrim(index,cue,scene){if(!cue?.freeEdit||!scene||scene.type!=='video')return;const next=Math.max(.1,(cue.trimEnd??scene.trimEnd??scene.sourceDuration)-(cue.trimStart??scene.trimStart??0));const old=cue.end-cue.start,delta=next-old;cue.end=cue.start+next;scene.duration=next;shiftFollowingCues(index,delta);}
 function createFreeCue(scene){
   const start=cues.at(-1)?.end||0,duration=Math.max(.1,Number(scene.duration)||3),style=window.newCueStyle?.()||{};
   return {id:uid(),start,end:start+duration,text:'',color:'white',sceneId:scene.id,mediaOffset:0,freeEdit:true,...cloneProjectData(style)};
