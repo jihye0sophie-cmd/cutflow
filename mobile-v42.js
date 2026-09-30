@@ -52,9 +52,15 @@
         <div class="v42-scenes-row"><div id="v42SceneStrip" class="v42-scene-strip"></div><button id="v42AddScene" type="button" class="v42-add-scene" aria-label="장면 추가">＋</button></div>
       </section>
       <nav id="v42Tabs" class="v42-tabs" aria-label="모바일 편집 탭">
-        <button type="button" data-tab="caption" aria-pressed="true"><span>T</span>자막</button>
-        <button type="button" data-tab="media"><span>▧</span>이미지·영상</button>
-        <button type="button" data-tab="timing"><span>⏱</span>정밀 타이밍</button>
+        <button type="button" data-tab="caption" aria-pressed="true" aria-label="자막" title="자막">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M12 6v12M8 18h8"/></svg>
+        </button>
+        <button type="button" data-tab="media" aria-label="이미지·영상" title="이미지·영상">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m6.5 16 4-4 3 3 2-2 2 3"/><circle cx="15.5" cy="9" r="1.2"/></svg>
+        </button>
+        <button type="button" data-tab="timing" aria-label="정밀 타이밍" title="정밀 타이밍">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
+        </button>
       </nav>
       <section id="v42Panel" class="v42-panel"></section>
     </main>`;
