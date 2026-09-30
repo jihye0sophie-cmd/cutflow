@@ -223,8 +223,8 @@ assert(css.includes('.v42-media-volume-presets'),'mobile video volume preset sty
 console.log('Cutflow v42.6.4 image video tab parity checks passed');
 assert(timingEditor.includes('data-caption-edge="start"')&&timingEditor.includes('data-caption-edge="end"'),'timeline v43 caption handles missing');
 assert(timingEditor.includes('data-scene-boundary'),'timeline v43 scene handles missing');
-assert(timingEditor.includes('timing-narration-layer')&&timingEditor.includes('timing-videoaudio-layer')&&timingEditor.includes('timing-bgm-layer'),'timeline v43 audio layers missing');
-assert(timingEditor.includes('pendingCenter')&&timingEditor.includes('snapTime('),'timeline v43 UX features missing');
+assert(!timingEditor.includes('timing-narration-layer')&&!timingEditor.includes('timing-videoaudio-layer')&&!timingEditor.includes('timing-bgm-layer'),'precision timing should omit non-editable audio layers');
+assert(timingEditor.includes('pendingCenter')&&timingEditor.includes('timelineScrollLeft')&&timingEditor.includes('snapTime('),'timeline v43 UX features missing');
 assert(!timingEditor.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'timeline v43.1 playback stability missing');
 assert(timingEditor.includes("h.closest('.timing-layer-body')"),'timeline v43.1 inset drag geometry missing');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
