@@ -146,12 +146,12 @@
   function details(title,body,sub='',open=false){return `<details class="v42-details" ${open?'open':''}><summary><span>${esc(title)}</span>${sub?`<small>${esc(sub)}</small>`:''}</summary><div class="v42-detail-body">${body}</div></details>`;}
   function autoGridMirror(){
     const grids=window.CutflowAutoSetup?.grids?.()||[];
-    if(!grids.length)return '<p class="v42-help">그리드 이미지를 추가하면 분할 미리보기와 조절선이 바로 표시됩니다.</p>';
+    if(!grids.length)return '<div class="v42-auto-empty v42-auto-grid-empty">그리드 이미지를 추가하면 분할 미리보기와 조절선이 바로 표시됩니다.</div>';
     return grids.map(g=>{
       const x=g.xCuts.map((p,i)=>`<button type="button" class="v42-cut-line v42-cut-x" data-auto-cut="x" data-cut-index="${i}" style="left:${p}%" aria-label="세로 분할선 ${i+1}"></button>`).join('');
       const y=g.yCuts.map((p,i)=>`<button type="button" class="v42-cut-line v42-cut-y" data-auto-cut="y" data-cut-index="${i}" style="top:${p}%" aria-label="가로 분할선 ${i+1}"></button>`).join('');
       return `<article class="v42-grid-source" data-auto-grid="${g.index}">
-        <div class="v42-grid-source-head"><div><strong>${esc(g.name)}</strong><small>${g.cols}×${g.rows} · ${g.cols*g.rows}장</small></div><button type="button" class="v42-grid-remove" data-auto-action="remove" aria-label="이미지 제거">×</button></div>
+        <div class="v42-grid-source-head"><div><strong>${esc(g.name)}</strong><small>${g.cols}×${g.rows} · ${g.cols*g.rows}장</small></div><button type="button" class="v42-grid-remove" data-auto-grid-delete aria-label="이미지 제거">×</button></div>
         <div class="v42-grid-control-row">
           <label><span>열</span><input type="number" min="1" max="12" value="${g.cols}" data-auto-field="cols"></label>
           <b>×</b>
@@ -584,7 +584,7 @@
     let changed=false;
     if(Number.isFinite(i)){
       if(action.dataset.autoAction==='reset')changed=!!window.CutflowAutoSetup?.resetGrid?.(i);
-      else if(action.dataset.autoAction==='remove')changed=!!window.CutflowAutoSetup?.removeGrid?.(i);
+      else if(action.dataset.autoAction==='remove')changed=false;
     }
     if(changed){action.blur?.();syncSettingsGridMirror(true);}
     setTimeout(refresh,0);return true;
@@ -606,6 +606,21 @@
   $('v42Settings').onclick=()=>{renderSettings();settingsDialog.showModal();requestAnimationFrame(()=>{$('v42SettingsBody').scrollTop=0;syncSettingsProxyState();});};
   $('v42SettingsClose').onclick=()=>settingsDialog.close();
   settingsDialog.addEventListener('cancel',e=>{e.preventDefault();settingsDialog.close();});
+  $('v42SettingsBody').addEventListener('click',e=>{
+    const del=e.target.closest('[data-auto-grid-delete]');
+    if(!del)return;
+    e.preventDefault();
+    e.stopPropagation();
+    const card=del.closest('[data-auto-grid]');
+    const i=Number(card?.dataset.autoGrid);
+    if(!Number.isFinite(i))return;
+    const removed=window.CutflowAutoSetup?.removeGrid?.(i);
+    if(removed){
+      card?.remove();
+      syncSettingsGridMirror(true);
+      syncSettingsProxyState();
+    }
+  },true);
   $('v42SettingsBody').addEventListener('click',e=>{
     const settingsColor=e.target.closest('[data-settings-color-target][data-color]');
     if(settingsColor){const source=$(settingsColor.dataset.settingsColorTarget);if(source){source.value=settingsColor.dataset.color;dispatch(source,'input');dispatch(source,'change');syncSettingsProxyState();}return;}
