@@ -1,7 +1,7 @@
 .auto-setup{margin-bottom:18px;border:1px solid rgba(238,255,0,.24)}.auto-setup-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.auto-setup-head h2{margin:2px 0 0}.auto-setup-head .button{white-space:nowrap}.auto-setup-body{margin-top:18px}.auto-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}.auto-field{display:grid;gap:8px}.auto-field textarea{min-height:142px}.auto-file-stack{display:grid;gap:10px}.auto-file{display:grid;grid-template-columns:minmax(145px,.7fr) 1fr;align-items:center;gap:10px}.auto-file-name{font-size:13px;color:var(--muted,#aeb4bd);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.auto-check{margin-top:16px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.035);display:grid;grid-template-columns:auto auto 1fr;gap:12px 22px;align-items:center}.auto-match{grid-column:1/-1;font-size:13px}.auto-match.good{color:#b8ff38}.auto-match.warn{color:#ffd166}.auto-match.bad{color:#ff6b6b}.auto-actions{display:flex;justify-content:flex-end;margin-top:14px}.auto-progress{margin-top:14px;padding:14px;border-radius:12px;background:rgba(0,0,0,.18)}.auto-progress p{margin:0 0 10px;font-weight:700}.auto-steps{display:flex;flex-wrap:wrap;gap:7px}.auto-step{font-size:12px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.06);color:#8e949d}.auto-step[data-state=active]{color:#111;background:#eeff00}.auto-step[data-state=done]{color:#b8ff38;background:rgba(184,255,56,.1)}
 @media(max-width:760px){.auto-setup{margin:10px 12px 14px}.auto-setup-head{align-items:flex-start}.auto-setup-head h2{font-size:16px}.auto-setup-head .button{font-size:12px;padding:9px 11px}.auto-grid{grid-template-columns:1fr;gap:14px}.auto-field textarea{min-height:110px;font-size:16px}.auto-file{grid-template-columns:1fr}.auto-file .button{width:100%;font-size:13px}.auto-file-name{font-size:12px}.auto-check{grid-template-columns:1fr 1fr;gap:8px 12px}.auto-match{grid-column:1/-1}.auto-actions .button{width:100%}.auto-steps{display:grid;grid-template-columns:1fr 1fr}.auto-step{text-align:center}}
 
-/* v29: integrate Quick Start with the existing Cutflow dark editor UI. */
+/* integrate Quick Start with the existing Cutflow dark editor UI. */
 body.desktop-editor .auto-setup{
   background:var(--studio-card,#171a1f);
   color:#fff;
@@ -31,11 +31,11 @@ body.desktop-editor .auto-step{background:var(--studio-input,#20242a);color:var(
 body.desktop-editor .auto-step[data-state=active]{background:var(--studio-accent,#f5e642);color:#101114}
 body.desktop-editor .auto-actions .button.primary{background:var(--studio-accent,#f5e642);border-color:var(--studio-accent,#f5e642);color:#101114}
 
-/* v30: complete quick-start basics + per-grid split editor. */
+/* complete quick-start basics + per-grid split editor. */
 .auto-basics{display:grid;grid-template-columns:1.4fr .8fr 1fr;gap:12px;margin-bottom:16px}.auto-basics label{display:grid;gap:6px;color:var(--studio-muted,#aeb3bc);font-size:12px}.auto-basics textarea{min-height:58px;resize:vertical}.auto-grid-section{margin-top:16px}.auto-grid-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.auto-grid-section-head>div{display:flex;align-items:baseline;gap:10px;min-width:0}.auto-grid-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.auto-grid-empty{grid-column:1/-1;margin:0;padding:18px;border:1px dashed var(--studio-border,#30343b);border-radius:12px;color:var(--studio-muted,#aeb3bc);text-align:center;font-size:12px}.auto-grid-item{min-width:0;padding:12px;border:1px solid var(--studio-border,#30343b);border-radius:12px;background:#111418}.auto-grid-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.auto-grid-item-head>div{min-width:0;display:grid;gap:2px}.auto-grid-item-head strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.auto-grid-item-head span{font-size:11px;color:var(--studio-muted,#aeb3bc)}.auto-grid-remove{border:0;background:transparent;color:#aeb3bc;font-size:20px;line-height:1;cursor:pointer}.auto-grid-controls{display:flex;align-items:end;gap:8px;margin-bottom:10px}.auto-grid-controls label{display:grid;gap:4px;font-size:11px;color:var(--studio-muted,#aeb3bc)}.auto-grid-controls input{width:64px}.auto-grid-controls .button{margin-left:auto}.auto-grid-preview{position:relative;width:100%;overflow:hidden;border-radius:9px;background:#08090b;touch-action:none;user-select:none}.auto-grid-preview img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none}.auto-cut-line{position:absolute;z-index:3;margin:0;padding:0;border:0;background:rgba(245,230,66,.58);box-shadow:0 0 0 .5px rgba(0,0,0,.5);touch-action:none;cursor:grab}.auto-cut-line.dragging{background:#fff;cursor:grabbing}.auto-cut-x{top:0;bottom:0;width:var(--cut-gap-x,1px);min-width:0;transform:translateX(-50%)}.auto-cut-y{left:0;right:0;height:var(--cut-gap-y,1px);min-height:0;transform:translateY(-50%)}.auto-cut-x:after,.auto-cut-y:after{content:"";position:absolute}.auto-cut-x:after{left:-8px;top:0;bottom:0;width:19px}.auto-cut-y:after{top:-8px;left:0;right:0;height:19px}.auto-grid-help{margin:8px 0 0;font-size:10px;line-height:1.5;color:var(--studio-muted,#aeb3bc)}body.auto-cut-dragging{user-select:none}
 @media(max-width:760px){.auto-basics{grid-template-columns:1fr;gap:10px;margin-bottom:12px}.auto-basics label{font-size:11px}.auto-basics textarea,.auto-basics input,.auto-basics select{font-size:16px}.auto-grid-section{margin-top:12px}.auto-grid-section-head strong{font-size:12px}.auto-grid-section-head .button{font-size:11px;padding:8px 9px}.auto-grid-list{grid-template-columns:1fr;gap:10px}.auto-grid-item{padding:10px}.auto-grid-controls{flex-wrap:wrap}.auto-grid-controls .button{width:100%;margin-left:0}.auto-grid-controls input{font-size:16px}.auto-grid-preview{max-height:52vh}.auto-grid-help{font-size:10px}}
 
-/* v33.3: keep the visible grid divider equal to the real split-gap thickness.
+/* keep the visible grid divider equal to the real split-gap thickness.
    Desktop/mobile button rules give every button a minimum height/padding, which
    made horizontal cut handles look like thick white bars. Override those rules
    here while keeping a larger invisible hit area via ::after. */
@@ -97,7 +97,7 @@ body.desktop-editor .auto-grid-preview .auto-cut-y,
   background:transparent;
 }
 
-/* v34: integrated narration silence-cut presets. */
+/* integrated narration silence-cut presets. */
 .auto-silence{padding:11px 12px;border:1px solid var(--studio-border,#30343b);border-radius:11px;background:#111418}.auto-silence-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.auto-silence-head strong{font-size:12px}.auto-silence-head span{font-size:10px;color:var(--studio-muted,#aeb3bc)}.auto-silence-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.auto-silence-presets label{cursor:pointer}.auto-silence-presets input{position:absolute;opacity:0;pointer-events:none}.auto-silence-presets span{display:block;padding:8px 5px;border:1px solid #3b4149;border-radius:9px;background:var(--studio-input,#20242a);color:#fff;text-align:center;font-size:11px;font-weight:700}.auto-silence-presets input:checked+span{background:var(--studio-accent,#f5e642);border-color:var(--studio-accent,#f5e642);color:#101114}.auto-silence-info{margin:8px 0 0;color:var(--studio-muted,#aeb3bc);font-size:10px;line-height:1.45}
 @media(max-width:760px){.auto-silence{padding:10px}.auto-silence-head{align-items:flex-start}.auto-silence-head span{font-size:9px}.auto-silence-presets span{padding:9px 4px;font-size:11px}}
 
@@ -107,19 +107,19 @@ body.desktop-editor .auto-grid-preview .auto-cut-y,
 .source-wrap-option{margin-top:10px}
 
 
-/* v35.2: allow individual scene images alongside grid images in auto setup. */
+/* allow individual scene images alongside grid images in auto setup. */
 .auto-image-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.auto-source-block{margin-top:10px}.auto-source-title{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}.auto-source-title strong{font-size:12px}.auto-single-block{padding-top:10px;border-top:1px solid var(--studio-border,#30343b)}.auto-single-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.auto-single-empty{grid-column:1/-1;margin:0;padding:14px;border:1px dashed var(--studio-border,#30343b);border-radius:10px;color:var(--studio-muted,#aeb3bc);text-align:center;font-size:11px}.auto-single-item{position:relative;display:grid;grid-template-columns:54px minmax(0,1fr) 24px;align-items:center;gap:8px;min-width:0;padding:7px;border:1px solid var(--studio-border,#30343b);border-radius:10px;background:#111418}.auto-single-item img{width:54px;height:54px;object-fit:cover;border-radius:7px;background:#08090b}.auto-single-item>div{min-width:0;display:grid;gap:3px}.auto-single-item strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.auto-single-item span{font-size:9px;color:var(--studio-muted,#aeb3bc)}.auto-single-item .auto-grid-remove{font-size:18px}
 @media(max-width:1000px){.auto-single-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.auto-grid-section-head{align-items:flex-start;flex-wrap:wrap}.auto-image-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.auto-image-actions .button{width:100%;margin:0}.auto-source-title{align-items:center;justify-content:space-between}.auto-single-list{grid-template-columns:1fr 1fr}.auto-single-item{grid-template-columns:48px minmax(0,1fr) 22px;padding:6px}.auto-single-item img{width:48px;height:48px}.auto-single-item strong{font-size:10px}}
 
-/* v35.3 compact narration/BGM picker parity */
+/* compact narration/BGM picker parity */
 .auto-audio-picks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .auto-audio-pick{display:grid;gap:5px;min-width:0}
 .auto-audio-pick .button{width:100%}
 .auto-audio-pick .auto-file-name{display:block;text-align:center;font-size:11px}
 @media(max-width:760px){.auto-audio-picks{grid-template-columns:1fr 1fr;gap:7px}.auto-audio-pick .auto-file-name{font-size:10px}}
 
-/* v35.4 Quick Start script / narration+BGM layout */
+/* Quick Start script / narration+BGM layout */
 .auto-column-title{display:block;margin-bottom:1px;color:#fff;font-size:13px;font-weight:800}
 .auto-script-column,.auto-audio-column{align-content:start}
 .auto-audio-column{display:grid;gap:10px}
