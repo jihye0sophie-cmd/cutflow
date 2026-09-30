@@ -78,6 +78,7 @@
   settingsDialog.innerHTML='<div class="v42-sheet-head"><div><strong>프로젝트 설정</strong></div><button type="button" id="v42SettingsClose" aria-label="닫기">×</button></div><div id="v42SettingsBody" class="v42-settings-body"></div>';
   document.body.append(settingsDialog);
 
+  function revealCutflowUI(){document.body.classList.remove('cutflow-booting');document.body.classList.add('cutflow-ready');}
   const panel=$('v42Panel'),tabs=$('v42Tabs'),stage=$('v42Stage'),ctx=stage.getContext('2d'),fullStage=$('v42FullStage'),fullCtx=fullStage.getContext('2d');
   const setMobileActive=(next,{initial=false}={})=>{
     next=!!next;
@@ -738,5 +739,5 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
   window.addEventListener('pageshow',()=>requestRefresh(false));
   setInterval(syncPlayer,200);
-  renderSceneStrip();renderPanel(true);syncPlayer();mirrorStage();
+  renderSceneStrip();renderPanel(true);syncPlayer();mirrorStage();requestAnimationFrame(()=>revealCutflowUI());
 })();
