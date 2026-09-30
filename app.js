@@ -273,7 +273,6 @@ async function exportVideo(){
   try{while(rendering)await new Promise(r=>setTimeout(r,20));await CutRenderer.fonts(project());try{wakeLock=await navigator.wakeLock?.request('screen');}catch{}
     const blob=await CutEncoder.exportMP4(project(),width,token,(progress,message)=>{$('exportProgress').value=progress;$('exportStatus').textContent=message;emit('cutflow-export-progress',{progress,message,width});});
     if(token.cancelled)throw new Error('취소되었습니다.');downloadUrl=URL.createObjectURL(blob);const link=$('downloadLink');link.href=downloadUrl;link.download=filename;link.hidden=false;$('exportProgress').value=1;$('exportStatus').textContent='MP4 완성. 다운로드 버튼을 눌러 저장하세요.';
-    if(window.CutflowExport){window.CutflowExport.lastBlob=blob;window.CutflowExport.lastFilename=filename;}
     emit('cutflow-export-complete',{blob,filename,width,size:blob.size});toast('MP4 파일을 만들었습니다.');return {blob,filename,width};
   }catch(error){const message=token.cancelled?'저장을 취소했습니다. 편집 내용은 유지됩니다.':`저장 실패: ${error.message}`;$('exportStatus').textContent=message;emit(token.cancelled?'cutflow-export-cancelled':'cutflow-export-error',{message,error});return false;}
   finally{await wakeLock?.release();exporting=false;window.currentExport=null;$('cancelExportBtn').hidden=true;$('closeExportBtn').hidden=false;dirty=true;stats();}
