@@ -1035,3 +1035,22 @@ body.v42-mobile .v42-tabs button:active{
   #v42SettingsDialog .v42-pc-typo-grid{grid-template-columns:1fr 1fr;gap:7px}
   #v42SettingsDialog .v42-settings-palette button{width:27px;height:27px}
 }
+
+/* v42.7.0 simplified project top actions */
+#v42SettingsDialog .v42-settings-primary-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  margin-bottom:10px;
+}
+#v42SettingsDialog .v42-settings-primary-actions .v42-btn{
+  min-width:0;
+  min-height:36px;
+  padding:6px 7px;
+  font-size:9px;
+  white-space:nowrap;
+}
+@media(max-width:390px){
+  #v42SettingsDialog .v42-settings-primary-actions{gap:4px}
+  #v42SettingsDialog .v42-settings-primary-actions .v42-btn{padding:5px 3px;font-size:8px}
+}
