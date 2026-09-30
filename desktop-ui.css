@@ -251,3 +251,20 @@
   width:100%;
   min-width:0;
 }
+
+/* compact left-aligned project actions */
+.desktop-editor #desktopProject .hero-actions{
+  display:flex!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+  gap:10px!important;
+  width:auto!important;
+}
+.desktop-editor #desktopProject .hero-actions .button,
+.desktop-editor #desktopProject .hero-actions #clearBtn{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:118px!important;
+  padding-left:16px!important;
+  padding-right:16px!important;
+}
