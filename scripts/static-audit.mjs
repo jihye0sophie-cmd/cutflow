@@ -49,6 +49,13 @@ const retiredMarkers=[
   ['index.html','history.css',index],
   ['index.html','undoCuesBtn',index],
   ['app.js','cueHistory',read('app.js')],
+  ['app.js','CutflowTimeline',read('app.js')],
+  ['timing-editor.js','CutflowTimeline',read('timing-editor.js')],
+  ['style-editor.js','CutflowCaptionStyle',read('style-editor.js')],
+  ['project-store.css','.project-tools',read('project-store.css')],
+  ['project-store.css','.project-save-status',read('project-store.css')],
+  ['app.js','lastBlob',read('app.js')],
+  ['app.js','lastFilename',read('app.js')],
 ];
 for(const [file,marker,source] of retiredMarkers){
   if(source.includes(marker))fail(`retired marker "${marker}" returned in ${file}`);
@@ -82,6 +89,14 @@ if(!mobile.includes('setSourcePreviewSize(1080,1920)')){
 if(!mobile.includes("setSourcePreviewSize(window.CutflowUI?.mobileActive?540:1080,window.CutflowUI?.mobileActive?960:1920)")){
   fail('fullscreen close path no longer restores the normal mobile preview size');
 }else pass('fullscreen close path restores the normal mobile preview size');
+
+const cssRefs=refs.filter(file=>file.endsWith('.css'));
+for(const file of cssRefs){
+  const css=read(file);
+  if(/@media[^{}]+\{\s*\}/g.test(css))fail(`empty media query in ${file}`);
+  if(/\/\*\s*v\d+(?:\.\d+)*/i.test(css))fail(`patch-history comment returned in ${file}`);
+}
+if(!process.exitCode)pass('stylesheets contain no empty media queries or version-patch comments');
 
 if(process.exitCode){
   console.error('\nStatic audit failed.');
