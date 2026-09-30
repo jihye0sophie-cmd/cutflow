@@ -21,7 +21,7 @@ function captionSegmentInfo(index){
   let offset=0,total=0;for(let i=first;i<=last;i++){const d=Math.max(0,cues[i].end-cues[i].start);if(i<index)offset+=d;total+=d;}
   return {position:index-first+1,count:last-first+1,first,last,offset,total:Math.max(.1,total)};
 }
-window.CutflowCaptionSegments={info:captionSegmentInfo};
+
 function normalizeSceneSettingsFromCues(){
   if(!cues.length)return;
   for(const scene of scenes){const group=cues.filter(c=>c.sceneId===scene.id);if(!group.length)continue;const first=group[0];
