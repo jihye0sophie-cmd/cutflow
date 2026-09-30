@@ -1054,3 +1054,16 @@ body.v42-mobile .v42-tabs button:active{
   #v42SettingsDialog .v42-settings-primary-actions{gap:4px}
   #v42SettingsDialog .v42-settings-primary-actions .v42-btn{padding:5px 3px;font-size:8px}
 }
+
+/* v42.7.1 Quick Start script and audio sections */
+#v42SettingsDialog .v42-auto-script-section,
+#v42SettingsDialog .v42-auto-audio-section{display:block}
+#v42SettingsDialog .v42-auto-script-section .v42-field:first-of-type>span{display:none}
+#v42SettingsDialog .v42-auto-script-section textarea{min-height:116px!important}
+#v42SettingsDialog .v42-auto-script-section .v42-check{margin-top:6px}
+#v42SettingsDialog .v42-auto-audio-section{padding-top:12px}
+#v42SettingsDialog .v42-auto-audio-picks{grid-template-columns:1fr 1fr;gap:8px}
+#v42SettingsDialog .v42-auto-audio-picks .v42-btn{min-height:40px;padding-left:6px;padding-right:6px}
+#v42SettingsDialog .v42-auto-audio-picks small{min-height:15px;font-size:8px}
+#v42SettingsDialog .v42-auto-audio-section .v42-silence{margin-top:10px}
+#v42SettingsDialog .v42-auto-audio-section .v42-silence>strong{font-size:10px}
