@@ -229,7 +229,7 @@
       <div class="v42-caption-actions"><button type="button" id="v42CaptionSplit" class="v42-btn">나누기</button><button type="button" id="v42CaptionMerge" class="v42-btn" ${state.segment.position===state.segment.count?'disabled':''}>다음 자막과 합치기</button><button type="button" id="v42CaptionDelete" class="v42-btn danger">구간 삭제</button></div>
       <div class="v42-caption-timing"><div class="v42-caption-timing-head"><strong>자막 타이밍</strong><span>${Number(state.end-state.start).toFixed(2)}초</span></div>
       <div class="v42-grid2"><label class="v42-field"><span>시작</span><input data-caption-field="start" type="number" min="0" step="0.01" value="${Number(state.start).toFixed(2)}" ${state.freeEdit?'disabled':''}></label><label class="v42-field"><span>종료</span><input data-caption-field="end" type="number" min="0.1" step="0.01" value="${Number(state.end).toFixed(2)}" ${state.freeEdit?'disabled':''}></label></div>
-      <div class="v42-actions"><button type="button" id="v42CaptionPlay" class="v42-btn">▶ 현재 자막 재생</button><button type="button" id="v42CaptionTiming" class="v42-btn">정밀 타이밍 조정 ›</button></div></div>`;
+      <div class="v42-actions"><button type="button" id="v42CaptionTiming" class="v42-btn wide">정밀 타이밍 조정 ›</button></div></div>`;
     const styleRange=(id,label,outputId)=>{
       const el=$(id);if(!el)return '';const k=key();proxyMap.set(k,el);
       const value=$(outputId)?.textContent||el.value;
@@ -261,7 +261,6 @@
     $('v42CaptionSelectionReset').onclick=()=>applySelectedCaptionColor(null);
     $('v42CaptionPrev').onclick=()=>{if(index>state.segment.first)api.select(index-1);};
     $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)api.select(index+1);};
-    $('v42CaptionPlay').onclick=()=>api.play(index);
     $('v42CaptionTiming').onclick=()=>{tab='timing';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.tab==='timing')));renderPanel(true);};
     $('v42CaptionSplit').onclick=()=>{const cursor=captionText?.selectionStart;if(api.split(index,cursor))requestRefresh(true);};
     $('v42CaptionMerge').onclick=()=>{if(api.mergeNext(index))requestRefresh(true);};
@@ -298,18 +297,24 @@
         <div class="v42-grid2">${field('페이드 인 (초)','mediaFadeIn','number',state.mediaFadeIn.toFixed(1),'min="0" max="10" step="0.1"')}${field('페이드 아웃 (초)','mediaFadeOut','number',state.mediaFadeOut.toFixed(1),'min="0" max="10" step="0.1"')}</div><p class="v42-help">내레이션·BGM과 별도로 영상 원음을 조절합니다.</p></div>`,'Trim · 원음 · Fade',false);
     }
     const sceneActions=`<div class="v42-caption-actions"><button class="v42-btn" id="v42SplitScene">장면 나누기</button><button class="v42-btn" id="v42MergeScene" ${index>=(window.CutflowScene?.items?.().length||1)-1?'disabled':''}>다음 장면과 합치기</button><button class="v42-btn danger" id="v42DeleteScene">장면 삭제</button></div><p class="v42-help">장면 나누기는 현재 재생 위치를 기준으로 합니다.</p>`;
-    const transform=`<div class="v42-grid3">${field('Scale (%)','scale','number',Number(state.transform.scale).toFixed(1),'min="10" max="500" step="1"')}${field('Position X (%)','x','number',Number(state.transform.x).toFixed(1),'min="-200" max="200" step="1"')}${field('Position Y (%)','y','number',Number(state.transform.y).toFixed(1),'min="-200" max="200" step="1"')}</div><button type="button" id="v42TransformReset" class="v42-btn wide">크기·위치 초기화</button><p class="v42-help">현재 장면에만 적용됩니다.</p>`;
+    const transform=`<div class="v42-transform-actions"><button type="button" id="v42TransformPreview" class="v42-btn" aria-pressed="false">미리보기에서 조절</button><button type="button" id="v42TransformReset" class="v42-btn">초기화</button></div><div class="v42-grid3">${field('Scale (%)','scale','number',Number(state.transform.scale).toFixed(1),'min="10" max="500" step="1"')}${field('Position X (%)','x','number',Number(state.transform.x).toFixed(1),'min="-200" max="200" step="1"')}${field('Position Y (%)','y','number',Number(state.transform.y).toFixed(1),'min="-200" max="200" step="1"')}</div><p class="v42-help">조절 모드: 한 손가락으로 이동 · 두 손가락으로 확대/축소<br>현재 장면에만 적용됩니다.</p>`;
     panel.innerHTML=
       section('이미지·영상',mediaBlock)+
       section('움직임 · 진입 전환',effects)+
       (duration?section('장면 길이',duration):'')+
       videoAdvanced+
-      section('장면 편집',sceneActions)+
-      details('상세 설정',transform,'이미지·영상 크기 / 위치',false);
+      section('이미지·영상 크기 / 위치',transform)+
+      section('장면 편집',sceneActions);
     $('v42ReplaceBtn').onclick=()=>$('v42ReplaceInput').click();
     $('v42ReplaceInput').onchange=async e=>{const f=e.target.files?.[0];if(f&&window.CutflowScene?.replace)await window.CutflowScene.replace(f);e.target.value='';requestRefresh(true);};
     panel.querySelectorAll('[data-media-volume]').forEach(btn=>btn.onclick=()=>{window.CutflowScene?.update?.(index,{mediaVolume:Number(btn.dataset.mediaVolume)});requestRefresh(false);});
-    $('v42TransformReset').onclick=()=>{window.CutflowScene?.update?.(index,{transform:{scale:100,x:0,y:0}});requestRefresh(false);};
+    const transformPreview=$('v42TransformPreview');
+    if(transformPreview){
+      transformPreview.setAttribute('aria-pressed',String(mobileTransformMode&&mobileTransformScene===index));
+      transformPreview.textContent=mobileTransformMode&&mobileTransformScene===index?'조절 모드 종료':'미리보기에서 조절';
+      transformPreview.onclick=()=>setMobileTransformMode(!(mobileTransformMode&&mobileTransformScene===index),index);
+    }
+    $('v42TransformReset').onclick=()=>{setMobileTransformMode(false,index);window.CutflowScene?.update?.(index,{transform:{scale:100,x:0,y:0}});requestRefresh(false);};
     $('v42SplitScene').onclick=()=>{const start=window.CutflowScene?.start?.(index)||0,duration=window.CutflowScene?.state?.(index)?.duration||0;let at=typeof currentTime==='function'?currentTime():start;if(!(at>start+.1&&at<start+duration-.1))at=start+duration/2;window.CutflowScene?.split?.(index,at);};
     $('v42MergeScene').onclick=()=>window.CutflowScene?.mergeNext?.(index);
     $('v42DeleteScene').onclick=()=>{if(confirm(`장면 ${index+1}을 삭제할까요?`))window.CutflowScene?.remove?.(index);};
