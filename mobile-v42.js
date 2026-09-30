@@ -27,7 +27,7 @@
     <header class="v42-head">
       <div class="v42-brand"><div><strong>Cutflow</strong><small>쇼츠 컷 편집 스튜디오</small></div></div>
       <div class="v42-head-actions">
-        <button type="button" id="v42Settings" class="v42-icon-btn" aria-label="설정" title="설정">⚙</button>
+        <button type="button" id="v42Settings" class="v42-icon-btn" aria-label="설정" title="설정"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7.2 7.2 0 0 0-.08-1l2.02-1.58-2-3.46-2.48 1a7.4 7.4 0 0 0-1.72-1L14.36 3h-4.02l-.38 2.96a7.4 7.4 0 0 0-1.72 1l-2.48-1-2 3.46L5.78 11a7.2 7.2 0 0 0 0 2l-2.02 1.58 2 3.46 2.48-1a7.4 7.4 0 0 0 1.72 1l.38 2.96h4.02l.38-2.96a7.4 7.4 0 0 0 1.72-1l2.48 1 2-3.46L18.92 13c.05-.33.08-.66.08-1Z"/></svg></button>
         <button type="button" data-click="projectOpenBtn">열기</button>
         <button type="button" data-click="projectSaveBtn">저장</button>
         <button type="button" id="v42Export" class="primary">내보내기 ↗</button>
