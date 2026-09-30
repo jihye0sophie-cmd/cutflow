@@ -34,8 +34,8 @@ button,select,input,textarea{font:inherit}
 .v42-auto-files{display:grid;gap:5px;margin:8px 0}.v42-auto-files span{display:grid;grid-template-columns:78px 1fr;gap:8px;padding:7px 8px;border-radius:7px;background:#101318;font-size:9px;color:#b4bbc4}.v42-auto-files b{color:#fff;font-size:9px}.v42-auto-check{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.v42-auto-check span{display:flex;justify-content:space-between;padding:8px;border:1px solid #313741;border-radius:7px;font-size:9px}.v42-auto-check strong{color:var(--v42-accent)}.v42-auto-match{margin:7px 0 0;color:var(--v42-muted);font-size:9px;line-height:1.5}.v42-grid-source{margin:7px 0;padding:8px;border:1px solid #343a43;border-radius:8px;background:#111419}.v42-grid-source>div:first-child{display:flex;justify-content:space-between;align-items:center}.v42-grid-source strong{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v42-grid-source small{color:var(--v42-accent);font-size:9px}
 
 /* Dialogs */
-#v42PreviewDialog{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#050607;color:#fff}#v42PreviewDialog::backdrop,#v42ScenesDialog::backdrop{background:#000b}.v42-full-head,.v42-sheet-head{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:var(--v42-bg);border-bottom:1px solid var(--v42-border)}.v42-full-head strong,.v42-sheet-head strong{font-size:13px}.v42-full-head button,.v42-sheet-head button{width:38px;height:38px;border:1px solid #3a4049;border-radius:8px;background:#1b1f24;color:#fff;font-size:21px}#v42FullStage{display:block;margin:auto;height:calc(100dvh - 52px);max-width:100vw;width:auto;aspect-ratio:9/16;background:#000}
-#v42ScenesDialog{position:fixed;inset:auto 0 0!important;width:100%;max-width:620px!important;max-height:72dvh;margin:0 auto;padding:0;border:1px solid var(--v42-border);border-bottom:0;border-radius:16px 16px 0 0;background:var(--v42-bg);color:#fff}.v42-scenes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 10px calc(16px + env(safe-area-inset-bottom));overflow:auto;max-height:calc(72dvh - 52px)}.v42-scenes-grid button{position:relative;padding:4px;border:1px solid #353b44;border-radius:8px;background:#171b20;color:#fff}.v42-scenes-grid button[aria-current=true]{border:2px solid var(--v42-accent)}.v42-scenes-grid img,.v42-scenes-grid .missing{display:grid;width:100%;aspect-ratio:1/1;object-fit:cover;place-items:center;border-radius:5px;background:#0b0d10}.v42-scenes-grid strong,.v42-scenes-grid small{display:block;text-align:left;padding:2px 2px 0}.v42-scenes-grid strong{font-size:9px}.v42-scenes-grid small{font-size:8px;color:var(--v42-muted)}
+.v42-full-head,.v42-sheet-head{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:var(--v42-bg);border-bottom:1px solid var(--v42-border)}.v42-full-head strong,.v42-sheet-head strong{font-size:13px}.v42-full-head button,.v42-sheet-head button{width:38px;height:38px;border:1px solid #3a4049;border-radius:8px;background:#1b1f24;color:#fff;font-size:21px}
+
 
 
 /* Project settings bottom sheet */
@@ -98,10 +98,6 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 .v42-export-result{margin:8px 0 12px;padding:9px;border:1px solid #30343b;border-radius:8px;background:#15181d;color:#cfd4da;font-size:10px}
 #v42ExportDialog .v42-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
 #v42ExportDialog .v42-btn{display:flex;align-items:center;justify-content:center;min-height:42px;text-decoration:none}
-#v42PreviewDialog:fullscreen{width:100vw;height:100vh;background:#000}
-#v42PreviewDialog:fullscreen #v42FullStage{height:calc(100vh - 52px)}
-@supports(height:100svh){#v42PreviewDialog{height:100svh}#v42FullStage{height:calc(100svh - 52px)}}
-
 /* v42.5.10 project settings desktop-parity layout */
 #v42SettingsDialog .v42-settings-body{
   padding:8px 8px calc(22px + env(safe-area-inset-bottom));
@@ -1385,40 +1381,98 @@ body.v42-mobile .v42-tabs button:active{
   pointer-events:none;
 }
 
-/* v42.9 fixed mobile editing workspace: large preview + independently scrolling editor */
+/* v42.11 canonical mobile editing runtime
+   Consolidated from v42.9–v42.10.6. Keep new mobile runtime fixes here instead
+   of appending competing overrides. */
 body.v42-mobile{
   overflow:hidden!important;
+  background:#0d0f12!important;
 }
 body.v42-mobile #mobileAppV42{
-  height:100dvh;
-  min-height:0!important;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-body.v42-mobile .v42-head{
-  position:relative!important;
-  top:auto!important;
-  flex:0 0 auto;
-}
-body.v42-mobile .v42-main{
-  flex:1 1 auto;
-  min-height:0;
+  display:flex!important;
+  flex-direction:column!important;
+  box-sizing:border-box!important;
   width:100%;
-  max-width:620px;
-  margin:0 auto;
-  padding:6px 8px calc(50px + env(safe-area-inset-bottom))!important;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
+  height:100svh!important;
+  min-height:100svh!important;
+  max-height:100svh!important;
+  padding-top:calc(52px + env(safe-area-inset-top))!important;
+  padding-bottom:0!important;
+  overflow:hidden!important;
+  background:#0d0f12!important;
+}
+body.v42-mobile.v42-standalone #mobileAppV42{
+  height:100dvh!important;
+  min-height:100dvh!important;
+  max-height:100dvh!important;
 }
 
-/* Preview is a true fixed workspace region now, not sticky. */
+/* Opaque fixed header including iOS safe area. */
+body.v42-mobile .v42-head{
+  position:fixed!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  z-index:500!important;
+  width:100%!important;
+  height:calc(52px + env(safe-area-inset-top))!important;
+  min-height:calc(52px + env(safe-area-inset-top))!important;
+  box-sizing:border-box!important;
+  padding:calc(7px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 7px max(10px,env(safe-area-inset-left))!important;
+  overflow:hidden!important;
+  background:#0d0f12!important;
+  border-bottom:1px solid #30343b!important;
+  opacity:1!important;
+  isolation:isolate;
+  transform:none!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-head::before,
+body.v42-mobile .v42-head::after{
+  display:none!important;
+  content:none!important;
+}
+body.v42-mobile .v42-head,
+body.v42-mobile .v42-head *{
+  text-shadow:none!important;
+}
+body.v42-mobile .v42-head>*{
+  position:relative;
+  z-index:1;
+  opacity:1!important;
+  visibility:visible!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+body.v42-mobile .v42-head button,
+body.v42-mobile .v42-head button.primary{
+  box-shadow:none!important;
+}
+
+/* Fixed preview workspace; only the editor panel scrolls. */
+body.v42-mobile .v42-main{
+  flex:1 1 0!important;
+  min-height:0!important;
+  width:100%;
+  max-width:620px;
+  height:auto!important;
+  margin:0 auto;
+  padding:6px max(8px,env(safe-area-inset-right)) 0 max(8px,env(safe-area-inset-left))!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
 body.v42-mobile .v42-preview-card{
   position:relative!important;
   top:auto!important;
   z-index:1!important;
-  flex:0 0 auto;
+  flex:0 0 auto!important;
   padding:6px!important;
   border-radius:10px;
   box-shadow:none!important;
@@ -1430,204 +1484,163 @@ body.v42-mobile .v42-preview-head{
 body.v42-mobile .v42-preview-head strong{font-size:10px}
 body.v42-mobile .v42-preview-head span{font-size:8px}
 
-/* CapCut-like larger 9:16 canvas. */
 body.v42-mobile .v42-stage-wrap{
-  min-height:0;
+  position:relative!important;
+  z-index:1!important;
+  min-height:0!important;
+  display:flex!important;
+  justify-content:center!important;
   border-radius:8px;
+  overflow:hidden!important;
+  pointer-events:none!important;
 }
 body.v42-mobile .v42-stage-wrap canvas{
-  height:clamp(280px,46dvh,440px)!important;
+  display:block;
   width:auto!important;
+  height:clamp(250px,38dvh,360px)!important;
   max-width:100%!important;
   max-height:none!important;
+  pointer-events:none!important;
 }
 
-/* Compress transport controls so the extra room goes to the image itself. */
-body.v42-mobile .v42-player{
-  min-height:34px!important;
-  height:34px;
-  margin-top:4px!important;
-}
-body.v42-mobile .v42-player .play{
-  width:34px!important;
-  height:34px!important;
-  min-height:34px!important;
-  font-size:14px!important;
-}
-body.v42-mobile .v42-preview-tools{
-  gap:4px!important;
-}
-body.v42-mobile .v42-preview-tools button{
-  width:30px!important;
-  min-width:30px!important;
-  height:30px!important;
-  min-height:30px!important;
-  padding:0!important;
-  font-size:14px!important;
-}
+/* Uniform scrubber: 3px track and yellow iOS thumb. */
 body.v42-mobile .v42-scrubber{
-  margin:4px 0 3px!important;
-  height:3px!important;
-}
-body.v42-mobile .v42-scene-nav{
-  grid-template-columns:58px 1fr 58px!important;
-  gap:5px!important;
-}
-body.v42-mobile .v42-scene-nav button{
-  min-height:25px!important;
-  height:25px!important;
-  padding:2px 7px!important;
-}
-body.v42-mobile .v42-scene-nav strong{
-  font-size:9px!important;
-}
-
-/* Compact fixed scene strip directly below the preview. */
-body.v42-mobile .v42-scenes-card{
-  flex:0 0 auto;
-  margin-top:5px!important;
-  padding:5px!important;
-}
-body.v42-mobile .v42-scenes-row{
-  gap:5px!important;
-}
-body.v42-mobile .v42-scene-strip{
-  gap:5px!important;
-}
-body.v42-mobile .v42-scene-strip>button{
-  flex-basis:48px!important;
-  width:48px!important;
-  height:54px!important;
-  padding:2px!important;
-}
-body.v42-mobile .v42-scene-strip img,
-body.v42-mobile .v42-scene-strip .missing{
-  height:34px!important;
-}
-body.v42-mobile .v42-scene-strip b{
-  left:4px!important;
-  top:4px!important;
-  font-size:7px!important;
-}
-body.v42-mobile .v42-scene-strip small{
-  font-size:7px!important;
-}
-body.v42-mobile .v42-add-scene{
-  flex:0 0 38px!important;
-  width:38px!important;
-  min-height:54px!important;
-  height:54px!important;
-  font-size:18px!important;
-}
-
-/* Only the editor panel scrolls. The preview and scene strip never move. */
-body.v42-mobile .v42-panel{
-  flex:1 1 auto;
-  min-height:110px;
-  margin-top:5px!important;
-  margin-bottom:0!important;
-  padding:7px 7px calc(52px + env(safe-area-inset-bottom))!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;
-  scroll-behavior:smooth;
-}
-
-/* Keep the compact 3-icon edit dock above the scrolling panel. */
-body.v42-mobile .v42-tabs{
-  bottom:max(4px,env(safe-area-inset-bottom))!important;
-}
-
-/* Short phones get a slightly smaller fixed preview while keeping it larger than before. */
-@media(max-height:740px){
-  body.v42-mobile .v42-stage-wrap canvas{
-    height:clamp(250px,42dvh,330px)!important;
-  }
-  body.v42-mobile .v42-preview-head{
-    display:none!important;
-  }
-  body.v42-mobile .v42-player{
-    margin-top:3px!important;
-  }
-  body.v42-mobile .v42-scenes-card{
-    margin-top:4px!important;
-  }
-}
-
-/* v42.9.1 mobile editor space rebalance */
-body.v42-mobile .v42-stage-wrap canvas{
-  height:clamp(250px,38dvh,360px)!important;
-}
-
-/* Scrubber sits directly on the preview bottom edge. */
-body.v42-mobile .v42-scrubber{
+  --v42-progress:0%;
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  position:relative!important;
+  z-index:3!important;
   display:block!important;
   width:100%!important;
-  height:3px!important;
-  margin:-1px 0 2px!important;
+  height:14px!important;
+  min-height:14px!important;
+  margin:-1px 0 -2px!important;
   padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:
+    linear-gradient(to right,
+      var(--v42-accent) 0,
+      var(--v42-accent) var(--v42-progress),
+      #434a54 var(--v42-progress),
+      #434a54 100%) center / 100% 3px no-repeat!important;
+}
+body.v42-mobile .v42-scrubber::-webkit-slider-runnable-track{
+  -webkit-appearance:none;
+  height:3px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-scrubber::-webkit-slider-thumb{
+  -webkit-appearance:none!important;
+  width:14px!important;
+  height:14px!important;
+  margin-top:-5.5px!important;
+  border:2px solid #11151a!important;
+  border-radius:50%!important;
+  background:var(--v42-accent)!important;
+  box-shadow:0 0 0 1px rgba(245,230,66,.35)!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-track{
+  height:3px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-progress{
+  height:3px!important;
+  background:var(--v42-accent)!important;
+}
+body.v42-mobile .v42-scrubber::-moz-range-thumb{
+  width:14px!important;
+  height:14px!important;
+  border:2px solid #11151a!important;
+  border-radius:50%!important;
+  background:var(--v42-accent)!important;
 }
 
-/* One compact transport row: <  play  > centered, undo/redo/fullscreen right. */
+/* Touch-friendly transport row. */
 body.v42-mobile .v42-player{
   position:relative!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
-  min-height:30px!important;
-  height:30px!important;
-  margin:1px 0 0!important;
+  min-height:38px!important;
+  height:38px!important;
+  margin:2px 0 0!important;
+  pointer-events:auto!important;
 }
 body.v42-mobile .v42-transport{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  pointer-events:auto!important;
 }
 body.v42-mobile .v42-transport button{
-  width:25px!important;
-  min-width:25px!important;
-  height:25px!important;
-  min-height:25px!important;
+  position:relative;
+  z-index:20!important;
+  width:38px!important;
+  min-width:38px!important;
+  height:34px!important;
+  min-height:34px!important;
   padding:0!important;
-  border:0!important;
-  background:transparent!important;
-  color:#e8ebef!important;
-  border-radius:6px!important;
-  font-size:18px!important;
+  border:1px solid #3a4049!important;
+  border-radius:8px!important;
+  background:#1b1f24!important;
+  color:#eef1f4!important;
+  font-size:20px!important;
+  font-weight:800!important;
   line-height:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-tap-highlight-color:transparent;
 }
 body.v42-mobile .v42-transport .play{
-  width:28px!important;
-  min-width:28px!important;
-  height:28px!important;
-  min-height:28px!important;
-  background:transparent!important;
-  border:0!important;
-  color:#fff!important;
-  font-size:14px!important;
+  display:grid!important;
+  place-items:center!important;
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  border-radius:50%!important;
+  background:var(--v42-accent)!important;
+  border-color:var(--v42-accent)!important;
+  color:#111!important;
+  font-size:15px!important;
+  line-height:1!important;
 }
 body.v42-mobile .v42-preview-tools{
   position:absolute!important;
   right:1px!important;
   top:50%!important;
   transform:translateY(-50%)!important;
+  display:flex!important;
   gap:2px!important;
+  pointer-events:auto!important;
 }
 body.v42-mobile .v42-preview-tools button{
+  position:relative;
+  z-index:20!important;
   width:24px!important;
   min-width:24px!important;
   height:24px!important;
   min-height:24px!important;
+  padding:0!important;
   border:0!important;
   background:transparent!important;
   color:#aeb6c0!important;
-  padding:0!important;
   font-size:13px!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-tap-highlight-color:transparent;
 }
-
-/* Scene count becomes a tiny bold line below controls. */
 body.v42-mobile .v42-scene-nav{
   display:flex!important;
   justify-content:center!important;
@@ -1642,8 +1655,9 @@ body.v42-mobile .v42-scene-nav strong{
   color:#dce1e7!important;
 }
 
-/* Return scene thumbnails to ultra-compact size. */
+/* Compact scene strip. */
 body.v42-mobile .v42-scenes-card{
+  flex:0 0 auto!important;
   margin-top:3px!important;
   padding:3px 4px!important;
   border-radius:8px!important;
@@ -1683,12 +1697,16 @@ body.v42-mobile .v42-add-scene{
   border-radius:5px!important;
 }
 
-/* Critical iOS flex fix: editor gets the remaining height and scrolls independently. */
+/* Editor consumes all remaining height and scrolls independently. */
 body.v42-mobile .v42-panel{
   flex:1 1 0!important;
-  height:0!important;
-  min-height:90px!important;
-  overflow-y:scroll!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  margin-top:3px!important;
+  margin-bottom:0!important;
+  padding:7px 7px calc(54px + env(safe-area-inset-bottom))!important;
+  overflow-y:auto!important;
   overflow-x:hidden!important;
   touch-action:pan-y!important;
   overscroll-behavior-y:contain!important;
@@ -1696,231 +1714,25 @@ body.v42-mobile .v42-panel{
   scrollbar-width:thin;
 }
 
-/* Short phones: preserve usable editor space first. */
-@media(max-height:740px){
-  body.v42-mobile .v42-stage-wrap canvas{
-    height:clamp(220px,34dvh,300px)!important;
-  }
-}
-
-/* v42.9.2 mobile playback controls, scrubber, editor fill */
-body.v42-mobile .v42-main{
-  padding-bottom:0!important;
-}
-
-/* Larger, touch-friendly previous / play / next buttons. */
-body.v42-mobile .v42-player{
-  min-height:38px!important;
-  height:38px!important;
-  margin:2px 0 0!important;
-}
-body.v42-mobile .v42-transport{
-  gap:6px!important;
-}
-body.v42-mobile .v42-transport button{
-  width:38px!important;
-  min-width:38px!important;
-  height:34px!important;
-  min-height:34px!important;
-  padding:0!important;
-  border:1px solid #3a4049!important;
-  background:#1b1f24!important;
-  color:#eef1f4!important;
-  border-radius:8px!important;
-  font-size:20px!important;
-  font-weight:800!important;
-  line-height:1!important;
-}
-body.v42-mobile .v42-transport .play{
-  width:44px!important;
-  min-width:44px!important;
-  height:36px!important;
-  min-height:36px!important;
-  background:var(--v42-accent)!important;
-  border-color:var(--v42-accent)!important;
-  color:#111!important;
-  font-size:15px!important;
-}
-
-/* Consistent 3px scrubber line with a yellow thumb on iPhone and other browsers. */
-body.v42-mobile .v42-scrubber{
-  --v42-progress:0%;
-  -webkit-appearance:none!important;
-  appearance:none!important;
-  display:block!important;
-  width:100%!important;
-  height:14px!important;
-  min-height:14px!important;
-  margin:-7px 0 -2px!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  outline:0!important;
-  background:
-    linear-gradient(to right,
-      var(--v42-accent) 0,
-      var(--v42-accent) var(--v42-progress),
-      #434a54 var(--v42-progress),
-      #434a54 100%) center / 100% 3px no-repeat!important;
-}
-body.v42-mobile .v42-scrubber::-webkit-slider-runnable-track{
-  -webkit-appearance:none;
-  height:3px!important;
-  border:0!important;
-  background:transparent!important;
-}
-body.v42-mobile .v42-scrubber::-webkit-slider-thumb{
-  -webkit-appearance:none!important;
-  width:14px!important;
-  height:14px!important;
-  margin-top:-5.5px!important;
-  border:2px solid #11151a!important;
-  border-radius:50%!important;
-  background:var(--v42-accent)!important;
-  box-shadow:0 0 0 1px rgba(245,230,66,.35)!important;
-}
-body.v42-mobile .v42-scrubber::-moz-range-track{
-  height:3px!important;
-  border:0!important;
-  background:#434a54!important;
-}
-body.v42-mobile .v42-scrubber::-moz-range-progress{
-  height:3px!important;
-  background:var(--v42-accent)!important;
-}
-body.v42-mobile .v42-scrubber::-moz-range-thumb{
-  width:14px!important;
-  height:14px!important;
-  border:2px solid #11151a!important;
-  border-radius:50%!important;
-  background:var(--v42-accent)!important;
-}
-
-/* The editor owns every remaining pixel below the fixed preview/scene area. */
-body.v42-mobile .v42-panel{
-  flex:1 1 0!important;
-  height:auto!important;
-  min-height:0!important;
-  margin-top:3px!important;
-  padding:7px 7px calc(54px + env(safe-area-inset-bottom))!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  touch-action:pan-y!important;
-  overscroll-behavior-y:contain!important;
-  -webkit-overflow-scrolling:touch!important;
+/* Compact floating edit dock. */
+body.v42-mobile .v42-tabs,
+body.v42-mobile .v42-tabs *{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
 }
 body.v42-mobile .v42-tabs{
-  pointer-events:auto;
-}
-
-/* Fullscreen preview always has a visible playback control. */
-#v42PreviewDialog .v42-full-stage-wrap{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:calc(100dvh - 52px);
-  overflow:hidden;
-  background:#000;
-}
-#v42PreviewDialog #v42FullStage{
-  height:100%!important;
-  max-height:100%!important;
-}
-#v42PreviewDialog .v42-full-play{
-  position:absolute;
-  left:50%;
-  bottom:max(18px,env(safe-area-inset-bottom));
-  transform:translateX(-50%);
-  z-index:5;
-  width:52px;
-  height:52px;
-  padding:0;
-  border:1px solid rgba(255,255,255,.28);
-  border-radius:50%;
-  background:rgba(13,15,18,.78);
-  color:#fff;
-  font-size:20px;
-  font-weight:800;
-  backdrop-filter:blur(8px);
-}
-#v42PreviewDialog:fullscreen .v42-full-stage-wrap{
-  height:calc(100vh - 52px);
-}
-@supports(height:100svh){
-  #v42PreviewDialog .v42-full-stage-wrap{height:calc(100svh - 52px)}
-}
-
-/* v42.9.3 sharpen mobile header + circular play button */
-body.v42-mobile .v42-head,
-body.v42-mobile .v42-head *{
-  filter:none!important;
-  -webkit-filter:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  text-shadow:none!important;
-  box-shadow:none;
-}
-body.v42-mobile .v42-head{
+  bottom:max(4px,env(safe-area-inset-bottom))!important;
   background:#0d0f12!important;
-  opacity:1!important;
-  transform:none!important;
+  pointer-events:auto!important;
 }
-body.v42-mobile .v42-head button{
-  box-shadow:none!important;
+body.v42-mobile.v42-standalone .v42-panel{
+  padding-bottom:8px!important;
 }
-body.v42-mobile .v42-head button.primary{
-  box-shadow:none!important;
-}
-
-/* Main preview play button: circular and easier to recognize/tap. */
-body.v42-mobile .v42-transport .play{
-  width:40px!important;
-  min-width:40px!important;
-  height:40px!important;
-  min-height:40px!important;
-  border-radius:50%!important;
-  padding:0!important;
-  display:grid!important;
-  place-items:center!important;
-  background:var(--v42-accent)!important;
-  border:1px solid var(--v42-accent)!important;
-  color:#111!important;
-  font-size:15px!important;
-  line-height:1!important;
+body.v42-mobile.v42-standalone .v42-tabs{
+  bottom:6px!important;
 }
 
-/* v42.9.4 iOS layout + browser chrome stabilization */
-body.v42-mobile #mobileAppV42{
-  display:flex!important;
-  flex-direction:column!important;
-  height:100dvh!important;
-  min-height:100dvh!important;
-  max-height:100dvh!important;
-  overflow:hidden!important;
-}
-body.v42-mobile .v42-main{
-  flex:1 1 0!important;
-  min-height:0!important;
-  height:auto!important;
-  overflow:hidden!important;
-}
-body.v42-mobile .v42-preview-card,
-body.v42-mobile .v42-scenes-card{
-  flex:0 0 auto!important;
-}
-body.v42-mobile .v42-panel{
-  flex:1 1 0!important;
-  min-height:0!important;
-  height:auto!important;
-  max-height:none!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-y!important;
-}
-
-/* Keep the page edge itself dark so Safari has no yellow page color to sample behind its chrome. */
+/* Browser chrome mitigation; installed Home Screen mode uses the full viewport. */
 html,
 body,
 body.v42-mobile,
@@ -1929,166 +1741,9 @@ body.v42-mobile #mobileAppV42{
 }
 body.v42-mobile::before,
 body.v42-mobile::after{
-  content:"";
-  position:fixed;
-  left:0;
-  right:0;
-  height:max(1px,env(safe-area-inset-bottom));
-  background:#0d0f12;
-  pointer-events:none;
-  z-index:140;
-}
-body.v42-mobile::before{top:0}
-body.v42-mobile::after{bottom:0}
-
-/* v42.9.5 uniform mobile scrubber track */
-body.v42-mobile .v42-stage-wrap{
-  position:relative!important;
-  z-index:1!important;
-}
-body.v42-mobile .v42-scrubber{
-  position:relative!important;
-  z-index:3!important;
-  display:block!important;
-  width:100%!important;
-  height:14px!important;
-  min-height:14px!important;
-  margin:-1px 0 -2px!important;
-  padding:0!important;
-  background:
-    linear-gradient(to right,
-      var(--v42-accent) 0,
-      var(--v42-accent) var(--v42-progress),
-      #434a54 var(--v42-progress),
-      #434a54 100%) center / 100% 3px no-repeat!important;
-}
-body.v42-mobile .v42-scrubber::-webkit-slider-runnable-track{
-  height:3px!important;
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-}
-body.v42-mobile .v42-scrubber::-moz-range-track{
-  height:3px!important;
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-}
-body.v42-mobile .v42-scrubber::-moz-range-progress{
-  height:3px!important;
-  background:transparent!important;
-}
-
-/* v42.9.6 iOS Home Screen status bar / safe-area fix */
-@supports(padding:max(0px)){
-  body.v42-mobile{
-    background:#0d0f12!important;
-  }
-  body.v42-mobile #mobileAppV42{
-    background:#0d0f12!important;
-  }
-  body.v42-mobile .v42-head{
-    padding-top:calc(7px + env(safe-area-inset-top))!important;
-    min-height:calc(52px + env(safe-area-inset-top))!important;
-    background:#0d0f12!important;
-    border-bottom-color:#30343b!important;
-    -webkit-backdrop-filter:none!important;
-    backdrop-filter:none!important;
-  }
-  body.v42-mobile .v42-main{
-    padding-left:max(8px,env(safe-area-inset-left))!important;
-    padding-right:max(8px,env(safe-area-inset-right))!important;
-  }
-}
-/* Ensure the very top safe area remains opaque in installed Home Screen mode. */
-@media(display-mode:standalone){
-  html,body,body.v42-mobile,body.v42-mobile #mobileAppV42{
-    background:#0d0f12!important;
-  }
-  body.v42-mobile .v42-head{
-    background:#0d0f12!important;
-    box-shadow:none!important;
-    filter:none!important;
-    -webkit-filter:none!important;
-  }
-}
-
-/* v42.9.7 restore visible Home Screen header */
-body.v42-mobile::before{
   display:none!important;
   content:none!important;
 }
-@supports(padding:max(0px)){
-  body.v42-mobile .v42-head{
-    box-sizing:border-box!important;
-    padding:calc(7px + env(safe-area-inset-top)) 10px 7px!important;
-    min-height:calc(52px + env(safe-area-inset-top))!important;
-    height:auto!important;
-    overflow:visible!important;
-    z-index:200!important;
-  }
-  body.v42-mobile .v42-head .v42-brand,
-  body.v42-mobile .v42-head .v42-head-actions{
-    position:relative!important;
-    z-index:1!important;
-    opacity:1!important;
-    visibility:visible!important;
-  }
-}
-
-/* v42.10 iOS 26/27 Liquid Glass workaround:
-   make the app header viewport-constrained + opaque, and keep browser chrome away from yellow content. */
-body.v42-mobile #mobileAppV42{
-  box-sizing:border-box!important;
-  padding-top:calc(52px + env(safe-area-inset-top))!important;
-  height:100svh!important;
-  min-height:100svh!important;
-  max-height:100svh!important;
-  background:#0d0f12!important;
-}
-body.v42-mobile.v42-standalone #mobileAppV42{
-  height:100dvh!important;
-  min-height:100dvh!important;
-  max-height:100dvh!important;
-}
-body.v42-mobile .v42-head{
-  position:fixed!important;
-  top:0!important;
-  left:0!important;
-  right:0!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  min-height:calc(52px + env(safe-area-inset-top))!important;
-  height:calc(52px + env(safe-area-inset-top))!important;
-  padding:calc(7px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 7px max(10px,env(safe-area-inset-left))!important;
-  background:#0d0f12!important;
-  background-color:#0d0f12!important;
-  opacity:1!important;
-  overflow:hidden!important;
-  isolation:isolate!important;
-  z-index:500!important;
-  transform:none!important;
-  filter:none!important;
-  -webkit-filter:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  box-shadow:none!important;
-}
-body.v42-mobile .v42-head::before,
-body.v42-mobile .v42-head::after{
-  display:none!important;
-  content:none!important;
-}
-body.v42-mobile .v42-head>*{
-  opacity:1!important;
-  filter:none!important;
-  -webkit-filter:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-}
-
-/* Safari browser mode: leave a dark strip beneath bottom sheets so Liquid Glass
-   samples the Cutflow background instead of the yellow CTA. */
 body.v42-mobile:not(.v42-standalone) #v42SettingsDialog,
 body.v42-mobile:not(.v42-standalone) #v42ExportDialog{
   bottom:20px!important;
@@ -2099,38 +1754,6 @@ body.v42-mobile:not(.v42-standalone) #v42SettingsDialog .v42-settings-body,
 body.v42-mobile:not(.v42-standalone) #v42ExportDialog .v42-export-body{
   padding-bottom:max(34px,calc(20px + env(safe-area-inset-bottom)))!important;
 }
-
-/* Remove all WebKit blur layers from Cutflow's own fixed chrome. */
-body.v42-mobile .v42-tabs,
-body.v42-mobile .v42-tabs *,
-#v42PreviewDialog .v42-full-play{
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
-}
-body.v42-mobile .v42-tabs{
-  background:#0d0f12!important;
-}
-
-/* v42.10.1 use the full bottom safe area in installed mobile app */
-body.v42-mobile::after{
-  display:none!important;
-  content:none!important;
-}
-body.v42-mobile.v42-standalone #mobileAppV42{
-  padding-bottom:0!important;
-}
-body.v42-mobile.v42-standalone .v42-main{
-  padding-bottom:0!important;
-}
-body.v42-mobile.v42-standalone .v42-panel{
-  padding-bottom:8px!important;
-}
-body.v42-mobile.v42-standalone .v42-tabs{
-  bottom:6px!important;
-}
-
-/* Safari browser mode can still reserve its browser chrome space,
-   but installed Home Screen mode should use the full screen. */
 body.v42-mobile.v42-standalone #v42SettingsDialog,
 body.v42-mobile.v42-standalone #v42ExportDialog{
   bottom:0!important;
@@ -2141,49 +1764,15 @@ body.v42-mobile.v42-standalone #v42ExportDialog .v42-export-body{
   padding-bottom:18px!important;
 }
 
-/* v42.10.2 stable mobile fullscreen preview: modal-only, no Fullscreen API top-layer conflict */
-#v42PreviewDialog[open]{
-  position:fixed!important;
-  inset:0!important;
-  width:100vw!important;
-  height:100dvh!important;
-  max-width:none!important;
-  max-height:none!important;
-  margin:0!important;
-  padding:0!important;
-  overflow:hidden!important;
-  z-index:2147483000!important;
-  pointer-events:auto!important;
-  touch-action:manipulation!important;
-}
-#v42PreviewDialog .v42-full-head{
-  position:relative!important;
-  z-index:20!important;
-  pointer-events:auto!important;
-}
-#v42PreviewDialog .v42-full-head button,
-#v42PreviewDialog .v42-full-play{
-  pointer-events:auto!important;
-  touch-action:manipulation!important;
-  -webkit-user-select:none!important;
-  user-select:none!important;
-}
-#v42PreviewDialog .v42-full-stage-wrap{
-  position:relative!important;
-  z-index:1!important;
-  pointer-events:auto!important;
-}
-#v42PreviewDialog #v42FullStage{
-  pointer-events:none!important;
-}
-#v42PreviewDialog .v42-full-play{
-  z-index:30!important;
-}
-
-/* v42.10.3 iPhone fullscreen preview uses a plain fixed overlay, not <dialog>. */
+/* Fullscreen preview is a normal fixed overlay, not <dialog> or Fullscreen API.
+   Layout: header / native 1080×1920 canvas / persistent playback bar. */
 #v42PreviewDialog.v42-preview-overlay{
   position:fixed!important;
   inset:0!important;
+  z-index:2147483000!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  grid-template-columns:1fr!important;
   width:100vw!important;
   height:100dvh!important;
   max-width:none!important;
@@ -2191,12 +1780,9 @@ body.v42-mobile.v42-standalone #v42ExportDialog .v42-export-body{
   margin:0!important;
   padding:0!important;
   border:0!important;
+  overflow:hidden!important;
   background:#050607!important;
   color:#fff!important;
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:hidden!important;
-  z-index:2147483000!important;
   pointer-events:auto!important;
   touch-action:manipulation!important;
 }
@@ -2206,137 +1792,100 @@ body.v42-mobile.v42-standalone #v42ExportDialog .v42-export-body{
 body.v42-preview-lock{
   overflow:hidden!important;
 }
-#v42PreviewDialog.v42-preview-overlay .v42-full-head{
-  flex:0 0 auto!important;
-}
-#v42PreviewDialog.v42-preview-overlay .v42-full-stage-wrap{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  height:auto!important;
-}
-#v42PreviewDialog.v42-preview-overlay .v42-full-play,
-#v42PreviewDialog.v42-preview-overlay #v42FullClose{
-  pointer-events:auto!important;
-  touch-action:manipulation!important;
-  z-index:50!important;
-}
-#v42PreviewDialog.v42-preview-overlay #v42FullStage{
-  pointer-events:none!important;
-}
-
-/* v42.10.4 keep mobile playback controls responsive during playback */
-body.v42-mobile .v42-player,
-body.v42-mobile .v42-transport,
-body.v42-mobile .v42-preview-tools{
-  pointer-events:auto!important;
-}
-body.v42-mobile .v42-transport button,
-body.v42-mobile .v42-preview-tools button,
-#v42PreviewDialog #v42FullClose,
-#v42PreviewDialog #v42FullPlay{
-  position:relative;
+#v42PreviewDialog .v42-full-head{
+  grid-row:1!important;
+  position:relative!important;
   z-index:20!important;
+  flex:0 0 auto!important;
+  min-height:52px!important;
+  pointer-events:auto!important;
+}
+#v42PreviewDialog .v42-full-head button{
+  position:relative;
+  z-index:50!important;
   pointer-events:auto!important;
   touch-action:manipulation!important;
   -webkit-user-select:none!important;
   user-select:none!important;
   -webkit-tap-highlight-color:transparent;
 }
-body.v42-mobile .v42-stage-wrap,
-body.v42-mobile .v42-stage-wrap canvas{
-  pointer-events:none!important;
-}
-
-/* v42.10.5 native 1080x1920 fullscreen preview with persistent controls */
-#v42PreviewDialog.v42-preview-overlay{
-  grid-template-rows:auto minmax(0,1fr) auto!important;
-}
-#v42PreviewDialog.v42-preview-overlay .v42-full-stage-wrap{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  height:auto!important;
+#v42PreviewDialog .v42-full-stage-wrap{
+  grid-row:2!important;
+  position:relative!important;
+  z-index:1!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
   overflow:hidden!important;
   background:#000!important;
   pointer-events:none!important;
 }
-#v42PreviewDialog.v42-preview-overlay #v42FullStage{
+#v42PreviewDialog #v42FullStage{
+  display:block!important;
   width:auto!important;
   height:100%!important;
   max-width:100vw!important;
   max-height:100%!important;
   aspect-ratio:9/16!important;
   object-fit:contain!important;
+  margin:auto!important;
   background:#000!important;
   pointer-events:none!important;
 }
 #v42PreviewDialog .v42-full-controls{
-  flex:0 0 auto!important;
-  min-height:68px!important;
-  padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important;
+  grid-row:3!important;
+  position:relative!important;
+  z-index:60!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
+  width:100%!important;
+  min-height:68px!important;
+  box-sizing:border-box!important;
+  padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important;
   background:#0d0f12!important;
   border-top:1px solid #30343b!important;
-  position:relative!important;
-  z-index:60!important;
+  visibility:visible!important;
+  opacity:1!important;
   pointer-events:auto!important;
 }
 #v42PreviewDialog .v42-full-play{
   position:relative!important;
   left:auto!important;
   bottom:auto!important;
-  transform:none!important;
+  z-index:70!important;
+  display:grid!important;
+  place-items:center!important;
   width:50px!important;
-  height:50px!important;
   min-width:50px!important;
+  height:50px!important;
   min-height:50px!important;
+  padding:0!important;
+  transform:none!important;
+  border:1px solid var(--v42-accent,#f5e642)!important;
   border-radius:50%!important;
   background:var(--v42-accent,#f5e642)!important;
-  border:1px solid var(--v42-accent,#f5e642)!important;
   color:#111!important;
   font-size:18px!important;
   font-weight:900!important;
-  z-index:70!important;
+  visibility:visible!important;
+  opacity:1!important;
   pointer-events:auto!important;
   touch-action:manipulation!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-#v42PreviewDialog .v42-full-head{
-  flex:0 0 auto!important;
-  min-height:52px!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
 }
 
-/* v42.10.6 canonical fullscreen layout: header / 1080p canvas / controls */
-#v42PreviewDialog.v42-preview-overlay{
-  display:grid!important;
-  grid-template-rows:auto minmax(0,1fr) auto!important;
-  grid-template-columns:1fr!important;
-}
-#v42PreviewDialog.v42-preview-overlay .v42-full-head{
-  grid-row:1!important;
-}
-#v42PreviewDialog.v42-preview-overlay .v42-full-stage-wrap{
-  grid-row:2!important;
-  width:100%!important;
-  min-width:0!important;
-  min-height:0!important;
-}
-#v42PreviewDialog.v42-preview-overlay .v42-full-controls{
-  grid-row:3!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  display:flex!important;
-  visibility:visible!important;
-  opacity:1!important;
-}
-#v42PreviewDialog.v42-preview-overlay #v42FullPlay{
-  display:grid!important;
-  place-items:center!important;
-  visibility:visible!important;
-  opacity:1!important;
+@media(max-height:740px){
+  body.v42-mobile .v42-preview-head{display:none!important}
+  body.v42-mobile .v42-stage-wrap canvas{
+    height:clamp(220px,34dvh,300px)!important;
+  }
 }
