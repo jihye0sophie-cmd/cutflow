@@ -7,9 +7,9 @@ const mobile=fs.readFileSync('mobile-v42.js','utf8');
 const desktop=fs.readFileSync('desktop-ui.js','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
 
-assert.ok(html.includes('caption-batch-editor.js?v=1.1'),'whole-caption editor script missing');
-assert.ok(html.includes('caption-batch-editor.css?v=1'),'whole-caption editor css missing');
-assert.ok(build.includes("'caption-batch-editor.js','caption-batch-editor.css'"),'build assets missing');
+assert.ok(/caption-batch-editor\.js\?v=[^\"']+/.test(html),'whole-caption editor script missing');
+assert.ok(/caption-batch-editor\.css\?v=[^\"']+/.test(html),'whole-caption editor css missing');
+assert.ok(build.includes('runtimeRefs')&&build.includes('index.matchAll'),'build must derive caption batch assets from index.html');
 assert.ok(js.includes('window.CutflowCaptionBatch={'),'shared whole-caption editor API missing');
 assert.ok(js.includes('sceneApi()?.items?.()'),'whole-caption editor must group by logical scenes');
 assert.ok(js.includes('caption-batch-row'),'scene row UI missing');
