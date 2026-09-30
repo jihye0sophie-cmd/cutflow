@@ -54,7 +54,7 @@ assert(!js.includes('if(settingsDialog.open)renderSettings()'),'settings mutatio
 assert(js.includes('followSelectedScene')&&js.includes('cutflow-auto-complete'),'scene follow and mobile auto-setup completion hooks missing');
 assert(js.includes('data-cutflow-history="undo"')&&js.includes('data-cutflow-history="redo"'),'mobile undo/redo controls missing');
 assert(new RegExp('auto-setup\\.js\\?v=[^"\\x27]+').test(html),'auto setup mobile completion cache key missing');
-assert(css.includes('.v42-panel{margin-top:8px;padding:8px;margin-bottom:0}'),'duplicate bottom spacing must be removed');
+assert(/\.v42-panel\{[\s\S]*?margin-bottom:0!important;[\s\S]*?overflow-y:auto!important;/.test(css),'canonical editor panel spacing/scroll ownership missing');
 assert(js.includes('function ensurePanelVisible()'),'tab panel visibility helper missing');
 assert(js.includes("panel.dataset.renderState='ready'"),'mobile panel render state missing');
 assert(js.includes('v42PanelRetry'),'mobile panel retry fallback missing');
