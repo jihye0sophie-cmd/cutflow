@@ -37,7 +37,7 @@
  @media(max-width:1000px){.desktop-editor .topbar{padding:12px 16px}.desktop-editor .brand span{display:none}.desktop-workspace{grid-template-columns:minmax(260px,35%) minmax(0,1fr)}#desktopEditor{padding:14px}.desktop-current{align-items:flex-start;flex-direction:column;gap:0}.desktop-current p{margin:4px 0 0}.desktop-editor .caption-style-grid{grid-template-columns:1fr}.desktop-editor .editor-row-heading{flex-wrap:wrap}.desktop-editor .app-shell{padding:0 12px 12px}}
 }
 @media(min-width:761px){#desktopManage{display:flex;gap:12px;margin-bottom:16px}.desktop-editor .stage-wrap{flex-basis:0}.desktop-editor .editor-row-heading{border-color:var(--studio-border)}}
-/* v33 free-edit and video-audio controls */
+/* free-edit and video-audio controls */
 @media(min-width:761px){
  .desktop-editor .editor-audio{grid-column:1/-1!important}
  .desktop-editor .editor-audio>span{display:block;margin-top:5px;font-size:12px;color:var(--studio-muted)}
@@ -46,10 +46,10 @@
  .desktop-editor .video-volume{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}.desktop-editor .video-volume input{width:100%}
 }
 
-/* v33.1 video trim/audio controls */
+/* video trim/audio controls */
 .desktop-editor .trim-fields,.desktop-editor .video-audio-fades{max-width:520px}.desktop-editor .video-volume-presets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 
-/* v34.1 desktop scene editing */
+/* desktop scene editing */
 @media(min-width:761px){
  #desktopScenes>header .desktop-scene-head-actions{display:flex;gap:8px;align-items:center}
  #desktopSceneEdit[aria-pressed=true]{background:var(--studio-accent);color:#111;border-color:var(--studio-accent);font-weight:700}
@@ -69,21 +69,21 @@
  #desktopStrip .desktop-scene-item.drop-target::after{content:'';position:absolute;inset:-3px;border:2px dashed var(--studio-accent);border-radius:9px;pointer-events:none;z-index:5}
 }
 
-/* v34.2 project text controls + scene strip follow */
+/* project text controls + scene strip follow */
 @media(min-width:761px){
  .desktop-editor #desktopProject .text-style-grid input[type=number]{background:var(--studio-card);color:#fff;-webkit-text-fill-color:#fff;caret-color:#fff}
  .desktop-editor #desktopProject .text-style-grid input[type=range]{width:100%;accent-color:var(--studio-accent);background:transparent;border:0;padding:0}
  .desktop-editor #desktopProject .text-style-grid output{float:right;color:var(--studio-accent);font-size:12px}
 }
 
-/* v34.5 caption-first actions + keyboard workflow */
+/* caption-first actions + keyboard workflow */
 @media(min-width:761px){
  .desktop-editor .caption-cue-actions{margin-top:12px;padding-top:12px;border-top:1px solid var(--studio-border)}
  .desktop-editor .caption-cue-actions button{min-height:34px}
  #desktopEditor[data-mode=caption] .editor-text{display:block!important}
 }
 
-/* v36.1: scene media settings are scene-level; captions stay caption-level. */
+/* scene media settings are scene-level; captions stay caption-level. */
 .desktop-editor .scene-media-summary{grid-column:1/-1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 14px;border:1px solid var(--studio-border);border-radius:8px;background:rgba(255,255,255,.025)}
 .desktop-editor .scene-media-summary>div{display:flex;flex-direction:column;gap:3px}.desktop-editor .scene-media-summary strong{font-size:15px;color:#fff}.desktop-editor .scene-media-summary span{font-size:11px;color:var(--studio-muted);line-height:1.5}
 .desktop-editor .scene-media-duration{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,180px) 1fr;gap:8px 14px;align-items:end}.desktop-editor .scene-media-duration span{font-size:11px;color:var(--studio-muted)}
@@ -98,7 +98,7 @@
 #desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-duration{display:grid!important}
 #desktopEditor[data-mode=image] .caption-row-heading{display:none!important}
 #desktopEditor[data-mode=caption] .caption-row-heading{display:none!important}
-/* v36.2 scene edit tools */
+/* scene edit tools */
 .desktop-scene-tools{display:none;margin:0 0 12px;padding:10px 12px;border:1px solid var(--studio-border);border-radius:10px;background:var(--studio-input)}
 #desktopEditor[data-mode=image] .desktop-scene-tools{display:block}
 .desktop-scene-tools>strong{display:block;margin-bottom:8px;font-size:12px}
@@ -107,7 +107,7 @@
 .desktop-scene-tools button.danger{color:#ff8d8d;border-color:#6d3434}
 .desktop-scene-tools small{display:block;margin-top:7px;color:var(--studio-muted);font-size:10px}
 
-/* v38 workflow polish: compact header, quick timing, progressive disclosure, scene status */
+/* workflow polish: compact header, quick timing, progressive disclosure, scene status */
 @media(min-width:761px){
  .desktop-editor .topbar{height:58px;min-height:58px;padding:8px 16px;flex-wrap:nowrap;overflow:hidden}
  .desktop-editor .brand{flex:0 0 auto;min-width:0}.desktop-editor .brand strong{font-size:20px;white-space:nowrap}.desktop-editor .brand span{font-size:10px;white-space:nowrap}
@@ -136,14 +136,14 @@
  #desktopEditor:not([data-mode=image]) .media-advanced{display:none!important}
  #desktopEditor[data-mode=image] .media-advanced{display:block!important}
 }
-/* v41 compact desktop header */
+/* compact desktop header */
 @media (min-width:761px){
  .desktop-current-actions{display:flex;align-items:center;gap:10px}.desktop-current-actions p{margin:0}.desktop-current-actions #desktopSettings{white-space:nowrap;padding:7px 10px;border:1px solid var(--studio-border);border-radius:8px;background:#20242a;color:#fff;font-size:11px}
  .desktop-header-actions{display:flex;gap:7px;flex-wrap:nowrap}.desktop-header-actions button{white-space:nowrap;min-width:auto!important}
  #desktopExport{background:var(--studio-accent)!important;color:#111!important;font-weight:800}
  .desktop-editor .topbar .project-tools,.desktop-editor .topbar .save-state{display:none!important}
 }
-/* v41.1 desktop polish */
+/* desktop polish */
 @media(min-width:761px){
   /* Keep the app header visually separated from the editor workspace. */
   #desktopStudio{margin-top:12px;height:calc(100dvh - 86px)}
@@ -181,7 +181,7 @@
 }
 
 
-/* v41.2: image/video tab follows the actual editing frequency. */
+/* image/video tab follows the actual editing frequency. */
 @media(min-width:761px){
   #desktopEditor[data-mode=image] #desktopReplace{display:none!important}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media,
@@ -198,7 +198,7 @@
 }
 
 
-/* v41.3 stabilization: exact image/video editor order, resilient to late media-transform creation. */
+/* stabilization: exact image/video editor order, resilient to late media-transform creation. */
 @media(min-width:761px){
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media{order:1!important;grid-column:1/-1!important}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-motion{order:2!important;grid-column:1!important}
@@ -261,7 +261,7 @@
   padding-right:16px!important;
 }
 
-/* v42.8 desktop title/channel style layout mirrors mobile */
+/* desktop title/channel style layout mirrors mobile */
 @media(min-width:761px){
   .desktop-editor #desktopProject #titleStylePanel .text-style-grid,
   .desktop-editor #desktopProject #channelStylePanel .text-style-grid{
@@ -325,7 +325,7 @@
   }
 }
 
-/* v42.9 compact project action controls */
+/* compact project action controls */
 @media(min-width:761px){
   .desktop-editor #desktopProject #scriptFileBtn{
     display:inline-flex!important;
