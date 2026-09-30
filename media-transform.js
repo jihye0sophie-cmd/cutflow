@@ -2,7 +2,7 @@
 (()=>{
  const stage=$('stage'),wrap=stage.parentElement;
  const panel=document.createElement('fieldset');panel.id='mediaTransform';
- panel.innerHTML=`<legend>이미지·영상 크기 / 위치</legend>
+ panel.innerHTML=`<strong class="transform-title">이미지·영상 크기 / 위치</strong>
  <div class="transform-actions"><button type="button" id="transformMode" aria-pressed="false">미리보기에서 조절</button><button type="button" id="transformReset">초기화</button></div>
  <div class="transform-fields"><label>Scale (%)<input id="transformScale" type="number" min="10" max="500" step="1" value="100"></label><label>Position X (%)<input id="transformX" type="number" min="-200" max="200" step="1" value="0"></label><label>Position Y (%)<input id="transformY" type="number" min="-200" max="200" step="1" value="0"></label></div>
  <input id="transformRange" type="range" min="10" max="500" value="100" aria-label="이미지·영상 확대 비율">
