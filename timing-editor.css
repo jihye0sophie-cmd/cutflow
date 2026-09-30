@@ -85,6 +85,8 @@
 .timing-playhead-area{position:absolute;z-index:38;left:var(--timeline-label-width);right:0;top:0;bottom:0;pointer-events:none}
 .timing-playhead-area>.timing-playhead{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--studio-accent);pointer-events:none;box-shadow:0 0 0 1px #0006}
 .timing-playhead-area>.timing-playhead:before{content:'';position:absolute;top:0;left:-5px;width:12px;height:8px;border-radius:0 0 6px 6px;background:var(--studio-accent)}
+.timing-playhead-grip{position:absolute!important;z-index:3;top:0!important;bottom:0!important;width:16px!important;min-width:16px!important;height:auto!important;min-height:0!important;margin-left:-8px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;cursor:ew-resize!important;pointer-events:auto!important;touch-action:none!important}
+.timing-playhead-grip:focus-visible{outline:1px solid var(--studio-accent);outline-offset:-1px}
 .timing-canvas>.timing-playhead{display:none!important}
 .timeline-layer-empty{left:8px!important}
 .timing-handle{touch-action:none!important;user-select:none;-webkit-user-select:none}
