@@ -153,7 +153,7 @@
           <div class="timing-layer timing-narration-layer"><span class="timing-layer-label">내레이션</span><div class="timing-layer-body">${narrationMarkup}</div></div>
           <div class="timing-layer timing-videoaudio-layer"><span class="timing-layer-label">영상 원음</span><div class="timing-layer-body">${videoMarkup}</div></div>
           <div class="timing-layer timing-bgm-layer"><span class="timing-layer-label">BGM</span><div class="timing-layer-body">${bgmMarkup}</div></div>
-          <div class="timing-playhead-area"><div class="timing-playhead" style="left:${pctAll(currentTime(),duration)}%"></div></div>
+          <div class="timing-playhead-area"><div class="timing-playhead" style="left:${pctAll(currentTime(),duration)}%"></div><button type="button" class="timing-playhead-grip" data-timeline-playhead style="left:${pctAll(currentTime(),duration)}%" aria-label="재생 위치 드래그"></button></div>
         </div>
       </div>`;
     host.dataset.windowStart='0';host.dataset.windowEnd=String(duration);
@@ -212,7 +212,36 @@
     else if(e.target.hasAttribute('data-timing-scene-duration')){const item=sceneItem();if(item){rememberCues();setSceneBoundary('end',item.start+Math.max(.1,num(e.target.value,.1)));renderAll();}}
     else if(e.target.dataset.timingCaption){changeSelectedTime(e.target.dataset.timingCaption,e.target.value);}
   }
+  function updatePlayheadFeedback(t){
+    const duration=timelineDuration();
+    document.querySelectorAll('.timing-panel').forEach(panel=>{
+      if(!panel.offsetParent&&panel!==externalPanel)return;
+      panel.querySelectorAll('.timing-playhead,.timing-playhead-grip').forEach(el=>el.style.left=`${pctAll(t,duration)}%`);
+      const clock=panel.querySelector('[data-timeline-clock]');if(clock)clock.textContent=`${fmt(t)} / ${fmt(duration)}`;
+    });
+  }
+  function updateBoundaryFeedback(){
+    const duration=timelineDuration(),list=timelineRanges();
+    document.querySelectorAll('.timing-panel').forEach(panel=>{
+      if(!panel.offsetParent&&panel!==externalPanel)return;
+      list.forEach((g,i)=>{
+        const block=panel.querySelector(`[data-timeline-scene="${i}"]`);
+        if(block){block.style.left=`${pctAll(g.start,duration)}%`;block.style.width=`${Math.max(.25,pctAll(g.end,duration)-pctAll(g.start,duration))}%`;const s=block.querySelector('span');if(s)s.textContent=`${fmt(g.end-g.start)}s`;}
+      });
+      (cues||[]).forEach((c,i)=>{
+        const block=panel.querySelector(`[data-timing-cue="${i}"]`);
+        if(block){block.style.left=`${pctAll(c.start,duration)}%`;block.style.width=`${Math.max(.25,pctAll(c.end,duration)-pctAll(c.start,duration))}%`;const s=block.querySelector('span');if(s)s.textContent=`${fmt(c.end-c.start)}s`;}
+      });
+    });
+  }
   function startDrag(e){
+    const playhead=e.target.closest('[data-timeline-playhead]');
+    if(playhead){
+      const canvas=playhead.closest('.timing-canvas'),body=canvas?.querySelector('.timing-scene-layer .timing-layer-body'),start=num(canvas?.dataset.windowStart,0),end=num(canvas?.dataset.windowEnd,timelineDuration()),rect=(body||canvas)?.getBoundingClientRect();
+      if(!canvas||!rect)return;
+      drag={kind:'playhead',start,end,rect,pointerId:e.pointerId,scene:sceneIndex(),el:playhead};
+      playhead.setPointerCapture?.(e.pointerId);e.preventDefault();return;
+    }
     const h=e.target.closest('.timing-handle');if(!h||h.disabled)return;
     const canvas=h.closest('.timing-canvas'),body=h.closest('.timing-layer-body'),start=num(canvas?.dataset.windowStart,0),end=num(canvas?.dataset.windowEnd,timelineDuration()),rect=(body||canvas)?.getBoundingClientRect();
     if(!canvas||!rect)return;rememberCues();
@@ -226,12 +255,16 @@
   function moveDrag(e){
     if(!drag)return;
     const raw=drag.start+clamp((e.clientX-drag.rect.left)/Math.max(1,drag.rect.width),0,1)*(drag.end-drag.start),t=snapTime(raw,40*timelineZoom);
+    if(drag.kind==='playhead'){jump(t);updatePlayheadFeedback(t);return;}
     if(drag.kind==='caption-edge')setCaptionEdge(drag.cueIndex,drag.side,t,{commit:false});
     else if(drag.kind==='scene')setSceneBoundaryAt(drag.scene,drag.side,t,{commit:false});
     if(drag.el?.isConnected)drag.el.style.left=`${pctAll(t,timelineDuration())}%`;
+    updateBoundaryFeedback();
   }
   function endDrag(){
-    if(!drag)return;const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();CutflowScene.select(idx);renderAll();
+    if(!drag)return;
+    if(drag.kind==='playhead'){const t=currentTime();drag=null;updatePlayheadFeedback(t);return;}
+    const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();CutflowScene.select(idx);renderAll();
   }
   document.addEventListener('click',handleAction);
   document.addEventListener('change',handleChange);
