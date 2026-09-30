@@ -4,6 +4,8 @@ assert(js.includes('async function undo()')&&js.includes('async function redo()'
 assert(js.includes("key==='z'")&&js.includes("key==='y'"),'keyboard shortcuts missing');
 assert(js.includes("window.CutflowHistory={begin,commit,undo,redo,reset"),'public history API missing');
 assert(js.includes("cutflow-history-updated"),'history state event missing');
+assert(js.includes('cloneFileSig')&&js.includes('snapshot:current'),'history must fingerprint media metadata while retaining shared File references for undo');
+assert(!js.includes('structuredClone(snapshot)')&&!js.includes('new File([snapshot'),'history must not duplicate media bytes per entry');
 assert(app.includes('window.CutflowHistory?.commit?.()'),'changed() must commit history');
 assert(html.includes('./history.js?v=40'),'history runtime missing from html');
 assert(!html.includes('history.css'),'retired history stylesheet returned to html');
