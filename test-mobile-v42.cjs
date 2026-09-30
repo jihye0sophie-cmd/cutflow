@@ -32,6 +32,8 @@ assert(js.includes('autoGridMirror')&&js.includes('data-auto-field="cols"')&&js.
 assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto setup silence presets missing');
 assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
 assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X (%)','x'")&&js.includes("field('Position Y (%)','y'"),'direct media transform controls missing');
+assert(js.includes('id="v42TransformPreview"')&&js.includes('setMobileTransformMode')&&js.includes('previewTransformGesture'),'mobile preview drag/pinch transform missing');
+assert(js.indexOf("section('이미지·영상 크기 / 위치',transform)")<js.indexOf("section('장면 편집',sceneActions)"),'mobile scene edit must stay last after transform controls');
 assert(js.includes("details('영상 고급 설정'")&&js.includes("field('시작 (초)','trimStart'")&&js.includes('data-media-field="mediaVolume"')&&js.includes("field('페이드 인 (초)','mediaFadeIn'"),'video advanced controls missing');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
 assert(js.includes('layoutSelect')&&js.includes('titleInput')&&js.includes('channelInput'),'template workflow missing');
@@ -93,6 +95,7 @@ assert(js.includes("'cutflow-auto-error'"),'mobile auto setup error listener mis
 assert(js.includes('data-auto-status="run"'),'mobile auto run status missing');
 assert(new RegExp('scene-ui\\.js\\?v=[^"\\x27]+').test(html),'scene bridge cache key missing');
 assert(sceneUi.includes('state:inspect')&&sceneUi.includes('update:patchScene'),'public scene media bridge missing');
+assert(sceneUi.includes('beginTransformGesture')&&sceneUi.includes('previewTransformGesture')&&sceneUi.includes('commitTransformGesture'),'mobile transform gesture bridge missing');
 assert(sceneUi.includes("window.dispatchEvent(new CustomEvent('cutflow-scene-updated'"),'scene updated event missing');
 assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'video\''),'replacement audio defaults hardening missing');
 assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
@@ -107,9 +110,12 @@ assert(styleEditor.includes('window.newCueStyle=')&&styleEditor.includes('functi
 assert(timingEditor.includes('mount(container,index)'),'v42 timing mount API missing');
 assert(timingEditor.includes('externalPanel?.isConnected'),'external timing panel visibility missing');
 assert(timingEditor.includes('timing-scene-layer')&&timingEditor.includes('timing-caption-layer'),'shared timeline layers missing');
+assert(timingEditor.includes('alignSelectedCaption')&&timingEditor.includes('alignAllCaptions'),'mobile timing must inherit selected/all narration alignment');
+assert(timingEditor.includes('const bars=420'),'mobile timing must inherit dense narration waveform');
 assert(js.includes("tab='timing'"),'mobile precision timing tab navigation missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
+assert(!js.includes('id="v42CaptionPlay"'),'retired current-caption playback button must stay removed');
 assert(js.includes('v42CaptionBatchOpen'),'mobile whole-caption editor entry missing');
 assert(new RegExp('caption-batch-editor\\.js\\?v=[^"\\x27]+').test(html),'shared whole-caption editor script missing');
 assert(new RegExp('caption-batch-editor\\.css\\?v=[^"\\x27]+').test(html),'shared whole-caption editor css missing');
