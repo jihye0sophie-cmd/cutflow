@@ -1,6 +1,6 @@
 /* Shared whole-caption editor */
 .caption-batch-dialog{
-  width:min(980px,calc(100vw - 28px));max-width:980px;max-height:min(82dvh,820px);
+  width:min(820px,calc(100vw - 40px));max-width:820px;max-height:min(82dvh,820px);
   padding:0;border:1px solid var(--studio-border,#30343b);border-radius:14px;
   background:var(--studio-bg,#0d0f12);color:#fff;
 }
@@ -13,10 +13,10 @@
 .caption-batch-row{display:grid;grid-template-columns:58px 8px minmax(0,1fr);align-items:center;gap:5px;min-height:42px;padding:5px 4px;border-bottom:1px solid #242a31;white-space:nowrap}
 .caption-batch-row>b{font-size:10px;color:#eef1f4}.caption-batch-bar,.caption-batch-divider{color:#59626d;font-size:11px}
 .caption-batch-segments{display:flex;align-items:center;gap:6px;min-width:0;overflow-x:auto;scrollbar-width:none}.caption-batch-segments::-webkit-scrollbar{display:none}
-.caption-batch-segment{flex:0 0 auto;max-width:min(520px,70vw);min-height:30px;padding:5px 8px;border:1px solid transparent;border-radius:6px;background:transparent;color:#e5e9ed;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.caption-batch-segment{flex:0 0 auto;max-width:min(420px,58vw);min-height:30px;padding:5px 8px;border:1px solid transparent;border-radius:6px;background:transparent;color:#e5e9ed;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
 button.caption-batch-segment:hover,button.caption-batch-segment:focus-visible{border-color:#47515c;background:#1a1f25}
-.caption-batch-segment.selected{min-width:180px;max-width:min(620px,76vw);padding:0;border-color:var(--studio-accent,#f5e642);background:#12161b}
-.caption-batch-segment input{width:min(620px,70vw);min-width:180px;height:32px;padding:4px 8px;border:0;outline:0;background:transparent;color:#fff;font:inherit;font-size:13px}
+.caption-batch-segment.selected{min-width:180px;max-width:min(500px,64vw);padding:0;border-color:var(--studio-accent,#f5e642);background:#12161b}
+.caption-batch-segment input{width:min(500px,58vw);min-width:180px;height:32px;padding:4px 8px;border:0;outline:0;background:transparent;color:#fff;font:inherit;font-size:13px}
 .caption-batch-actions{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--studio-border,#30343b);background:#11151af2;backdrop-filter:blur(14px)}
 .caption-batch-actions button{min-height:38px;padding:7px 8px;border:1px solid #3a424b;border-radius:8px;background:#20252b;color:#fff;font-size:11px}
 .caption-batch-actions button:disabled{opacity:.35}.caption-batch-actions .danger{color:#ffaaa9;border-color:#663a3d;background:#2b1d20}
