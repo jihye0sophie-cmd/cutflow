@@ -438,6 +438,6 @@ window.CutflowProjectBridge={
 };
 
 document.addEventListener('keydown',e=>{const active=document.activeElement,editable=!!active&&(active.isContentEditable||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(active.tagName));const saveKey=(e.ctrlKey||e.metaKey)&&!e.altKey&&String(e.key).toLowerCase()==='s';if(saveKey){e.preventDefault();window.CutflowProjects?.save?.();return;}if(editable||exporting||e.ctrlKey||e.metaKey||e.altKey)return;if(e.code==='Space'){e.preventDefault();playing?pause():play();return;}if(e.key==='ArrowLeft'){e.preventDefault();navigateCut(-1);return;}if(e.key==='ArrowRight'){e.preventDefault();navigateCut(1);}});
-window.addEventListener('beforeunload',e=>{if(scenes.length||audioBuffer||window.bgmProject?.().buffer){e.preventDefault();e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{const savedState=window.CutflowProjects?.dirty;if(savedState===true||(savedState==null&&(scenes.length||audioBuffer||window.bgmProject?.().buffer))){e.preventDefault();e.returnValue='';}});
 document.fonts.ready.then(()=>dirty=true);document.fonts.addEventListener('loadingdone',()=>dirty=true);
 renderScenes();renderCues();waveform();requestAnimationFrame(tick);
