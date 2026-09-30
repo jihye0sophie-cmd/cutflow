@@ -358,13 +358,6 @@
       <p class="v42-status" data-auto-status="run">${esc(runText)}</p>
       <div class="v42-auto-start-row"><button type="button" data-auto-start class="v42-btn primary" ${info.canStart?'':'disabled'}>쇼츠 자동 세팅 시작</button></div>`;
   }
-  function renderNarration(){
-    proxyMap.clear();
-    const status=$('audioStatus')?.textContent||'오디오 없음';
-    const source=`${proxyControl($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}${proxyControl($('projectCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-actions">${proxyButton($('scriptFileBtn'),'TXT 대본 불러오기')}${proxyButton($('audioBtn'),'내레이션 불러오기')}</div><p class="v42-status">${esc(status)}</p>${proxyButton($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}<div class="v42-silence"><strong>현재 내레이션 무음 줄이기</strong><div class="v42-pills"><label><input type="radio" name="v42Silence" value="soft"><span>부드럽게</span></label><label><input type="radio" name="v42Silence" value="normal" checked><span>보통</span></label><label><input type="radio" name="v42Silence" value="tight"><span>타이트</span></label></div><button id="v42SilenceRun" class="v42-btn wide" type="button">무음 줄이기</button><p id="v42SilenceStatus" class="v42-help">원본은 유지하고 처리본을 사용합니다.</p></div>`;
-    panel.innerHTML=section('대본 · 내레이션',source,'SCRIPT & VOICE');
-    $('v42SilenceRun').onclick=async()=>{const statusEl=$('v42SilenceStatus');try{const p=qs('input[name="v42Silence"]:checked')?.value||'normal';statusEl.textContent='무음 구간 분석 중…';const result=await window.CutflowAutoBridge?.processNarration?.(p,m=>statusEl.textContent=m);if(!result)throw new Error('무음컷을 실행하지 못했습니다.');statusEl.textContent=`완료 · ${result.originalDuration.toFixed(1)}초 → ${result.processedDuration.toFixed(1)}초`;requestRefresh(true);}catch(err){statusEl.textContent=`처리 실패: ${err.message}`;}};
-  }
   function syncSettingsProxyState(){
     if(!settingsDialog.open)return;
     for(const [k,source] of settingsProxyMap){
@@ -480,49 +473,6 @@
       settingsSection('02 COMPOSE','화면 구성',project,$('sceneCount')?.textContent||'')+
       settingsSection('03 EXPORT','완성한 쇼츠를 MP4로.',output);
     syncSettingsProxyState();
-  }
-  function renderTemplate(){
-    proxyMap.clear();
-    const compose=window.CutflowCompose?.state?.()||{},title=window.CutflowTypography?.state?.('title')||{},channel=window.CutflowTypography?.state?.('channel')||{};
-    const selectMarkup=(id,value,field)=>{const el=$(id);return `<label class="v42-field"><span>${esc(field.label)}</span><select data-compose-field="${field.key}" ${field.disabled?'disabled':''}>${[...el.options].map(o=>`<option value="${esc(o.value)}" ${o.value===value?'selected':''}>${esc(o.textContent)}</option>`).join('')}</select></label>`;};
-    const fontMarkup=(kind,state)=>{const el=$(kind+'Font');return `<label class="v42-field"><span>폰트</span><select data-typo-kind="${kind}" data-typo-field="font">${[...el.options].map(o=>`<option value="${esc(o.value)}" ${o.value===state.font?'selected':''}>${esc(o.textContent)}</option>`).join('')}</select></label>`;};
-    const typoMarkup=(kind,state)=>{
-      const yMax=kind==='channel'?94:90;
-      return `<div class="v42-grid2">${fontMarkup(kind,state)}
-        <label class="v42-field"><span>크기(px)</span><input data-typo-kind="${kind}" data-typo-field="size" type="number" min="${kind==='channel'?16:24}" max="${kind==='channel'?96:160}" step="0.1" value="${esc(state.size)}"></label>
-        <label class="v42-field"><span>색상</span><input data-typo-kind="${kind}" data-typo-field="color" type="color" value="${esc(state.color)}"></label>
-        <label class="v42-field"><span>가로 위치 ${Number(state.x||0).toFixed(0)}%</span><input data-typo-kind="${kind}" data-typo-field="x" type="range" min="5" max="95" step="1" value="${esc(state.x)}"></label>
-        <label class="v42-field"><span>세로 위치 ${Number(state.y||0).toFixed(0)}%</span><input data-typo-kind="${kind}" data-typo-field="y" type="range" min="0" max="${yMax}" step="1" value="${esc(state.y)}"></label>
-        <label class="v42-check"><input data-typo-kind="${kind}" data-typo-field="bold" type="checkbox" ${state.bold?'checked':''}><span><b>B</b> 볼드</span></label>
-        <label class="v42-check"><input data-typo-kind="${kind}" data-typo-field="italic" type="checkbox" ${state.italic?'checked':''}><span><i>I</i> 이탤릭</span></label>
-        <label class="v42-check"><input data-typo-kind="${kind}" data-typo-field="strokeEnabled" type="checkbox" ${state.strokeEnabled?'checked':''}><span>스트로크 사용</span></label>
-        <label class="v42-field"><span>스트로크 두께</span><input data-typo-kind="${kind}" data-typo-field="strokeWidth" type="range" min="0" max="18" step="0.5" value="${esc(state.strokeWidth)}" ${state.strokeEnabled?'':'disabled'}></label>
-      </div><div class="v42-typo-palette" data-typo-palette="${kind}">${Object.values(window.CaptionStyle?.palette||{}).map(c=>`<button type="button" class="v42-color" data-color="${c}" style="--v42-color:${c}" aria-label="${c}"></button>`).join('')}</div>`;
-    };
-    const basic=`${selectMarkup('layoutSelect',compose.layout,{key:'layout',label:'영상 템플릿'})}<label class="v42-field wide"><span>상단 제목</span><textarea data-compose-field="title" rows="2" maxlength="80">${esc(compose.title||'')}</textarea></label><label class="v42-field"><span>채널명</span><input data-compose-field="channel" maxlength="40" value="${esc(compose.channel||'')}"></label>${selectMarkup('fitSelect',compose.fit,{key:'fit',label:'이미지·영상 맞춤',disabled:compose.fitDisabled})}${selectMarkup('templateSelect',compose.motionPreset,{key:'motionPreset',label:'움직임 프리셋'})}<div class="v42-actions"><button type="button" id="v42ApplyMotionPreset" class="v42-btn wide">움직임만 전체 적용</button><button type="button" id="v42RandomMotion" class="v42-btn wide">전체 이미지 랜덤 무빙</button></div>`;
-    panel.innerHTML=section('화면 구성',basic)+details('제목 스타일',typoMarkup('title',title),'폰트 · 크기 · 색상 · 위치 · B · I · 스트로크',true)+details('채널명 스타일',typoMarkup('channel',channel),'폰트 · 크기 · 색상 · 위치 · B · I · 스트로크',true);
-    $('v42ApplyMotionPreset').onclick=()=>{window.CutflowCompose?.applyMotionPreset?.();requestRefresh(false);};
-    $('v42RandomMotion').onclick=()=>{window.CutflowCompose?.randomMotion?.();requestRefresh(false);};
-  }
-  function renderBgm(){
-    proxyMap.clear();
-    const api=window.CutflowBgm,state=api?.state?.()||{loaded:false,name:'',duration:0,start:0,volume:0,repeat:'stop',fadeIn:0,fadeOut:0,summary:'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.'};
-    const repeat=$('bgmRepeat');
-    const controls=`<input id="v42BgmInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac" hidden>
-      <div class="v42-actions"><button type="button" id="v42BgmAdd" class="v42-btn primary">음악 파일 추가</button><button type="button" id="v42BgmRemove" class="v42-btn danger" ${state.loaded?'':'disabled'}>음악 제거</button></div>
-      <p class="v42-status">${state.loaded?esc(state.name)+' · '+Number(state.duration).toFixed(2)+'초':'음악 없음'}</p>
-      <div class="v42-grid2">
-        <label class="v42-field"><span>음악 시작 지점</span><input data-bgm-field="start" type="number" min="0" max="${Math.max(0,(state.duration||0)-.01).toFixed(2)}" step="0.01" value="${Number(state.start||0).toFixed(2)}" ${state.loaded?'':'disabled'}></label>
-        <label class="v42-field"><span>BGM 볼륨 ${Math.round(state.volume||0)}%</span><input data-bgm-field="volume" type="range" min="0" max="100" step="1" value="${Math.round(state.volume||0)}" ${state.loaded?'':'disabled'}></label>
-        <label class="v42-field"><span>음악이 짧을 때</span><select data-bgm-field="repeat" ${state.loaded?'':'disabled'}>${repeat?[...repeat.options].map(o=>`<option value="${esc(o.value)}" ${o.value===state.repeat?'selected':''}>${esc(o.textContent)}</option>`).join(''):''}</select></label>
-        <label class="v42-field"><span>페이드 인</span><input data-bgm-field="fadeIn" type="number" min="0" max="30" step="0.1" value="${Number(state.fadeIn||0).toFixed(1)}" ${state.loaded?'':'disabled'}></label>
-        <label class="v42-field"><span>페이드 아웃</span><input data-bgm-field="fadeOut" type="number" min="0" max="30" step="0.1" value="${Number(state.fadeOut||0).toFixed(1)}" ${state.loaded?'':'disabled'}></label>
-      </div>
-      <p class="v42-help">${esc(state.summary||'')}</p>`;
-    panel.innerHTML=section('배경음악 · BGM',controls);
-    $('v42BgmAdd').onclick=()=>$('v42BgmInput').click();
-    $('v42BgmInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;const btn=$('v42BgmAdd');btn.disabled=true;btn.textContent='음악 읽는 중…';const ok=await api?.load?.(file);e.target.value='';if(!ok){btn.disabled=false;btn.textContent='음악 파일 추가';window.CutflowAutoBridge?.toast?.('음악을 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');return;}requestRefresh(true);};
-    $('v42BgmRemove').onclick=()=>{api?.remove?.();requestRefresh(true);};
   }
   function renderPanel(force=false){
     if(!force&&panel.contains(document.activeElement))return;
