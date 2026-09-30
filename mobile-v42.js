@@ -25,12 +25,12 @@
   app.id='mobileAppV42';
   app.innerHTML=`
     <header class="v42-head">
-      <div class="v42-brand"><span class="v42-brand-mark" aria-hidden="true"></span><div><strong>Cutflow</strong><small>쇼츠 컷 편집 스튜디오</small></div></div>
+      <div class="v42-brand"><div><strong>Cutflow</strong><small>쇼츠 컷 편집 스튜디오</small></div></div>
       <div class="v42-head-actions">
         <button type="button" id="v42Settings" class="v42-icon-btn" aria-label="설정" title="설정">⚙</button>
         <button type="button" data-click="projectOpenBtn">열기</button>
         <button type="button" data-click="projectSaveBtn">저장</button>
-        <button type="button" id="v42Export" class="primary">내보내기</button>
+        <button type="button" id="v42Export" class="primary">내보내기 ↗</button>
       </div>
     </header>
     <main class="v42-main">
