@@ -1,4 +1,4 @@
-/* v37 timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
+/* Timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
 (()=>{
   const q=id=>document.getElementById(id);
   let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,lastCenteredCueId=null;
@@ -170,19 +170,16 @@
   function ensureUI(){
     const dt=q('desktopTabs');if(dt&&!dt.querySelector('[data-tab="timing"]')){const b=document.createElement('button');b.type='button';b.dataset.tab='timing';b.textContent='정밀 타이밍';dt.append(b);}
     const de=q('desktopEditor');if(de&&!q('desktopTiming')){const p=document.createElement('section');p.id='desktopTiming';p.className='timing-panel';p.innerHTML='<div class="timing-track"></div><div class="timing-controls"></div>';de.insertBefore(p,q('desktopEditorScroll'));}
-    // v41.3: mobile precision timing is a subview of the Caption tab, not a sixth bottom tab.
-    const me=q('mobileEditor');if(me&&!q('mobileTiming')){const p=document.createElement('section');p.id='mobileTiming';p.className='timing-panel';p.innerHTML='<div class="timing-track"></div><div class="timing-controls"></div>';me.insertBefore(p,q('mobileEditorBody'));}
   }
   function renderPanel(panel){if(!panel)return;const item=sceneItem(),track=panel.querySelector('.timing-track'),controls=panel.querySelector('.timing-controls');renderTrack(track,item);controls.innerHTML=editorMarkup(item);}
   function renderAll(){
     ensureUI();const targets=new Set();
     if(externalPanel?.isConnected)targets.add(externalPanel);
     if(q('desktopEditor')?.dataset.mode==='timing')targets.add(q('desktopTiming'));
-    if(q('mobileEditor')?.dataset.mode==='timing')targets.add(q('mobileTiming'));
     if(!targets.size){const visible=visiblePanel();if(visible)targets.add(visible);}
     targets.forEach(renderPanel);
   }
-  function visiblePanel(){if(externalPanel?.isConnected)return externalPanel;if(q('desktopEditor')?.dataset.mode==='timing')return q('desktopTiming');if(q('mobileEditor')?.dataset.mode==='timing')return q('mobileTiming');return null;}
+  function visiblePanel(){if(externalPanel?.isConnected)return externalPanel;if(q('desktopEditor')?.dataset.mode==='timing')return q('desktopTiming');return null;}
   function selectCaption(delta){const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;const pos=item.cueIndices.indexOf(sel.index),target=item.cueIndices[clamp(pos+delta,0,item.cueIndices.length-1)],cue=cues[target];if(cue){selectedCueId=cue.id;jump(cue.start);renderAll();}}
   function handleAction(e){
     const panel=e.target.closest('.timing-panel');if(!panel)return;
