@@ -74,6 +74,6 @@
     if(mod&&key==='z'){e.preventDefault();e.stopImmediatePropagation();if(e.shiftKey)redo();else undo();return;}
     if(e.ctrlKey&&!e.metaKey&&!e.altKey&&key==='y'){e.preventDefault();e.stopImmediatePropagation();redo();return;}
   },true);
-  window.CutflowHistory={begin,commit,undo,redo,reset,get applying(){return applying},get busy(){return busy},get canUndo(){return past.length>0},get canRedo(){return future.length>0}};
+  window.CutflowHistory={begin,commit,undo,redo,reset,get canUndo(){return past.length>0},get canRedo(){return future.length>0}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update,{once:true});else queueMicrotask(update);
 })();
