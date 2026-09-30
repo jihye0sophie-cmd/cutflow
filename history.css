@@ -1,7 +1,0 @@
-/* v40 global undo/redo controls */
-.cutflow-history-button{min-width:34px!important;width:34px;padding:0!important;font-size:20px!important;line-height:1;font-weight:700;white-space:nowrap}
-.cutflow-history-button:disabled{opacity:.34;cursor:not-allowed}
-.history-v40-ready #undoCuesBtn{display:none!important}
-@media(min-width:761px){.desktop-editor .cutflow-history-button{height:34px;border:1px solid var(--studio-border);background:var(--studio-card);color:#fff;border-radius:8px}}
-
-
