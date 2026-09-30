@@ -1,0 +1,9 @@
+{
+  "name": "Cutflow · 쇼츠 컷 편집 스튜디오",
+  "short_name": "Cutflow",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12"
+}
