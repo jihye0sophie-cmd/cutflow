@@ -2140,3 +2140,42 @@ body.v42-mobile.v42-standalone #v42SettingsDialog .v42-settings-body,
 body.v42-mobile.v42-standalone #v42ExportDialog .v42-export-body{
   padding-bottom:18px!important;
 }
+
+/* v42.10.2 stable mobile fullscreen preview: modal-only, no Fullscreen API top-layer conflict */
+#v42PreviewDialog[open]{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  z-index:2147483000!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#v42PreviewDialog .v42-full-head{
+  position:relative!important;
+  z-index:20!important;
+  pointer-events:auto!important;
+}
+#v42PreviewDialog .v42-full-head button,
+#v42PreviewDialog .v42-full-play{
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+}
+#v42PreviewDialog .v42-full-stage-wrap{
+  position:relative!important;
+  z-index:1!important;
+  pointer-events:auto!important;
+}
+#v42PreviewDialog #v42FullStage{
+  pointer-events:none!important;
+}
+#v42PreviewDialog .v42-full-play{
+  z-index:30!important;
+}
