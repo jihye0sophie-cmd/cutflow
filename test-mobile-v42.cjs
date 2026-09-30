@@ -115,7 +115,7 @@ assert(app.includes('window.CutflowCompose={'),'shared compose bridge missing');
 assert(styleEditor.includes('window.CutflowTypography={'),'shared typography bridge missing');
 assert(js.includes('function applyComposeField('),'mobile compose direct bridge missing');
 assert(js.includes('function applyTypographyField('),'mobile typography direct bridge missing');
-assert(js.includes("data-typo-field=\"x\"")&&js.includes("data-typo-field=\"y\""),'mobile title/channel position controls missing');
+assert(js.includes("pc($('titleX'),'가로 위치')")&&js.includes("pc($('titleY'),'세로 위치')")&&js.includes("pc($('channelX'),'가로 위치')")&&js.includes("pc($('channelY'),'세로 위치')"),'mobile title/channel position controls missing');
 assert(js.includes('v42ApplyMotionPreset')&&js.includes('v42RandomMotion'),'mobile motion preset actions missing');
 assert(css.includes('.v42-typo-palette'),'mobile typography palette styles missing');
 assert(new RegExp('bgm-editor\\.js\\?v=[^"\\x27]+').test(html),'BGM bridge cache key missing');
