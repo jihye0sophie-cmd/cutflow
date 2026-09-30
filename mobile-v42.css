@@ -2223,3 +2223,26 @@ body.v42-preview-lock{
 #v42PreviewDialog.v42-preview-overlay #v42FullStage{
   pointer-events:none!important;
 }
+
+/* v42.10.4 keep mobile playback controls responsive during playback */
+body.v42-mobile .v42-player,
+body.v42-mobile .v42-transport,
+body.v42-mobile .v42-preview-tools{
+  pointer-events:auto!important;
+}
+body.v42-mobile .v42-transport button,
+body.v42-mobile .v42-preview-tools button,
+#v42PreviewDialog #v42FullClose,
+#v42PreviewDialog #v42FullPlay{
+  position:relative;
+  z-index:20!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-tap-highlight-color:transparent;
+}
+body.v42-mobile .v42-stage-wrap,
+body.v42-mobile .v42-stage-wrap canvas{
+  pointer-events:none!important;
+}
