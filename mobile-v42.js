@@ -71,9 +71,14 @@
       <section id="v42Panel" class="v42-panel"></section>
     </main>`;
   document.body.append(app);
-  const previewDialog=document.createElement('dialog');
+  const previewDialog=document.createElement('div');
   previewDialog.id='v42PreviewDialog';
-  previewDialog.innerHTML='<div class="v42-full-head"><strong>전체화면 미리보기</strong><button type="button" id="v42FullClose">×</button></div><div class="v42-full-stage-wrap"><canvas id="v42FullStage" width="360" height="640"></canvas><button type="button" id="v42FullPlay" class="v42-full-play" aria-label="재생/일시정지">▶</button></div>';
+  previewDialog.className='v42-preview-overlay';
+  previewDialog.hidden=true;
+  previewDialog.setAttribute('role','dialog');
+  previewDialog.setAttribute('aria-modal','true');
+  previewDialog.setAttribute('aria-label','전체화면 미리보기');
+  previewDialog.innerHTML='<div class="v42-full-head"><strong>전체화면 미리보기</strong><button type="button" id="v42FullClose" aria-label="닫기">×</button></div><div class="v42-full-stage-wrap"><canvas id="v42FullStage" width="360" height="640"></canvas><button type="button" id="v42FullPlay" class="v42-full-play" aria-label="재생/일시정지">▶</button></div>';
   document.body.append(previewDialog);
   const exportDialogV42=document.createElement('dialog');
   exportDialogV42.id='v42ExportDialog';
@@ -94,8 +99,9 @@
     document.body.classList.toggle('v42-mobile',next);
     document.body.classList.remove('mobile-editor');
     if(!next){
-      for(const dialog of [settingsDialog,previewDialog,exportDialogV42]){try{if(dialog?.open)dialog.close();}catch{}}
-      try{if(document.fullscreenElement===previewDialog)document.exitFullscreen();}catch{}
+      for(const dialog of [settingsDialog,exportDialogV42]){try{if(dialog?.open)dialog.close();}catch{}}
+      previewDialog.hidden=true;
+      previewDialog.classList.remove('v42-preview-open');
     }
     if(initial||prev===next)return;
     window.dispatchEvent(new CustomEvent(next?'cutflow-mobile-activate':'cutflow-mobile-deactivate',{detail:{responsive:!deviceMobile,width:innerWidth}}));
@@ -545,7 +551,7 @@
     const fullPlay=$('v42FullPlay');if(fullPlay)fullPlay.textContent=label;
   }
   function mirrorStage(){
-    const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(previewDialog.open){fullCtx.clearRect(0,0,fullStage.width,fullStage.height);fullCtx.drawImage(src,0,0,fullStage.width,fullStage.height);}}catch{}}
+    const src=$('stage');if(src&&ctx){try{ctx.clearRect(0,0,stage.width,stage.height);ctx.drawImage(src,0,0,stage.width,stage.height);if(!previewDialog.hidden){fullCtx.clearRect(0,0,fullStage.width,fullStage.height);fullCtx.drawImage(src,0,0,fullStage.width,fullStage.height);}}catch{}}
     requestAnimationFrame(mirrorStage);
   }
 
@@ -674,18 +680,20 @@
   $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
   $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
   function openPreviewFullscreen(){
-    if(!previewDialog.open)previewDialog.showModal();
+    previewDialog.hidden=false;
     previewDialog.classList.add('v42-preview-open');
+    document.body.classList.add('v42-preview-lock');
     syncPlayer();
+    requestAnimationFrame(()=>$('v42FullPlay')?.focus?.({preventScroll:true}));
   }
   function closePreviewFullscreen(){
     previewDialog.classList.remove('v42-preview-open');
-    if(previewDialog.open)previewDialog.close();
+    previewDialog.hidden=true;
+    document.body.classList.remove('v42-preview-lock');
   }
   $('v42Fullscreen').onclick=openPreviewFullscreen;
-  $('v42FullClose').onclick=closePreviewFullscreen;
+  $('v42FullClose').onclick=e=>{e.preventDefault();e.stopPropagation();closePreviewFullscreen();};
   $('v42FullPlay').onclick=e=>{e.preventDefault();e.stopPropagation();window.CutflowPlayer?.toggle?.();requestAnimationFrame(syncPlayer);};
-  previewDialog.addEventListener('cancel',e=>{e.preventDefault();closePreviewFullscreen();});
   $('v42Scrubber').addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
   $('v42Scrubber').addEventListener('change',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
 
