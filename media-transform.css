@@ -14,5 +14,5 @@
 #stage.media-transform-active:active{cursor:grabbing}
 .media-transform-frame{position:absolute;pointer-events:none;box-sizing:border-box;border:2px solid #26c6da;z-index:2}
 .media-transform-frame[hidden]{display:none}
-#desktopEditor:not([data-mode=image]) #mediaTransform,#mobileEditor:not([data-mode=image]) #mediaTransform{display:none}
+#desktopEditor:not([data-mode=image]) #mediaTransform{display:none}
 @media(max-width:760px){#mediaTransform button,#mediaTransform input[type=number]{min-height:44px}#transformRange{min-height:30px}.transform-fields{gap:6px}}
