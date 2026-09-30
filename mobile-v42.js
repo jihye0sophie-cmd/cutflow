@@ -83,6 +83,63 @@
 
   function revealCutflowUI(){document.body.classList.remove('cutflow-booting');document.body.classList.add('cutflow-ready');}
   const panel=$('v42Panel'),tabs=$('v42Tabs'),stage=$('v42Stage'),ctx=stage.getContext('2d'),fullStage=$('v42FullStage'),fullCtx=fullStage.getContext('2d');
+  let mobileTransformMode=false,mobileTransformScene=-1,mobileTransformGesture=null;
+  const mobileTransformPoints=new Map();
+  const mobilePoint=e=>{const r=stage.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height};};
+  const mobileTransformCenter=()=>{const pts=[...mobileTransformPoints.values()];if(!pts.length)return null;if(pts.length===1)return pts[0];return {x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2,w:pts[0].w,h:pts[0].h};};
+  const mobileTransformDistance=()=>{const pts=[...mobileTransformPoints.values()];return pts.length>1?Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y):0;};
+  function syncMobileTransformFields(state){
+    if(!state?.transform)return;
+    for(const [name,value] of Object.entries(state.transform)){
+      const input=panel.querySelector(`[data-media-field="${name}"]`);
+      if(input&&document.activeElement!==input)input.value=Number(value).toFixed(1);
+    }
+  }
+  function setMobileTransformMode(on,index=currentScene().index){
+    on=!!on;
+    if(!on){
+      if(mobileTransformGesture)window.CutflowScene?.commitTransformGesture?.(mobileTransformScene);
+      else window.CutflowScene?.cancelTransformGesture?.();
+      mobileTransformPoints.clear();mobileTransformGesture=null;mobileTransformMode=false;mobileTransformScene=-1;
+    }else{
+      window.CutflowPlayer?.pause?.();mobileTransformMode=true;mobileTransformScene=index;
+    }
+    stage.classList.toggle('v42-transform-active',mobileTransformMode);
+    const btn=$('v42TransformPreview');if(btn){btn.setAttribute('aria-pressed',String(mobileTransformMode));btn.textContent=mobileTransformMode?'조절 모드 종료':'미리보기에서 조절';}
+  }
+  function rebaseMobileTransform(){
+    if(!mobileTransformMode||mobileTransformScene<0)return;
+    const state=window.CutflowScene?.state?.(mobileTransformScene),center=mobileTransformCenter();if(!state||!center)return;
+    mobileTransformGesture={base:{...state.transform},center,distance:mobileTransformDistance()};
+  }
+  stage.addEventListener('pointerdown',e=>{
+    if(!mobileTransformMode||tab!=='media'||e.button>0||mobileTransformPoints.size>=2)return;
+    if(!mobileTransformPoints.size){
+      const started=window.CutflowScene?.beginTransformGesture?.(mobileTransformScene);if(!started){setMobileTransformMode(false);return;}
+    }
+    e.preventDefault();mobileTransformPoints.set(e.pointerId,mobilePoint(e));stage.setPointerCapture?.(e.pointerId);rebaseMobileTransform();
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(!mobileTransformMode||!mobileTransformPoints.has(e.pointerId)||!mobileTransformGesture)return;
+    e.preventDefault();mobileTransformPoints.set(e.pointerId,mobilePoint(e));
+    const current=mobileTransformCenter(),base=mobileTransformGesture;if(!current)return;
+    let scale=base.base.scale;
+    if(base.distance>0&&mobileTransformPoints.size>1)scale=Math.max(10,Math.min(500,base.base.scale*(mobileTransformDistance()/base.distance)));
+    const dx=(current.x-base.center.x)/Math.max(1,current.w)*100,dy=(current.y-base.center.y)/Math.max(1,current.h)*100;
+    const state=window.CutflowScene?.previewTransformGesture?.(mobileTransformScene,{scale,x:base.base.x+dx,y:base.base.y+dy});
+    syncMobileTransformFields(state);
+  });
+  const endMobileTransformPointer=e=>{
+    if(!mobileTransformPoints.has(e.pointerId))return;
+    mobileTransformPoints.delete(e.pointerId);
+    if(mobileTransformPoints.size)rebaseMobileTransform();
+    else{
+      const state=window.CutflowScene?.commitTransformGesture?.(mobileTransformScene);mobileTransformGesture=null;syncMobileTransformFields(state);requestRefresh(false);
+    }
+  };
+  stage.addEventListener('pointerup',endMobileTransformPointer);
+  stage.addEventListener('pointercancel',e=>{mobileTransformPoints.delete(e.pointerId);if(!mobileTransformPoints.size){window.CutflowScene?.cancelTransformGesture?.();mobileTransformGesture=null;}});
+
   const setMobileActive=(next,{initial=false}={})=>{
     next=!!next;
     const prev=!!window.CutflowUI.mobileActive;
@@ -584,7 +641,7 @@
   app.addEventListener('click',e=>{
     const click=e.target.closest('[data-click]');if(click){const source=$(click.dataset.click),fileTarget=fileTargetFor(source);if(fileTarget&&openFileTarget(fileTarget))return;source?.click();return;}
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
-    const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
+    const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);setMobileTransformMode(false);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
   });
   panel.addEventListener('input',e=>{if(e.target.dataset.bgmField&&['volume'].includes(e.target.dataset.bgmField)){applyBgmField(e.target);return;}if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
   panel.addEventListener('change',e=>{if(e.target.dataset.bgmField){applyBgmField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.composeField){applyComposeField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);setTimeout(()=>requestRefresh(false),0);return;}const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
@@ -643,7 +700,7 @@
   const endMobileGridDrag=()=>{if(!mobileGridDrag)return;window.CutflowAutoSetup?.setCut?.(mobileGridDrag.index,mobileGridDrag.axis,mobileGridDrag.cutIndex,parseFloat(mobileGridDrag.line.style[mobileGridDrag.axis==='x'?'left':'top'])||0,{commit:true});mobileGridDrag.line.classList.remove('dragging');mobileGridDrag=null;syncSettingsGridMirror();};
   $('v42SettingsBody').addEventListener('pointerup',endMobileGridDrag);
   $('v42SettingsBody').addEventListener('pointercancel',endMobileGridDrag);
-  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
+  tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);if(b.dataset.tab!=='media')setMobileTransformMode(false);tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
   $('v42AddScene').onclick=()=>$('fileInput')?.click();
   $('v42Undo').onclick=()=>window.CutflowHistory?.undo?.();
   $('v42Redo').onclick=()=>window.CutflowHistory?.redo?.();
