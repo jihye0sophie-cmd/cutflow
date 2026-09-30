@@ -1332,3 +1332,32 @@ body.v42-mobile .v42-tabs button:active{
     padding-right:8px!important;
   }
 }
+
+/* v42.8.2 mobile export button parity with desktop */
+#v42SettingsDialog .v42-pc-settings-section:last-of-type .v42-grid2{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:end!important;
+  justify-content:stretch!important;
+  gap:10px!important;
+}
+#v42SettingsDialog .v42-pc-settings-section:last-of-type .v42-btn.primary{
+  width:auto!important;
+  min-width:150px!important;
+  min-height:42px!important;
+  height:42px!important;
+  padding:7px 16px!important;
+  justify-self:end!important;
+  background:var(--v42-accent)!important;
+  border-color:var(--v42-accent)!important;
+  color:#111!important;
+  font-weight:850!important;
+  opacity:1!important;
+}
+#v42SettingsDialog .v42-pc-settings-section:last-of-type .v42-btn.primary:disabled{
+  background:rgba(245,230,66,.38)!important;
+  border-color:rgba(245,230,66,.48)!important;
+  color:rgba(17,17,17,.78)!important;
+  opacity:1!important;
+  cursor:not-allowed!important;
+}
