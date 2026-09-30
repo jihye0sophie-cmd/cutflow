@@ -380,14 +380,10 @@
     const collapsibleSettingsSection=(step,title,body)=>`<details class="v42-pc-settings-section v42-pc-settings-collapsible v42-quick-start"><summary><div><span>${esc(step)}</span><strong>${esc(title)}</strong></div><em>자동 세팅 열기</em></summary><div class="v42-pc-settings-body">${body}</div></details>`;
     let waveformSrc='';try{waveformSrc=$('waveform')?.toDataURL?.('image/png')||'';}catch{}
     const topActions=`
-      <div class="v42-settings-top-actions">
-        <button type="button" class="v42-btn" data-direct-click="projectOpenBtn">프로젝트 열기</button>
-        <button type="button" class="v42-btn" data-direct-click="addCueBtn">+ 구간 추가</button>
-        <button type="button" class="v42-btn" data-direct-click="clearBtn">불러온 컷 비우기</button>
-      </div>
-      <div class="v42-settings-source-actions">
+      <div class="v42-settings-primary-actions">
         <button type="button" class="v42-btn primary" data-direct-click="uploadBtn">이미지·영상 추가</button>
         <button type="button" class="v42-btn" data-direct-click="demoBtn">샘플로 시작</button>
+        <button type="button" class="v42-btn" data-direct-click="clearBtn">불러온 컷 비우기</button>
       </div>`;
     const source=`
       ${pc($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}
