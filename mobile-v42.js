@@ -109,7 +109,7 @@
     if(!next){
       for(const dialog of [settingsDialog,exportDialogV42]){try{if(dialog?.open)dialog.close();}catch{}}
       previewDialog.hidden=true;
-      previewDialog.classList.remove('v42-preview-open');
+      document.body.classList.remove('v42-preview-lock');
     }
     if(initial||prev===next)return;
     window.dispatchEvent(new CustomEvent(next?'cutflow-mobile-activate':'cutflow-mobile-deactivate',{detail:{responsive:!deviceMobile,width:innerWidth}}));
@@ -725,14 +725,12 @@
   function openPreviewFullscreen(){
     setSourcePreviewSize(1080,1920);
     previewDialog.hidden=false;
-    previewDialog.classList.add('v42-preview-open');
     document.body.classList.add('v42-preview-lock');
     syncPlayer();
     requestAnimationFrame(()=>$('v42FullPlay')?.focus?.({preventScroll:true}));
   }
   function closePreviewFullscreen(){
     window.CutflowPlayer?.pause?.();
-    previewDialog.classList.remove('v42-preview-open');
     previewDialog.hidden=true;
     document.body.classList.remove('v42-preview-lock');
     setSourcePreviewSize(window.CutflowUI?.mobileActive?540:1080,window.CutflowUI?.mobileActive?960:1920);
