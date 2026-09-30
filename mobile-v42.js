@@ -105,7 +105,6 @@
     window.CutflowUI.mobileActive=next;
     window.CutflowUI.mode=next?'mobile':'desktop';
     document.body.classList.toggle('v42-mobile',next);
-    document.body.classList.remove('mobile-editor');
     if(!next){
       for(const dialog of [settingsDialog,exportDialogV42]){try{if(dialog?.open)dialog.close();}catch{}}
       previewDialog.hidden=true;
