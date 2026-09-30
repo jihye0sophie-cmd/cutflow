@@ -88,8 +88,6 @@
     const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;
     rememberCues();setCaptionEdge(sel.index,side,value,{commit:false});changed();renderCues();window.CutflowScene.select(sceneForCueIndex(sel.index));renderAll();
   };
-  function waveform(canvas,start,end){
-    if(!canvas)return;const r=canvas.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}const ctx=canvas.getContext('2d');ctx.clearRect(0,0,w,h);ctx.fillStyle='#20262d';ctx.fillRect(0,0,w,h);if(!audioBuffer){ctx.fillStyle='#69727e';ctx.font=`${12*dpr}px sans-serif`;ctx.fillText('내레이션 없음',12*dpr,h/2);return;}const data=audioBuffer.getChannelData(0),sr=audioBuffer.sampleRate,duration=end-start;ctx.strokeStyle='#8f9aa7';ctx.lineWidth=Math.max(1,dpr);ctx.beginPath();const columns=Math.max(1,Math.floor(w));for(let x=0;x<columns;x++){const t0=start+(x/columns)*duration,t1=start+((x+1)/columns)*duration,a=Math.max(0,Math.floor(t0*sr)),b=Math.min(data.length,Math.max(a+1,Math.ceil(t1*sr)));let peak=0;const step=Math.max(1,Math.floor((b-a)/8));for(let j=a;j<b;j+=step)peak=Math.max(peak,Math.abs(data[j]||0));const y=peak*h*.44;ctx.moveTo(x,h/2-y);ctx.lineTo(x,h/2+y);}ctx.stroke();}
   const timelineRanges=()=>{
     const list=sceneItems();if(cues?.length)return list;
     let cursor=0;return list.map((item,i)=>{const duration=Math.max(.1,num(item?.duration,window.CutflowScene?.state?.(i)?.duration||.1)),start=cursor,end=cursor+duration;cursor=end;return {...item,start,end,duration};});
