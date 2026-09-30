@@ -268,3 +268,67 @@
   padding-left:16px!important;
   padding-right:16px!important;
 }
+
+/* v42.8 desktop title/channel style layout mirrors mobile */
+@media(min-width:761px){
+  .desktop-editor #desktopProject #titleStylePanel .text-style-grid,
+  .desktop-editor #desktopProject #channelStylePanel .text-style-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.7fr) minmax(130px,.8fr)!important;
+    gap:12px 14px!important;
+    align-items:end;
+  }
+
+  /* Font + size share the first row, with the font selector wider. */
+  .desktop-editor #desktopProject #titleStylePanel .text-style-grid>label.style-full:first-child,
+  .desktop-editor #desktopProject #channelStylePanel .text-style-grid>label.style-full:first-child{
+    grid-column:1!important;
+    min-width:0;
+  }
+  .desktop-editor #desktopProject #titleStylePanel .text-style-grid>label:nth-child(2),
+  .desktop-editor #desktopProject #channelStylePanel .text-style-grid>label:nth-child(2){
+    grid-column:2!important;
+    min-width:0;
+  }
+
+  /* Color occupies a clean full-width row, like mobile. */
+  .desktop-editor #desktopProject #titleStylePanel .text-style-grid>div:nth-child(3),
+  .desktop-editor #desktopProject #channelStylePanel .text-style-grid>div:nth-child(3){
+    grid-column:1/-1!important;
+    display:grid;
+    grid-template-columns:auto 1fr minmax(150px,.72fr);
+    align-items:center;
+    gap:10px;
+  }
+  .desktop-editor #desktopProject #titleStylePanel .text-style-grid>div:nth-child(3)>label,
+  .desktop-editor #desktopProject #channelStylePanel .text-style-grid>div:nth-child(3)>label{
+    margin:0;
+    white-space:nowrap;
+  }
+  .desktop-editor #desktopProject #titleStylePanel .text-style-grid>div:nth-child(3)>.compact-palette,
+  .desktop-editor #desktopProject #channelStylePanel .text-style-grid>div:nth-child(3)>.compact-palette{
+    margin:0;
+    align-items:center;
+  }
+  .desktop-editor #desktopProject #titleStylePanel .text-style-grid>div:nth-child(3)>input[type=color],
+  .desktop-editor #desktopProject #channelStylePanel .text-style-grid>div:nth-child(3)>input[type=color]{
+    width:100%;
+    min-width:0;
+  }
+
+  /* Position controls remain paired, everything else keeps its current behavior. */
+  .desktop-editor #desktopProject #titleStylePanel .style-checks,
+  .desktop-editor #desktopProject #channelStylePanel .style-checks,
+  .desktop-editor #desktopProject #titleStylePanel .title-selection-tools,
+  .desktop-editor #desktopProject #titleStylePanel .text-stroke-controls,
+  .desktop-editor #desktopProject #channelStylePanel .text-stroke-controls{
+    grid-column:1/-1!important;
+  }
+
+  .desktop-editor #desktopProject #titleStylePanel,
+  .desktop-editor #desktopProject #channelStylePanel{
+    background:#20242a!important;
+    border-color:#373d45!important;
+    border-radius:10px!important;
+  }
+}
