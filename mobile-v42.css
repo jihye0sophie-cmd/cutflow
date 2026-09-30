@@ -420,8 +420,6 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 }#v42SettingsDialog .v42-grid2{
   gap:8px;
 }
-@media(max-width:390px){
-}
 
 
 /* v42.6.7 compact icon-only mobile edit dock */
