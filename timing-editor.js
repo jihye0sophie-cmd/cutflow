@@ -70,33 +70,34 @@
     if(commit){changed();renderCues();window.CutflowScene.select(Math.max(0,si));}
     return true;
   };
-  const redistribute=()=>{
-    const items=sceneItems(),si=sceneIndex(),item=items[si];if(!item?.cueIndices?.length)return;
-    rememberCues();
-    const prev=items[si-1],next=items[si+1],audioEnd=num(audioBuffer?.duration,timelineDuration());
-    let start=item.start,end=item.end,snapped=0;
-    if(si>0){
-      const hit=nearestNarrationBoundary(start,prev.start+.1,end-.1);
-      if(hit!=null){setSceneBoundaryAt(si,'start',hit,{commit:false});start=hit;snapped++;}
-    }
-    const refreshed=sceneItems()[si]||item;
-    end=refreshed.end;start=refreshed.start;
-    if(si<items.length-1){
-      const hit=nearestNarrationBoundary(end,start+.1,next.end-.1);
-      if(hit!=null){setSceneBoundaryAt(si,'end',hit,{commit:false});end=hit;snapped++;}
-    }else if(audioEnd>start+.1){
-      const hit=nearestNarrationBoundary(end,start+.1,audioEnd,.9);
-      if(hit!=null){setSceneBoundaryAt(si,'end',hit,{commit:false});end=hit;snapped++;}
-    }
-    const current=sceneItems()[si]||item,list=current.cueIndices.map(i=>cues[i]).filter(Boolean);
-    const aligned=window.CutflowTimingAlign?.alignTexts?.(list.map(c=>c.text||''),current.start,current.end,window.CutflowTimingData?.candidates||[]);
-    if(list.length>1&&aligned?.boundaries?.length===list.length+1){
-      list.forEach((cue,k)=>{cue.start=aligned.boundaries[k];cue.end=aligned.boundaries[k+1];});
-    }
-    updateOffsets(current);changed();renderCues();window.CutflowScene.select(si);renderAll();
-    const matched=(aligned?.pauseHits||0)+(aligned?.valleyHits||0)+snapped;
-    toast(matched?`장면 ${si+1}을 내레이션 발화와 쉼 ${matched}곳에 맞췄습니다.`:`장면 ${si+1} 주변에서 가까운 쉼을 찾지 못해 현재 경계를 유지했습니다.`);
+  const alignSelectedCaption=()=>{
+    const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel||!audioBuffer)return;
+    const cue=cues[sel.index],items=sceneItems(),si=items.indexOf(item),pos=item.cueIndices.indexOf(sel.index),prevIndex=item.cueIndices[pos-1],nextIndex=item.cueIndices[pos+1];
+    rememberCues();let snapped=0;
+    const startMin=prevIndex!=null?cues[prevIndex].start+.08:si>0?items[si-1].start+.1:0;
+    const startMax=Math.max(startMin,cue.end-.08),startHit=nearestNarrationBoundary(cue.start,startMin,startMax,.8);
+    if(startHit!=null){setCaptionEdge(sel.index,'start',startHit,{commit:false});snapped++;}
+    const live=cues[sel.index],endMin=live.start+.08;
+    const endMax=nextIndex!=null?cues[nextIndex].end-.08:si<items.length-1?items[si+1].end-.1:num(audioBuffer?.duration,timelineDuration());
+    const endHit=nearestNarrationBoundary(live.end,endMin,Math.max(endMin,endMax),.8);
+    if(endHit!=null){setCaptionEdge(sel.index,'end',endHit,{commit:false});snapped++;}
+    const currentItem=sceneItems().find(g=>g?.cueIndices?.includes(sel.index));if(currentItem)updateOffsets(currentItem);
+    changed();renderCues();window.CutflowScene.select(Math.max(0,sceneForCueIndex(sel.index)));renderAll();
+    toast(snapped?`선택 자막을 내레이션 쉼 ${snapped}곳에 맞췄습니다.`:'선택 자막 주변에서 가까운 쉼을 찾지 못해 현재 시간을 유지했습니다.');
   };
+  const alignAllCaptions=()=>{
+    if(!audioBuffer||!cues?.length)return;
+    rememberCues();
+    const start=Math.max(0,num(cues[0]?.start,0)),end=Math.max(start+.1,num(audioBuffer.duration,timelineDuration()));
+    const aligned=window.CutflowTimingAlign?.alignTexts?.(cues.map(c=>c.text||''),start,end,window.CutflowTimingData?.candidates||[]);
+    if(!aligned?.boundaries||aligned.boundaries.length!==cues.length+1){toast('전체 자막을 내레이션에 맞추지 못했습니다.');return;}
+    cues.forEach((cue,i)=>{cue.start=aligned.boundaries[i];cue.end=aligned.boundaries[i+1];});
+    for(const group of sceneItems())updateOffsets(group);
+    changed();renderCues();window.CutflowScene.select(Math.min(sceneIndex(),Math.max(0,sceneItems().length-1)));renderAll();
+    const matched=(aligned.pauseHits||0)+(aligned.valleyHits||0),fallback=aligned.fallbackCount||0;
+    toast(matched?`전체 자막을 내레이션 쉼 ${matched}곳에 맞췄습니다.${fallback?` ${fallback}곳은 문장 길이 기준으로 보정했습니다.`:''}`:'전체 자막을 문장 길이 기준으로 다시 배분했습니다.');
+  };
+  const redistribute=alignSelectedCaption;
   const changeSelectedTime=(side,value)=>{
     const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;
     rememberCues();setCaptionEdge(sel.index,side,value,{commit:false});changed();renderCues();window.CutflowScene.select(sceneForCueIndex(sel.index));renderAll();
@@ -137,12 +138,12 @@
   function waveformMarkup(duration){
     const analysis=window.CutflowTimingData,rms=analysis?.rms,peak=Math.max(.000001,num(analysis?.peak,0));
     if(!rms?.length||!audioBuffer)return '<span class="timing-waveform-empty">내레이션 없음</span>';
-    const bars=180,out=[],len=rms.length;
+    const bars=420,out=[],len=rms.length;
     for(let i=0;i<bars;i++){
       const from=Math.floor(i*len/bars),to=Math.max(from+1,Math.floor((i+1)*len/bars));let amp=0;
       for(let j=from;j<to;j++)amp=Math.max(amp,num(rms[j],0));
-      const h=Math.max(2,Math.min(92,amp/peak*92));
-      out.push(`<i style="left:${i/bars*100}%;height:${h}%"></i>`);
+      const level=clamp(amp/peak,0,1),h=level<.018?0:Math.min(94,1+Math.pow(level,.88)*93);
+      out.push(`<i style="left:${i/bars*100}%;height:${h}%;opacity:${Math.max(.18,Math.min(.96,.28+level*.72))}"></i>`);
     }
     return `<div class="timing-waveform-bars" aria-hidden="true">${out.join('')}</div>`;
   }
@@ -206,7 +207,7 @@
   function editorMarkup(item){
     if(!item)return '<p class="timing-empty">타이밍을 조정할 장면을 선택해 주세요.</p>';
     const sel=cueForSelection(item),cue=sel?.cue,pos=sel?item.cueIndices.indexOf(sel.index):-1,count=item.cueIndices.length;
-    return `<div class="timing-head"><div><span>TIMING</span><h3>장면 ${sceneIndex()+1}</h3><small>${fmt(item.start)}–${fmt(item.end)}초 · ${fmt(item.end-item.start)}초</small></div><div class="timing-head-actions"><button type="button" data-timing-action="redistribute">✨ 내레이션에 맞춤</button></div></div><div class="timing-grid timeline-selection-grid"><section><h4>선택 장면</h4><div class="timing-fields"><label>시작 (초)<input type="number" step="0.01" data-timing-scene="start" value="${fmt(item.start)}" ${sceneIndex()===0?'readonly':''}></label><label>종료 (초)<input type="number" step="0.01" data-timing-scene="end" value="${fmt(item.end)}"></label><label>길이 (초)<input type="number" min="0.1" step="0.01" data-timing-scene-duration value="${fmt(item.end-item.start)}"></label></div><p>장면 경계를 움직이면 인접 장면과 내부 자막 길이가 함께 맞춰집니다.</p></section><section><h4>선택 자막 ${count?`${pos+1}/${count}`:''}</h4>${cue?`<div class="timing-caption-text">${esc(cue.text||'(무자막 구간)')}</div><div class="timing-fields"><label>시작 (초)<input type="number" step="0.01" data-timing-caption="start" value="${fmt(cue.start)}"></label><label>종료 (초)<input type="number" step="0.01" data-timing-caption="end" value="${fmt(cue.end)}"></label></div>`:'<p>자막이 없습니다.</p>'}</section></div>`;
+    return `<div class="timing-head"><div><span>TIMING</span><h3>장면 ${sceneIndex()+1}</h3><small>${fmt(item.start)}–${fmt(item.end)}초 · ${fmt(item.end-item.start)}초</small></div><div class="timing-head-actions"><button type="button" data-timing-action="align-selected">✨ 선택 자막 맞춤</button><button type="button" data-timing-action="align-all">전체 맞춤</button></div></div><div class="timing-grid timeline-selection-grid"><section><h4>선택 장면</h4><div class="timing-fields"><label>시작 (초)<input type="number" step="0.01" data-timing-scene="start" value="${fmt(item.start)}" ${sceneIndex()===0?'readonly':''}></label><label>종료 (초)<input type="number" step="0.01" data-timing-scene="end" value="${fmt(item.end)}"></label><label>길이 (초)<input type="number" min="0.1" step="0.01" data-timing-scene-duration value="${fmt(item.end-item.start)}"></label></div><p>장면 경계를 움직이면 인접 장면과 내부 자막 길이가 함께 맞춰집니다.</p></section><section><h4>선택 자막 ${count?`${pos+1}/${count}`:''}</h4>${cue?`<div class="timing-caption-text">${esc(cue.text||'(무자막 구간)')}</div><div class="timing-fields"><label>시작 (초)<input type="number" step="0.01" data-timing-caption="start" value="${fmt(cue.start)}"></label><label>종료 (초)<input type="number" step="0.01" data-timing-caption="end" value="${fmt(cue.end)}"></label></div>`:'<p>자막이 없습니다.</p>'}</section></div>`;
   }
   function ensureUI(){
     const dt=q('desktopTabs');if(dt&&!dt.querySelector('[data-tab="timing"]')){const b=document.createElement('button');b.type='button';b.dataset.tab='timing';b.textContent='정밀 타이밍';dt.append(b);}
@@ -239,7 +240,8 @@
       else if(action==='zoom-out'){timelineZoom=clamp(timelineZoom-.25,.5,3);pendingCenter=true;renderAll();}
       else if(action==='zoom-in'){timelineZoom=clamp(timelineZoom+.25,.5,3);pendingCenter=true;renderAll();}
       else if(action==='snap'){snapEnabled=!!e.target.checked;renderAll();}
-      else if(action==='redistribute')redistribute();
+      else if(action==='align-selected')alignSelectedCaption();
+      else if(action==='align-all')alignAllCaptions();
       return;
     }
     const canvas=e.target.closest('[data-timeline-seek]');
@@ -335,7 +337,7 @@
     selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);renderAll();return true;
   }
   window.CutflowTiming={
-    render:renderAll,setSceneBoundary,setCaptionBoundary,redistribute,
+    render:renderAll,setSceneBoundary,setCaptionBoundary,redistribute,alignSelectedCaption,alignAllCaptions,
     selectCue(index){return selectTimelineCaption(index);},
     mount(container,index){
       if(!container)return false;externalPanel=container;container.classList.add('timing-panel','v42-timing-panel');container.style.display='block';
