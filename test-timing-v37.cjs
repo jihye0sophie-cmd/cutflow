@@ -5,9 +5,9 @@ assert.ok(js.includes('timing-scene-layer'),'full scene layer missing');
 assert.ok(js.includes('timing-caption-layer'),'full caption layer missing');
 assert.ok(js.includes('data-timeline-scene'),'scene selection blocks missing');
 assert.ok(js.includes("data-timing-action=\"zoom-in\"")&&js.includes("data-timing-action=\"zoom-out\""),'timeline zoom controls missing');
-assert.ok(js.includes('내레이션에 맞춤'));
+assert.ok(js.includes('선택 자막 맞춤')&&js.includes('전체 맞춤'),'selected/all narration alignment controls missing');
 assert.ok(js.includes('timing-waveform-layer')&&js.includes('window.CutflowTimingData')&&js.includes('timing-waveform-bars'),'narration waveform missing');
-assert.ok(js.includes('nearestNarrationBoundary')&&js.includes("setSceneBoundaryAt(si,'start'")&&js.includes("setSceneBoundaryAt(si,'end'"),'scene-aware narration alignment missing');
+assert.ok(js.includes('nearestNarrationBoundary')&&js.includes('alignSelectedCaption')&&js.includes('alignAllCaptions'),'selected/all narration alignment logic missing');
 assert.ok(!js.includes('data-timing-action="play-caption"'),'broken selected-caption playback control must stay removed');
 assert.ok(js.includes("b.dataset.tab='timing'"));
 
@@ -21,7 +21,7 @@ assert.ok(!js.includes('timing-narration-layer')&&!js.includes('timing-videoaudi
 assert.ok(js.includes('data-timing-action="prev-scene"')&&js.includes('data-timing-action="next-scene"'),'previous/next scene timing controls missing');
 assert.ok(css.includes('.timeline-caption-edge'),'caption edge handle styles missing');
 assert.ok(css.includes('.timeline-scene-handle'),'scene boundary handle styles missing');
-assert.ok(css.includes('.timing-waveform-bars'),'narration waveform styles missing');
+assert.ok(css.includes('.timing-waveform-bars')&&js.includes('const bars=420'),'dense narration waveform missing');
 assert.ok(!css.includes('.timeline-audio-block'),'retired audio layer styles should be removed');
 
 assert.ok(!js.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'playback must not rebuild the timing DOM');
