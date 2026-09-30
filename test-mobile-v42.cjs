@@ -165,10 +165,10 @@ assert(autoSetup.includes("else window.CutflowBgm?.remove?.()"),'final audit: st
 assert(js.includes('v42PrevScene')&&js.includes('v42NextScene'),'final audit: scene navigation missing');
 assert(js.includes('id="v42SceneStrip"')&&!js.includes('data-scene-grid'),'final audit: horizontal scene strip should replace all-scenes selection');
 assert(new RegExp('auto-setup\\.js\\?v=[^"\\x27]+').test(html),'final audit: auto setup cache key missing');
-assert(js.includes('v42-settings-utility'),'desktop-like compact settings utility missing');
+assert(js.includes('v42-settings-primary-actions'),'desktop-like compact settings utility missing');
 assert(js.includes('v42-pc-settings-section'),'desktop-like settings section structure missing');
 assert(css.includes('#v42SettingsDialog .v42-btn:disabled'),'readable disabled settings buttons missing');
-assert(css.includes('.v42-settings-utility-group'),'compact settings toolbar styling missing');
+assert(css.includes('.v42-settings-primary-actions'),'compact settings toolbar styling missing');
 assert(js.includes('collapsibleSettingsSection'),'collapsible mobile settings helper missing');
 assert(js.includes("collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅'"),'auto setup must be collapsed by default');
 const projectPos=js.indexOf('quickActions+');
