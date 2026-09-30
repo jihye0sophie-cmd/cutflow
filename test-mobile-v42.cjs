@@ -189,9 +189,7 @@ assert(js.includes('id="v42PrevScene" aria-label="이전 장면"')&&js.includes(
 assert(js.includes('syncPreviewHistory'),'preview history state sync missing');
 assert(!js.includes('<span>HISTORY</span><button'),'history must be removed from settings utility');
 assert(css.includes('.v42-preview-tools'),'compact preview tool cluster missing');
-assert(css.includes('height:min(24dvh,220px)!important'),'compact preview height missing');
-assert(css.includes('flex:0 0 44px!important'),'compact scene thumbnail size missing');
-assert(css.includes('flex:0 0 36px!important'),'ultra-compact scene thumbnail size missing');
+assert(css.includes('height:clamp(250px,38dvh,360px)!important'),'canonical preview height missing');
 assert(css.includes('margin-top:4px!important'),'compact scene card spacing missing');
 assert(js.includes('data-tab="caption"')&&js.includes('data-tab="media"')&&js.includes('data-tab="timing"'),'three mobile editor tabs missing');
 assert(!js.includes('data-tab="narration"')&&!js.includes('data-tab="template"')&&!js.includes('data-tab="bgm"'),'legacy five-tab mobile navigation must be removed');
