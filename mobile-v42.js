@@ -398,13 +398,13 @@
     const source=`
       ${pc($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}
       ${pc($('projectCaptionWrap'),'자막 보기 좋게 자동 줄바꿈')}
-      <div class="v42-settings-file-row">${pb($('scriptFileBtn'),'TXT 대본 불러오기',{wide:true})}</div>
+      <div class="v42-settings-file-row v42-left-file-action">${pb($('scriptFileBtn'),'TXT 대본 불러오기')}</div>
       <div class="v42-settings-file-row">${pb($('audioBtn'),'내레이션 오디오 불러오기',{wide:true})}</div>
       ${waveformSrc?`<div class="v42-settings-waveform"><img src="${waveformSrc}" alt="내레이션 파형"></div>`:''}
       ${pb($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}
       <p class="v42-help">내레이션을 사용할 때는 대본 분량과 음성의 무음 구간으로 시간을 추정합니다. 내레이션이 없다면 장면을 추가하고 자막과 장면 길이를 직접 입력할 수 있습니다.</p>`;
     const bgm=`
-      <div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div>
+      <div class="v42-actions v42-compact-actions v42-bgm-actions">${pb($('bgmBtn'),'음악 파일 추가')}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div>
       <div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점 (초)')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인 (초)')}${pc($('bgmFadeOut'),'페이드 아웃 (초)')}</div>
       <p class="v42-help">${esc($('bgmSummary')?.textContent||'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.')}</p>`;
     const stylePalette=(target)=>Object.values(window.CaptionStyle?.palette||{white:'#ffffff',yellow:'#f5e642',lime:'#c9ff57',sky:'#8ed1f5',red:'#e95a55',orange:'#ee9b45'}).map(c=>`<button type="button" data-settings-color-target="${target}" data-color="${c}" style="--swatch:${c}" aria-label="${c}"></button>`).join('');
@@ -417,7 +417,7 @@
         <div class="full v42-inline-checks">${pc($('titleBold'),'볼드')}${pc($('titleItalic'),'이탤릭')}</div>
         <div class="full v42-selection-style">
           <strong>선택 글자색</strong>
-          <div class="v42-selection-row"><div class="v42-settings-palette">${stylePalette('titleSelectionColor')}</div>${pc($('titleSelectionColor'),'직접 선택')}${pb($('titleSelectionApply'),'선택 글자에 적용')}${pb($('titleSelectionReset'),'선택 색상 해제')}</div>
+          <div class="v42-selection-row"><div class="v42-settings-palette">${stylePalette('titleSelectionColor')}</div>${pc($('titleSelectionColor'),'직접 선택')}${pb($('titleSelectionReset'),'해제')}</div>
           <small>제목에서 글자를 드래그한 뒤 적용하세요.</small>
         </div>
         <div class="full v42-stroke-row">${pc($('titleStrokeEnabled'),'스트로크 사용')}${pc($('titleStrokeWidth'),'두께')}</div>
@@ -443,11 +443,11 @@
       <details class="v42-settings-details v42-pc-style-card" open><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>
       ${pc($('fitSelect'),'이미지·영상 맞춤')}
       ${pc($('templateSelect'),'움직임 프리셋')}
-      <div class="v42-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>
+      <div class="v42-actions v42-compact-actions v42-motion-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>
       <p class="v42-help">랜덤 무빙은 이미지에만 적용하며 영상의 움직임은 유지합니다.</p>
       <div class="v42-settings-stats"><span>출력 시간 <strong>${esc($('totalDuration')?.textContent||'0.0초')}</strong></span><span>반복 움직임 <strong>${esc($('repeatCount')?.textContent||'없음')}</strong></span></div>
       <p class="v42-help">${esc($('timingNotice')?.textContent||'')}</p>
-      ${pb($('fitCutsBtn'),'자막 순서대로 컷 다시 연결',{wide:true})}`;
+      <div class="v42-fitcuts-action">${pb($('fitCutsBtn'),'자막 순서대로 컷 다시 연결')}</div>`;
     const output=`
       <p class="v42-export-copy">제목·자막·이미지·영상 컷·영상 원음·내레이션·BGM을 하나의 영상으로 저장합니다. 첫 저장 시 약 32MB의 인코더를 내려받습니다. 파일은 외부로 전송하지 않습니다.</p>
       <div class="v42-grid2">${pc($('resolutionSelect'),'출력 해상도')}${pb($('exportBtn'),'MP4 영상 저장',{primary:true,wide:true})}</div>`;
@@ -623,7 +623,7 @@
   },true);
   $('v42SettingsBody').addEventListener('click',e=>{
     const settingsColor=e.target.closest('[data-settings-color-target][data-color]');
-    if(settingsColor){const source=$(settingsColor.dataset.settingsColorTarget);if(source){source.value=settingsColor.dataset.color;dispatch(source,'input');dispatch(source,'change');syncSettingsProxyState();}return;}
+    if(settingsColor){const targetId=settingsColor.dataset.settingsColorTarget,source=$(targetId);if(source){source.value=settingsColor.dataset.color;dispatch(source,'input');dispatch(source,'change');if(targetId==='titleSelectionColor')$('titleSelectionApply')?.click();syncSettingsProxyState();}return;}
     const history=e.target.closest('[data-cutflow-history]');
     if(history){window.CutflowHistory?.[history.dataset.cutflowHistory]?.();setTimeout(syncSettingsProxyState,0);return;}
     const autoStart=e.target.closest('[data-auto-start]');
