@@ -2,7 +2,7 @@
 @media(min-width:761px){
  body.desktop-editor{--ink:#fff;--paper:var(--studio-card);--muted:var(--studio-muted);--line:var(--studio-border);--lime:var(--studio-accent);background:var(--studio-bg);color:#fff;color-scheme:dark;font-size:14px}
  .desktop-editor *{box-sizing:border-box}.desktop-editor [hidden]{display:none!important}.desktop-editor .desktop-only{display:block}
- .desktop-editor .topbar{height:72px;min-height:72px;position:static;padding:12px 24px;border-color:var(--studio-border);background:var(--studio-bg);gap:16px}.desktop-editor .brand strong{font-size:28px}.desktop-editor .brand span{color:var(--studio-muted)}.desktop-editor .brand-mark,.desktop-editor .save-state{display:none}
+ .desktop-editor .topbar{height:72px;min-height:72px;position:static;padding:12px 24px;border-color:var(--studio-border);background:var(--studio-bg);gap:16px}.desktop-editor .brand span{color:var(--studio-muted)}.desktop-editor .brand-mark,.desktop-editor .save-state{display:none}
  .desktop-editor .desktop-header-actions{display:flex;margin-left:auto;gap:12px;align-items:center}.desktop-editor #desktopExport{background:var(--studio-accent);color:#111;font-weight:700;border-color:var(--studio-accent)}
  .desktop-editor button,.desktop-editor input,.desktop-editor textarea,.desktop-editor select{font:inherit;font-size:14px;min-width:0;max-width:100%;border:1px solid var(--studio-border);border-radius:7px;background-color:var(--studio-input);color:#fff;padding:8px 10px}.desktop-editor button{min-height:36px;cursor:pointer}.desktop-editor button:disabled{opacity:.4;cursor:default}.desktop-editor input[type=range]{padding:0;accent-color:var(--studio-accent);border:0}.desktop-editor input[type=checkbox]{accent-color:var(--studio-accent);width:18px;height:18px}.desktop-editor input[type=color]{padding:2px;min-height:36px}.desktop-editor label{font-size:14px;color:var(--studio-muted)}
  .desktop-editor .app-shell{width:100%;max-width:1800px;padding:0 20px 16px;margin:0 auto}.desktop-editor .app-shell>.workspace,.desktop-editor .app-shell>.preview-note{display:none}
@@ -117,7 +117,7 @@
  .desktop-editor #desktopSettings{width:36px;min-width:36px;padding:0;font-size:16px}
  .desktop-editor #desktopSave{font-weight:700}
  .desktop-editor #desktopExport{padding-inline:14px}
- #desktopStudio{height:calc(100dvh - 74px)}
+ 
  .desktop-editor #captionStylePanel>summary{display:flex;align-items:center;justify-content:space-between;pointer-events:auto;cursor:pointer;padding:10px 0;margin:0;font-size:14px}
  .desktop-editor #captionStylePanel>summary:after{content:'상세 설정 ▾';font-size:11px;font-weight:500;color:var(--studio-muted)}
  .desktop-editor #captionStylePanel[open]>summary:after{content:'상세 설정 ▴'}
@@ -163,7 +163,7 @@
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-motion{display:block!important;grid-column:1;order:2}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-transition{display:block!important;grid-column:2;order:3}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.media-advanced{display:block!important;grid-column:1/-1;order:4}
-  #desktopEditor[data-mode=image] .cue-row.desktop-selected>.scene-media-duration{grid-column:1/-1;order:5}
+  
 
   /* Scene edit comes after the primary media controls. */
   #desktopSceneActions{margin-top:12px;margin-bottom:12px}
@@ -242,11 +242,7 @@
   gap:10px;
   width:100%;
 }
-.desktop-editor #desktopProject .hero-actions .button,
-.desktop-editor #desktopProject .hero-actions #clearBtn{
-  width:100%;
-  min-width:0;
-}
+
 
 /* compact left-aligned project actions */
 .desktop-editor #desktopProject .hero-actions{
