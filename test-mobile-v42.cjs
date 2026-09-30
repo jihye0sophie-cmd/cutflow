@@ -163,6 +163,7 @@ assert(js.includes('id="v42Play"'),'direct mobile play button missing');
 assert(js.includes('v42ExportDialog'),'mobile export dialog missing');
 assert(js.includes('navigator.canShare?.({files:[file]})'),'iPhone file share fallback missing');
 assert(js.includes('function openPreviewFullscreen()')&&js.includes("previewDialog.hidden=false")&&js.includes("classList.add('v42-preview-lock')"),'fullscreen preview overlay missing');
+assert(js.includes('suppressMobileClickUntil=performance.now()+550'),'fullscreen close click-through guard missing');
 assert(js.includes('CutflowPlayer?.seekProgress'),'direct mobile scrubber bridge missing');
 assert(css.includes('#v42ExportDialog'),'mobile export dialog styling missing');
 assert(js.includes("uploadBtn:'fileInput'"),'final audit: image/video input bridge missing');
@@ -237,6 +238,8 @@ assert(timingEditor.includes('data-caption-edge="start"')&&timingEditor.includes
 assert(timingEditor.includes('data-scene-boundary'),'timeline v43 scene handles missing');
 assert(!timingEditor.includes('timing-narration-layer')&&!timingEditor.includes('timing-videoaudio-layer')&&!timingEditor.includes('timing-bgm-layer'),'precision timing should omit non-editable audio layers');
 assert(timingEditor.includes('pendingCenter')&&timingEditor.includes('timelineScrollLeft')&&timingEditor.includes('snapTime('),'timeline v43 UX features missing');
+assert(timingEditor.includes("panel.closest('.v42-panel')")&&timingEditor.includes('verticalOwner.scrollTop=verticalScroll'),'mobile timing vertical scroll preservation missing');
+assert(js.includes("if(tab==='timing'){renderSceneStrip();syncPlayer();") ,'mobile timing updates must not remount the whole panel');
 assert(!timingEditor.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'timeline v43.1 playback stability missing');
 assert(timingEditor.includes("h.closest('.timing-layer-body')"),'timeline v43.1 inset drag geometry missing');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
