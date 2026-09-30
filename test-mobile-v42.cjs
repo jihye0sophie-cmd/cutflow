@@ -170,9 +170,9 @@ assert(js.includes('v42-pc-settings-section'),'desktop-like settings section str
 assert(css.includes('#v42SettingsDialog .v42-btn:disabled'),'readable disabled settings buttons missing');
 assert(css.includes('.v42-settings-primary-actions'),'compact settings toolbar styling missing');
 assert(js.includes('collapsibleSettingsSection'),'collapsible mobile settings helper missing');
-assert(js.includes("collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅'"),'auto setup must be collapsed by default');
-const projectPos=js.indexOf('quickActions+');
-const autoPos=js.indexOf("collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅'");
+assert(js.includes("collapsibleSettingsSection('QUICK START','✨ 쇼츠 자동 세팅'"),'auto setup must be collapsed by default');
+const projectPos=js.indexOf('topActions+');
+const autoPos=js.indexOf("collapsibleSettingsSection('QUICK START','✨ 쇼츠 자동 세팅'");
 const scriptPos=js.indexOf("settingsSection('01 SCRIPT & VOICE','대본과 내레이션'");
 assert(projectPos>=0&&autoPos>projectPos&&scriptPos>autoPos,'auto setup should appear directly after project utility');
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'settings dialog accent scope missing');
