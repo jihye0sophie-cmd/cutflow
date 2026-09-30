@@ -1554,3 +1554,151 @@ body.v42-mobile .v42-tabs{
     margin-top:4px!important;
   }
 }
+
+/* v42.9.1 mobile editor space rebalance */
+body.v42-mobile .v42-stage-wrap canvas{
+  height:clamp(250px,38dvh,360px)!important;
+}
+
+/* Scrubber sits directly on the preview bottom edge. */
+body.v42-mobile .v42-scrubber{
+  display:block!important;
+  width:100%!important;
+  height:3px!important;
+  margin:-1px 0 2px!important;
+  padding:0!important;
+}
+
+/* One compact transport row: <  play  > centered, undo/redo/fullscreen right. */
+body.v42-mobile .v42-player{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:30px!important;
+  height:30px!important;
+  margin:1px 0 0!important;
+}
+body.v42-mobile .v42-transport{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+}
+body.v42-mobile .v42-transport button{
+  width:25px!important;
+  min-width:25px!important;
+  height:25px!important;
+  min-height:25px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:#e8ebef!important;
+  border-radius:6px!important;
+  font-size:18px!important;
+  line-height:1!important;
+}
+body.v42-mobile .v42-transport .play{
+  width:28px!important;
+  min-width:28px!important;
+  height:28px!important;
+  min-height:28px!important;
+  background:transparent!important;
+  border:0!important;
+  color:#fff!important;
+  font-size:14px!important;
+}
+body.v42-mobile .v42-preview-tools{
+  position:absolute!important;
+  right:1px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  gap:2px!important;
+}
+body.v42-mobile .v42-preview-tools button{
+  width:24px!important;
+  min-width:24px!important;
+  height:24px!important;
+  min-height:24px!important;
+  border:0!important;
+  background:transparent!important;
+  color:#aeb6c0!important;
+  padding:0!important;
+  font-size:13px!important;
+}
+
+/* Scene count becomes a tiny bold line below controls. */
+body.v42-mobile .v42-scene-nav{
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  min-height:14px!important;
+  margin:0!important;
+}
+body.v42-mobile .v42-scene-nav strong{
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:850!important;
+  color:#dce1e7!important;
+}
+
+/* Return scene thumbnails to ultra-compact size. */
+body.v42-mobile .v42-scenes-card{
+  margin-top:3px!important;
+  padding:3px 4px!important;
+  border-radius:8px!important;
+}
+body.v42-mobile .v42-scenes-row{
+  min-height:34px!important;
+  gap:3px!important;
+}
+body.v42-mobile .v42-scene-strip{
+  gap:3px!important;
+}
+body.v42-mobile .v42-scene-strip>button{
+  flex:0 0 32px!important;
+  width:32px!important;
+  height:32px!important;
+  min-height:32px!important;
+  padding:1px!important;
+  border-radius:5px!important;
+}
+body.v42-mobile .v42-scene-strip img,
+body.v42-mobile .v42-scene-strip .missing{
+  width:100%!important;
+  height:100%!important;
+  border-radius:4px!important;
+}
+body.v42-mobile .v42-scene-strip b,
+body.v42-mobile .v42-scene-strip small{
+  display:none!important;
+}
+body.v42-mobile .v42-add-scene{
+  flex:0 0 30px!important;
+  width:30px!important;
+  height:32px!important;
+  min-height:32px!important;
+  padding:0!important;
+  font-size:16px!important;
+  border-radius:5px!important;
+}
+
+/* Critical iOS flex fix: editor gets the remaining height and scrolls independently. */
+body.v42-mobile .v42-panel{
+  flex:1 1 0!important;
+  height:0!important;
+  min-height:90px!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  touch-action:pan-y!important;
+  overscroll-behavior-y:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:thin;
+}
+
+/* Short phones: preserve usable editor space first. */
+@media(max-height:740px){
+  body.v42-mobile .v42-stage-wrap canvas{
+    height:clamp(220px,34dvh,300px)!important;
+  }
+}
