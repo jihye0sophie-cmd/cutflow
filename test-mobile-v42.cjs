@@ -226,7 +226,7 @@ assert(js.includes("proxyControl(sourceSelect,'이미지·영상'"),'mobile curr
 assert(js.includes("section('움직임 · 진입 전환'"),'mobile motion transition section missing');
 assert(js.includes("details('영상 고급 설정'"),'video advanced settings should be separate from transform details');
 assert(js.includes("section('장면 편집'"),'mobile scene editing section missing');
-assert(js.includes("details('상세 설정',transform,'이미지·영상 크기 / 위치'"),'mobile transform details should match desktop role');
+assert(js.includes("section('이미지·영상 크기 / 위치',transform)"),'mobile transform controls should stay always visible like desktop');
 assert(js.includes('v42TransformReset'),'mobile transform reset missing');
 assert(js.includes('data-media-volume'),'mobile video volume presets missing');
 assert(css.includes('.v42-media-volume-presets'),'mobile video volume preset styling missing');
