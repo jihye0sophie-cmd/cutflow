@@ -1001,3 +1001,37 @@ body.v42-mobile .v42-tabs button:active{
   #v42SettingsDialog .v42-grid-control-row .gap{grid-column:1/3}
   #v42SettingsDialog .v42-grid-control-row .reset{grid-column:3}
 }
+
+/* v42.6.9 settings refinements */
+#v42SettingsDialog .v42-compose-title textarea{min-height:58px!important;max-height:58px!important}
+#v42SettingsDialog .v42-auto-audio-picks{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:7px 0 2px}
+#v42SettingsDialog .v42-auto-audio-picks>div{display:grid;gap:4px;min-width:0}
+#v42SettingsDialog .v42-auto-audio-picks .pick-button{display:block}
+#v42SettingsDialog .v42-auto-audio-picks .v42-btn{width:100%;min-height:38px}
+#v42SettingsDialog .v42-auto-audio-picks small{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:#aeb6c0;font-size:8px}
+#v42SettingsDialog .v42-auto-audio-picks small em{font-style:normal;color:#858e99}
+#v42SettingsDialog .v42-auto-grid-inline>.v42-help:first-child{margin:8px 0 0}
+#v42SettingsDialog .v42-pc-style-card{background:#20242a;border-color:#373d45;border-radius:10px}
+#v42SettingsDialog .v42-pc-style-card>summary{padding:11px 12px;background:#20242a;font-size:12px}
+#v42SettingsDialog .v42-pc-style-card>summary small{color:#848d98}
+#v42SettingsDialog .v42-pc-style-card>div{padding:2px 12px 12px}
+#v42SettingsDialog .v42-pc-typo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+#v42SettingsDialog .v42-pc-typo-grid>.full{grid-column:1/-1}
+#v42SettingsDialog .v42-typo-color>span{display:block;margin-bottom:5px;color:#d7dce3;font-size:10px}
+#v42SettingsDialog .v42-settings-palette{display:flex;gap:6px;flex-wrap:wrap;margin:5px 0 6px}
+#v42SettingsDialog .v42-settings-palette button{width:29px;height:29px;padding:0;border:1px solid #4a515b;border-radius:6px;background:var(--swatch)}
+#v42SettingsDialog .v42-inline-checks{display:flex;gap:18px;align-items:center;padding:2px 0 8px;border-bottom:1px solid #51565d}
+#v42SettingsDialog .v42-inline-checks .v42-check{min-height:30px;margin:0}
+#v42SettingsDialog .v42-selection-style{padding:8px 0;border-bottom:1px solid #51565d}
+#v42SettingsDialog .v42-selection-style>strong{display:block;margin-bottom:6px;font-size:10px}
+#v42SettingsDialog .v42-selection-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#v42SettingsDialog .v42-selection-row .v42-settings-palette{margin:0}
+#v42SettingsDialog .v42-selection-row .v42-field{margin:0;min-width:72px;max-width:110px}
+#v42SettingsDialog .v42-selection-row .v42-field>span{display:none}
+#v42SettingsDialog .v42-selection-row .v42-btn{min-height:34px}
+#v42SettingsDialog .v42-selection-style>small{display:block;margin-top:6px;color:#9fa8b3;font-size:8px}
+#v42SettingsDialog .v42-stroke-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end;padding-top:8px}
+@media(max-width:430px){
+  #v42SettingsDialog .v42-pc-typo-grid{grid-template-columns:1fr 1fr;gap:7px}
+  #v42SettingsDialog .v42-settings-palette button{width:27px;height:27px}
+}
