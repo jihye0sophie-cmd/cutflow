@@ -1978,3 +1978,37 @@ body.v42-mobile .v42-scrubber::-moz-range-progress{
   height:3px!important;
   background:transparent!important;
 }
+
+/* v42.9.6 iOS Home Screen status bar / safe-area fix */
+@supports(padding:max(0px)){
+  body.v42-mobile{
+    background:#0d0f12!important;
+  }
+  body.v42-mobile #mobileAppV42{
+    background:#0d0f12!important;
+  }
+  body.v42-mobile .v42-head{
+    padding-top:calc(7px + env(safe-area-inset-top))!important;
+    min-height:calc(52px + env(safe-area-inset-top))!important;
+    background:#0d0f12!important;
+    border-bottom-color:#30343b!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  body.v42-mobile .v42-main{
+    padding-left:max(8px,env(safe-area-inset-left))!important;
+    padding-right:max(8px,env(safe-area-inset-right))!important;
+  }
+}
+/* Ensure the very top safe area remains opaque in installed Home Screen mode. */
+@media(display-mode:standalone){
+  html,body,body.v42-mobile,body.v42-mobile #mobileAppV42{
+    background:#0d0f12!important;
+  }
+  body.v42-mobile .v42-head{
+    background:#0d0f12!important;
+    box-shadow:none!important;
+    filter:none!important;
+    -webkit-filter:none!important;
+  }
+}
