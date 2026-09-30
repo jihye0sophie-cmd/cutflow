@@ -51,7 +51,6 @@ function sync(){
     inlineReplace.disabled=loading>0||exporting;inlineReplace.onclick=()=>file.click();mediaBlock.prepend(inlineReplace);
    }
   }
-  const sceneChanged=i!==lastIndex;
   const next=JSON.stringify(list.map((item,j)=>{const {source,duration}=CutflowScene.thumbnail(item,j);return [item.id,source?.thumb,duration]}));
   const edit=$('desktopSceneEdit');if(edit){edit.textContent=sceneEdit?'편집 완료':'순서 편집';edit.setAttribute('aria-pressed',String(sceneEdit));}
   const renderKey=next+'|'+sceneEdit;
