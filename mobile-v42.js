@@ -690,8 +690,29 @@
   $('v42Redo').onclick=()=>window.CutflowHistory?.redo?.();
   const syncPreviewHistory=()=>{const undo=$('v42Undo'),redo=$('v42Redo');if(undo)undo.disabled=!window.CutflowHistory?.canUndo;if(redo)redo.disabled=!window.CutflowHistory?.canRedo;};
   syncPreviewHistory();
-  $('v42PrevScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.max(0,index-1));};
-  $('v42NextScene').onclick=()=>{const {items,index}=currentScene();if(items.length)window.CutflowScene?.select?.(Math.min(items.length-1,index+1));};
+  const bindMobileTap=(el,handler)=>{
+    if(!el)return;
+    let lastPointer=0;
+    el.addEventListener('pointerup',e=>{
+      if(e.pointerType==='mouse')return;
+      lastPointer=performance.now();
+      e.preventDefault();e.stopPropagation();
+      handler(e);
+    },{passive:false});
+    el.addEventListener('click',e=>{
+      if(performance.now()-lastPointer<650){e.preventDefault();e.stopPropagation();return;}
+      e.preventDefault();e.stopPropagation();
+      handler(e);
+    });
+  };
+  const selectAdjacentScene=delta=>{
+    window.CutflowPlayer?.pause?.();
+    const {items,index}=currentScene();
+    if(items.length)window.CutflowScene?.select?.(Math.max(0,Math.min(items.length-1,index+delta)));
+    requestAnimationFrame(()=>{syncPlayer();requestRefresh(true);});
+  };
+  bindMobileTap($('v42PrevScene'),()=>selectAdjacentScene(-1));
+  bindMobileTap($('v42NextScene'),()=>selectAdjacentScene(1));
   function openPreviewFullscreen(){
     previewDialog.hidden=false;
     previewDialog.classList.add('v42-preview-open');
@@ -704,9 +725,9 @@
     previewDialog.hidden=true;
     document.body.classList.remove('v42-preview-lock');
   }
-  $('v42Fullscreen').onclick=openPreviewFullscreen;
-  $('v42FullClose').onclick=e=>{e.preventDefault();e.stopPropagation();closePreviewFullscreen();};
-  $('v42FullPlay').onclick=e=>{e.preventDefault();e.stopPropagation();window.CutflowPlayer?.toggle?.();requestAnimationFrame(syncPlayer);};
+  bindMobileTap($('v42Fullscreen'),openPreviewFullscreen);
+  bindMobileTap($('v42FullClose'),closePreviewFullscreen);
+  bindMobileTap($('v42FullPlay'),()=>{window.CutflowPlayer?.toggle?.();requestAnimationFrame(syncPlayer);});
   $('v42Scrubber').addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
   $('v42Scrubber').addEventListener('change',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
 
@@ -715,7 +736,7 @@
     if(mobileExportUrl){URL.revokeObjectURL(mobileExportUrl);mobileExportUrl='';}
     mobileExportBlob=null;mobileExportFilename='';$('v42ExportProgress').value=0;$('v42ExportStatus').textContent='준비 중…';$('v42ExportResult').hidden=true;$('v42ExportResult').textContent='';$('v42ExportCancel').hidden=false;$('v42ExportShare').hidden=true;$('v42ExportDownload').hidden=true;$('v42ExportDone').hidden=true;
   };
-  $('v42Play').onclick=()=>window.CutflowPlayer?.toggle?.();
+  bindMobileTap($('v42Play'),()=>{window.CutflowPlayer?.toggle?.();requestAnimationFrame(syncPlayer);});
   $('v42Export').onclick=()=>{resetMobileExport();exportDialogV42.showModal();window.CutflowExport?.start?.();};
   $('v42ExportCancel').onclick=()=>window.CutflowExport?.cancel?.();
   $('v42ExportClose').onclick=()=>{if(!window.CutflowExport?.busy)exportDialogV42.close();};
@@ -730,7 +751,7 @@
     $('v42ExportDownload').click();
   };
 
-  for(const id of ['cueList','sceneList','nowPlaying','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus']){const el=$(id);if(el)new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
+  for(const id of ['cueList','sceneList','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus']){const el=$(id);if(el)new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
   window.addEventListener('cutflow-scene',e=>{sceneIndex=Number(e.detail)||0;lastSceneId=null;requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));});
   window.addEventListener('cutflow-scene-updated',()=>requestRefresh(false));
   window.addEventListener('cutflow-caption-updated',()=>requestRefresh(false));
