@@ -124,3 +124,11 @@ body.desktop-editor .auto-grid-preview .auto-cut-y,
 body.desktop-editor .auto-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
 body.desktop-editor .auto-script-column textarea{min-height:142px}
 
+
+@media(min-width:761px){
+  body.desktop-editor #desktopProject .auto-setup:not(.is-open) .auto-setup-head{
+    margin-bottom:-20px!important;
+    border-bottom:0!important;
+    border-radius:11px;
+  }
+}
