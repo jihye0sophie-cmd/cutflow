@@ -1150,3 +1150,19 @@ body.v42-mobile .v42-tabs button:active{
     gap:6px;
   }
 }
+
+/* v42.7.7 compact left-aligned project actions */
+#v42SettingsDialog .v42-settings-primary-actions{
+  display:flex!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+  gap:6px!important;
+  width:auto!important;
+}
+#v42SettingsDialog .v42-settings-primary-actions .v42-btn{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:96px!important;
+  padding-left:12px!important;
+  padding-right:12px!important;
+}
