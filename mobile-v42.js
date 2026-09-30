@@ -219,7 +219,7 @@
     proxyMap.clear();
     const api=window.CutflowCaption,index=api?.currentIndex?.()??-1,state=api?.state?.(index);
     if(!state){panel.innerHTML=section('자막','<p class="v42-help">아직 자막 구간이 없습니다. 프로젝트 설정에서 대본과 내레이션을 불러온 뒤 자막 구간을 만들어 주세요.</p>');return;}
-    window.CutflowCaptionStyle?.select?.(index);
+    window.selectStyleCue?.(index,false);
     const selectionPalette=paletteColors.map(([name,color])=>`<button type="button" data-caption-selection-color="${color}" title="${name}" aria-label="${name}" style="--swatch:${color}"></button>`).join('');
     const core=`
       <div class="v42-caption-batch-entry"><button type="button" id="v42CaptionBatchOpen" class="v42-btn wide">전체 자막 편집</button></div>
