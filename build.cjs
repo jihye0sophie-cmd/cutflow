@@ -1,9 +1,22 @@
-// Static distribution: publish only application code and bundled runtime assets.
+// Static distribution: publish only runtime files referenced by index.html plus bundled assets.
 const fs=require('node:fs'),path=require('node:path');
 const root=__dirname,dist=path.join(root,'dist');
-fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
-for(const name of ['index.html','style.css','studio.css','font-catalog.js','caption-style.js','renderer.js','audio-mixer.js','encoder.js','caption-ranges.js','timing-align.js','app.js','style-editor.js','bgm-editor.js','studio-tokens.css','scene-ui.js','mobile-v42.js','mobile-v42.css','desktop-ui.js','desktop-ui.css','media-transform.js','media-transform.css','project-store.js','project-store.css','history.js','history.css','timing-editor.js','timing-editor.css','caption-batch-editor.js','caption-batch-editor.css','silence-cut.js','auto-setup.js','auto-setup.css']){
-  fs.copyFileSync(path.join(root,name),path.join(dist,name));
+const indexPath=path.join(root,'index.html');
+const index=fs.readFileSync(indexPath,'utf8');
+
+fs.rmSync(dist,{recursive:true,force:true});
+fs.mkdirSync(dist,{recursive:true});
+
+const runtimeRefs=[...index.matchAll(/(?:src|href)="\.\/([^"?]+\.(?:js|css))(?:\?[^"]*)?"/g)]
+  .map(match=>match[1])
+  .filter(name=>!name.startsWith('assets/'));
+const files=[...new Set(['index.html','favicon.svg','manifest.webmanifest',...runtimeRefs])];
+
+for(const name of files){
+  const source=path.join(root,name);
+  if(!fs.existsSync(source))throw new Error(`Missing runtime file referenced by build: ${name}`);
+  fs.copyFileSync(source,path.join(dist,name));
 }
+
 fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});
-console.log('Built Cutflow v42 static studio in dist/');
+console.log(`Built Cutflow static studio in dist/ (${files.length} root runtime files + assets/)`);
