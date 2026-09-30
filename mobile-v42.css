@@ -2012,3 +2012,26 @@ body.v42-mobile .v42-scrubber::-moz-range-progress{
     -webkit-filter:none!important;
   }
 }
+
+/* v42.9.7 restore visible Home Screen header */
+body.v42-mobile::before{
+  display:none!important;
+  content:none!important;
+}
+@supports(padding:max(0px)){
+  body.v42-mobile .v42-head{
+    box-sizing:border-box!important;
+    padding:calc(7px + env(safe-area-inset-top)) 10px 7px!important;
+    min-height:calc(52px + env(safe-area-inset-top))!important;
+    height:auto!important;
+    overflow:visible!important;
+    z-index:200!important;
+  }
+  body.v42-mobile .v42-head .v42-brand,
+  body.v42-mobile .v42-head .v42-head-actions{
+    position:relative!important;
+    z-index:1!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+}
