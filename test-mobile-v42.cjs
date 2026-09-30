@@ -26,7 +26,7 @@ assert(js.includes('쇼츠 컷 편집 스튜디오'),'Cutflow product subtitle m
 assert(!js.includes('v42AllScenes')&&!js.includes('v42ScenesGrid'),'all scenes mobile sheet should be removed');
 for(const tab of ['caption','media','timing'])assert(js.includes(`data-tab="${tab}"`),`missing ${tab} tab`);
 for(const tab of ['narration','template','bgm'])assert(!js.includes(`data-tab="${tab}"`),`legacy ${tab} tab should be removed`);
-assert(js.includes("collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅'")&&js.includes("'v42-quick-start'"),'auto setup must exist in settings');
+assert(js.includes("collapsibleSettingsSection('QUICK START','✨ 쇼츠 자동 세팅'")&&js.includes('v42-quick-start'),'auto setup must exist in settings');
 for(const id of ['autoTitle','autoChannel','autoLayout','autoScript','autoCaptionWrap','autoNarrationBtn','autoGridBtn','autoSingleBtn','autoBgmBtn','autoStart'])assert(js.includes(id),`auto setup bridge missing ${id}`);
 assert(js.includes('autoGridMirror')&&js.includes('data-auto-field="cols"')&&js.includes('data-auto-field="rows"')&&js.includes('data-auto-field="gap"'),'mobile grid split controls missing');
 assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto setup silence presets missing');
