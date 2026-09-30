@@ -103,10 +103,16 @@
     window.CutflowUI.mobileActive=next;
     window.CutflowUI.mode=next?'mobile':'desktop';
     document.body.classList.toggle('v42-mobile',next);
+    const exportBusy=!!window.CutflowExport?.busy;
     if(!next){
-      for(const dialog of [settingsDialog,exportDialogV42]){try{if(dialog?.open)dialog.close();}catch{}}
+      try{if(settingsDialog?.open)settingsDialog.close();}catch{}
+      try{if(exportDialogV42?.open)exportDialogV42.close();}catch{}
+      if(exportBusy){const desktopExport=$('exportDialog');try{if(desktopExport&&!desktopExport.open)desktopExport.showModal();}catch{}}
       previewDialog.hidden=true;
       document.body.classList.remove('v42-preview-lock');
+    }else if(exportBusy){
+      try{if(!exportDialogV42.open)exportDialogV42.showModal();}catch{}
+      const desktopExport=$('exportDialog');try{if(desktopExport?.open)desktopExport.close();}catch{}
     }
     if(initial||prev===next)return;
     window.dispatchEvent(new CustomEvent(next?'cutflow-mobile-activate':'cutflow-mobile-deactivate',{detail:{responsive:!deviceMobile,width:innerWidth}}));
@@ -726,11 +732,13 @@
   window.addEventListener('cutflow-auto-status',e=>{const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.text||'';});
   window.addEventListener('cutflow-auto-error',e=>{if(!settingsDialog.open){renderSettings();settingsDialog.showModal();}const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent=e.detail?.message?'자동 세팅 중단: '+e.detail.message:'자동 세팅이 중단되었습니다.';});
   window.addEventListener('cutflow-auto-complete',e=>{const detail=e.detail||{};const el=settingsDialog.querySelector('[data-auto-status="run"]');if(el)el.textContent='완료 · 장면 '+(detail.sceneCount||0)+'개 · 자막 '+(detail.cueCount||0)+'개';requestRefresh(true);requestAnimationFrame(()=>{followSelectedScene('smooth');ensurePanelVisible();});});
-  window.addEventListener('cutflow-export-start',e=>{if(!exportDialogV42.open)exportDialogV42.showModal();$('v42ExportStatus').textContent=(e.detail?.width||'')+'p MP4 준비 중…';$('v42ExportCancel').hidden=false;});
-  window.addEventListener('cutflow-export-progress',e=>{$('v42ExportProgress').value=Number(e.detail?.progress)||0;$('v42ExportStatus').textContent=e.detail?.message||'MP4 만드는 중…';});
-  window.addEventListener('cutflow-export-complete',e=>{mobileExportBlob=e.detail?.blob||null;mobileExportFilename=e.detail?.filename||'Cutflow.mp4';$('v42ExportProgress').value=1;$('v42ExportStatus').textContent='MP4 완성';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;const result=$('v42ExportResult');result.hidden=false;result.textContent=(e.detail?.width||'')+'p · '+((e.detail?.size||0)/1024/1024).toFixed(1)+'MB';const dl=$('v42ExportDownload');if(mobileExportBlob){mobileExportUrl=URL.createObjectURL(mobileExportBlob);dl.href=mobileExportUrl;dl.download=mobileExportFilename;dl.hidden=false;const file=new File([mobileExportBlob],mobileExportFilename,{type:'video/mp4'});$('v42ExportShare').hidden=!(navigator.canShare?.({files:[file]})&&navigator.share);}});
-  window.addEventListener('cutflow-export-error',e=>{if(!exportDialogV42.open)exportDialogV42.showModal();$('v42ExportStatus').textContent=e.detail?.message||'MP4 저장에 실패했습니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
-  window.addEventListener('cutflow-export-cancelled',()=>{$('v42ExportStatus').textContent='저장을 취소했습니다. 편집 내용은 유지됩니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
+  const mobileExportUi=()=>window.CutflowUI?.mode==='mobile';
+  const ensureMobileExportDialog=()=>{if(!mobileExportUi())return false;try{if(!exportDialogV42.open)exportDialogV42.showModal();}catch{}return true;};
+  window.addEventListener('cutflow-export-start',e=>{if(!ensureMobileExportDialog())return;$('v42ExportStatus').textContent=(e.detail?.width||'')+'p MP4 준비 중…';$('v42ExportCancel').hidden=false;});
+  window.addEventListener('cutflow-export-progress',e=>{if(!ensureMobileExportDialog())return;$('v42ExportProgress').value=Number(e.detail?.progress)||0;$('v42ExportStatus').textContent=e.detail?.message||'MP4 만드는 중…';});
+  window.addEventListener('cutflow-export-complete',e=>{if(!ensureMobileExportDialog())return;mobileExportBlob=e.detail?.blob||null;mobileExportFilename=e.detail?.filename||'Cutflow.mp4';$('v42ExportProgress').value=1;$('v42ExportStatus').textContent='MP4 완성';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;const result=$('v42ExportResult');result.hidden=false;result.textContent=(e.detail?.width||'')+'p · '+((e.detail?.size||0)/1024/1024).toFixed(1)+'MB';const dl=$('v42ExportDownload');if(mobileExportBlob){mobileExportUrl=URL.createObjectURL(mobileExportBlob);dl.href=mobileExportUrl;dl.download=mobileExportFilename;dl.hidden=false;const file=new File([mobileExportBlob],mobileExportFilename,{type:'video/mp4'});$('v42ExportShare').hidden=!(navigator.canShare?.({files:[file]})&&navigator.share);}});
+  window.addEventListener('cutflow-export-error',e=>{if(!ensureMobileExportDialog())return;$('v42ExportStatus').textContent=e.detail?.message||'MP4 저장에 실패했습니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
+  window.addEventListener('cutflow-export-cancelled',()=>{if(!ensureMobileExportDialog())return;$('v42ExportStatus').textContent='저장을 취소했습니다. 편집 내용은 유지됩니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
   $('projectDialog')?.addEventListener('close',()=>setTimeout(()=>requestRefresh(false),0));
   const syncAfterProjectRestore=()=>{
     const items=window.CutflowScene?.items?.()||[];
