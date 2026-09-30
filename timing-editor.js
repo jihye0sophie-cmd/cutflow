@@ -284,18 +284,13 @@
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
   setInterval(()=>{const panel=visiblePanel();if(!panel)return;const track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration();line.style.left=`${pctAll(currentTime(),duration)}%`;if(clock)clock.textContent=`${fmt(currentTime())} / ${fmt(duration)}`;},100);
-  window.CutflowTimeline={
-    state(){return {duration:timelineDuration(),currentTime:currentTime(),zoom:timelineZoom,snap:snapEnabled,sceneIndex:sceneIndex(),selectedCueIndex:cues.findIndex(c=>c.id===selectedCueId),sceneCount:sceneItems().length,captionCount:cues.length};},
-    setZoom(value){timelineZoom=clamp(num(value,1),.5,3);pendingCenter=true;renderAll();return this.state();},
-    setSnap(value){snapEnabled=!!value;renderAll();return this.state();},
-    seek(time){jump(snapTime(clamp(num(time),0,timelineDuration())));renderAll();return this.state();},
-    selectScene(index){window.CutflowScene?.select?.(index);renderAll();return this.state();},
-    selectCaption(index){if(cues[index]){selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);renderAll();return true;}return false;},
-    setCaptionEdge,setSceneBoundaryAt,render:renderAll
-  };
+  function selectTimelineCaption(index){
+    if(!cues[index])return false;
+    selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);renderAll();return true;
+  }
   window.CutflowTiming={
     render:renderAll,setSceneBoundary,setCaptionBoundary,redistribute,
-    selectCue(index){return window.CutflowTimeline.selectCaption(index);},
+    selectCue(index){return selectTimelineCaption(index);},
     mount(container,index){
       if(!container)return false;externalPanel=container;container.classList.add('timing-panel','v42-timing-panel');container.style.display='block';
       if(!container.querySelector('.timing-track'))container.innerHTML='<div class="timing-track"></div><div class="timing-controls"></div>';
