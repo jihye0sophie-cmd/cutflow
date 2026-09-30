@@ -16,6 +16,8 @@
   const touchHandheld=!desktopOS&&coarse&&touchPoints>0&&physicalShort<=900;
   const deviceMobile=!!(mobileUA||ipadDesktop||touchHandheld);
   const compactMq=matchMedia('(max-width:760px)');
+  const standaloneMode=window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
+  document.body.classList.toggle('v42-standalone',!!standaloneMode);
   window.CutflowUI=window.CutflowUI||{};
   window.CutflowUI.isMobileDevice=()=>deviceMobile;
   window.CutflowUI.mobileActive=!!(deviceMobile||compactMq.matches);
