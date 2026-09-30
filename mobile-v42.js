@@ -742,7 +742,6 @@
     requestAnimationFrame(()=>followSelectedScene('auto'));
   };
   window.addEventListener('cutflow-project-restored',syncAfterProjectRestore);
-  window.addEventListener('cutflow-project-loaded',syncAfterProjectRestore);
   window.addEventListener('cutflow-history-updated',()=>{syncPreviewHistory();if(settingsDialog.open)syncSettingsProxyState();});
   for(const id of ['scriptInput','projectCaptionWrap','audioInput','scriptFile','bgmInput','autoNarration','autoGrids','autoSingles','autoBgm']){
     const el=$(id);if(!el)continue;
