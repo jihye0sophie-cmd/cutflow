@@ -146,16 +146,21 @@
   function details(title,body,sub='',open=false){return `<details class="v42-details" ${open?'open':''}><summary><span>${esc(title)}</span>${sub?`<small>${esc(sub)}</small>`:''}</summary><div class="v42-detail-body">${body}</div></details>`;}
   function autoGridMirror(){
     const grids=window.CutflowAutoSetup?.grids?.()||[];
-    if(!grids.length)return '<p class="v42-help">그리드 이미지를 추가하면 PC와 동일한 분할 미리보기와 조절선이 표시됩니다.</p>';
+    if(!grids.length)return '<p class="v42-help">그리드 이미지를 추가하면 분할 미리보기와 조절선이 바로 표시됩니다.</p>';
     return grids.map(g=>{
       const x=g.xCuts.map((p,i)=>`<button type="button" class="v42-cut-line v42-cut-x" data-auto-cut="x" data-cut-index="${i}" style="left:${p}%" aria-label="세로 분할선 ${i+1}"></button>`).join('');
       const y=g.yCuts.map((p,i)=>`<button type="button" class="v42-cut-line v42-cut-y" data-auto-cut="y" data-cut-index="${i}" style="top:${p}%" aria-label="가로 분할선 ${i+1}"></button>`).join('');
       return `<article class="v42-grid-source" data-auto-grid="${g.index}">
-        <div class="v42-grid-source-head"><div><strong>${esc(g.name)}</strong><small>${g.cols}×${g.rows} · ${g.cols*g.rows}장</small></div></div>
-        <div class="v42-grid3"><label class="v42-field"><span>열</span><input type="number" min="1" max="12" value="${g.cols}" data-auto-field="cols"></label><label class="v42-field"><span>행</span><input type="number" min="1" max="12" value="${g.rows}" data-auto-field="rows"></label><label class="v42-field"><span>여백(px)</span><input type="number" min="0" max="40" value="${g.gap}" data-auto-field="gap"></label></div>
-        <div class="v42-grid-preview" style="aspect-ratio:${g.width||4}/${g.height||2}"><img src="${esc(g.url||'')}" alt=""><div class="v42-grid-lines">${x}${y}</div></div>
-        <p class="v42-help">노란 분할선을 손가락으로 움직여 실제 분할 위치를 조정할 수 있습니다.</p>
-        <div class="v42-actions"><button type="button" class="v42-btn" data-auto-action="reset">균등 분할</button><button type="button" class="v42-btn danger" data-auto-action="remove">삭제</button></div>
+        <div class="v42-grid-source-head"><div><strong>${esc(g.name)}</strong><small>${g.cols}×${g.rows} · ${g.cols*g.rows}장</small></div><button type="button" class="v42-grid-remove" data-auto-action="remove" aria-label="이미지 제거">×</button></div>
+        <div class="v42-grid-control-row">
+          <label><span>열</span><input type="number" min="1" max="12" value="${g.cols}" data-auto-field="cols"></label>
+          <b>×</b>
+          <label><span>행</span><input type="number" min="1" max="12" value="${g.rows}" data-auto-field="rows"></label>
+          <label class="gap"><span>분할 여백(px)</span><input type="number" min="0" max="40" value="${g.gap}" data-auto-field="gap"></label>
+          <button type="button" class="v42-btn reset" data-auto-action="reset">초기화</button>
+        </div>
+        <div class="v42-grid-preview" style="aspect-ratio:${g.width||4}/${g.height||1}"><img src="${esc(g.url||'')}" alt=""><div class="v42-grid-lines">${x}${y}</div></div>
+        <p class="v42-help">노란 띠가 실제 분할 시 제거되는 여백입니다. 기본 8px이며, 경계가 맞지 않으면 띠의 중심을 손가락으로 움직여 조정하세요.</p>
       </article>`;
     }).join('');
   }
@@ -293,7 +298,35 @@
     const info=window.CutflowAutoSetup?.status?.()||{canStart:!$('autoStart')?.disabled,running:false,reason:''};
     const progressVisible=!$('autoProgress')?.hidden||info.running;
     const runText=progressVisible?($('autoStatus')?.textContent||''):(info.canStart?'준비 완료 · 자동 세팅을 시작할 수 있습니다.':info.reason||'');
-    return `${pc($('autoTitle'),'영상 제목',{wide:true})}${pc($('autoChannel'),'채널명')}${pc($('autoLayout'),'영상 템플릿')}${pc($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}${pc($('autoCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-file-actions">${pb($('autoNarrationBtn'),'내레이션 선택')}${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}${pb($('autoBgmBtn'),'BGM 선택')}</div><div class="v42-auto-files"><span><b>내레이션</b><i data-auto-status="narration">${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</i></span><span><b>그리드</b><i data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</i></span><span><b>개별 이미지</b><i data-auto-status="single">${esc($('autoSingleName')?.textContent||'선택 안 됨')}</i></span></div><div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div><div data-settings-grid-mirror>${details('그리드 분할 설정',autoGridMirror(),'열 · 행 · 분할 여백')}</div><div class="v42-auto-check"><span>대본 장면 <strong data-auto-status="script-count">${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong data-auto-status="image-count">${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div><p class="v42-auto-match" data-auto-status="match">${esc($('autoMatch')?.textContent||'')}</p><p class="v42-status" data-auto-status="run">${esc(runText)}</p><button type="button" data-auto-start class="v42-btn primary wide" ${info.canStart?'':'disabled'}>쇼츠 자동 세팅 시작</button>`;
+    return `
+      <div class="v42-auto-basics">
+        <div class="v42-auto-title">${pc($('autoTitle'),'영상 제목',{wide:true})}</div>
+        <div class="v42-grid2">${pc($('autoChannel'),'채널명')}${pc($('autoLayout'),'영상 템플릿')}</div>
+      </div>
+      <section class="v42-auto-flow-section">
+        <header><strong>대본 · 내레이션 · BGM</strong></header>
+        ${pc($('autoScript'),'대본 · 한 줄이 한 장면',{wide:true})}
+        ${pc($('autoCaptionWrap'),'자막 자동 줄바꿈')}
+        <div class="v42-file-actions">${pb($('autoNarrationBtn'),'내레이션 선택')}${pb($('autoBgmBtn'),'BGM 선택 · 선택사항')}</div>
+        <div class="v42-auto-files">
+          <span><b>내레이션</b><i data-auto-status="narration">${esc($('autoNarrationName')?.textContent||'선택 안 됨')}</i></span>
+          <span><b>BGM</b><i>${esc($('autoBgmName')?.textContent||'선택 안 됨')}</i></span>
+        </div>
+        <div class="v42-silence"><strong>무음컷 강도</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>
+      </section>
+      <section class="v42-auto-flow-section">
+        <header><div><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div></header>
+        <div class="v42-file-actions">${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}</div>
+        <div class="v42-auto-files">
+          <span><b>그리드</b><i data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</i></span>
+          <span><b>개별 이미지</b><i data-auto-status="single">${esc($('autoSingleName')?.textContent||'선택 안 됨')}</i></span>
+        </div>
+        <div class="v42-auto-grid-inline" data-settings-grid-mirror>${autoGridMirror()}</div>
+      </section>
+      <div class="v42-auto-check"><span>대본 장면 <strong data-auto-status="script-count">${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong data-auto-status="image-count">${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div>
+      <p class="v42-auto-match" data-auto-status="match">${esc($('autoMatch')?.textContent||'')}</p>
+      <p class="v42-status" data-auto-status="run">${esc(runText)}</p>
+      <button type="button" data-auto-start class="v42-btn primary wide" ${info.canStart?'':'disabled'}>쇼츠 자동 세팅 시작</button>`;
   }
   function renderNarration(){
     proxyMap.clear();
@@ -345,7 +378,7 @@
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map:settingsProxyMap});
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
     const settingsSection=(step,title,body,status='')=>`<section class="v42-pc-settings-section"><header><div><span>${esc(step)}</span><strong>${esc(title)}</strong></div>${status?`<small>${esc(status)}</small>`:''}</header><div class="v42-pc-settings-body">${body}</div></section>`;
-    const collapsibleSettingsSection=(step,title,body)=>`<details class="v42-pc-settings-section v42-pc-settings-collapsible"><summary><div><span>${esc(step)}</span><strong>${esc(title)}</strong></div><em>자동 세팅 열기</em></summary><div class="v42-pc-settings-body">${body}</div></details>`;
+    const collapsibleSettingsSection=(step,title,body)=>`<details class="v42-pc-settings-section v42-pc-settings-collapsible v42-quick-start"><summary><div><span>${esc(step)}</span><strong>${esc(title)}</strong></div><em>자동 세팅 열기</em></summary><div class="v42-pc-settings-body">${body}</div></details>`;
     let waveformSrc='';try{waveformSrc=$('waveform')?.toDataURL?.('image/png')||'';}catch{}
     const topActions=`
       <div class="v42-settings-top-actions">
@@ -369,19 +402,35 @@
       <div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div>
       <div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점 (초)')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인 (초)')}${pc($('bgmFadeOut'),'페이드 아웃 (초)')}</div>
       <p class="v42-help">${esc($('bgmSummary')?.textContent||'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.')}</p>`;
+    const titleStyle=`
+      <div class="v42-grid2">${pc($('titleFont'),'폰트')}${pc($('titleSize'),'크기 (px)')}${pc($('titleColor'),'색상 · 직접 선택')}${pc($('titleX'),'가로 위치')}${pc($('titleY'),'세로 위치')}${pc($('titleBold'),'볼드')}${pc($('titleItalic'),'이탤릭')}${pc($('titleStrokeEnabled'),'스트로크 사용')}${pc($('titleStrokeWidth'),'스트로크 두께')}</div>`;
+    const channelStyle=`
+      <div class="v42-grid2">${pc($('channelFont'),'폰트')}${pc($('channelSize'),'크기 (px)')}${pc($('channelColor'),'색상 · 직접 선택')}${pc($('channelX'),'가로 위치')}${pc($('channelY'),'세로 위치')}${pc($('channelBold'),'볼드')}${pc($('channelItalic'),'이탤릭')}${pc($('channelStrokeEnabled'),'스트로크 사용')}${pc($('channelStrokeWidth'),'스트로크 두께')}</div>`;
     const project=`
+      <label class="v42-field"><span>화면 비율</span><div class="v42-format-lock">9:16 <small>세로형 고정</small></div></label>
       ${pc($('layoutSelect'),'영상 템플릿')}
+      <p class="v42-help">${esc($('layoutDescription')?.textContent||'')}</p>
       ${pc($('titleInput'),'상단 제목',{wide:true})}
-      <div class="v42-grid2">${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}</div>
-      <div class="v42-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>`;
-    const output=`<div class="v42-grid2">${pc($('resolutionSelect'),'출력 해상도')}${pb($('exportBtn'),'MP4 영상 저장',{primary:true,wide:true})}</div>`;
+      <details class="v42-settings-details" open><summary>제목 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${titleStyle}</div></details>
+      ${pc($('channelInput'),'채널명 · 모든 템플릿',{wide:true})}
+      <details class="v42-settings-details" open><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>
+      ${pc($('fitSelect'),'이미지·영상 맞춤')}
+      ${pc($('templateSelect'),'움직임 프리셋')}
+      <div class="v42-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>
+      <p class="v42-help">랜덤 무빙은 이미지에만 적용하며 영상의 움직임은 유지합니다.</p>
+      <div class="v42-settings-stats"><span>출력 시간 <strong>${esc($('totalDuration')?.textContent||'0.0초')}</strong></span><span>반복 움직임 <strong>${esc($('repeatCount')?.textContent||'없음')}</strong></span></div>
+      <p class="v42-help">${esc($('timingNotice')?.textContent||'')}</p>
+      ${pb($('fitCutsBtn'),'자막 순서대로 컷 다시 연결',{wide:true})}`;
+    const output=`
+      <p class="v42-export-copy">제목·자막·이미지·영상 컷·영상 원음·내레이션·BGM을 하나의 영상으로 저장합니다. 첫 저장 시 약 32MB의 인코더를 내려받습니다. 파일은 외부로 전송하지 않습니다.</p>
+      <div class="v42-grid2">${pc($('resolutionSelect'),'출력 해상도')}${pb($('exportBtn'),'MP4 영상 저장',{primary:true,wide:true})}</div>`;
     $('v42SettingsBody').innerHTML=
       topActions+
       collapsibleSettingsSection('QUICK START','✨ 쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap))+
       settingsSection('01 SCRIPT & VOICE','대본과 내레이션',source,$('audioStatus')?.textContent||'오디오 없음')+
       settingsSection('AUDIO','배경음악 · BGM',bgm,$('bgmStatus')?.textContent||'음악 없음')+
       settingsSection('02 COMPOSE','화면 구성',project,$('sceneCount')?.textContent||'')+
-      settingsSection('04 EXPORT','출력 설정',output);
+      settingsSection('03 EXPORT','완성한 쇼츠를 MP4로.',output);
     syncSettingsProxyState();
   }
   function renderTemplate(){
