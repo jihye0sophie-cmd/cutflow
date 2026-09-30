@@ -43,6 +43,8 @@ const retiredMarkers=[
   ['history.js','mobileSceneGrid',history],
   ['history.js','mobileSceneStrip',history],
   ['history.js','mobileTiming',history],
+  ['timing-editor.js','mobileEditor',read('timing-editor.js')],
+  ['timing-editor.js','mobileTiming',read('timing-editor.js')],
   ['index.html','history.css',index],
 ];
 for(const [file,marker,source] of retiredMarkers){
