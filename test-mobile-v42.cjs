@@ -150,7 +150,7 @@ assert(js.includes('id="v42Export"'),'direct mobile export button missing');
 assert(js.includes('id="v42Play"'),'direct mobile play button missing');
 assert(js.includes('v42ExportDialog'),'mobile export dialog missing');
 assert(js.includes('navigator.canShare?.({files:[file]})'),'iPhone file share fallback missing');
-assert(js.includes('requestFullscreen'),'fullscreen API attempt missing');
+assert(js.includes('function openPreviewFullscreen()')&&js.includes("previewDialog.hidden=false")&&js.includes("classList.add('v42-preview-lock')"),'fullscreen preview overlay missing');
 assert(js.includes('CutflowPlayer?.seekProgress'),'direct mobile scrubber bridge missing');
 assert(css.includes('#v42ExportDialog'),'mobile export dialog styling missing');
 assert(js.includes("uploadBtn:'fileInput'"),'final audit: image/video input bridge missing');
