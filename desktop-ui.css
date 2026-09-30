@@ -332,3 +332,63 @@
     border-radius:10px!important;
   }
 }
+
+/* v42.9 compact project action controls */
+@media(min-width:761px){
+  .desktop-editor #desktopProject #scriptFileBtn{
+    display:inline-flex!important;
+    width:auto!important;
+    min-width:0!important;
+    justify-self:start;
+  }
+  .desktop-editor #desktopProject .bgm-buttons{
+    display:flex!important;
+    justify-content:flex-start!important;
+    align-items:center;
+    gap:8px!important;
+  }
+  .desktop-editor #desktopProject .bgm-buttons #bgmBtn{
+    width:auto!important;
+    min-width:118px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .desktop-editor #desktopProject .bgm-buttons #bgmRemove{
+    width:auto!important;
+    min-width:78px!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+  .desktop-editor #desktopProject #applyTemplateBtn,
+  .desktop-editor #desktopProject #randomMotionBtn{
+    display:inline-flex!important;
+    width:auto!important;
+    min-width:150px!important;
+    margin-right:8px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .desktop-editor #desktopProject #fitCutsBtn{
+    display:inline-flex!important;
+    width:auto!important;
+    min-width:210px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .desktop-editor #desktopProject #titleSelectionApply{
+    display:none!important;
+  }
+  .desktop-editor #desktopProject #titleSelectionReset{
+    width:auto!important;
+    min-width:58px!important;
+    padding-left:12px!important;
+    padding-right:12px!important;
+  }
+  .desktop-editor #desktopProject .export-actions #exportBtn{
+    background:var(--studio-accent)!important;
+    border-color:var(--studio-accent)!important;
+    color:#111!important;
+    font-weight:850!important;
+    min-height:42px!important;
+  }
+}
