@@ -69,7 +69,7 @@
   document.body.append(exportDialogV42);
   const settingsDialog=document.createElement('dialog');
   settingsDialog.id='v42SettingsDialog';
-  settingsDialog.innerHTML='<div class="v42-sheet-head"><div><strong>프로젝트 설정</strong><small>Cutflow</small></div><button type="button" id="v42SettingsClose" aria-label="닫기">×</button></div><div id="v42SettingsBody" class="v42-settings-body"></div>';
+  settingsDialog.innerHTML='<div class="v42-sheet-head"><div><strong>프로젝트 설정</strong></div><button type="button" id="v42SettingsClose" aria-label="닫기">×</button></div><div id="v42SettingsBody" class="v42-settings-body"></div>';
   document.body.append(settingsDialog);
 
   const panel=$('v42Panel'),tabs=$('v42Tabs'),stage=$('v42Stage'),ctx=stage.getContext('2d'),fullStage=$('v42FullStage'),fullCtx=fullStage.getContext('2d');
@@ -338,19 +338,43 @@
     settingsProxyMap.clear();
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map:settingsProxyMap});
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
-    const settingsSection=(step,title,body,extra='')=>`<section class="v42-pc-settings-section ${extra}"><header><span>${esc(step)}</span><strong>${esc(title)}</strong></header><div class="v42-pc-settings-body">${body}</div></section>`;
-    const collapsibleSettingsSection=(step,title,body,extra='')=>`<details class="v42-pc-settings-section v42-pc-settings-collapsible ${extra}"><summary><span>${esc(step)}</span><strong>${esc(title)}</strong><em>열기</em></summary><div class="v42-pc-settings-body">${body}</div></details>`;
-    const quickActions=`<div class="v42-settings-utility"><div class="v42-settings-utility-group"><span>PROJECT</span><button type="button" class="v42-btn primary" data-direct-click="uploadBtn">+ 이미지·영상</button><button type="button" class="v42-btn" data-direct-click="demoBtn">샘플 시작</button></div></div>`;
-    const source=`${pc($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}${pc($('projectCaptionWrap'),'자막 자동 줄바꿈')}<div class="v42-actions">${pb($('scriptFileBtn'),'TXT 대본 불러오기')}${pb($('audioBtn'),'내레이션 불러오기')}</div><p class="v42-status">${esc($('audioStatus')?.textContent||'오디오 없음')}</p>${pb($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}<div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills"><label><input type="radio" name="v42SettingsSilence" value="soft"><span>부드럽게</span></label><label><input type="radio" name="v42SettingsSilence" value="normal" checked><span>보통</span></label><label><input type="radio" name="v42SettingsSilence" value="tight"><span>타이트</span></label></div><button type="button" class="v42-btn wide" data-settings-silence-run>무음 줄이기</button><p class="v42-help" data-settings-silence-status>원본은 유지하고 처리본을 사용합니다.</p></div>`;
-    const bgm=`<div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div><p class="v42-status">${esc($('bgmStatus')?.textContent||'음악 없음')}</p><div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인')}${pc($('bgmFadeOut'),'페이드 아웃')}</div>`;
-    const project=`${pc($('layoutSelect'),'영상 템플릿')}${pc($('titleInput'),'상단 제목',{wide:true})}<div class="v42-grid2">${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}</div><div class="v42-actions">${pb($('applyTemplateBtn'),'움직임 전체 적용')}${pb($('randomMotionBtn'),'랜덤 무빙')}</div>`;
+    const settingsSection=(step,title,body,status='')=>`<section class="v42-pc-settings-section"><header><div><span>${esc(step)}</span><strong>${esc(title)}</strong></div>${status?`<small>${esc(status)}</small>`:''}</header><div class="v42-pc-settings-body">${body}</div></section>`;
+    const collapsibleSettingsSection=(step,title,body)=>`<details class="v42-pc-settings-section v42-pc-settings-collapsible"><summary><div><span>${esc(step)}</span><strong>${esc(title)}</strong></div><em>자동 세팅 열기</em></summary><div class="v42-pc-settings-body">${body}</div></details>`;
+    let waveformSrc='';try{waveformSrc=$('waveform')?.toDataURL?.('image/png')||'';}catch{}
+    const topActions=`
+      <div class="v42-settings-top-actions">
+        <button type="button" class="v42-btn" data-direct-click="projectOpenBtn">프로젝트 열기</button>
+        <button type="button" class="v42-btn" data-direct-click="addCueBtn">+ 구간 추가</button>
+        <button type="button" class="v42-btn" data-direct-click="clearBtn">불러온 컷 비우기</button>
+      </div>
+      <div class="v42-settings-source-actions">
+        <button type="button" class="v42-btn primary" data-direct-click="uploadBtn">이미지·영상 추가</button>
+        <button type="button" class="v42-btn" data-direct-click="demoBtn">샘플로 시작</button>
+      </div>`;
+    const source=`
+      ${pc($('scriptInput'),'대본 · 한 줄이 한 자막 구간',{wide:true})}
+      ${pc($('projectCaptionWrap'),'자막 보기 좋게 자동 줄바꿈')}
+      <div class="v42-settings-file-row">${pb($('scriptFileBtn'),'TXT 대본 불러오기',{wide:true})}</div>
+      <div class="v42-settings-file-row">${pb($('audioBtn'),'내레이션 오디오 불러오기',{wide:true})}</div>
+      ${waveformSrc?`<div class="v42-settings-waveform"><img src="${waveformSrc}" alt="내레이션 파형"></div>`:''}
+      ${pb($('buildCuesBtn'),'대본으로 자막 구간 만들기',{primary:true,wide:true})}
+      <p class="v42-help">내레이션을 사용할 때는 대본 분량과 음성의 무음 구간으로 시간을 추정합니다. 내레이션이 없다면 장면을 추가하고 자막과 장면 길이를 직접 입력할 수 있습니다.</p>`;
+    const bgm=`
+      <div class="v42-actions">${pb($('bgmBtn'),'음악 파일 추가',{primary:true})}${pb($('bgmRemove'),'음악 제거',{danger:true})}</div>
+      <div class="v42-grid2">${pc($('bgmStart'),'음악 시작 지점 (초)')}${pc($('bgmVolume'),'BGM 볼륨')}${pc($('bgmRepeat'),'음악이 짧을 때')}${pc($('bgmFadeIn'),'페이드 인 (초)')}${pc($('bgmFadeOut'),'페이드 아웃 (초)')}</div>
+      <p class="v42-help">${esc($('bgmSummary')?.textContent||'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.')}</p>`;
+    const project=`
+      ${pc($('layoutSelect'),'영상 템플릿')}
+      ${pc($('titleInput'),'상단 제목',{wide:true})}
+      <div class="v42-grid2">${pc($('channelInput'),'채널명')}${pc($('fitSelect'),'이미지·영상 맞춤')}${pc($('templateSelect'),'움직임 프리셋')}</div>
+      <div class="v42-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>`;
     const output=`<div class="v42-grid2">${pc($('resolutionSelect'),'출력 해상도')}${pb($('exportBtn'),'MP4 영상 저장',{primary:true,wide:true})}</div>`;
     $('v42SettingsBody').innerHTML=
-      quickActions+
-      collapsibleSettingsSection('QUICK START','쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap),'v42-quick-start')+
-      settingsSection('01 SCRIPT & VOICE','대본과 내레이션',source)+
-      settingsSection('AUDIO','배경음악 · BGM',bgm)+
-      settingsSection('02 COMPOSE','화면 구성',project)+
+      topActions+
+      collapsibleSettingsSection('QUICK START','✨ 쇼츠 자동 세팅',autoSetupMarkup(settingsProxyMap))+
+      settingsSection('01 SCRIPT & VOICE','대본과 내레이션',source,$('audioStatus')?.textContent||'오디오 없음')+
+      settingsSection('AUDIO','배경음악 · BGM',bgm,$('bgmStatus')?.textContent||'음악 없음')+
+      settingsSection('02 COMPOSE','화면 구성',project,$('sceneCount')?.textContent||'')+
       settingsSection('04 EXPORT','출력 설정',output);
     syncSettingsProxyState();
   }
