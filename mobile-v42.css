@@ -2110,3 +2110,33 @@ body.v42-mobile .v42-tabs *,
 body.v42-mobile .v42-tabs{
   background:#0d0f12!important;
 }
+
+/* v42.10.1 use the full bottom safe area in installed mobile app */
+body.v42-mobile::after{
+  display:none!important;
+  content:none!important;
+}
+body.v42-mobile.v42-standalone #mobileAppV42{
+  padding-bottom:0!important;
+}
+body.v42-mobile.v42-standalone .v42-main{
+  padding-bottom:0!important;
+}
+body.v42-mobile.v42-standalone .v42-panel{
+  padding-bottom:8px!important;
+}
+body.v42-mobile.v42-standalone .v42-tabs{
+  bottom:6px!important;
+}
+
+/* Safari browser mode can still reserve its browser chrome space,
+   but installed Home Screen mode should use the full screen. */
+body.v42-mobile.v42-standalone #v42SettingsDialog,
+body.v42-mobile.v42-standalone #v42ExportDialog{
+  bottom:0!important;
+  border-radius:18px 18px 0 0!important;
+}
+body.v42-mobile.v42-standalone #v42SettingsDialog .v42-settings-body,
+body.v42-mobile.v42-standalone #v42ExportDialog .v42-export-body{
+  padding-bottom:18px!important;
+}
