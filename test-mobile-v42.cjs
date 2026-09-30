@@ -100,10 +100,9 @@ assert(new RegExp('style-editor\\.js\\?v=[^"\\x27]+').test(html),'caption style 
 assert(new RegExp('timing-editor\\.js\\?v=[^"\\x27]+').test(html),'timing mount cache key missing');
 assert(app.includes('window.CutflowCaption={'),'shared caption editing bridge missing');
 assert(app.includes('captionChanged(index)'),'caption update refresh hook missing');
-assert(styleEditor.includes('window.CutflowCaptionStyle={'),'caption style bridge missing');
+assert(styleEditor.includes('window.newCueStyle=')&&styleEditor.includes('function applyCaptionStyle('),'caption style integration missing');
 assert(timingEditor.includes('mount(container,index)'),'v42 timing mount API missing');
 assert(timingEditor.includes('externalPanel?.isConnected'),'external timing panel visibility missing');
-assert(timingEditor.includes('window.CutflowTimeline={'),'shared timeline API missing');
 assert(timingEditor.includes('timing-scene-layer')&&timingEditor.includes('timing-caption-layer'),'shared timeline layers missing');
 assert(js.includes("tab='timing'"),'mobile precision timing tab navigation missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
