@@ -237,3 +237,17 @@
 .desktop-editor #desktopProject .auto-setup-head h2{
   color:var(--studio-accent);
 }
+
+/* project settings top actions parity */
+.desktop-editor #desktopProject #desktopManage:empty{display:none}
+.desktop-editor #desktopProject .hero-actions{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  width:100%;
+}
+.desktop-editor #desktopProject .hero-actions .button,
+.desktop-editor #desktopProject .hero-actions #clearBtn{
+  width:100%;
+  min-width:0;
+}
