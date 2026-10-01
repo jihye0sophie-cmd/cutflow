@@ -4,6 +4,7 @@ const js=fs.readFileSync('mobile-v42.js','utf8');
 const css=fs.readFileSync('mobile-v42.css','utf8');
 const build=fs.readFileSync('build.cjs','utf8');
 const app=fs.readFileSync('app.js','utf8');
+const desktop=fs.readFileSync('desktop-ui.js','utf8');
 const autoSetup=fs.readFileSync('auto-setup.js','utf8');
 const sceneUi=fs.readFileSync('scene-ui.js','utf8');
 const styleEditor=fs.readFileSync('style-editor.js','utf8');
