@@ -1,5 +1,5 @@
 .desktop-only{display:none}
-@media(min-width:761px){
+@media(min-width:820px){
  body.desktop-editor{--ink:#fff;--paper:var(--studio-card);--muted:var(--studio-muted);--line:var(--studio-border);--lime:var(--studio-accent);background:var(--studio-bg);color:#fff;color-scheme:dark;font-size:14px}
  .desktop-editor *{box-sizing:border-box}.desktop-editor [hidden]{display:none!important}.desktop-editor .desktop-only{display:block}
  .desktop-editor .topbar{position:static;border-color:var(--studio-border);background:var(--studio-bg);gap:16px}.desktop-editor .brand span{color:var(--studio-muted)}.desktop-editor .brand-mark,.desktop-editor .save-state{display:none}
@@ -36,9 +36,9 @@
  .desktop-editor #desktopProject{width:min(850px,calc(100vw - 48px));max-width:850px;max-height:88dvh;padding:0;background:var(--studio-bg);color:#fff;border:1px solid var(--studio-border);border-radius:12px}.desktop-editor #desktopProject>header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--studio-card);position:sticky;top:0;z-index:2}.desktop-editor #desktopProject h2{font-size:18px;margin:0}#desktopProjectBody{padding:20px}.desktop-editor #desktopProject .panel{padding:20px;margin:0 0 16px;background:var(--studio-card);border:1px solid var(--studio-border);box-shadow:none}.desktop-editor #desktopProject .hero{margin:0 0 16px;padding:0;min-height:0;display:block}.desktop-editor #desktopProject .hero>div:first-child,.desktop-editor #desktopProject .hero-actions p{display:none}.desktop-editor #desktopProject .hero-actions{display:flex;gap:10px;justify-content:flex-start}.desktop-editor #desktopProject .setup-panel{width:100%}.desktop-editor .text-style-panel{background:var(--studio-input);border-color:var(--studio-border)}.desktop-editor .text-style-panel summary{color:#fff}.desktop-editor .count-pill,.desktop-editor .format-lock{background:var(--studio-input);color:#fff}.desktop-editor .button.primary,.desktop-editor .button.secondary{background:var(--studio-accent);color:#111;border-color:var(--studio-accent)}.desktop-editor .export-panel{flex-wrap:wrap}.desktop-editor dialog{background:var(--studio-card);color:#fff;border-color:var(--studio-border)}
  @media(max-width:1000px){.desktop-editor .topbar{padding:12px 16px}.desktop-editor .brand span{display:none}.desktop-workspace{grid-template-columns:minmax(260px,35%) minmax(0,1fr)}#desktopEditor{padding:14px}.desktop-current{align-items:flex-start;flex-direction:column;gap:0}.desktop-current p{margin:4px 0 0}.desktop-editor .caption-style-grid{grid-template-columns:1fr}.desktop-editor .editor-row-heading{flex-wrap:wrap}.desktop-editor .app-shell{padding:0 12px 12px}}
 }
-@media(min-width:761px){.desktop-editor .stage-wrap{flex-basis:0}.desktop-editor .editor-row-heading{border-color:var(--studio-border)}}
+@media(min-width:820px){.desktop-editor .stage-wrap{flex-basis:0}.desktop-editor .editor-row-heading{border-color:var(--studio-border)}}
 /* free-edit and video-audio controls */
-@media(min-width:761px){
+@media(min-width:820px){
  .desktop-editor .editor-audio{grid-column:1/-1!important}
  .desktop-editor .editor-audio>span{display:block;margin-top:5px;font-size:12px;color:var(--studio-muted)}
  .desktop-editor .editor-audio{padding:12px;border:1px solid var(--studio-border);border-radius:8px;background:var(--studio-card)}
@@ -50,7 +50,7 @@
 .desktop-editor .trim-fields,.desktop-editor .video-audio-fades{max-width:520px}.desktop-editor .video-volume-presets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 
 /* desktop scene editing */
-@media(min-width:761px){
+@media(min-width:820px){
  #desktopScenes>header .desktop-scene-head-actions{display:flex;gap:8px;align-items:center}
  #desktopSceneEdit[aria-pressed=true]{background:var(--studio-accent);color:#111;border-color:var(--studio-accent);font-weight:700}
  #desktopStrip .desktop-scene-item{position:relative;flex:0 0 80px;height:80px;min-width:80px}
@@ -70,16 +70,19 @@
 }
 
 /* project text controls + scene strip follow */
-@media(min-width:761px){
+@media(min-width:820px){
  .desktop-editor #desktopProject .text-style-grid input[type=number]{background:var(--studio-card);color:#fff;-webkit-text-fill-color:#fff;caret-color:#fff}
  .desktop-editor #desktopProject .text-style-grid input[type=range]{width:100%;accent-color:var(--studio-accent);background:transparent;border:0;padding:0}
  .desktop-editor #desktopProject .text-style-grid output{float:right;color:var(--studio-accent);font-size:12px}
 }
 
 /* caption-first actions + keyboard workflow */
-@media(min-width:761px){
+@media(min-width:820px){
  .desktop-editor .caption-cue-actions{margin-top:12px;padding-top:12px;border-top:1px solid var(--studio-border)}
  .desktop-editor .caption-cue-actions button{min-height:34px}
+ .desktop-editor .scene-cue-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
+ .desktop-editor .scene-cue-actions .cue-action-label{margin-right:auto;color:var(--studio-muted);font-size:11px;font-weight:800}
+ .desktop-editor .scene-cue-actions button{min-height:34px}
  #desktopEditor[data-mode=caption] .editor-text{display:block!important}
 }
 
@@ -108,7 +111,7 @@
 .desktop-scene-tools small{display:block;margin-top:7px;color:var(--studio-muted);font-size:10px}
 
 /* workflow polish: compact header, quick timing, progressive disclosure, scene status */
-@media(min-width:761px){
+@media(min-width:820px){
  .desktop-editor .topbar{height:58px;min-height:58px;padding:8px 16px;flex-wrap:nowrap;overflow:hidden}
  .desktop-editor .brand{flex:0 0 auto;min-width:0}.desktop-editor .brand strong{font-size:20px;white-space:nowrap}.desktop-editor .brand span{font-size:10px;white-space:nowrap}
  .desktop-editor .project-tools{display:none!important}
@@ -129,10 +132,10 @@
  .media-advanced>summary{cursor:pointer;padding:11px 12px;font-weight:700}.media-advanced>summary span{font-size:11px;color:var(--studio-muted);font-weight:400;margin-left:6px}.media-advanced-body{display:grid;gap:12px;padding:0 12px 12px}
  .desktop-scene-card{position:relative}.scene-status-badge{position:absolute;z-index:2;display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#0b0e11dd;color:#fff;font-size:10px;font-weight:800;border:1px solid #ffffff33}.scene-status-badge.caption-count{right:4px;top:4px}.scene-status-badge.motion-state{left:4px;bottom:4px;color:var(--studio-accent)}
 }
-@media(min-width:761px) and (max-width:900px){
+@media(min-width:820px) and (max-width:900px){
  .desktop-editor .topbar{padding-inline:10px}.desktop-editor .desktop-header-actions button{padding-inline:8px}.desktop-editor #desktopExport{padding-inline:10px}
 }
-@media(min-width:761px){
+@media(min-width:820px){
  #desktopEditor:not([data-mode=image]) .media-advanced{display:none!important}
  #desktopEditor[data-mode=image] .media-advanced{display:block!important}
 }
@@ -144,7 +147,7 @@
  .desktop-editor .topbar .project-tools,.desktop-editor .topbar .save-state{display:none!important}
 }
 /* desktop polish */
-@media(min-width:761px){
+@media(min-width:820px){
   /* Keep the app header visually separated from the editor workspace. */
   #desktopStudio{margin-top:12px;height:calc(100dvh - 86px)}
   .desktop-editor .app-shell{padding-top:0}
@@ -178,7 +181,7 @@
 
 
 /* image/video tab follows the actual editing frequency. */
-@media(min-width:761px){
+@media(min-width:820px){
   #desktopEditor[data-mode=image] #desktopReplace{display:none!important}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media,
   #desktopEditor[data-mode=image] .scene-row.desktop-selected>.editor-media{position:relative;padding-top:46px}
@@ -195,7 +198,7 @@
 
 
 /* stabilization: exact image/video editor order, resilient to late media-transform creation. */
-@media(min-width:761px){
+@media(min-width:820px){
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media{order:1!important;grid-column:1/-1!important}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-motion{order:2!important;grid-column:1!important}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-transition{order:3!important;grid-column:2!important}
@@ -207,7 +210,7 @@
 }
 
 /* Whole-caption editor entry */
-@media(min-width:761px){
+@media(min-width:820px){
   #desktopBatchCaptions{margin-left:auto!important;flex:0 0 auto!important;max-width:none!important;background:#20252b!important;color:#fff!important;border-color:#3b434c!important;font-weight:700}
   #desktopBatchCaptions:hover{border-color:var(--studio-accent)!important}
   #desktopEditor:not([data-mode=caption]) #desktopBatchCaptions{display:none!important}
@@ -256,7 +259,7 @@
 }
 
 /* desktop title/channel style layout mirrors mobile */
-@media(min-width:761px){
+@media(min-width:820px){
   .desktop-editor #desktopProject #titleStylePanel .text-style-grid,
   .desktop-editor #desktopProject #channelStylePanel .text-style-grid{
     display:grid!important;
@@ -320,7 +323,7 @@
 }
 
 /* compact project action controls */
-@media(min-width:761px){
+@media(min-width:820px){
   .desktop-editor #desktopProject #scriptFileBtn{
     display:inline-flex!important;
     width:auto!important;
