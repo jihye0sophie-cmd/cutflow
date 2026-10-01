@@ -66,7 +66,7 @@ function sync(){
   $('desktopTabs').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===mode)));
  }
  let syncQueued=false;
- function requestSync(){if(syncQueued||!enabled)return;syncQueued=true;queueMicrotask(()=>{syncQueued=false;sync();});}
+ function requestSync(){if(syncQueued||!enabled)return;syncQueued=true;requestAnimationFrame(()=>{syncQueued=false;sync();});}
  function sceneStatus(item,source){const count=(item?.cueIndices||[]).length;const motion=window.CutflowMotionMeta?.[source?.motion]?.badge||'';return `${count>1?`<span class="scene-status-badge caption-count">${count}</span>`:''}${motion?`<span class="scene-status-badge motion-state">${motion}</span>`:''}`;}
  function canEditStructure(){return CutflowScene.confirmStructureEdit?.()===true;}
  function clearDragState(){dragIndex=null;$('desktopStrip').querySelectorAll('.dragging,.drop-target').forEach(el=>el.classList.remove('dragging','drop-target'));}
