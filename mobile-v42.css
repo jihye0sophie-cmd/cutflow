@@ -267,6 +267,16 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
   border:1px solid #303640;
   border-radius:8px;
   background:#14171c;
+}
+.v42-caption-quick-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+.v42-caption-quick-actions .v42-btn{
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
 }.v42-caption-timing-head{
   display:flex;
   align-items:center;
@@ -1292,7 +1302,7 @@ html,body,body.v42-mobile,body.v42-mobile #mobileAppV42{
 #v42Stage.v42-transform-active{touch-action:none!important;cursor:move;outline:2px solid var(--v42-accent);outline-offset:-2px}
 #v42Stage.v42-transform-active:active{cursor:grabbing}
 .v42-panel[data-active-tab="media"] .v42-section:last-child{margin-bottom:0}
-@media(max-width:760px){
+@media(max-width:819px){
   .timing-head-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   .timing-head-actions button:last-child{grid-column:auto!important}
   .timing-head-actions button{width:100%;min-width:0}
