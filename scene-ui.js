@@ -235,7 +235,7 @@
       changed();this.select(index);toast('다음 장면과 합쳤습니다. 현재 장면의 효과 설정을 유지합니다.');return true;
     },
     async replace(file){
-      if(!file)return false;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;const oldIds=new Set(scenes.map(s=>s.id));await addFiles([file],{createFreeCues:false});const added=scenes.find(s=>!oldIds.has(s.id));if(!added)return false;if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
+      if(!file)return false;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;const [added]=await addFiles([file],{createFreeCues:false,deferCommit:true});if(!added){toast('장면을 교체하지 못했습니다. 파일을 다시 확인해 주세요.');return false;}if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
       if(withCues&&group){
         const previous=scenes.find(s=>s.id===group.sceneId),addedIndex=scenes.indexOf(added),previousIndex=previous?scenes.indexOf(previous):-1;
         if(previous&&previousIndex>=0){
