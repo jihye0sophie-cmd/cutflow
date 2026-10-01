@@ -382,10 +382,27 @@
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
   window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing){const time=currentTime(),activeScene=sceneIndexAtTime(time);playbackFollowScene=activeScene>=0?activeScene:target;syncSelectedCueToTime(time);pendingCenter=true;}}requestRenderAll();});
   window.addEventListener('cutflow-scene-updated',requestRenderAll);
-  window.addEventListener('cutflow-project-restored',()=>{pendingCenter=true;requestRenderAll();});
+  window.addEventListener('cutflow-project-restored',()=>{selectedCueId=null;playbackFollowScene=-1;timelineScrollLeft=0;pendingCenter=true;syncSelectedCueToTime(currentTime());requestRenderAll();});
   new MutationObserver(requestRenderAll).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
-  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const playerState=window.CutflowPlayer?.state?.(),track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration(),time=currentTime();line.style.left=`${pctAll(time,duration)}%`;if(clock)clock.textContent=`${fmt(time)} / ${fmt(duration)}`;if(playerState?.playing){const activeScene=sceneIndexAtTime(time);if(activeScene>=0&&activeScene!==playbackFollowScene){playbackFollowScene=activeScene;syncSelectedCueToScene(activeScene,{forceFirst:false});syncSelectedCueToTime(time);pendingCenter=true;requestRenderAll();}}else playbackFollowScene=-1;},100);
+  function syncPlaybackFrame(){
+    const panel=visiblePanel(),playerState=window.CutflowPlayer?.state?.();
+    if(panel){
+      const time=currentTime();updatePlayheadFeedback(time);
+      if(playerState?.playing){
+        const activeScene=sceneIndexAtTime(time);
+        if(activeScene>=0&&activeScene!==playbackFollowScene){
+          playbackFollowScene=activeScene;
+          syncSelectedCueToScene(activeScene,{forceFirst:false});
+          syncSelectedCueToTime(time);
+          pendingCenter=true;
+          requestRenderAll();
+        }
+      }else playbackFollowScene=-1;
+    }else if(!playerState?.playing)playbackFollowScene=-1;
+    requestAnimationFrame(syncPlaybackFrame);
+  }
+  requestAnimationFrame(syncPlaybackFrame);
   function selectTimelineCaption(index){
     if(!cues[index])return false;
     selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);requestRenderAll();return true;
