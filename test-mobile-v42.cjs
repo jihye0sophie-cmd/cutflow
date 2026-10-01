@@ -33,7 +33,7 @@ assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto set
 assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
 assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X (%)','x'")&&js.includes("field('Position Y (%)','y'"),'direct media transform controls missing');
 assert(js.includes('id="v42TransformPreview"')&&js.includes('setMobileTransformMode')&&js.includes('previewTransformGesture'),'mobile preview drag/pinch transform missing');
-assert(js.indexOf("section('이미지·영상 크기 / 위치',transform)")<js.indexOf("section('장면 편집',sceneActions)"),'mobile scene edit must stay last after transform controls');
+assert(js.indexOf("section('이미지·영상 크기 / 위치',transform)")<js.indexOf("section('장면 관리',sceneActions)"),'mobile scene management must stay last after transform controls');
 assert(js.includes("details('영상 고급 설정'")&&js.includes("field('시작 (초)','trimStart'")&&js.includes('data-media-field="mediaVolume"')&&js.includes("field('페이드 인 (초)','mediaFadeIn'"),'video advanced controls missing');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
 assert(js.includes('layoutSelect')&&js.includes('titleInput')&&js.includes('channelInput'),'template workflow missing');
