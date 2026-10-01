@@ -117,7 +117,7 @@ assert(timingEditor.includes('const bars=420'),'mobile timing must inherit dense
 assert(js.includes("tab='timing'"),'mobile precision timing tab navigation missing');
 assert(js.includes('data-caption-field="text"'),'direct mobile caption text field missing');
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
-assert(!js.includes('id="v42CaptionPlay"'),'retired current-caption playback button must stay removed');
+assert(js.includes('id="v42CaptionPlay"')&&js.includes("api.play?.(index)"),'mobile current-caption playback quick action missing');
 assert(js.includes('v42CaptionBatchOpen'),'mobile whole-caption editor entry missing');
 assert(new RegExp('caption-batch-editor\\.js\\?v=[^"\\x27]+').test(html),'shared whole-caption editor script missing');
 assert(new RegExp('caption-batch-editor\\.css\\?v=[^"\\x27]+').test(html),'shared whole-caption editor css missing');
