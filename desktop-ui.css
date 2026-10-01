@@ -78,11 +78,11 @@
 
 /* caption-first actions + keyboard workflow */
 @media(min-width:820px){
- .desktop-editor .caption-cue-actions{margin-top:12px;padding-top:12px;border-top:1px solid var(--studio-border)}
- .desktop-editor .caption-cue-actions button{min-height:34px}
- .desktop-editor .scene-cue-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
- .desktop-editor .scene-cue-actions .cue-action-label{margin-right:auto;color:var(--studio-muted);font-size:11px;font-weight:800}
- .desktop-editor .scene-cue-actions button{min-height:34px}
+ .desktop-editor .caption-cue-actions,.desktop-editor .scene-cue-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px;padding:9px 10px;border:1px solid var(--studio-border);border-radius:9px;background:var(--studio-input)}
+ .desktop-editor .caption-cue-actions{margin-top:12px}
+ .desktop-editor .caption-cue-actions .cue-action-label,.desktop-editor .scene-cue-actions .cue-action-label{margin-right:auto;color:var(--studio-muted);font-size:11px;font-weight:800;white-space:nowrap}
+ .desktop-editor .caption-cue-actions button,.desktop-editor .scene-cue-actions button{min-height:34px}
+ .desktop-editor .scene-cue-actions{background:rgba(255,255,255,.018)}
  #desktopEditor[data-mode=caption] .editor-text{display:block!important}
 }
 
