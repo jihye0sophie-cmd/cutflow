@@ -25,6 +25,7 @@ assert.ok(css.includes('.timing-waveform-bars')&&js.includes('const bars=420'),'
 assert.ok(!css.includes('.timeline-audio-block'),'retired audio layer styles should be removed');
 
 assert.ok(!js.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'playback must not rebuild the timing DOM');
+assert.ok(js.includes("if(window.CutflowPlayer?.state?.().playing)pendingCenter=true"),'precision timing playback must follow the active scene');
 assert.ok(js.includes("targets.forEach(renderPanel)"),'timeline should render only active timing panels');
 assert.ok(js.includes("h.closest('.timing-layer-body')"),'drag geometry must use the inset time area');
 assert.ok(js.includes("drag.el?.isConnected"),'drag must keep the active handle DOM stable');
