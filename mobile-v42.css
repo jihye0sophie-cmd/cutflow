@@ -225,29 +225,42 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 }.v42-caption-segment-nav .v42-btn{
   min-height:34px;
   padding:6px 9px;
+}.v42-edit-action-group{
+  margin:8px 0 0;
+  padding:9px;
+  border:1px solid #303640;
+  border-radius:9px;
+  background:#14171c;
+}.v42-edit-action-group+.v42-edit-action-group{
+  margin-top:6px;
+}.v42-edit-action-group>strong{
+  display:block;
+  margin:0 0 7px;
+  color:#eef1f4;
+  font-size:10px;
+  font-weight:800;
 }.v42-caption-actions{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:6px;
-  margin:8px 0;
-  padding-top:8px;
-  border-top:1px solid #303640;
+  margin:0;
+  padding:0;
+  border:0;
 }.v42-caption-actions .v42-btn{
   min-width:0;
   padding:7px 5px;
 }.v42-scene-caption-actions{
   display:grid;
-  grid-template-columns:auto minmax(0,.72fr) minmax(0,1.45fr);
-  align-items:center;
+  grid-template-columns:minmax(0,.75fr) minmax(0,1.45fr);
   gap:6px;
-  margin:6px 0 8px;
-}.v42-scene-caption-actions>span{
-  color:var(--v42-muted);
-  font-size:10px;
-  font-weight:800;
+  margin:0;
 }.v42-scene-caption-actions .v42-btn{
   min-width:0;
   padding:7px 5px;
+}.v42-edit-action-group.scene{
+  background:#12151a;
+}.v42-edit-action-group.scene>strong{
+  color:#cfd5dc;
 }.v42-caption-timing{
   margin-top:8px;
   padding:9px;
