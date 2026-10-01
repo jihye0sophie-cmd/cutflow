@@ -204,7 +204,7 @@
   if(typeof compactMq.addEventListener==='function')compactMq.addEventListener('change',syncResponsiveMode);
   else if(typeof compactMq.addListener==='function')compactMq.addListener(syncResponsiveMode);
   const proxyMap=new Map(),settingsProxyMap=new Map();
-  let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false,captionMode='edit',captionSelection={index:-1,start:0,end:0};
+  let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false,captionSelection={index:-1,start:0,end:0};
 
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const key=()=>`p${Math.random().toString(36).slice(2)}`;
