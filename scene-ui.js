@@ -83,7 +83,8 @@
       if(patch.mediaFadeOut!=null)scene.mediaFadeOut=Math.max(0,Math.min(available,Number(patch.mediaFadeOut)||0));
       if(trimChanged&&group){for(const ci of group.cueIndices){delete cues[ci].trimStart;delete cues[ci].trimEnd;cues[ci].mediaOffset=Math.max(0,cues[ci].start-group.start);}if(group.freeEdit)setSceneGroupDuration(group.firstCueIndex,Math.max(.1,available));}
     }
-    if(cues.length)renderCues();else{renderScenes();changed();}
+    if(cues.length)renderCues();else renderScenes();
+    changed();
     window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state:inspect(index)}}));
     return inspect(index);
   };
