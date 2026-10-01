@@ -219,6 +219,7 @@
     autoNarrationBtn:'autoNarration',
     autoGridBtn:'autoGrids',
     autoSingleBtn:'autoSingles',
+    autoLongVideoBtn:'autoLongVideo',
     autoBgmBtn:'autoBgm'
   };
   const fileTargetFor=el=>fileButtonTargets[el?.id]||'';
@@ -418,9 +419,30 @@
     const preset=document.querySelector('input[name="autoSilencePreset"]:checked')?.value||'normal';
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map});
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map});
-    const info=window.CutflowAutoSetup?.status?.()||{canStart:!$('autoStart')?.disabled,running:false,reason:''};
+    const info=window.CutflowAutoSetup?.status?.()||{canStart:!$('autoStart')?.disabled,running:false,reason:'',mediaMode:'multi'};
+    const longMode=info.mediaMode==='long-video';
     const progressVisible=!$('autoProgress')?.hidden||info.running;
     const runText=progressVisible?($('autoStatus')?.textContent||''):(info.canStart?'준비 완료 · 자동 세팅을 시작할 수 있습니다.':info.reason||'');
+    const mediaSource=longMode?`
+      <section class="v42-auto-flow-section v42-auto-images-section" data-auto-media-mode-view="long-video">
+        <header><strong>긴 영상 1개 자동 분할</strong></header>
+        ${pc($('autoMediaMode'),'장면 준비 방식',{wide:true})}
+        <div class="v42-auto-audio-picks"><div><span class="pick-button">${pb($('autoLongVideoBtn'),'긴 영상 선택')}</span><small data-auto-status="long-video">${esc($('autoLongVideoName')?.textContent||'선택 안 됨')}</small></div></div>
+        ${pc($('autoLongVideoStart'),'원본 영상 시작 위치 (초)',{wide:true})}
+        <p class="v42-help">자막 구간 수만큼 같은 원본 영상을 자동으로 나누고 각 장면의 시작·종료 구간을 자막 길이에 맞춥니다. 자동 세팅 후 이미지·영상 탭에서 다시 조정할 수 있습니다.</p>
+      </section>`:`
+      <section class="v42-auto-flow-section v42-auto-images-section" data-auto-media-mode-view="multi">
+        ${pc($('autoMediaMode'),'장면 준비 방식',{wide:true})}
+        <header class="v42-auto-images-head"><div class="v42-auto-images-title"><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div><div class="v42-auto-image-buttons">${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}</div></header>
+        <div class="v42-auto-source-block">
+          <div class="v42-auto-source-title"><strong>그리드 분할 이미지</strong><small data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</small></div>
+          <div class="v42-auto-grid-inline" data-settings-grid-mirror>${autoGridMirror()}</div>
+        </div>
+        <div class="v42-auto-source-block v42-auto-single-block">
+          <div class="v42-auto-source-title"><strong>개별 이미지</strong><small data-auto-status="single">${esc($('autoSingleName')?.textContent||'선택 안 됨')}</small></div>
+          <div data-settings-single-mirror>${autoSingleMirror()}</div>
+        </div>
+      </section>`;
     return `
       <div class="v42-auto-basics">
         <div class="v42-auto-title">${pc($('autoTitle'),'영상 제목',{wide:true})}</div>
@@ -439,18 +461,8 @@
         </div>
         <div class="v42-silence"><strong>내레이션 무음 줄이기</strong><div class="v42-pills" data-auto-silence>${[['soft','부드럽게'],['normal','보통'],['tight','타이트']].map(([v,l])=>`<label><input type="radio" name="v42AutoSilence" value="${v}" ${preset===v?'checked':''}><span>${l}</span></label>`).join('')}</div><p class="v42-help" data-auto-status="silence-info">${esc($('autoSilenceInfo')?.textContent||'')}</p></div>
       </section>
-      <section class="v42-auto-flow-section v42-auto-images-section">
-        <header class="v42-auto-images-head"><div class="v42-auto-images-title"><strong>장면 이미지</strong><small>그리드 분할 + 개별 이미지 혼합 가능</small></div><div class="v42-auto-image-buttons">${pb($('autoGridBtn'),'+ 그리드 이미지')}${pb($('autoSingleBtn'),'+ 개별 이미지')}</div></header>
-        <div class="v42-auto-source-block">
-          <div class="v42-auto-source-title"><strong>그리드 분할 이미지</strong><small data-auto-status="grid">${esc($('autoGridName')?.textContent||'선택 안 됨')}</small></div>
-          <div class="v42-auto-grid-inline" data-settings-grid-mirror>${autoGridMirror()}</div>
-        </div>
-        <div class="v42-auto-source-block v42-auto-single-block">
-          <div class="v42-auto-source-title"><strong>개별 이미지</strong><small data-auto-status="single">${esc($('autoSingleName')?.textContent||'선택 안 됨')}</small></div>
-          <div data-settings-single-mirror>${autoSingleMirror()}</div>
-        </div>
-      </section>
-      <div class="v42-auto-check"><span>대본 장면 <strong data-auto-status="script-count">${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 이미지 <strong data-auto-status="image-count">${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div>
+      ${mediaSource}
+      <div class="v42-auto-check"><span>대본 장면 <strong data-auto-status="script-count">${esc($('autoScriptCount')?.textContent||'0개')}</strong></span><span>장면 미디어 <strong data-auto-status="image-count">${esc($('autoImageCount')?.textContent||'0개')}</strong></span></div>
       <p class="v42-auto-match" data-auto-status="match">${esc($('autoMatch')?.textContent||'')}</p>
       <p class="v42-status" data-auto-status="run">${esc(runText)}</p>
       <div class="v42-auto-start-row"><button type="button" data-auto-start class="v42-btn primary" ${info.canStart?'':'disabled'}>쇼츠 자동 세팅 시작</button></div>`;
@@ -471,6 +483,7 @@
       bgm:($('autoBgmName')?.textContent||'선택 안 됨')+' · 선택사항',
       grid:$('autoGridName')?.textContent||'선택 안 됨',
       single:$('autoSingleName')?.textContent||'선택 안 됨',
+      'long-video':$('autoLongVideoName')?.textContent||'선택 안 됨',
       'silence-info':$('autoSilenceInfo')?.textContent||'',
       'script-count':$('autoScriptCount')?.textContent||'0개',
       'image-count':$('autoImageCount')?.textContent||'0개',
@@ -727,7 +740,7 @@
   });
   $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});});
   $('v42SettingsBody').addEventListener('select',e=>{const k=e.target?.dataset?.proxy,source=k?settingsProxyMap.get(k):null;if(source===$('titleInput')&&typeof source.setSelectionRange==='function')source.setSelectionRange(e.target.selectionStart||0,e.target.selectionEnd||0);},true);
-  $('v42SettingsBody').addEventListener('change',e=>{proxyChange(e,settingsProxyMap);setTimeout(syncSettingsProxyState,0);});
+  $('v42SettingsBody').addEventListener('change',e=>{const k=e.target?.dataset?.proxy,source=k?settingsProxyMap.get(k):null;proxyChange(e,settingsProxyMap);if(source===$('autoMediaMode')){requestAnimationFrame(renderSettings);return;}setTimeout(syncSettingsProxyState,0);});
   let mobileGridDrag=null;
   $('v42SettingsBody').addEventListener('pointerdown',e=>{
     const line=e.target.closest('[data-auto-cut]');if(!line)return;
@@ -878,7 +891,7 @@
   }
   window.addEventListener('cutflow-mobile-activate',ensureMirrorStage);
   window.addEventListener('cutflow-auto-grid-change',()=>{if(settingsDialog.open){syncSettingsGridMirror(true);syncSettingsProxyState();}});
-  window.addEventListener('cutflow-auto-state',()=>{if(settingsDialog.open)syncSettingsProxyState();});
+  window.addEventListener('cutflow-auto-state',e=>{if(!settingsDialog.open)return;const view=settingsDialog.querySelector('[data-auto-media-mode-view]'),mode=e.detail?.mediaMode||'multi';if(view&&view.dataset.autoMediaModeView!==mode){renderSettings();return;}syncSettingsProxyState();});
   window.addEventListener('cutflow-auto-ready',()=>{if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
   window.addEventListener('pageshow',()=>requestRefresh(false));
