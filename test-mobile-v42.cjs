@@ -38,6 +38,8 @@ assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto set
 assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
 assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X (%)','x'")&&js.includes("field('Position Y (%)','y'"),'direct media transform controls missing');
 assert(js.includes('id="v42TransformPreview"')&&js.includes('setMobileTransformMode')&&js.includes('previewTransformGesture'),'mobile preview drag/pinch transform missing');
+assert(js.includes('id="v42AddSceneInput"')&&js.includes('addTimelineMedia?.(files)'),'mobile add-scene must create timeline-visible scenes');
+assert(js.includes('selectCaptionAndEdit')&&js.includes('cutflow-caption-selected'),'mobile caption navigation must refresh the text editor');
 assert(js.includes("classList.toggle('v42-transform-interactive',mobileTransformMode)"),'mobile transform must explicitly unlock preview wrapper');
 assert(js.includes("style.setProperty('pointer-events',mobileTransformMode?'auto':''"),'mobile transform must explicitly unlock preview canvas');
 assert(js.includes('thresholdX:6*stage.width')&&js.includes('thresholdY:6*stage.height'),'mobile transform snap must use 6px display threshold');
