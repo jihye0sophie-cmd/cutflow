@@ -25,6 +25,7 @@ assert.ok(css.includes('.timing-waveform-bars')&&js.includes('const bars=420'),'
 assert.ok(!css.includes('.timeline-audio-block'),'retired audio layer styles should be removed');
 
 assert.ok(!js.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'playback must not rebuild the timing DOM');
+assert.ok(js.includes('function requestRenderAll()')&&js.includes('new MutationObserver(requestRenderAll)'),'precision timing refreshes must be coalesced through one render queue');
 assert.ok(js.includes('playerState?.playing')&&js.includes('pendingCenter=true'),'precision timing playback must follow the active scene');
 assert.ok(js.includes('playbackFollowScene')&&js.includes('activeScene!==playbackFollowScene'),'restored project playback must re-detect and follow scene changes');
 assert.ok(js.includes("targets.forEach(renderPanel)"),'timeline should render only active timing panels');
