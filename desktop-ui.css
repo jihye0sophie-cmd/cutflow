@@ -182,7 +182,6 @@
 
 /* image/video tab follows the actual editing frequency. */
 @media(min-width:820px){
-  #desktopEditor[data-mode=image] #desktopReplace{display:none!important}
   #desktopEditor[data-mode=image] .cue-row.desktop-selected>.editor-media,
   #desktopEditor[data-mode=image] .scene-row.desktop-selected>.editor-media{position:relative;padding-top:46px}
   #desktopEditor[data-mode=image] .desktop-inline-replace{position:absolute;right:12px;top:10px;width:auto;min-height:32px;padding:6px 10px;white-space:nowrap}
