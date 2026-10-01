@@ -56,7 +56,7 @@
   let proposed={scale,x:g.base.x+(c.x-g.center.x+(g.center.x-bx)*(1-r)+bx-candidate.x-candidate.w/2)/g.rect.w,y:g.base.y+(c.y-g.center.y+(g.center.y-by)*(1-r)+by-candidate.y-candidate.h/2)/g.rect.h};
   const proposedBox=CutRenderer.mediaGeometry({...state().scene,transform:proposed},state().loc.elapsed,g.rect,$('layoutSelect').value==='fullscreen'?'cover':$('fitSelect').value),snapApi=window.CutflowTransformSnap;
   if(proposedBox&&snapApi?.apply){
-   const v=viewport(),snapped=snapApi.apply({rect:g.rect,box:proposedBox,transform:proposed,unit:'normalized',thresholdX:8*stage.width/Math.max(1,v.w),thresholdY:8*stage.height/Math.max(1,v.h)});
+   const v=viewport(),snapped=snapApi.apply({rect:g.rect,box:proposedBox,transform:proposed,unit:'normalized',thresholdX:6*stage.width/Math.max(1,v.w),thresholdY:6*stage.height/Math.max(1,v.h)});
    proposed=snapped.transform;showGuides(snapped.guides);
   }else hideGuides();
   write(proposed);
