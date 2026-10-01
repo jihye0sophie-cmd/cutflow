@@ -247,5 +247,7 @@ assert(timingEditor.includes('pendingCenter')&&timingEditor.includes('timelineSc
 assert(timingEditor.includes("panel.closest('.v42-panel')")&&timingEditor.includes('verticalOwner.scrollTop=verticalScroll'),'mobile timing vertical scroll preservation missing');
 assert(js.includes("if(tab==='timing'){renderSceneStrip();syncPlayer();") ,'mobile timing updates must not remount the whole panel');
 assert(!timingEditor.includes("new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('nowPlaying')"),'timeline v43.1 playback stability missing');
+assert(app.includes("'cutflow-caption-active'"),'active caption playback event missing');
+assert(!desktop.includes("observe($('nowPlaying')"),'desktop must not observe per-frame now-playing text');
 assert(timingEditor.includes("h.closest('.timing-layer-body')"),'timeline v43.1 inset drag geometry missing');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
