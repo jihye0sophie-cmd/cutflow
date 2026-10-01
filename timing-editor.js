@@ -113,6 +113,14 @@
   const pctAll=(t,duration)=>clamp((num(t)/Math.max(.1,duration))*100,0,100);
   const tickStep=pps=>pps>=110 ? .5 : pps>=55 ? 1 : pps>=28 ? 2 : 5;
   const sceneForCueIndex=ci=>sceneItems().findIndex(item=>item?.cueIndices?.includes(ci));
+  const syncSelectedCueToScene=(index=sceneIndex(),{forceFirst=false}={})=>{
+    const item=sceneItems()[index];if(!item?.cueIndices?.length){selectedCueId=null;return -1;}
+    const selectedIndex=cues.findIndex(c=>c.id===selectedCueId);
+    if(!forceFirst&&item.cueIndices.includes(selectedIndex))return selectedIndex;
+    const activeIndex=window.CutflowScene?.cueIndex?.(index);
+    const target=!forceFirst&&item.cueIndices.includes(activeIndex)?activeIndex:item.firstCueIndex;
+    const cue=cues[target];selectedCueId=cue?.id||null;return cue?target:-1;
+  };
   const snapCandidates=()=>{
     const values=[0,timelineDuration()];
     for(const item of timelineRanges())values.push(num(item.start),num(item.end));
@@ -234,12 +242,12 @@
   function selectCaption(delta){const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;const pos=item.cueIndices.indexOf(sel.index),target=item.cueIndices[clamp(pos+delta,0,item.cueIndices.length-1)],cue=cues[target];if(cue){selectedCueId=cue.id;jump(cue.start);renderAll();}}
   function selectSceneRelative(delta){
     const list=sceneItems(),target=clamp(sceneIndex()+delta,0,Math.max(0,list.length-1));if(!list.length||target===sceneIndex())return;
-    const item=list[target],cue=cues?.[item?.firstCueIndex];selectedCueId=cue?.id||null;pendingCenter=true;
+    syncSelectedCueToScene(target,{forceFirst:true});pendingCenter=true;
     window.CutflowScene?.select?.(target);renderAll();
   }
   function handleAction(e){
     const panel=e.target.closest('.timing-panel');if(!panel)return;
-    const sceneBtn=e.target.closest('[data-timeline-scene]');if(sceneBtn){window.CutflowScene?.select?.(Number(sceneBtn.dataset.timelineScene));renderAll();return;}
+    const sceneBtn=e.target.closest('[data-timeline-scene]');if(sceneBtn){const target=Number(sceneBtn.dataset.timelineScene);syncSelectedCueToScene(target,{forceFirst:true});pendingCenter=true;window.CutflowScene?.select?.(target);renderAll();return;}
     const cueBtn=e.target.closest('[data-timing-cue]');if(cueBtn){const i=Number(cueBtn.dataset.timingCue);if(cues[i]){selectedCueId=cues[i].id;pendingCenter=true;jump(cues[i].start);renderAll();}return;}
     const action=e.target.closest('[data-timing-action]')?.dataset.timingAction;
     if(action){
@@ -328,14 +336,14 @@
   function endDrag(){
     if(!drag)return;
     if(drag.kind==='playhead'){const t=currentTime();drag=null;updatePlayheadFeedback(t);return;}
-    const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();CutflowScene.select(idx);renderAll();
+    const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();syncSelectedCueToScene(idx);CutflowScene.select(idx);renderAll();
   }
   document.addEventListener('click',handleAction);
   document.addEventListener('change',handleChange);
   document.addEventListener('pointerdown',startDrag);
   document.addEventListener('pointermove',moveDrag);
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
-  window.addEventListener('cutflow-scene',()=>requestAnimationFrame(renderAll));
+  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target))syncSelectedCueToScene(target);requestAnimationFrame(renderAll);});
   window.addEventListener('cutflow-scene-updated',()=>requestAnimationFrame(renderAll));
   window.addEventListener('cutflow-project-restored',()=>requestAnimationFrame(()=>{pendingCenter=true;renderAll();}));
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
