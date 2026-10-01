@@ -10,7 +10,7 @@ run("window.CutflowCaption.split(1,2)");assert.equal(run('cues.length'),3);asser
 run(`({scenes,cues}=JSON.parse(${JSON.stringify(splitBaseline)}));renderCues()`);assert.equal(run('cues.length'),2);
 run("window.CutflowCaption.split(0,1);window.CutflowCaption.mergeNext(0)");assert.equal(run('cues.length'),2);assert.equal(run('cues[0].sceneId'),'a');assert.equal(run('project().scenes[0].end'),2);
 run(`({scenes,cues}=JSON.parse(${JSON.stringify(splitBaseline)}));renderCues()`);
-run("cues.push({id:'c3',start:6,end:8,text:'누락',color:'white'});renderCues()");assert.equal(els.get('exportBtn').disabled,true);run("cues[2].sceneId='a';renderCues()");assert.equal(els.get('exportBtn').disabled,false);
+run("cues.push({id:'c3',start:6,end:8,text:'누락',color:'white'});renderCues();stats()");assert.equal(els.get('exportBtn').disabled,true);run("cues[2].sceneId='a';renderCues();stats()");assert.equal(els.get('exportBtn').disabled,false);
 console.log('PASS: exact 0–3 / 3–6 boundaries; timing edits; empty gaps; split video offset; merge and undo; missing-media export gate.');
 run("scenes[0].motion='pan-left';renderCues()");
 assert.equal(run("project().scenes.filter(s=>s.sourceIndex===0).every(s=>s.motion==='pan-left')"),true);assert.equal(run('scenes[0].motion'),'pan-left');
