@@ -1407,3 +1407,15 @@ body.v42-mobile .v42-live-value{font-size:11px!important}
 body.v42-mobile .v42-caption-selection-tools>small{font-size:10px!important}
 body.v42-mobile .v42-caption-timing-head strong{font-size:13px!important}
 body.v42-mobile .v42-caption-timing-head span{font-size:11px!important}
+
+/* Mobile media transform snap guides. */
+body.v42-mobile .v42-stage-wrap .v42-transform-guide{
+  position:absolute!important;
+  z-index:6!important;
+  pointer-events:none!important;
+  background:var(--v42-accent,#f5e642)!important;
+  box-shadow:0 0 0 1px #0008,0 0 8px rgba(245,230,66,.58)!important;
+}
+body.v42-mobile .v42-stage-wrap .v42-transform-guide.vertical{width:1px!important}
+body.v42-mobile .v42-stage-wrap .v42-transform-guide.horizontal{height:1px!important}
+body.v42-mobile .v42-stage-wrap .v42-transform-guide[hidden]{display:none!important}
