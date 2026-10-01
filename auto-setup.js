@@ -1,6 +1,6 @@
 (()=>{
 const $=id=>document.getElementById(id);
-const state={grids:[],singles:[],narration:null,processedNarration:null,silencePreset:'normal',bgm:null,running:false,drag:null};
+const state={grids:[],singles:[],narration:null,processedNarration:null,silencePreset:'normal',bgm:null,mediaMode:'multi',longVideo:null,running:false,drag:null};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const setText=(id,text)=>{const el=$(id);text=String(text);if(el&&el.textContent!==text)el.textContent=text;};
@@ -24,16 +24,18 @@ function gridCapacity(){return state.grids.reduce((sum,g)=>sum+normalizeGrid(g).
 function gridName(){return state.grids.length?`${state.grids.length}장 · 분할 ${gridCapacity()}컷`:'선택 안 됨';}
 function singleName(){return state.singles.length?`${state.singles.length}장 선택`:'선택 안 됨';}
 function autoState(){
-  const scriptCount=lines().length,imageCount=capacity(),hasNarration=!!state.narration;
-  const canStart=!state.running&&!!scriptCount&&hasNarration&&imageCount>=scriptCount;
-  const reason=state.running?'자동 세팅 실행 중…':!scriptCount?'대본을 입력해 주세요.':!hasNarration?'내레이션을 선택해 주세요.':imageCount<scriptCount?`이미지가 ${scriptCount-imageCount}장 부족합니다.`:'준비 완료';
-  return {scriptCount,imageCount,hasNarration,running:state.running,canStart,reason};
+  const scriptCount=lines().length,imageCount=capacity(),hasNarration=!!state.narration,mediaMode=state.mediaMode||'multi',hasLongVideo=!!state.longVideo;
+  const mediaReady=mediaMode==='long-video'?hasLongVideo:imageCount>=scriptCount;
+  const canStart=!state.running&&!!scriptCount&&hasNarration&&mediaReady;
+  const reason=state.running?'자동 세팅 실행 중…':!scriptCount?'대본을 입력해 주세요.':!hasNarration?'내레이션을 선택해 주세요.':mediaMode==='long-video'&&!hasLongVideo?'긴 영상 1개를 선택해 주세요.':mediaMode==='multi'&&imageCount<scriptCount?`이미지가 ${scriptCount-imageCount}장 부족합니다.`:'준비 완료';
+  return {scriptCount,imageCount,hasNarration,mediaMode,hasLongVideo,longVideoName:state.longVideo?.name||'',running:state.running,canStart,reason};
 }
 function update(){
-  const info=autoState(),n=info.scriptCount,c=info.imageCount;setText('autoScriptCount',`${n}개`);setText('autoImageCount',`${c}개`);
-  setText('autoNarrationName',state.narration?.name||'선택 안 됨');setText('autoBgmName',state.bgm?.name||'선택 안 됨');setText('autoGridName',gridName());setText('autoSingleName',singleName());
-  const m=$('autoMatch'),matchClass='auto-match '+(!n||!c?'muted':c<n?'bad':c===n?'good':'warn');if(m.className!==matchClass)m.className=matchClass;
-  setText('autoMatch',!n?'대본을 입력하면 필요한 장면 수를 계산합니다.':!c?'그리드 또는 개별 이미지를 추가해 주세요.':c<n?`이미지가 ${n-c}장 부족합니다.`:c===n?'대본 장면 수와 이미지 수가 일치합니다.':`이미지가 ${c-n}장 더 많습니다. 앞에서 ${n}장만 사용합니다.`);
+  const info=autoState(),n=info.scriptCount,c=info.imageCount,longMode=info.mediaMode==='long-video';setText('autoScriptCount',`${n}개`);setText('autoImageCount',longMode?(state.longVideo?'1개 영상':'0개'):`${c}개`);
+  setText('autoNarrationName',state.narration?.name||'선택 안 됨');setText('autoBgmName',state.bgm?.name||'선택 안 됨');setText('autoGridName',gridName());setText('autoSingleName',singleName());setText('autoLongVideoName',state.longVideo?.name||'선택 안 됨');
+  if($('autoMultiMediaSection'))$('autoMultiMediaSection').hidden=longMode;if($('autoLongVideoSection'))$('autoLongVideoSection').hidden=!longMode;
+  const m=$('autoMatch'),matchClass='auto-match '+(longMode?(!n||!state.longVideo?'muted':'good'):(!n||!c?'muted':c<n?'bad':c===n?'good':'warn'));if(m.className!==matchClass)m.className=matchClass;
+  setText('autoMatch',longMode?(!n?'대본을 입력하면 필요한 장면 수를 계산합니다.':!state.longVideo?'긴 영상 1개를 선택해 주세요.':`긴 영상 1개를 자막 기준 ${n}개 장면으로 자동 분할합니다.`):!n?'대본을 입력하면 필요한 장면 수를 계산합니다.':!c?'그리드 또는 개별 이미지를 추가해 주세요.':c<n?`이미지가 ${n-c}장 부족합니다.`:c===n?'대본 장면 수와 이미지 수가 일치합니다.':`이미지가 ${c-n}장 더 많습니다. 앞에서 ${n}장만 사용합니다.`);
   setDisabled('autoStart',!info.canStart);
   emit('cutflow-auto-state',info);
 }
@@ -101,27 +103,30 @@ async function applyProjectBasics(){
   $('layoutSelect').value=layout;$('layoutSelect').dispatchEvent(new Event('input',{bubbles:true}));
 }
 async function run(){
-  if(state.running)return;const script=lines();state.silencePreset=silencePreset();
-  if(!script.length||!state.narration||capacity()<script.length)return;
+  if(state.running)return;const script=lines();state.silencePreset=silencePreset();const longMode=state.mediaMode==='long-video';
+  if(!script.length||!state.narration||(longMode?!state.longVideo:capacity()<script.length))return;
   const bridge=window.CutflowProjectBridge,hadWork=!!bridge?.hasWork?.();
   if(hadWork&&!confirm('자동 세팅을 시작하면 현재 대본·내레이션·장면 구성이 새 입력으로 교체됩니다. 계속할까요?'))return;
   const rollback=hadWork?bridge?.capture?.():null;
   state.running=true;update();$('autoProgress').hidden=false;
   try{
-    status('장면 이미지를 준비하는 중…',0);let files=[];
-    for(const grid of state.grids){if(files.length>=script.length)break;files.push(...await splitGrid(grid,files.length,script.length-files.length));}
-    if(files.length<script.length){for(const item of state.singles){if(files.length>=script.length)break;files.push(item.file);}}
-    if(files.length!==script.length)throw new Error(`필요한 이미지 ${script.length}장 중 ${files.length}장만 준비되었습니다.`);
-    status(`이미지 ${files.length}장 준비 완료 · 내레이션 무음 줄이는 중…`,1);
+    status(longMode?'긴 영상을 자막 장면 수에 맞춰 준비하는 중…':'장면 이미지를 준비하는 중…',0);let files=[];
+    if(longMode)files=Array.from({length:script.length},()=>state.longVideo);
+    else{
+      for(const grid of state.grids){if(files.length>=script.length)break;files.push(...await splitGrid(grid,files.length,script.length-files.length));}
+      if(files.length<script.length){for(const item of state.singles){if(files.length>=script.length)break;files.push(item.file);}}
+      if(files.length!==script.length)throw new Error(`필요한 이미지 ${script.length}장 중 ${files.length}장만 준비되었습니다.`);
+    }
+    status(longMode?`긴 영상 자동 분할용 장면 ${files.length}개 준비 · 내레이션 무음 줄이는 중…`:`이미지 ${files.length}장 준비 완료 · 내레이션 무음 줄이는 중…`,1);
     await applyProjectBasics();$('scriptInput').value=$('autoScript').value;$('scriptInput').dispatchEvent(new Event('input',{bubbles:true}));window.CutflowAutoBridge.markChanged();
     if(!window.CutflowSilenceCut?.process)throw new Error('무음컷 엔진을 불러오지 못했습니다. 페이지를 새로고침해 주세요.');
     const cut=await window.CutflowSilenceCut.process(state.narration,state.silencePreset,msg=>status(msg,1));state.processedNarration=cut.processedFile;
     status(`무음컷 완료 · ${cut.originalDuration.toFixed(1)}초 → ${cut.processedDuration.toFixed(1)}초 · 타임라인용 내레이션 연결 중…`,1);
     if(!await window.CutflowAutoBridge.loadNarration(state.processedNarration))throw new Error('처리된 내레이션을 읽지 못했습니다.');
-    status('기존 장면을 정리하고 이미지를 배치하는 중…',2);await window.CutflowAutoBridge.clearScenesOnly();
-    const added=await window.CutflowAutoBridge.addMedia(files);if(added!==files.length)throw new Error(`이미지 ${files.length}장 중 ${added}장만 추가되었습니다.`);
+    status(longMode?'기존 장면을 정리하고 긴 영상을 가상 장면으로 나누는 중…':'기존 장면을 정리하고 이미지를 배치하는 중…',2);await window.CutflowAutoBridge.clearScenesOnly();
+    const added=await window.CutflowAutoBridge.addMedia(files);if(added!==files.length)throw new Error(longMode?`긴 영상 장면 ${files.length}개 중 ${added}개만 생성되었습니다.`:`이미지 ${files.length}장 중 ${added}장만 추가되었습니다.`);
     const afterMedia=window.CutflowAutoBridge.counts?.();if(afterMedia&&afterMedia.sceneCount!==script.length)throw new Error(`장면 생성 수가 맞지 않습니다. 필요 ${script.length}장 / 생성 ${afterMedia.sceneCount}장`);
-    status('내레이션의 쉼을 분석해 자막 타이밍을 자동으로 맞추는 중…',3);const result=window.CutflowAutoBridge.buildTimeline();
+    status('내레이션의 쉼을 분석해 자막 타이밍을 자동으로 맞추는 중…',3);const result=window.CutflowAutoBridge.buildTimeline(longMode?{sequentialVideo:{start:Math.max(0,Number($('autoLongVideoStart')?.value)||0)}}:{});
     if(result.cueCount!==script.length)throw new Error(`자막 구간 수가 맞지 않습니다. 필요 ${script.length}개 / 생성 ${result.cueCount}개`);
     if(result.sceneCount!==script.length)throw new Error(`장면 수가 맞지 않습니다. 필요 ${script.length}장 / 생성 ${result.sceneCount}장`);
     if(result.missingSceneCount)throw new Error(`장면이 연결되지 않은 자막이 ${result.missingSceneCount}개 있습니다.`);
@@ -131,7 +136,7 @@ async function run(){
     if(state.bgm){if(!(await window.loadBgmFile?.(state.bgm)))throw new Error('BGM을 읽지 못했습니다.');}
     else window.CutflowBgm?.remove?.();
     status('자동 세팅이 완료되었습니다.',5);$('autoProgress').querySelectorAll('.auto-step').forEach(el=>el.dataset.state='done');
-    const complete={cueCount:result.cueCount,sceneCount:result.sceneCount,missingSceneCount:result.missingSceneCount||0,imageCount:files.length};
+    const complete={cueCount:result.cueCount,sceneCount:result.sceneCount,missingSceneCount:result.missingSceneCount||0,imageCount:longMode?0:files.length,mediaMode:state.mediaMode,longVideoSegments:longMode?files.length:0};
     emit('cutflow-auto-complete',complete);
     if(window.CutflowUI?.mode!=='mobile')setTimeout(()=>document.querySelector('.workspace')?.scrollIntoView({behavior:'smooth',block:'start'}),250);
   }catch(e){
@@ -152,6 +157,9 @@ function syncBasicsFromProject(){
 }
 $('autoToggle').onclick=()=>{const open=$('autoPanel').hidden;if(open)syncBasicsFromProject();$('autoPanel').hidden=!open;$('autoToggle').setAttribute('aria-expanded',String(open));$('autoToggle').closest('.auto-setup')?.classList.toggle('is-open',open);};
 $('autoScript').addEventListener('input',update);
+$('autoMediaMode').addEventListener('change',e=>{state.mediaMode=e.target.value==='long-video'?'long-video':'multi';update();});
+$('autoLongVideoBtn').onclick=()=>$('autoLongVideo').click();$('autoLongVideo').onchange=e=>{const file=e.target.files[0]||null;state.longVideo=file&&(/^video\//.test(file.type)||/\.(mp4|mov|webm|m4v)$/i.test(file.name))?file:null;if(file&&!state.longVideo)window.CutflowAutoBridge?.toast?.('영상 파일을 선택해 주세요.');e.target.value='';update();};
+$('autoLongVideoStart').addEventListener('input',update);
 $('autoNarrationBtn').onclick=()=>$('autoNarration').click();$('autoNarration').onchange=e=>{state.narration=e.target.files[0]||null;state.processedNarration=null;update();};
 document.querySelectorAll('input[name="autoSilencePreset"]').forEach(el=>el.addEventListener('change',()=>{state.processedNarration=null;updateSilenceInfo();}));
 $('autoGridBtn').onclick=()=>$('autoGrids').click();$('autoGrids').onchange=e=>{addGridFiles([...e.target.files]);e.target.value='';};
@@ -165,6 +173,8 @@ window.addEventListener('pointermove',updateDraggedLine,{passive:true});window.a
 window.CutflowAutoSetup={
   status:()=>autoState(),
   run,
+  setMediaMode(mode){state.mediaMode=mode==='long-video'?'long-video':'multi';if($('autoMediaMode'))$('autoMediaMode').value=state.mediaMode;update();return state.mediaMode;},
+  longVideo(){return state.longVideo?{name:state.longVideo.name,size:state.longVideo.size,type:state.longVideo.type,start:Math.max(0,Number($('autoLongVideoStart')?.value)||0)}:null;},
   grids(){return state.grids.map((g,index)=>{normalizeGrid(g);return {index,name:g.file?.name||`그리드 ${index+1}`,url:g.url,width:g.width,height:g.height,cols:g.cols,rows:g.rows,gap:g.gap,xCuts:[...g.xCuts],yCuts:[...g.yCuts]};});},
   singles(){return state.singles.map((g,index)=>({index,name:g.file?.name||`이미지 ${index+1}`,url:g.url,width:g.width,height:g.height}));},
   setGrid(index,patch={}){const g=state.grids[index];if(!g)return false;let reset=false;if(patch.cols!=null){const v=clamp(Number(patch.cols)||1,1,12);reset=reset||v!==g.cols;g.cols=v;}if(patch.rows!=null){const v=clamp(Number(patch.rows)||1,1,12);reset=reset||v!==g.rows;g.rows=v;}if(patch.gap!=null)g.gap=clamp(Number(patch.gap)||0,0,40);if(reset)resetCuts(g);normalizeGrid(g);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;},
@@ -173,5 +183,5 @@ window.CutflowAutoSetup={
   removeGrid(index){const g=state.grids[index];if(!g)return false;URL.revokeObjectURL(g.url);state.grids.splice(index,1);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;},
   removeSingle(index){const g=state.singles[index];if(!g)return false;URL.revokeObjectURL(g.url);state.singles.splice(index,1);renderSingles();update();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;}
 };
-$('autoStart').onclick=run;updateSilenceInfo();renderGrids();renderSingles();update();emit('cutflow-auto-ready',autoState());
+$('autoStart').onclick=run;state.mediaMode=$('autoMediaMode')?.value==='long-video'?'long-video':'multi';updateSilenceInfo();renderGrids();renderSingles();update();emit('cutflow-auto-ready',autoState());
 })();
