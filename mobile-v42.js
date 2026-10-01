@@ -151,8 +151,8 @@
       const display=stage.getBoundingClientRect();
       const snapped=snapApi.apply({
         rect:geometry.rect,box:geometry.box,transform:state.transform,unit:'percent',
-        thresholdX:10*stage.width/Math.max(1,display.width),
-        thresholdY:10*stage.height/Math.max(1,display.height)
+        thresholdX:8*stage.width/Math.max(1,display.width),
+        thresholdY:8*stage.height/Math.max(1,display.height)
       });
       if(snapped.guides.x||snapped.guides.y)state=window.CutflowScene?.previewTransformGesture?.(mobileTransformScene,snapped.transform)||state;
       showMobileTransformGuides(snapped.guides);
