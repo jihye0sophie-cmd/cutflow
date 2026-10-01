@@ -206,7 +206,7 @@
   if(typeof compactMq.addEventListener==='function')compactMq.addEventListener('change',syncResponsiveMode);
   else if(typeof compactMq.addListener==='function')compactMq.addListener(syncResponsiveMode);
   const proxyMap=new Map(),settingsProxyMap=new Map();
-  let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false,captionSelection={index:-1,start:0,end:0};
+  let tab='caption',sceneIndex=0,lastSceneId=null,renderQueued=false,renderForce=false,captionSelection={index:-1,start:0,end:0};
 
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const key=()=>`p${Math.random().toString(36).slice(2)}`;
@@ -591,7 +591,10 @@
     if(rect.top>=visibleBottom||rect.bottom<=0)panel.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
   }
   function requestRefresh(force=false){
-    if(renderQueued&&!force)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderSceneStrip();renderPanel(force);syncPlayer();});
+    renderForce=renderForce||!!force;
+    if(renderQueued)return;
+    renderQueued=true;
+    requestAnimationFrame(()=>{const forceNow=renderForce;renderForce=false;renderQueued=false;renderSceneStrip();renderPanel(forceNow);syncPlayer();});
   }
   function syncPlayer(){
     const state=window.CutflowPlayer?.state?.(),m=$('v42Scrubber');
