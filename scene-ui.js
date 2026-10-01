@@ -62,6 +62,7 @@
     };
   };
   const emitSceneUpdated=index=>{const state=inspect(index);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state}}));return state;};
+  const renderSceneModel=()=>{if(cues.length)renderCues();else renderScenes();};
   const patchScene=(index,patch={})=>{
     const {item,scene}=sourceForIndex(index);if(!item||!scene||exporting||loading)return false;
     pause();if(cues.length)rememberCues();
@@ -84,7 +85,7 @@
       if(patch.mediaFadeOut!=null)scene.mediaFadeOut=Math.max(0,Math.min(available,Number(patch.mediaFadeOut)||0));
       if(trimChanged&&group){for(const ci of group.cueIndices){delete cues[ci].trimStart;delete cues[ci].trimEnd;cues[ci].mediaOffset=Math.max(0,cues[ci].start-group.start);}if(group.freeEdit)setSceneGroupDuration(group.firstCueIndex,Math.max(.1,available));}
     }
-    if(cues.length)renderCues();else renderScenes();
+    renderSceneModel();
     changed();
     return emitSceneUpdated(index);
   };
@@ -194,8 +195,8 @@
       if(cues.length){
         rememberCues();const group=list[index],removeSet=new Set(group.cueIndices),removed=cues.filter((_,i)=>removeSet.has(i)),sceneId=group.sceneId;cues=cues.filter((_,i)=>!removeSet.has(i));recalcCueTimes();
         if(sceneId&&!cues.some(c=>c.sceneId===sceneId)){const si=scenes.findIndex(s=>s.id===sceneId);if(si>=0)releaseScene(scenes.splice(si,1)[0]);}
-        syncSceneOrderToCues();renderCues();
-      }else{const [scene]=scenes.splice(index,1);releaseScene(scene);renderScenes();}
+        syncSceneOrderToCues();renderSceneModel();
+      }else{const [scene]=scenes.splice(index,1);releaseScene(scene);renderSceneModel();}
       offset=Math.min(offset,totalDuration());changed();const next=logicalItems();if(next.length)this.select(Math.min(index,next.length-1));else{jump(0);window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:0}));}return true;
     },
     async split(index,time=currentTime()){
@@ -218,8 +219,8 @@
           if(cutCue>=0){const cue=cues[cutCue],tail=cloneProjectData(cue);cue.end=splitAt;tail.id=uid();tail.start=splitAt;tail.sceneId=second.id;tail.mediaOffset=0;cues.splice(cutCue+1,0,tail);}
           for(const c of cues){if(c.sceneId===originalSceneId&&c.start>=splitAt-.001){c.sceneId=second.id;c.mediaOffset=Math.max(0,c.start-splitAt);}}
           for(const c of cues){if(c.sceneId===originalSceneId)c.mediaOffset=Math.max(0,c.start-start);}
-          renderCues();
-        }else renderScenes();
+          renderSceneModel();
+        }else renderSceneModel();
         changed();jump(splitAt);this.select(index+1);toast('현재 재생 위치를 기준으로 장면을 두 개로 나눴습니다.');return true;
       }catch(error){toast(`장면을 나누지 못했습니다: ${error.message}`);return false;}finally{loading--;stats();}
     },
@@ -230,8 +231,8 @@
       pause();if(cues.length)rememberCues();
       if(a.type==='video'){a.trimEnd=Number(b.trimEnd??b.sourceDuration)||a.trimEnd;a.mediaFadeOut=b.mediaFadeOut??a.mediaFadeOut;}
       a.duration=Math.max(.1,(current.duration||a.duration||0)+(next.duration||b.duration||0));
-      if(cues.length){for(const ci of next.cueIndices){cues[ci].sceneId=a.id;cues[ci].mediaOffset=Math.max(0,cues[ci].start-current.start);}const si=scenes.indexOf(b);if(si>=0){releaseScene(scenes.splice(si,1)[0]);}syncSceneOrderToCues();renderCues();}
-      else{const bi=scenes.indexOf(b);if(bi>=0){releaseScene(scenes.splice(bi,1)[0]);}renderScenes();}
+      if(cues.length){for(const ci of next.cueIndices){cues[ci].sceneId=a.id;cues[ci].mediaOffset=Math.max(0,cues[ci].start-current.start);}const si=scenes.indexOf(b);if(si>=0){releaseScene(scenes.splice(si,1)[0]);}syncSceneOrderToCues();renderSceneModel();}
+      else{const bi=scenes.indexOf(b);if(bi>=0){releaseScene(scenes.splice(bi,1)[0]);}renderSceneModel();}
       changed();this.select(index);toast('다음 장면과 합쳤습니다. 현재 장면의 효과 설정을 유지합니다.');return true;
     },
     async replace(file){
@@ -245,9 +246,9 @@
             mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};
           if(addedIndex>=0&&addedIndex!==previousIndex)scenes.splice(scenes.indexOf(added),1);releaseScene(previous);
         }else{group.cueIndices.forEach(ci=>{cues[ci].sceneId=added.id;});}
-        renderCues();changed();this.select(sceneIndex);emitSceneUpdated(sceneIndex);return true;
+        renderSceneModel();changed();this.select(sceneIndex);emitSceneUpdated(sceneIndex);return true;
       }else if(group){
-        const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target],sameVideo=previous.type==='video'&&added.type==='video';scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};scenes.splice(scenes.indexOf(added),1);releaseScene(previous);renderScenes();changed();this.select(target);emitSceneUpdated(target);return true;}
+        const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target],sameVideo=previous.type==='video'&&added.type==='video';scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};scenes.splice(scenes.indexOf(added),1);releaseScene(previous);renderSceneModel();changed();this.select(target);emitSceneUpdated(target);return true;}
       }
       return false;
     }
