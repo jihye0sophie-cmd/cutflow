@@ -9,8 +9,11 @@
   // desktop browsers switch to the mobile workspace when the window is narrow.
   const compactMq=matchMedia('(max-width:819px)');
   const standaloneMode=window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   document.body.classList.toggle('v42-standalone',!!standaloneMode);
+  document.body.classList.toggle('v42-ios',isIOS);
   window.CutflowUI=window.CutflowUI||{};
+  window.CutflowUI.isIOS=isIOS;
   window.CutflowUI.isMobileDevice=()=>compactMq.matches;
   window.CutflowUI.mobileActive=compactMq.matches;
   window.CutflowUI.mode=window.CutflowUI.mobileActive?'mobile':'desktop';
@@ -209,8 +212,31 @@
     window.dispatchEvent(new CustomEvent(next?'cutflow-mobile-activate':'cutflow-mobile-deactivate',{detail:{responsive:true,width:innerWidth}}));
     if(next){requestAnimationFrame(()=>{requestRefresh(true);syncPreviewHistory();});}
   };
-  const syncResponsiveMode=()=>setMobileActive(compactMq.matches);
+  const syncVisualViewport=()=>{
+    const vv=window.visualViewport;
+    const height=Math.max(1,Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||1));
+    document.documentElement.style.setProperty('--v42-visual-height',height+'px');
+    const layoutHeight=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0);
+    const keyboardOpen=!!(window.CutflowUI?.mobileActive&&vv&&layoutHeight-height>120);
+    document.body.classList.toggle('v42-keyboard-open',keyboardOpen);
+  };
+  const syncResponsiveMode=()=>{setMobileActive(compactMq.matches);syncVisualViewport();};
   setMobileActive(compactMq.matches,{initial:true});
+  syncVisualViewport();
+  window.visualViewport?.addEventListener?.('resize',syncVisualViewport,{passive:true});
+  window.visualViewport?.addEventListener?.('scroll',syncVisualViewport,{passive:true});
+  window.addEventListener('resize',syncVisualViewport,{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(syncVisualViewport,80),{passive:true});
+  document.addEventListener('focusin',e=>{
+    if(!window.CutflowUI?.mobileActive)return;
+    const target=e.target;
+    if(!target?.matches?.('input,textarea,select,[contenteditable="true"]'))return;
+    setTimeout(()=>{
+      if(document.activeElement!==target)return;
+      syncVisualViewport();
+      try{target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch{}
+    },120);
+  },true);
   if(typeof compactMq.addEventListener==='function')compactMq.addEventListener('change',syncResponsiveMode);
   else if(typeof compactMq.addListener==='function')compactMq.addListener(syncResponsiveMode);
   const proxyMap=new Map(),settingsProxyMap=new Map();
