@@ -449,9 +449,9 @@ window.CutflowCompose={
 window.CutflowAutoBridge={
   scriptLines,
   async autoWrapCaptions(){return autoWrapCaptions();},
-  async loadNarration(file){await loadAudio(file);return !!audioBuffer;},
-  async processNarration(preset='normal',onProgress){if(!audioFile)throw new Error('먼저 내레이션을 불러오세요.');if(!window.CutflowSilenceCut?.process)throw new Error('무음컷 엔진을 불러오지 못했습니다.');const result=await window.CutflowSilenceCut.process(audioFile,preset,onProgress);await loadAudio(result.processedFile);return result;},
-  async addMedia(files){const before=scenes.length;await addFiles(files,{createFreeCues:false});return scenes.length-before;},
+  async loadNarration(file){return loadAudio(file);},
+  async processNarration(preset='normal',onProgress){if(!audioFile)throw new Error('먼저 내레이션을 불러오세요.');if(!window.CutflowSilenceCut?.process)throw new Error('무음컷 엔진을 불러오지 못했습니다.');const result=await window.CutflowSilenceCut.process(audioFile,preset,onProgress);if(!await loadAudio(result.processedFile))throw new Error('무음컷 결과 음성을 불러오지 못했습니다.');return result;},
+  async addMedia(files){const added=await addFiles(files,{createFreeCues:false});return added.length;},
   buildTimeline(){buildCues();if(cues.length&&scenes.length)fitCuts(false);const missingSceneCount=cues.filter(c=>!scenes.some(s=>s.id===c.sceneId)).length;return {cueCount:cues.length,sceneCount:scenes.length,missingSceneCount};},
   counts(){return {sceneCount:scenes.length,cueCount:cues.length,scriptCount:scriptLines($('scriptInput').value).length,missingSceneCount:cues.filter(c=>!scenes.some(s=>s.id===c.sceneId)).length};},
   async clearScenesOnly(){pause();for(const s of scenes)releaseSceneResources(s);scenes=[];cues.forEach(c=>{c.sceneId=null;});offset=0;renderCues();changed();},
