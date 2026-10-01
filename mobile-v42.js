@@ -289,7 +289,7 @@
       <div class="v42-edit-action-group scene"><strong>장면 편집</strong><div class="v42-scene-caption-actions"><button type="button" id="v42SceneSplitCaption" class="v42-btn" ${state.segment.position===1?'disabled':''}>나누기</button><button type="button" id="v42SceneMergeCaption" class="v42-btn" ${captionSceneIndex<0||captionSceneIndex>=captionSceneCount-1?'disabled':''}>다음 장면과 합치기</button><button type="button" id="v42SceneDeleteCaption" class="v42-btn danger" ${captionSceneIndex<0?'disabled':''}>장면 삭제</button></div></div>
       <div class="v42-caption-timing"><div class="v42-caption-timing-head"><strong>자막 타이밍</strong><span>${Number(state.end-state.start).toFixed(2)}초</span></div>
       <div class="v42-grid2"><label class="v42-field"><span>시작</span><input data-caption-field="start" type="number" min="0" step="0.01" value="${Number(state.start).toFixed(2)}" ${state.freeEdit?'disabled':''}></label><label class="v42-field"><span>종료</span><input data-caption-field="end" type="number" min="0.1" step="0.01" value="${Number(state.end).toFixed(2)}" ${state.freeEdit?'disabled':''}></label></div>
-      <div class="v42-actions"><button type="button" id="v42CaptionTiming" class="v42-btn wide">정밀 타이밍 조정 ›</button></div></div>`;
+      <div class="v42-actions v42-caption-quick-actions"><button type="button" id="v42CaptionPlay" class="v42-btn">▶ 현재 자막 재생</button><button type="button" id="v42CaptionTiming" class="v42-btn">정밀 타이밍 조정 ›</button></div></div>`;
     const styleRange=(id,label,outputId)=>{
       const el=$(id);if(!el)return '';const k=key();proxyMap.set(k,el);
       const value=$(outputId)?.textContent||el.value;
@@ -321,6 +321,7 @@
     $('v42CaptionSelectionReset').onclick=()=>applySelectedCaptionColor(null);
     $('v42CaptionPrev').onclick=()=>{if(index>state.segment.first)api.select(index-1);};
     $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)api.select(index+1);};
+    $('v42CaptionPlay').onclick=()=>api.play?.(index);
     $('v42CaptionTiming').onclick=()=>{tab='timing';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.tab==='timing')));renderPanel(true);};
     $('v42CaptionSplit').onclick=()=>{const cursor=captionText?.selectionStart;if(api.split(index,cursor))requestRefresh(true);};
     $('v42CaptionMerge').onclick=()=>{if(api.mergeNext(index))requestRefresh(true);};
