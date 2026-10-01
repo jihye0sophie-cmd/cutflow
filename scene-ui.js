@@ -242,7 +242,7 @@
           scenes[previousIndex]={...added,id:keptId,duration:group.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,
             mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,
             mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};
-          if(addedIndex>=0&&addedIndex!==previousIndex)scenes.splice(scenes.indexOf(added),1);try{previous.audioElement?.pause();previous.element.src='';}catch{}if(previous.url)URL.revokeObjectURL(previous.url);
+          if(addedIndex>=0&&addedIndex!==previousIndex)scenes.splice(scenes.indexOf(added),1);releaseScene(previous);
         }else{group.cueIndices.forEach(ci=>{cues[ci].sceneId=added.id;});}
         renderCues();changed();this.select(sceneIndex);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:sceneIndex,state:inspect(sceneIndex)}}));return true;
       }else if(group){
