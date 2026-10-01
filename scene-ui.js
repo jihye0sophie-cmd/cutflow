@@ -67,6 +67,7 @@
     const {item,scene}=sourceForIndex(index);if(!item||!scene||exporting||loading)return false;
     pause();if(cues.length)rememberCues();
     const group=cues.length?item:null;
+    if(patch.duration!=null){const next=Math.max(.1,Math.min(600,Number(patch.duration)||(group?.duration||scene.duration||.1)));if(group)setSceneGroupDuration(group.firstCueIndex,next);else scene.duration=next;}
     if(patch.motion!=null&&Object.prototype.hasOwnProperty.call(motionLabels,patch.motion)){scene.motion=patch.motion;if(group)for(const ci of group.cueIndices)delete cues[ci].motion;}
     if(patch.transition!=null&&Object.prototype.hasOwnProperty.call(transitionLabels,patch.transition)){scene.transition=patch.transition;if(group)for(const ci of group.cueIndices)delete cues[ci].transition;}
     if(patch.transform){const t=CutRenderer.transform(scene.transform),p=patch.transform;scene.transform=CutRenderer.transform({
