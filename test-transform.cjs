@@ -52,6 +52,7 @@ event('pointerdown',1,150,260);event('pointerdown',2,220,260);event('pointermove
 near(run('scenes[0].transform.scale'),2);near(run('scenes[0].transform.x'),0);
 event('pointerup',2,255,260);event('pointermove',1,142,260);event('pointerup',1,142,260);near(run('scenes[0].transform.x'),.1);
 run('CutflowScene.select(1)');tick();assert.equal(run('scenes[1].transform'),undefined);
+run("CutflowScene.update(1,{duration:5,motion:'pan-left'})");assert.equal(run('scenes[1].duration'),5);assert.equal(run('scenes[1].motion'),'pan-left');
 const scaleInput=els.get('transformScale');scaleInput.value='130';scaleInput.valueAsNumber=130;scaleInput.listeners.input[0]();near(run('scenes[1].transform.scale'),1.3);
 run('CutflowScene.select(0)');tick();near(run('scenes[0].transform.scale'),2);
 // A pan/zoom camera still preserves the point under the pinch center.
