@@ -373,6 +373,7 @@
     window.CutflowTiming?.mount?.($('v42TimingHost'),state?index:undefined);
   }
   function renderMedia(){
+    const previousMediaSceneId=panel.dataset.mediaSceneId||'',advancedOpen=!!panel.querySelector('.v42-details[open]')&&previousMediaSceneId===(currentRows().item?.id||'');
     proxyMap.clear();const {item,index,mediaRow}=currentRows();
     if(!item){panel.innerHTML=section('이미지·영상','<p class="v42-help">장면을 먼저 추가해 주세요.</p>'+proxyButton($('uploadBtn'),'이미지·영상 추가',{primary:true,wide:true}));return;}
     const state=window.CutflowScene?.state?.(index);
@@ -392,10 +393,11 @@
         <div class="v42-media-subsection"><div class="v42-media-audio-head"><strong>영상 원음</strong><label class="v42-check"><input data-media-field="mediaMuted" type="checkbox" ${state.mediaMuted?'checked':''}><span>음소거</span></label></div>
         <label class="v42-field"><span>볼륨 <b class="v42-live-value">${Math.round(state.mediaVolume)}%</b></span><input data-media-field="mediaVolume" type="range" min="0" max="100" step="1" value="${state.mediaVolume}"></label>
         <div class="v42-media-volume-presets" aria-label="영상 원음 빠른 볼륨">${[0,25,50,75,100].map(v=>`<button type="button" class="v42-btn" data-media-volume="${v}">${v}${v===100?'%':''}</button>`).join('')}</div>
-        <div class="v42-grid2">${field('페이드 인 (초)','mediaFadeIn','number',state.mediaFadeIn.toFixed(1),'min="0" max="10" step="0.1"')}${field('페이드 아웃 (초)','mediaFadeOut','number',state.mediaFadeOut.toFixed(1),'min="0" max="10" step="0.1"')}</div><p class="v42-help">내레이션·BGM과 별도로 영상 원음을 조절합니다.</p></div>`,'Trim · 원음 · Fade',false);
+        <div class="v42-grid2">${field('페이드 인 (초)','mediaFadeIn','number',state.mediaFadeIn.toFixed(1),'min="0" max="10" step="0.1"')}${field('페이드 아웃 (초)','mediaFadeOut','number',state.mediaFadeOut.toFixed(1),'min="0" max="10" step="0.1"')}</div><p class="v42-help">내레이션·BGM과 별도로 영상 원음을 조절합니다.</p></div>`,'Trim · 원음 · Fade',advancedOpen);
     }
     const sceneActions=`<div class="v42-actions"><button class="v42-btn danger wide" id="v42DeleteScene">장면 삭제</button></div>`;
     const transform=`<div class="v42-transform-actions"><button type="button" id="v42TransformPreview" class="v42-btn" aria-pressed="false">미리보기에서 조절</button><button type="button" id="v42TransformReset" class="v42-btn">초기화</button></div><div class="v42-grid3">${field('Scale (%)','scale','number',Number(state.transform.scale).toFixed(1),'min="10" max="500" step="1"')}${field('Position X (%)','x','number',Number(state.transform.x).toFixed(1),'min="-200" max="200" step="1"')}${field('Position Y (%)','y','number',Number(state.transform.y).toFixed(1),'min="-200" max="200" step="1"')}</div><p class="v42-help">조절 모드: 한 손가락으로 이동 · 두 손가락으로 확대/축소<br>현재 장면에만 적용됩니다.</p>`;
+    panel.dataset.mediaSceneId=item.id||'';
     panel.innerHTML=
       section('이미지·영상',mediaBlock)+
       section('움직임 · 진입 전환',effects)+
