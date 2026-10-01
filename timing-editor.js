@@ -1,7 +1,7 @@
 /* Timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
 (()=>{
   const q=id=>document.getElementById(id);
-  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,timelineScrollLeft=0,playbackFollowScene=-1;
+  let selectedCueId=null,drag=null,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,timelineScrollLeft=0,playbackFollowScene=-1;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const num=(n,d=0)=>Number.isFinite(Number(n))?Number(n):d;
   const fmt=n=>num(n).toFixed(2);
