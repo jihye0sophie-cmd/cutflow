@@ -49,10 +49,12 @@ assert.equal(run("scenes[1].motion"),'still');
 assert.notEqual(run("scenes[0].motion"),'still');
 assert.equal(run("cues.every(c=>c.motion===undefined)"),true);
 for(const name of run('Object.keys(motionLabels)')){
-  for(const elapsed of [0,.22,1,2]){
-    const m=context.CutRenderer.motion({motion:name,duration:2},elapsed);
+  const samples=[];
+  for(const elapsed of [0,.22,.5,1,1.5,2]){
+    const m=context.CutRenderer.motion({motion:name,duration:2},elapsed);samples.push(m);
     assert.ok(Number.isFinite(m.scale)&&m.scale>=1-1e-12&&Number.isFinite(m.x)&&Number.isFinite(m.y));
   }
+  if(name!=='still')assert.ok(samples.some(m=>Math.abs(m.scale-1)>1e-6||Math.abs(m.x)>1e-6||Math.abs(m.y)>1e-6),name+' must produce visible camera motion');
 }
 assert.equal(context.CutRenderer.motion({motion:'punch-hold',duration:2},.22).scale,context.CutRenderer.motion({motion:'punch-hold',duration:2},2).scale);
 assert.ok(context.CutRenderer.motion({motion:'zoom-pan-up',duration:2},2).y<context.CutRenderer.motion({motion:'zoom-pan-up',duration:2},0).y);
