@@ -139,6 +139,7 @@ assert(app.includes("window.syncBgm?.({emit:false})"),'ordinary edits must refre
 assert(bgmEditor.includes('function syncBgm({emit=true}={})'),'BGM sync must support silent summary refreshes');
 assert(app.includes('function changed({syncBgm=true}={})'),'shared dirty-state helper must support skipping redundant BGM sync');
 assert(bgmEditor.includes('changed({syncBgm:false});syncBgm()'),'BGM edits must sync their summary only once');
+assert(bgmEditor.includes('syncBgm({emit:!silent})'),'silent project restore must update BGM UI without intermediate BGM events');
 assert(js.includes('function applyBgmField('),'mobile BGM direct field bridge missing');
 assert(js.includes("pb($('bgmBtn'),'음악 파일 추가')")&&js.includes("pb($('bgmRemove'),'음악 제거'"),'mobile BGM direct file controls missing');
 assert(js.includes("pc($('bgmStart'),'음악 시작 지점 (초)')")&&js.includes("pc($('bgmVolume'),'BGM 볼륨')")&&js.includes("pc($('bgmRepeat'),'음악이 짧을 때')"),'mobile BGM fields missing');
