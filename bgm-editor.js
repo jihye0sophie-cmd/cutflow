@@ -1,11 +1,12 @@
 /* Music is independent of narration and never determines timeline duration. */
 let bgmBuffer=null,bgmName='',bgmFile=null,bgmLoadId=0;
 function bgmProject(){return {buffer:bgmBuffer,start:Number($('bgmStart').value)||0,volume:(Number($('bgmVolume').value)||0)/100,loop:$('bgmRepeat').value==='loop',fadeIn:Number($('bgmFadeIn').value)||0,fadeOut:Number($('bgmFadeOut').value)||0};}
+const setBgmText=(id,text)=>{const el=$(id);if(el&&el.textContent!==text)el.textContent=text;};
 function syncBgm({emit=true}={}){
-  $('bgmFields').disabled=!bgmBuffer;$('bgmRemove').disabled=!bgmBuffer;$('bgmVolumeValue').textContent=`${$('bgmVolume').value}%`;
-  $('bgmStatus').textContent=bgmBuffer?`${bgmName} · ${bgmBuffer.duration.toFixed(2)}초`:'음악 없음';
+  $('bgmFields').disabled=!bgmBuffer;$('bgmRemove').disabled=!bgmBuffer;setBgmText('bgmVolumeValue',`${$('bgmVolume').value}%`);
+  setBgmText('bgmStatus',bgmBuffer?`${bgmName} · ${bgmBuffer.duration.toFixed(2)}초`:'음악 없음');
   const s=CutAudio.settings({duration:totalDuration(),bgm:bgmProject()});
-  $('bgmSummary').textContent=!bgmBuffer?'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.':!s.duration?'컷이나 내레이션을 추가하면 사용할 길이가 정해집니다.':s.loop?`${s.start.toFixed(2)}초부터 원본 끝까지 반복 · 쇼츠 ${s.duration.toFixed(2)}초에 맞춰 종료`:`원본 ${s.start.toFixed(2)}~${(s.start+s.length).toFixed(2)}초 사용 · ${s.length.toFixed(2)}초 재생${s.length<s.duration?' 후 음악 종료':''}`;
+  setBgmText('bgmSummary',!bgmBuffer?'음악을 추가하면 쇼츠 길이에 맞춰 자동으로 잘립니다.':!s.duration?'컷이나 내레이션을 추가하면 사용할 길이가 정해집니다.':s.loop?`${s.start.toFixed(2)}초부터 원본 끝까지 반복 · 쇼츠 ${s.duration.toFixed(2)}초에 맞춰 종료`:`원본 ${s.start.toFixed(2)}~${(s.start+s.length).toFixed(2)}초 사용 · ${s.length.toFixed(2)}초 재생${s.length<s.duration?' 후 음악 종료':''}`);
   if(emit&&typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-bgm-updated',{detail:{loaded:!!bgmBuffer,name:bgmName,duration:bgmBuffer?.duration||0}}));
 }
 $('bgmBtn').onclick=()=>$('bgmInput').click();
