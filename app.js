@@ -271,7 +271,6 @@ async function addFiles(files,{createFreeCues=true,deferCommit=false}={}){
   assignAvailableCuts();renderCues();if(success)changed();$('fileInput').value='';toast(`${success}개 장면을 추가했습니다.${!audioBuffer&&success?' 내레이션 없이 자막을 직접 입력할 수 있습니다.':''}${errors.length?' 읽기 실패: '+errors.join(', '):''}`);
   return added;
 }
-function moveScene(from,to){if(to<0||to>=scenes.length)return false;pause();const [scene]=scenes.splice(from,1);scenes.splice(to,0,scene);renderScenes();offset=sceneStart(to);return true;}
 async function demo(){
   if(loading)return;loading++;stats();
   for(let i=0;i<4;i++){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=900;const ctx=canvas.getContext('2d');const colors=['#244663','#674552','#526044','#61507b'];ctx.fillStyle=colors[i];ctx.fillRect(0,0,600,900);ctx.fillStyle='#f2d998';ctx.beginPath();ctx.arc(420,200,100,0,Math.PI*2);ctx.fill();ctx.fillStyle='#142930';ctx.beginPath();ctx.moveTo(0,620);ctx.lineTo(220,450);ctx.lineTo(600,800);ctx.lineTo(600,900);ctx.lineTo(0,900);ctx.fill();const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));scenes.push(await makeScene(new File([blob],`sample_${i+1}.png`,{type:'image/png'})));}
