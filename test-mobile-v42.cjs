@@ -83,6 +83,8 @@ assert(js.includes("autoGridBtn:'autoGrids'"),'auto grid direct file picker mapp
 assert(js.includes('data-file-target'),'mobile file proxy direct target marker missing');
 assert(new RegExp('app\\.js\\?v=[^"\\x27]+').test(html),'shared app bridge cache key missing');
 assert(app.includes('async processNarration('),'shared narration processing bridge missing');
+assert(app.includes('async loadNarration(file){return loadAudio(file);}'),'auto narration loader must return the current load result');
+assert(app.includes('async addMedia(files){const added=await addFiles(files,{createFreeCues:false});return added.length;}'),'auto media loader must use explicit add results');
 assert(app.includes('buildTimeline(){buildCues();')&&app.includes('window.CutflowAutoBridge={'),'shared cue building bridge missing');
 assert(app.includes("scriptInput').dispatchEvent(new Event('input'"),'TXT import must dispatch input');
 assert(!js.includes("typeof audioFile==='undefined'"),'mobile must not depend on app lexical audioFile');
