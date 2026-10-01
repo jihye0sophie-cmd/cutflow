@@ -831,8 +831,7 @@
   for(const id of refreshSources){
     const el=$(id);if(!el)continue;
     const observer=new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}});
-    const structural=id==='cueList'||id==='sceneList';
-    observer.observe(el,{subtree:true,childList:true,attributes:!structural});
+    observer.observe(el,{subtree:true,childList:true,characterData:true});
   }
   window.addEventListener('cutflow-scene',e=>{
     if(mobileTransformMode)setMobileTransformMode(false);
