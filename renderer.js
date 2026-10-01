@@ -31,6 +31,15 @@ window.CutRenderer = (() => {
     if(scene.motion==='zoom-out-fast')m.scale=1.22-.22*quick;
     if(scene.motion==='zoom-pan-right'){m.scale=1.16+.18*p;m.x=-.045+.09*p;}
     if(scene.motion==='zoom-pan-left'){m.scale=1.16+.18*p;m.x=.045-.09*p;}
+    if(scene.motion==='zoom-pan-up'){m.scale=1.16+.18*p;m.y=.045-.09*p;}
+    if(scene.motion==='zoom-pan-down'){m.scale=1.16+.18*p;m.y=-.045+.09*p;}
+    if(scene.motion==='handheld-subtle'){
+      // Deterministic low-amplitude handheld drift. Keeping this time-based makes preview/export identical.
+      const t=p*Math.PI*2;
+      m.scale=1.025+.004*Math.sin(t*1.7+.4);
+      m.x=.0045*Math.sin(t*2.1+.2)+.0022*Math.sin(t*4.7+1.1);
+      m.y=.0035*Math.sin(t*1.6+1.4)+.0018*Math.sin(t*3.9+.5);
+    }
     if(scene.motion==='punch-hold')m.scale=1+.4*Math.min(1,elapsed/.22);
     return m;
   }
