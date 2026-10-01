@@ -17,6 +17,8 @@ assert(new RegExp('mobile-v42\\.css\\?v=[^"\\x27]+').test(html),'mobile css cach
 assert(new RegExp('mobile-v42\\.js\\?v=[^"\\x27]+').test(html),'responsive mobile js cache key missing');
 assert(projectStore.includes("'cutflow-project-status'")&&projectStore.includes('if(changed&&typeof CustomEvent'), 'project status updates must be event-driven and deduplicated');
 assert(js.includes("const refreshSources=['cueList','sceneList','audioStatus']")&&!js.includes("'projectSaveStatus','audioStatus'"),'mobile refresh observers must stay limited to editor content');
+assert(autoSetup.includes("emit('cutflow-auto-state',info)")&&js.includes("window.addEventListener('cutflow-auto-state'"),'auto setup state must refresh mobile UI through events');
+assert(!js.includes("'autoNarration','autoGrids','autoSingles','autoBgm'"),'mobile must not use file-input refresh timers for auto setup state');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'responsive mode switching must not reload the page');
 assert(js.includes("const compactMq=matchMedia('(max-width:819px)')"),'responsive mobile breakpoint missing');
