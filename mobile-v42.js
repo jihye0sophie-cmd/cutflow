@@ -827,10 +827,10 @@
     $('v42ExportDownload').click();
   };
 
-  const refreshSources=['cueList','sceneList','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus'];
+  const refreshSources=['cueList','sceneList','projectSaveStatus','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus'];
   for(const id of refreshSources){
     const el=$(id);if(!el)continue;
-    const observer=new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}});
+    const observer=new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}});
     observer.observe(el,{subtree:true,childList:true,characterData:true});
   }
   window.addEventListener('cutflow-scene',e=>{
