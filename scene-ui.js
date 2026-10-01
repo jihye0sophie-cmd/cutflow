@@ -1,6 +1,6 @@
 /* Logical-scene helpers. A scene can own multiple caption cues without duplicating media. */
 (()=>{
-  const releaseScene=scene=>{if(!scene)return;try{scene.audioElement?.pause();if(scene.audioElement){scene.audioElement.removeAttribute('src');scene.audioElement.load?.();scene.audioElement=null;}if(scene.element){scene.element.removeAttribute?.('src');scene.element.src='';}}catch{}if(scene.url){URL.revokeObjectURL(scene.url);scene.url='';}};
+  const releaseScene=scene=>{if(window.CutflowReleaseSceneResources)return window.CutflowReleaseSceneResources(scene);if(!scene)return;try{scene.audioElement?.pause();if(scene.audioElement){scene.audioElement.removeAttribute('src');scene.audioElement.load?.();scene.audioElement=null;}if(scene.element){scene.element.removeAttribute?.('src');scene.element.src='';}}catch{}if(scene.url){URL.revokeObjectURL(scene.url);scene.url='';}};
   const sceneSettings=scene=>({
     duration:scene.duration,motion:scene.motion,transition:scene.transition,
     transform:cloneProjectData(scene.transform||null),mediaVolume:scene.mediaVolume,
