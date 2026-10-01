@@ -1288,3 +1288,17 @@ html,body,body.v42-mobile,body.v42-mobile #mobileAppV42{
   .v42-timing-host .timing-scroll{max-width:100%}
   .v42-timing-host .timing-waveform-bars i{width:1px}
 }
+
+/* Mobile toast feedback: keep save/load confirmations above the floating edit dock. */
+body.v42-mobile #toast{
+  z-index:1000!important;
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 86px)!important;
+  max-width:min(86vw,360px)!important;
+  padding:10px 14px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(23,25,29,.96)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.38)!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  text-align:center!important;
+}
