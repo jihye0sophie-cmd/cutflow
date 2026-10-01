@@ -186,6 +186,8 @@
     document.body.classList.toggle('v42-mobile',next);
     const exportBusy=!!window.CutflowExport?.busy;
     if(!next){
+      if(mobileTransformMode)setMobileTransformMode(false);
+      const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);
       try{if(settingsDialog?.open)settingsDialog.close();}catch{}
       try{if(exportDialogV42?.open)exportDialogV42.close();}catch{}
       if(exportBusy){const desktopExport=$('exportDialog');try{if(desktopExport&&!desktopExport.open)desktopExport.showModal();}catch{}}
