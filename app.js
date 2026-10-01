@@ -253,14 +253,17 @@ async function makeScene(file){
     return {id:uid(),name:file.name,file,url,element,type:video?'video':'image',sourceDuration,trimStart:0,trimEnd:video?sourceDuration:0,duration:video?Math.min(2.4,sourceDuration):2.4,motion:'still',transition:'cut',mediaVolume:0,mediaMuted:false,mediaFadeIn:0,mediaFadeOut:0,thumb:canvas.toDataURL('image/jpeg',.65)};
   }catch(error){URL.revokeObjectURL(url);throw error;}
 }
-async function addFiles(files,{createFreeCues=true}={}){
-  const list=[...files].filter(f=>/^image\/|^video\//.test(f.type)||/\.(mp4|mov|webm|m4v)$/i.test(f.name));if(!list.length){toast('이미지 또는 영상 파일을 선택해 주세요.');return;}
+async function addFiles(files,{createFreeCues=true,deferCommit=false}={}){
+  const list=[...files].filter(f=>/^image\/|^video\//.test(f.type)||/\.(mp4|mov|webm|m4v)$/i.test(f.name));if(!list.length){toast('이미지 또는 영상 파일을 선택해 주세요.');return [];}
   pause();loading++;stats();let success=0,errors=[],added=[];
   for(const file of list){try{const scene=await makeScene(file);scene.motion=scene.type==='image'?chooseAutoMotion():'still';
       if(!audioBuffer&&createFreeCues){scene.duration=scene.type==='video'?Math.max(.1,Math.min(600,scene.sourceDuration)):3;scene.mediaVolume=scene.type==='video'?1:0;}
       scenes.push(scene);added.push(scene);success++;}catch{errors.push(file.name);}}
   if(!audioBuffer&&createFreeCues&&added.length){rememberCues();for(const scene of added)cues.push(createFreeCue(scene));}
-  loading--;assignAvailableCuts();renderCues();if(success)changed();$('fileInput').value='';toast(`${success}개 장면을 추가했습니다.${!audioBuffer&&success?' 내레이션 없이 자막을 직접 입력할 수 있습니다.':''}${errors.length?' 읽기 실패: '+errors.join(', '):''}`);
+  loading--;
+  if(deferCommit){stats();return added;}
+  assignAvailableCuts();renderCues();if(success)changed();$('fileInput').value='';toast(`${success}개 장면을 추가했습니다.${!audioBuffer&&success?' 내레이션 없이 자막을 직접 입력할 수 있습니다.':''}${errors.length?' 읽기 실패: '+errors.join(', '):''}`);
+  return added;
 }
 function moveScene(from,to){if(to<0||to>=scenes.length)return false;pause();const [scene]=scenes.splice(from,1);scenes.splice(to,0,scene);if(cues.length){rememberCues();cues.forEach((c,i)=>{c.sceneId=scenes[i]?.id;c.mediaOffset=0;});renderCues();}else renderScenes();offset=sceneStart(to);return true;}
 async function demo(){
