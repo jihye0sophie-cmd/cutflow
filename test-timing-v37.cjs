@@ -28,6 +28,9 @@ assert.ok(!js.includes("new MutationObserver(()=>requestAnimationFrame(renderAll
 assert.ok(js.includes('function requestRenderAll()')&&js.includes('new MutationObserver(requestRenderAll)'),'precision timing refreshes must be coalesced through one render queue');
 assert.ok(js.includes('playerState?.playing')&&js.includes('pendingCenter=true'),'precision timing playback must follow the active scene');
 assert.ok(js.includes('playbackFollowScene')&&js.includes('activeScene!==playbackFollowScene'),'restored project playback must re-detect and follow scene changes');
+assert.ok(!js.includes('setInterval(()=>{const panel=visiblePanel()'),'precision timing playback follow must not use a polling interval');
+assert.ok(js.includes('requestAnimationFrame(syncPlaybackFrame)'),'precision timing playback follow must use the shared animation frame loop');
+assert.ok(js.includes("selectedCueId=null;playbackFollowScene=-1;timelineScrollLeft=0"),'restored projects must reset precision timing selection/follow state');
 assert.ok(js.includes("targets.forEach(renderPanel)"),'timeline should render only active timing panels');
 assert.ok(js.includes("h.closest('.timing-layer-body')"),'drag geometry must use the inset time area');
 assert.ok(js.includes("drag.el?.isConnected"),'drag must keep the active handle DOM stable');
