@@ -456,6 +456,7 @@ body.v42-mobile .v42-main{
 }body.v42-mobile .v42-tabs{
   position:fixed;
   left:50%;
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) - 2px)!important;
   transform:translateX(-50%);
   z-index:150;
   display:grid!important;
@@ -471,6 +472,7 @@ body.v42-mobile .v42-main{
   box-shadow:0 10px 28px rgba(0,0,0,.38),0 1px 0 rgba(255,255,255,.035) inset!important;
   -webkit-backdrop-filter:blur(20px) saturate(120%);
   backdrop-filter:blur(20px) saturate(120%);
+  pointer-events:auto!important;
 }body.v42-mobile .v42-tabs button{
   display:grid!important;
   place-items:center!important;
@@ -1143,22 +1145,13 @@ body.v42-mobile .v42-panel{
   max-height:none!important;
   margin-top:3px!important;
   margin-bottom:0!important;
-  padding:7px 7px calc(50px + env(safe-area-inset-bottom))!important;
+  padding:7px 7px calc(88px + env(safe-area-inset-bottom))!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   touch-action:pan-y!important;
   overscroll-behavior-y:contain!important;
   -webkit-overflow-scrolling:touch!important;
   scrollbar-width:thin;
-}
-
-/* Dock position and touch behavior. */
-body.v42-mobile .v42-tabs{
-  bottom:calc(max(8px,env(safe-area-inset-bottom)) - 2px)!important;
-  pointer-events:auto!important;
-}
-body.v42-mobile.v42-standalone .v42-panel{
-  padding-bottom:calc(50px + env(safe-area-inset-bottom))!important;
 }
 
 /* Browser chrome mitigation; installed Home Screen mode uses the full viewport. */
