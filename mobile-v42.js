@@ -553,6 +553,10 @@
     if(singleHost&&(force||!(active&&singleHost.contains(active))))singleHost.innerHTML=autoSingleMirror();
   }
   function renderSettings(){
+    const settingsBody=$('v42SettingsBody');
+    const preserve=settingsDialog.open;
+    const previousScroll=preserve?settingsBody.scrollTop:0;
+    const autoWasOpen=preserve&&!!settingsBody.querySelector('.v42-pc-settings-collapsible[open]');
     settingsProxyMap.clear();
     const pc=(el,label,opts={})=>proxyControl(el,label,{...opts,map:settingsProxyMap});
     const pb=(el,label,opts={})=>proxyButton(el,label,{...opts,map:settingsProxyMap});
@@ -628,6 +632,8 @@
       settingsSection('AUDIO','배경음악 · BGM',bgm,$('bgmStatus')?.textContent||'음악 없음')+
       settingsSection('02 COMPOSE','화면 구성',project,$('sceneCount')?.textContent||'')+
       settingsSection('03 EXPORT','완성한 쇼츠를 MP4로.',output);
+    if(autoWasOpen){const autoDetails=settingsBody.querySelector('.v42-pc-settings-collapsible');if(autoDetails)autoDetails.open=true;}
+    if(preserve)settingsBody.scrollTop=previousScroll;
     syncSettingsProxyState();
   }
   function renderPanel(force=false){
@@ -717,7 +723,6 @@
       const i=Number(card.dataset.autoGrid),patch={[e.target.dataset.autoField]:e.target.value};
       window.CutflowAutoSetup?.setGrid?.(i,patch);setTimeout(refresh,0);return true;
     }
-    if(e.target.name==='v42AutoSilence'){const target=document.querySelector(`input[name="autoSilencePreset"][value="${e.target.value}"]`);if(target){target.checked=true;dispatch(target,'change');setTimeout(refresh,0);}return true;}
     return false;
   }
   function handleAutoClick(e,refresh){
@@ -827,6 +832,7 @@
   const endMobileGridDrag=e=>{if(!mobileGridDrag||e?.pointerId!=null&&e.pointerId!==mobileGridDrag.pointerId)return;window.CutflowAutoSetup?.setCut?.(mobileGridDrag.index,mobileGridDrag.axis,mobileGridDrag.cutIndex,parseFloat(mobileGridDrag.line.style[mobileGridDrag.axis==='x'?'left':'top'])||0,{commit:true});mobileGridDrag.line.classList.remove('dragging');mobileGridDrag=null;syncSettingsGridMirror();};
   $('v42SettingsBody').addEventListener('pointerup',endMobileGridDrag);
   $('v42SettingsBody').addEventListener('pointercancel',endMobileGridDrag);
+  $('v42SettingsBody').addEventListener('focusout',e=>{if(e.target?.dataset?.autoField)setTimeout(()=>syncSettingsGridMirror(true),0);});
   tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);if(b.dataset.tab!=='media')setMobileTransformMode(false);tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
   const mobileSceneInput=$('v42AddSceneInput');
   $('v42AddScene').onclick=()=>{
@@ -1001,7 +1007,14 @@
     el.addEventListener(id==='scriptInput'||id==='projectCaptionWrap'?'input':'change',()=>setTimeout(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}},id==='audioInput'?350:40));
   }
   window.addEventListener('cutflow-mobile-activate',ensureMirrorStage);
-  window.addEventListener('cutflow-auto-grid-change',e=>{if(!settingsDialog.open)return;if(e.detail?.live){syncSettingsProxyState();return;}syncSettingsGridMirror(true);syncSettingsProxyState();});
+  window.addEventListener('cutflow-auto-grid-change',e=>{
+    if(!settingsDialog.open)return;
+    if(e.detail?.live){syncSettingsProxyState();return;}
+    const active=document.activeElement;
+    const editingGrid=!!active?.closest?.('[data-auto-grid]')&&!!active?.dataset?.autoField;
+    syncSettingsGridMirror(!editingGrid);
+    syncSettingsProxyState();
+  });
   window.addEventListener('cutflow-auto-state',e=>{if(!settingsDialog.open)return;const view=settingsDialog.querySelector('[data-auto-media-mode-view]'),mode=e.detail?.mediaMode||'multi';if(view&&view.dataset.autoMediaModeView!==mode){renderSettings();return;}syncSettingsProxyState();});
   window.addEventListener('cutflow-auto-ready',()=>{if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
