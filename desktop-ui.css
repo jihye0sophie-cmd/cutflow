@@ -140,7 +140,7 @@
  #desktopEditor[data-mode=image] .media-advanced{display:block!important}
 }
 /* compact desktop header */
-@media (min-width:761px){
+@media (min-width:820px){
  .desktop-current-actions{display:flex;align-items:center;gap:10px}.desktop-current-actions p{margin:0}.desktop-current-actions #desktopSettings{white-space:nowrap;padding:7px 10px;border:1px solid var(--studio-border);border-radius:8px;background:#20242a;color:#fff;font-size:11px}
  .desktop-header-actions{display:flex;gap:7px;flex-wrap:nowrap}.desktop-header-actions button{white-space:nowrap;min-width:auto!important}
  #desktopExport{background:var(--studio-accent)!important;color:#111!important;font-weight:800}
