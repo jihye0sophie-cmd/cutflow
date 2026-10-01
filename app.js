@@ -160,6 +160,7 @@ function selectNavigationCue(index,scroll=false){
     if(selected&&scroll)row.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});
   });
   lastCue=index;
+  if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-caption-active',{detail:{index}}));
   window.selectStyleCue?.(index);
   const sourceIndex=scenes.findIndex(scene=>scene.id===cue.sceneId);
   const label=`자막 ${index+1} · 컷 ${sourceIndex+1}`;if($('nowPlaying').textContent!==label)$('nowPlaying').textContent=label;
@@ -199,7 +200,7 @@ async function tick(frameNow=performance.now()){
     $('currentTime').textContent=timeText(time);$('scrubber').value=totalDuration()?1000*time/totalDuration():0;
     const timeline=timelineScenes(),found=CutRenderer.locate(timeline,time),active=timeline[found.index];const loc={index:cues.length?(active?.sourceIndex??-1):found.index},playingLabel=loc.index<0?'장면 없음':cues.length?`자막 ${active.cueIndex+1} · 컷 ${loc.index+1}`:`컷 ${loc.index+1} / ${scenes.length}`;if($('nowPlaying').textContent!==playingLabel)$('nowPlaying').textContent=playingLabel;
     if(loc.index!==lastActive){document.querySelectorAll('.scene-row,.mini-block').forEach(el=>el.classList.toggle('active',Number(el.dataset.index)===loc.index));lastActive=loc.index;}
-    const cueIndex=cues.findIndex(c=>time>=c.start&&time<c.end);if(cueIndex!==lastCue){document.querySelectorAll('.cue-row').forEach(el=>el.classList.toggle('active',Number(el.dataset.index)===cueIndex));lastCue=cueIndex;}
+    const cueIndex=cues.findIndex(c=>time>=c.start&&time<c.end);if(cueIndex!==lastCue){document.querySelectorAll('.cue-row').forEach(el=>el.classList.toggle('active',Number(el.dataset.index)===cueIndex));lastCue=cueIndex;if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-caption-active',{detail:{index:cueIndex}}));}
     if(playing){const sceneIndex=cues.length?(window.CutflowScene?.sceneIndexForCue?.(cueIndex)??-1):found.index;if(sceneIndex>=0&&sceneIndex!==lastPlaybackScene){lastPlaybackScene=sceneIndex;window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:sceneIndex}));}}
     waveform(time);
   }
