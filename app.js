@@ -346,11 +346,15 @@ window.CutflowCaption={
     return Number.isInteger(ci)&&ci>=0?ci:Math.max(0,active);
   },
   update(index,patch={}){
-    const c=cues[index];if(!c)return false;const seg=captionSegmentInfo(index);rememberCues();
+    const c=cues[index];if(!c)return false;const seg=captionSegmentInfo(index);
+    const nextStart=patch.start!=null&&!c.freeEdit?Number(patch.start):null,nextEnd=patch.end!=null&&!c.freeEdit?Number(patch.end):null;
+    if(nextStart!=null&&(!Number.isFinite(nextStart)||nextStart<0||nextStart>=c.end-.05||(index>0&&nextStart<cues[index-1].end))){toast('자막 시작 시간을 확인해 주세요.');return false;}
+    if(nextEnd!=null&&(!Number.isFinite(nextEnd)||nextEnd<=(nextStart??c.start)+.05||(index<cues.length-1&&nextEnd>cues[index+1].start))){toast('자막 종료 시간을 확인해 주세요.');return false;}
+    rememberCues();
     if(patch.text!=null){c.colorRanges=CaptionRanges.edit(c.text,String(patch.text),c.colorRanges);c.text=String(patch.text);c.captionGap=!c.text.trim();}
     if(patch.color!=null){c.color=patch.color;c.style={...c.style,color:patch.color};}
-    if(patch.start!=null&&!c.freeEdit){const v=Number(patch.start);if(!Number.isFinite(v)||v<0||v>=c.end-.05||(index>0&&v<cues[index-1].end)){toast('자막 시작 시간을 확인해 주세요.');return false;}c.start=v;}
-    if(patch.end!=null&&!c.freeEdit){const v=Number(patch.end);if(!Number.isFinite(v)||v<=c.start+.05||(index<cues.length-1&&v>cues[index+1].start)){toast('자막 종료 시간을 확인해 주세요.');return false;}c.end=v;}
+    if(nextStart!=null)c.start=nextStart;
+    if(nextEnd!=null)c.end=nextEnd;
     if(c.sceneId){for(let j=seg.first;j<=seg.last;j++)cues[j].mediaOffset=Math.max(0,cues[j].start-cues[seg.first].start);}
     return commitCaptionChange(index);
   },
