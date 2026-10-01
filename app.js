@@ -52,6 +52,7 @@ function previewAudioElement(scene){
   return scene.audioElement;
 }
 function releaseSceneResources(scene){if(!scene)return;try{scene.audioElement?.pause();if(scene.audioElement){scene.audioElement.removeAttribute?.('src');scene.audioElement.load?.();scene.audioElement=null;}if(scene.element){scene.element.removeAttribute?.('src');scene.element.src='';}}catch{}if(scene.url){URL.revokeObjectURL(scene.url);scene.url='';}}
+window.CutflowReleaseSceneResources=releaseSceneResources;
 function mediaFadeGain(item,elapsed){
   const clipLength=Math.max(0,Math.min(Number(item.duration)||0,(Number(item.trimEnd)||Number(item.sourceDuration)||0)-(Number(item.trimStart)||0)));
   if(!clipLength)return 0;
