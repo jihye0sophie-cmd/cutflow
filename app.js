@@ -269,7 +269,7 @@ async function demo(){
   for(let i=0;i<4;i++){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=900;const ctx=canvas.getContext('2d');const colors=['#244663','#674552','#526044','#61507b'];ctx.fillStyle=colors[i];ctx.fillRect(0,0,600,900);ctx.fillStyle='#f2d998';ctx.beginPath();ctx.arc(420,200,100,0,Math.PI*2);ctx.fill();ctx.fillStyle='#142930';ctx.beginPath();ctx.moveTo(0,620);ctx.lineTo(220,450);ctx.lineTo(600,800);ctx.lineTo(600,900);ctx.lineTo(0,900);ctx.fill();const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));scenes.push(await makeScene(new File([blob],`sample_${i+1}.png`,{type:'image/png'})));}
   if(!$('titleInput').value)$('titleInput').value='나만의 쇼츠 제목\n지금 만들어 보세요';lastTitleText=$('titleInput').value;if(!$('scriptInput').value)$('scriptInput').value='대본과 오디오를 함께 넣으세요.\n자막 시간을 자유롭게 조정하세요.\n이미지와 영상을 섞어 편집하세요.\n완성한 쇼츠를 MP4로 저장하세요.';
   if(!cues.length){rememberCues();cues=scriptLines($('scriptInput').value).map((text,i)=>({id:uid(),text,start:i*2.4,end:(i+1)*2.4,color:'white'}));}
-  loading--;renderCues();applyRhythm();await CutRenderer.fonts(project());dirty=true;
+  loading--;applyRhythm();await CutRenderer.fonts(project());dirty=true;
 }
 function applyRhythm(){pause();const rhythm=rhythms[$('templateSelect').value];scenes.forEach((s,i)=>{if(s.type==='image')s.motion=rhythm.motions[i%rhythm.motions.length];s.transition=i?rhythm.transitions[i%rhythm.transitions.length]:'cut';});cues.forEach(c=>{delete c.motion;delete c.transition;delete c.transform;delete c.trimStart;delete c.trimEnd;});renderCues();changed();toast('길이는 유지하고 장면별 움직임·전환만 적용했습니다.');}
 async function exportVideo(){
