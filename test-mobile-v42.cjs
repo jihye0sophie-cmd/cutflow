@@ -40,6 +40,8 @@ assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X 
 assert(js.includes('id="v42TransformPreview"')&&js.includes('setMobileTransformMode')&&js.includes('previewTransformGesture'),'mobile preview drag/pinch transform missing');
 assert(js.indexOf("section('이미지·영상 크기 / 위치',transform)")<js.indexOf("section('장면 관리',sceneActions)"),'mobile scene management must stay last after transform controls');
 assert(js.includes("details('영상 고급 설정'")&&js.includes("field('시작 (초)','trimStart'")&&js.includes('data-media-field="mediaVolume"')&&js.includes("field('페이드 인 (초)','mediaFadeIn'"),'video advanced controls missing');
+assert(js.includes("advancedOpen=!!panel.querySelector('.v42-details[open]')")&&js.includes("'Trim · 원음 · Fade',advancedOpen"),'mobile video advanced open state must survive media rerenders');
+assert(app.includes("const openMediaAdvanced=new Set(")&&app.includes("openMediaAdvanced.has(c.id)?'open':''"),'desktop video advanced open state must survive cue rerenders');
 assert(js.includes('applyAllCaptionStyle')&&js.includes('captionStroke')&&js.includes('captionPosition'),'caption style workflow missing');
 assert(js.includes('layoutSelect')&&js.includes('titleInput')&&js.includes('channelInput'),'template workflow missing');
 assert(js.includes('<div class="v42-grid2"><label class="v42-field"><span>화면 비율</span>')&&js.includes("pc($('layoutSelect'),'영상 템플릿')"),'compose ratio/template row missing');
