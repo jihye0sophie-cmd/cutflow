@@ -65,14 +65,15 @@
   };
   const setCaptionEdge=(cueIndex,side,value,{commit=true}={})=>{
     const items=sceneItems(),item=items.find(g=>g?.cueIndices?.includes(cueIndex)),cue=cues[cueIndex];if(!item||!cue)return false;
-    const si=items.indexOf(item),pos=item.cueIndices.indexOf(cueIndex);
+    const si=items.indexOf(item),pos=item.cueIndices.indexOf(cueIndex),prevIndex=item.cueIndices[pos-1],nextIndex=item.cueIndices[pos+1];
     if(side==='start'){
-      if(pos===0){if(si===0){cue.start=clamp(num(value,cue.start),0,cue.end-.08);updateOffsets(item);}else setSceneBoundaryAt(si,'start',value,{commit:false});}
-      else setCaptionBoundary(item.cueIndices[pos-1],value,{commit:false});
+      const min=prevIndex!=null?Math.max(item.start,cues[prevIndex].end):item.start,max=cue.end-.08;
+      cue.start=clamp(num(value,cue.start),min,max);
     }else{
-      if(pos===item.cueIndices.length-1)setSceneBoundaryAt(si,'end',value,{commit:false});
-      else setCaptionBoundary(cueIndex,value,{commit:false});
+      const min=cue.start+.08,max=nextIndex!=null?Math.min(item.end,cues[nextIndex].start):item.end;
+      cue.end=clamp(num(value,cue.end),min,max);
     }
+    updateOffsets(item);
     if(commit)commitTimingMutation(Math.max(0,si));
     return true;
   };
@@ -80,11 +81,11 @@
     const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel||!audioBuffer)return;
     const cue=cues[sel.index],items=sceneItems(),si=items.indexOf(item),pos=item.cueIndices.indexOf(sel.index),prevIndex=item.cueIndices[pos-1],nextIndex=item.cueIndices[pos+1];
     rememberCues();let snapped=0;
-    const startMin=prevIndex!=null?cues[prevIndex].start+.08:si>0?items[si-1].start+.1:0;
+    const startMin=prevIndex!=null?Math.max(item.start,cues[prevIndex].end):item.start;
     const startMax=Math.max(startMin,cue.end-.08),startHit=nearestNarrationBoundary(cue.start,startMin,startMax,.8);
     if(startHit!=null){setCaptionEdge(sel.index,'start',startHit,{commit:false});snapped++;}
     const live=cues[sel.index],endMin=live.start+.08;
-    const endMax=nextIndex!=null?cues[nextIndex].end-.08:si<items.length-1?items[si+1].end-.1:num(audioBuffer?.duration,timelineDuration());
+    const endMax=nextIndex!=null?Math.min(item.end,cues[nextIndex].start):item.end;
     const endHit=nearestNarrationBoundary(live.end,endMin,Math.max(endMin,endMax),.8);
     if(endHit!=null){setCaptionEdge(sel.index,'end',endHit,{commit:false});snapped++;}
     const currentItem=sceneItems().find(g=>g?.cueIndices?.includes(sel.index));if(currentItem)updateOffsets(currentItem);
