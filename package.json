@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node build.cjs",
-    "test": "node test-v4.cjs && node test-transform.cjs && node test-scene-groups.cjs && node test-timing-v37.cjs && node test-timing-align-v39.cjs && node test-history-v40.cjs && node test-caption-batch.cjs && node test-mobile-v42.cjs && node test-project-roundtrip.cjs && node test-export-retry.cjs",
+    "test": "node test-v4.cjs && node test-transform.cjs && node test-scene-groups.cjs && node test-timing-v37.cjs && node test-timing-align-v39.cjs && node test-history-v40.cjs && node test-caption-batch.cjs && node test-mobile-v42.cjs && node test-long-video-auto.cjs && node test-project-roundtrip.cjs && node test-export-retry.cjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "devDependencies": {
