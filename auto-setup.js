@@ -62,12 +62,12 @@ function renderSingles(){
 }
 async function addSingleFiles(files){
   for(const file of files){try{const info=await imageInfo(file);state.singles.push({file,url:info.url,width:info.width,height:info.height});}catch(e){window.CutflowAutoBridge?.toast?.(e.message);}}
-  renderSingles();update();
+  renderSingles();update();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change',{detail:{kind:'single-add',commit:true}}));
 }
 async function imageInfo(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>res({url,width:im.naturalWidth,height:im.naturalHeight});im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error(`${file.name}을 읽지 못했습니다.`))};im.src=url;});}
 async function addGridFiles(files){
   for(const file of files){try{const info=await imageInfo(file);state.grids.push({file,cols:4,rows:1,gap:8,xCuts:evenCuts(4),yCuts:evenCuts(1),...info});}catch(e){window.CutflowAutoBridge?.toast?.(e.message);}}
-  renderGrids();
+  renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change',{detail:{kind:'grid-add',commit:true}}));
 }
 function resetCuts(grid){grid.xCuts=evenCuts(grid.cols);grid.yCuts=evenCuts(grid.rows);}
 function lineBounds(cuts,index){return {min:index?cuts[index-1]+2:2,max:index<cuts.length-1?cuts[index+1]-2:98};}
@@ -177,11 +177,11 @@ window.CutflowAutoSetup={
   longVideo(){return state.longVideo?{name:state.longVideo.name,size:state.longVideo.size,type:state.longVideo.type,start:Math.max(0,Number($('autoLongVideoStart')?.value)||0)}:null;},
   grids(){return state.grids.map((g,index)=>{normalizeGrid(g);return {index,name:g.file?.name||`그리드 ${index+1}`,url:g.url,width:g.width,height:g.height,cols:g.cols,rows:g.rows,gap:g.gap,xCuts:[...g.xCuts],yCuts:[...g.yCuts]};});},
   singles(){return state.singles.map((g,index)=>({index,name:g.file?.name||`이미지 ${index+1}`,url:g.url,width:g.width,height:g.height}));},
-  setGrid(index,patch={}){const g=state.grids[index];if(!g)return false;let reset=false;if(patch.cols!=null){const v=clamp(Number(patch.cols)||1,1,12);reset=reset||v!==g.cols;g.cols=v;}if(patch.rows!=null){const v=clamp(Number(patch.rows)||1,1,12);reset=reset||v!==g.rows;g.rows=v;}if(patch.gap!=null)g.gap=clamp(Number(patch.gap)||0,0,40);if(reset)resetCuts(g);normalizeGrid(g);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;},
+  setGrid(index,patch={}){const g=state.grids[index];if(!g)return false;let reset=false;if(patch.cols!=null){const v=clamp(Number(patch.cols)||1,1,12);reset=reset||v!==g.cols;g.cols=v;}if(patch.rows!=null){const v=clamp(Number(patch.rows)||1,1,12);reset=reset||v!==g.rows;g.rows=v;}if(patch.gap!=null)g.gap=clamp(Number(patch.gap)||0,0,40);if(reset)resetCuts(g);normalizeGrid(g);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change',{detail:{kind:'grid-settings',commit:true}}));return true;},
   setCut(index,axis,cutIndex,pct,{commit=false}={}){const g=state.grids[index];if(!g)return false;normalizeGrid(g);const cuts=axis==='x'?g.xCuts:g.yCuts;if(!cuts[cutIndex]&&cuts[cutIndex]!==0)return false;const b=lineBounds(cuts,cutIndex);cuts[cutIndex]=clamp(Number(pct)||0,b.min,b.max);if(commit)renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change',{detail:{index,axis,cutIndex,pct:cuts[cutIndex],commit:!!commit,live:!commit}}));return true;},
-  resetGrid(index){const g=state.grids[index];if(!g)return false;resetCuts(g);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;},
-  removeGrid(index){const g=state.grids[index];if(!g)return false;URL.revokeObjectURL(g.url);state.grids.splice(index,1);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;},
-  removeSingle(index){const g=state.singles[index];if(!g)return false;URL.revokeObjectURL(g.url);state.singles.splice(index,1);renderSingles();update();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change'));return true;}
+  resetGrid(index){const g=state.grids[index];if(!g)return false;resetCuts(g);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change',{detail:{kind:'grid-reset',commit:true}}));return true;},
+  removeGrid(index){const g=state.grids[index];if(!g)return false;URL.revokeObjectURL(g.url);state.grids.splice(index,1);renderGrids();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change',{detail:{kind:'grid-remove',commit:true}}));return true;},
+  removeSingle(index){const g=state.singles[index];if(!g)return false;URL.revokeObjectURL(g.url);state.singles.splice(index,1);renderSingles();update();window.dispatchEvent(new CustomEvent('cutflow-auto-grid-change',{detail:{kind:'single-remove',commit:true}}));return true;}
 };
 $('autoStart').onclick=run;state.mediaMode=$('autoMediaMode')?.value==='long-video'?'long-video':'multi';updateSilenceInfo();renderGrids();renderSingles();update();emit('cutflow-auto-ready',autoState());
 })();
