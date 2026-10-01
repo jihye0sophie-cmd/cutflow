@@ -1,0 +1,21 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const html=fs.readFileSync('index.html','utf8');
+const auto=fs.readFileSync('auto-setup.js','utf8');
+const app=fs.readFileSync('app.js','utf8');
+const mobile=fs.readFileSync('mobile-v42.js','utf8');
+
+assert.ok(html.includes('id="autoMediaMode"'),'quick start media mode selector missing');
+assert.ok(html.includes('value="long-video"'),'long-video quick start option missing');
+assert.ok(html.includes('id="autoLongVideo"')&&html.includes('id="autoLongVideoStart"'),'long-video source controls missing');
+assert.ok(auto.includes("mediaMode:'multi'")&&auto.includes("longVideo:null"),'long-video auto state missing');
+assert.ok(auto.includes("state.mediaMode==='long-video'"),'long-video run branch missing');
+assert.ok(auto.includes("Array.from({length:script.length},()=>state.longVideo)"),'long-video scene replication missing');
+assert.ok(auto.includes("sequentialVideo:{start:"),'long-video timeline option missing');
+assert.ok(app.includes('buildTimeline(options={})'),'auto bridge options missing');
+assert.ok(app.includes('const sequential=options?.sequentialVideo'),'sequential video fit path missing');
+assert.ok(app.includes('scene.trimStart=sourceStart+cue.start')&&app.includes('scene.trimEnd=sourceStart+cue.end'),'video trims must follow caption timing');
+assert.ok(app.includes('requiredEnd>scene.sourceDuration+.02'),'short source video guard missing');
+assert.ok(mobile.includes("autoLongVideoBtn:'autoLongVideo'"),'mobile long-video file bridge missing');
+assert.ok(mobile.includes("data-auto-media-mode-view="long-video""),'mobile long-video quick start UI missing');
+assert.ok(mobile.includes("source===$('autoMediaMode')"),'mobile media mode switch refresh missing');
+console.log('PASS: long-video quick start reuses caption timing without changing the existing multi-image path.');
