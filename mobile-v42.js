@@ -827,7 +827,7 @@
     $('v42ExportDownload').click();
   };
 
-  const refreshSources=['cueList','sceneList','projectSaveStatus','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus'];
+  const refreshSources=['cueList','sceneList','audioStatus'];
   for(const id of refreshSources){
     const el=$(id);if(!el)continue;
     const observer=new MutationObserver(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}});
@@ -870,6 +870,7 @@
     requestAnimationFrame(()=>followSelectedScene('auto'));
   };
   window.addEventListener('cutflow-project-restored',syncAfterProjectRestore);
+  window.addEventListener('cutflow-project-status',()=>requestRefresh(false));
   window.addEventListener('cutflow-history-updated',()=>{syncPreviewHistory();if(settingsDialog.open)syncSettingsProxyState();});
   for(const id of ['scriptInput','projectCaptionWrap','audioInput','scriptFile','bgmInput','autoNarration','autoGrids','autoSingles','autoBgm']){
     const el=$(id);if(!el)continue;
