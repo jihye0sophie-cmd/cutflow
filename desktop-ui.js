@@ -74,7 +74,6 @@ function sync(){
  $('desktopExport').onclick=()=>{dialog.showModal();requestAnimationFrame(()=>q('.export-panel')?.scrollIntoView({behavior:'smooth',block:'center'}));};$('desktopAdd').onclick=()=>$('fileInput').click();$('desktopSceneEdit').onclick=()=>{sceneEdit=!sceneEdit;signature='';sync();};file.onchange=async()=>{await CutflowScene.replace(file.files[0]);file.value='';sync();};
  $('desktopTabs').onclick=e=>{const tab=e.target.closest('[data-tab]');if(tab){mode=tab.dataset.tab;sync();if(mode==='timing')requestAnimationFrame(()=>window.CutflowTiming?.render?.());}};
  $('desktopBatchCaptions').onclick=()=>window.CutflowCaptionBatch?.open?.(window.CutflowCaption?.currentIndex?.());
-  new MutationObserver(()=>{if(enabled)requestAnimationFrame(()=>{stabilizeImageLayout();sync();});}).observe($('sceneList'),{childList:true,subtree:false});
  $('desktopPrev').onclick=()=>CutflowScene.select(CutflowScene.index()-1);$('desktopNext').onclick=()=>CutflowScene.select(CutflowScene.index()+1);
  $('desktopSceneDelete').onclick=()=>{const at=CutflowScene.index();if(!CutflowScene.confirmStructureEdit?.()!==false)return;if(confirm(`장면 ${at+1}을 삭제할까요?`)){CutflowScene.remove(at);signature='';sync();}};
  $('desktopStrip').onclick=e=>{
