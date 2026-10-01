@@ -187,7 +187,7 @@
       const list=logicalItems();if(exporting||from===to||from<0||to<0||from>=list.length||to>=list.length)return false;pause();
       if(cues.length){
         rememberCues();const groups=list.map(g=>g.cueIndices.map(ci=>cues[ci]));const [block]=groups.splice(from,1);groups.splice(to,0,block);cues=groups.flat();recalcCueTimes();syncSceneOrderToCues();renderCues();
-      }else{moveScene(from,to);}
+      }else{const [scene]=scenes.splice(from,1);scenes.splice(to,0,scene);renderScenes();}
       changed();this.select(to);return true;
     },
     remove(index){
