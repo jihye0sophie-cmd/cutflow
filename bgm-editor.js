@@ -11,7 +11,7 @@ function syncBgm({emit=true}={}){
 }
 $('bgmBtn').onclick=()=>$('bgmInput').click();
 $('bgmInput').onchange=async e=>{const file=e.target.files[0];if(!file)return;pause();const id=++bgmLoadId;loading++;stats();$('bgmStatus').textContent='음악 읽는 중…';let ctx,loaded=false;
-  try{ctx=new AudioContext();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();loaded=true;toast('BGM을 추가했습니다. 미리보기 재생으로 함께 들어보세요.');}
+  try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('오디오 디코더를 사용할 수 없습니다.');ctx=new AudioCtx();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();loaded=true;toast('BGM을 추가했습니다. 미리보기 재생으로 함께 들어보세요.');}
   catch{toast('음악을 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');}
   finally{await ctx?.close();loading--;e.target.value='';if(loaded)changed({syncBgm:false});else stats();syncBgm();}
 };
@@ -25,7 +25,7 @@ async function restoreBgmSnapshot(snapshot,{silent=false}={}){
   let ctx;
   try{
     const file=snapshot.file instanceof File?snapshot.file:new File([snapshot.file],snapshot.name||'bgm.wav',{type:snapshot.file.type||'audio/wav'});
-    ctx=new AudioContext();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('오디오 디코더를 사용할 수 없습니다.');ctx=new AudioCtx();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());
     bgmBuffer=buffer;bgmFile=file;bgmName=snapshot.name||file.name;
     $('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);$('bgmStart').value=String(Math.min(Math.max(0,Number(snapshot.start)||0),Math.max(0,buffer.duration-.01)));
     $('bgmVolume').value=String(Math.max(0,Math.min(100,Number(snapshot.volume)||0)));$('bgmRepeat').value=snapshot.repeat==='loop'?'loop':'stop';$('bgmFadeIn').value=String(Math.max(0,Math.min(30,Number(snapshot.fadeIn)||0)));$('bgmFadeOut').value=String(Math.max(0,Math.min(30,Number(snapshot.fadeOut)||0)));
@@ -35,7 +35,7 @@ async function restoreBgmSnapshot(snapshot,{silent=false}={}){
 }
 async function loadBgmFile(file){
   if(!file)return false;pause();const id=++bgmLoadId;loading++;stats();$('bgmStatus').textContent='음악 읽는 중…';let ctx;
-  try{ctx=new AudioContext();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return false;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();changed({syncBgm:false});syncBgm();return true;}
+  try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('오디오 디코더를 사용할 수 없습니다.');ctx=new AudioCtx();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return false;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();changed({syncBgm:false});syncBgm();return true;}
   catch{return false;}finally{await ctx?.close();loading--;stats();}
 }
 window.loadBgmFile=loadBgmFile;
