@@ -88,6 +88,40 @@
     return inspect(index);
   };
 
+  const snapAxis=(candidates,threshold)=>{
+    let best=null;
+    for(const candidate of candidates){
+      const distance=Math.abs(candidate.delta);
+      if(distance>threshold||best&&distance>=best.distance)continue;
+      best={...candidate,distance};
+    }
+    return best;
+  };
+  window.CutflowTransformSnap={
+    apply({rect,box,transform,thresholdX=10,thresholdY=10,unit='percent'}={}){
+      if(!rect||!box||!transform)return {transform,guides:{x:null,y:null}};
+      const factor=unit==='normalized'?1:100;
+      const x=snapAxis([
+        {delta:rect.x-box.x,position:rect.x,kind:'left'},
+        {delta:rect.x+rect.w-(box.x+box.w),position:rect.x+rect.w,kind:'right'},
+        {delta:rect.x+rect.w/2-(box.x+box.w/2),position:rect.x+rect.w/2,kind:'center'}
+      ],Math.max(0,Number(thresholdX)||0));
+      const y=snapAxis([
+        {delta:rect.y-box.y,position:rect.y,kind:'top'},
+        {delta:rect.y+rect.h-(box.y+box.h),position:rect.y+rect.h,kind:'bottom'},
+        {delta:rect.y+rect.h/2-(box.y+box.h/2),position:rect.y+rect.h/2,kind:'center'}
+      ],Math.max(0,Number(thresholdY)||0));
+      return {
+        transform:{
+          ...transform,
+          x:Number(transform.x||0)+(x?x.delta/Math.max(1,rect.w)*factor:0),
+          y:Number(transform.y||0)+(y?y.delta/Math.max(1,rect.h)*factor:0)
+        },
+        guides:{x:x?{position:x.position,kind:x.kind}:null,y:y?{position:y.position,kind:y.kind}:null}
+      };
+    }
+  };
+
   let transformGestureIndex=-1;
   const beginTransformGesture=index=>{
     const {scene}=sourceForIndex(index);if(!scene||exporting||loading)return false;
@@ -116,6 +150,15 @@
   window.CutflowScene={
     items:logicalItems,
     state:inspect,
+    geometry(index,width,height){
+      const {item,scene}=sourceForIndex(index);if(!item||!scene)return null;
+      width=Math.max(1,Number(width)||1080);height=Math.max(1,Number(height)||1920);
+      const rect=CutRenderer.mediaRect(width,height,$('layoutSelect').value);
+      const elapsed=cues.length?Math.max(0,currentTime()-Number(item.start||0)):Math.max(0,CutRenderer.locate(timelineScenes(),currentTime()).elapsed||0);
+      const fit=$('layoutSelect').value==='fullscreen'?'cover':$('fitSelect').value;
+      const box=CutRenderer.mediaGeometry(scene,elapsed,rect,fit);
+      return box?{rect,box,transform:inspect(index)?.transform||null}:null;
+    },
     update:patchScene,
     beginTransformGesture,previewTransformGesture,commitTransformGesture,cancelTransformGesture,
     index(){
