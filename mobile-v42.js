@@ -822,6 +822,7 @@
 
   for(const id of ['cueList','sceneList','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus']){const el=$(id);if(el)new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
   window.addEventListener('cutflow-scene',e=>{
+    if(mobileTransformMode)setMobileTransformMode(false);
     sceneIndex=Number(e.detail)||0;lastSceneId=null;
     if(tab==='timing'){renderSceneStrip();syncPlayer();requestAnimationFrame(()=>followSelectedScene('smooth'));return;}
     requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));
@@ -850,6 +851,7 @@
   window.addEventListener('cutflow-export-cancelled',()=>{if(!ensureMobileExportDialog())return;$('v42ExportStatus').textContent='저장을 취소했습니다. 편집 내용은 유지됩니다.';$('v42ExportCancel').hidden=true;$('v42ExportDone').hidden=false;});
   $('projectDialog')?.addEventListener('close',()=>setTimeout(()=>requestRefresh(false),0));
   const syncAfterProjectRestore=()=>{
+    if(mobileTransformMode)setMobileTransformMode(false);
     const items=window.CutflowScene?.items?.()||[];
     sceneIndex=Math.max(0,Math.min(sceneIndex,Math.max(0,items.length-1)));
     lastSceneId=null;
