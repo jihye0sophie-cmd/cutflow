@@ -115,6 +115,13 @@
     const list=timelineRanges(),sceneEnd=list.at(-1)?.end||0,cueEnd=cues?.at(-1)?.end||0;
     return Math.max(.1,num(totalDuration?.(),0),num(sceneEnd,0),num(cueEnd,0));
   };
+  const sceneIndexAtTime=time=>{
+    const list=timelineRanges();if(!list.length)return -1;
+    time=num(time,0);
+    let index=list.findIndex((item,i)=>time>=num(item.start)&&time<num(item.end)||(i===list.length-1&&Math.abs(time-num(item.end))<.02));
+    if(index<0)index=Math.max(0,list.findLastIndex(item=>num(item.start)<=time));
+    return clamp(index,0,list.length-1);
+  };
   const pctAll=(t,duration)=>clamp((num(t)/Math.max(.1,duration))*100,0,100);
   const tickStep=pps=>pps>=110 ? .5 : pps>=55 ? 1 : pps>=28 ? 2 : 5;
   const sceneForCueIndex=ci=>sceneItems().findIndex(item=>item?.cueIndices?.includes(ci));
@@ -372,12 +379,12 @@
   document.addEventListener('pointerdown',startDrag);
   document.addEventListener('pointermove',moveDrag);
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
-  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing){pendingCenter=true;playbackFollowScene=target;}}requestRenderAll();});
+  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing){const time=currentTime(),activeScene=sceneIndexAtTime(time);playbackFollowScene=activeScene>=0?activeScene:target;syncSelectedCueToTime(time);pendingCenter=true;}}requestRenderAll();});
   window.addEventListener('cutflow-scene-updated',requestRenderAll);
   window.addEventListener('cutflow-project-restored',()=>{pendingCenter=true;requestRenderAll();});
   new MutationObserver(requestRenderAll).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
-  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const playerState=window.CutflowPlayer?.state?.(),track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration(),time=currentTime();line.style.left=`${pctAll(time,duration)}%`;if(clock)clock.textContent=`${fmt(time)} / ${fmt(duration)}`;if(playerState?.playing){const activeScene=sceneIndex();if(activeScene!==playbackFollowScene){playbackFollowScene=activeScene;syncSelectedCueToScene(activeScene);pendingCenter=true;requestRenderAll();}}else playbackFollowScene=-1;},100);
+  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const playerState=window.CutflowPlayer?.state?.(),track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration(),time=currentTime();line.style.left=`${pctAll(time,duration)}%`;if(clock)clock.textContent=`${fmt(time)} / ${fmt(duration)}`;if(playerState?.playing){const activeScene=sceneIndexAtTime(time);if(activeScene>=0&&activeScene!==playbackFollowScene){playbackFollowScene=activeScene;syncSelectedCueToScene(activeScene,{forceFirst:false});syncSelectedCueToTime(time);pendingCenter=true;requestRenderAll();}}else playbackFollowScene=-1;},100);
   function selectTimelineCaption(index){
     if(!cues[index])return false;
     selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);requestRenderAll();return true;
