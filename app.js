@@ -334,6 +334,7 @@ $('addCueBtn').onclick=()=>{rememberCues();const start=cues.at(-1)?.end||0;cues.
 
 const captionState=index=>{const c=cues[index];if(!c)return null;const seg=captionSegmentInfo(index);return {index,id:c.id,text:c.text||'',start:c.start,end:c.end,color:CaptionStyle.resolve(c,project()).color,freeEdit:!!c.freeEdit,sceneId:c.sceneId||null,segment:{position:seg.position,count:seg.count,first:seg.first,last:seg.last}};};
 const captionChanged=index=>{renderCues();window.selectStyleCue?.(Math.max(0,Math.min(cues.length-1,index)));window.dispatchEvent(new CustomEvent('cutflow-caption-updated',{detail:{index,state:captionState(index)}}));};
+const commitCaptionChange=index=>{changed();captionChanged(index);return captionState(index);};
 window.CutflowCaption={
   count(){return cues.length;},
   state:captionState,
@@ -350,7 +351,7 @@ window.CutflowCaption={
     if(patch.start!=null&&!c.freeEdit){const v=Number(patch.start);if(!Number.isFinite(v)||v<0||v>=c.end-.05||(index>0&&v<cues[index-1].end)){toast('자막 시작 시간을 확인해 주세요.');return false;}c.start=v;}
     if(patch.end!=null&&!c.freeEdit){const v=Number(patch.end);if(!Number.isFinite(v)||v<=c.start+.05||(index<cues.length-1&&v>cues[index+1].start)){toast('자막 종료 시간을 확인해 주세요.');return false;}c.end=v;}
     if(c.sceneId){for(let j=seg.first;j<=seg.last;j++)cues[j].mediaOffset=Math.max(0,cues[j].start-cues[seg.first].start);}
-    changed();captionChanged(index);return captionState(index);
+    return commitCaptionChange(index);
   },
   play(index){const c=cues[index];if(!c)return false;jump(c.start);play();return true;},
   applySelectionColor(index,start,end,color){
@@ -375,17 +376,17 @@ window.CutflowCaption={
     c.start=start;c.end=splitAt;c.text=first.text;c.colorRanges=first.ranges;c.captionGap=false;
     const next={...cloneProjectData(c),id:uid(),start:splitAt,end,text:second.text,colorRanges:second.ranges,captionGap:false,mediaOffset:base+firstDuration};
     cues.splice(index+1,0,next);
-    changed();captionChanged(index);toast('자막을 두 구간으로 나눴습니다.');return true;
+    commitCaptionChange(index);toast('자막을 두 구간으로 나눴습니다.');return true;
   },
   mergeNext(index){
     const c=cues[index],next=cues[index+1],seg=captionSegmentInfo(index);if(!c||!next||index>=seg.last)return false;
-    const end=Number(next.end);if(!Number.isFinite(end)){toast('다음 자막 시간 정보가 올바르지 않아 합칠 수 없습니다.');return false;}rememberCues();c.end=end;c.colorRanges=CaptionRanges.merge(c,next);c.text=[c.text,next.text].filter(Boolean).join('\n');c.captionGap=!c.text.trim();cues.splice(index+1,1);changed();captionChanged(index);return true;
+    const end=Number(next.end);if(!Number.isFinite(end)){toast('다음 자막 시간 정보가 올바르지 않아 합칠 수 없습니다.');return false;}rememberCues();c.end=end;c.colorRanges=CaptionRanges.merge(c,next);c.text=[c.text,next.text].filter(Boolean).join('\n');c.captionGap=!c.text.trim();cues.splice(index+1,1);commitCaptionChange(index);return true;
   },
   remove(index){
     const c=cues[index];if(!c)return false;rememberCues();const seg=captionSegmentInfo(index);
     if(seg.count>1){c.text='';c.colorRanges=[];c.captionGap=true;}
     else{const duration=c.end-c.start,sceneId=c.sceneId;cues.splice(index,1);if(c.freeEdit){const si=scenes.findIndex(s=>s.id===sceneId);if(si>=0){const [removed]=scenes.splice(si,1);releaseSceneResources(removed);}for(let j=index;j<cues.length;j++){cues[j].start-=duration;cues[j].end-=duration;}}}
-    changed();renderCues();window.dispatchEvent(new CustomEvent('cutflow-caption-updated',{detail:{index:Math.min(index,cues.length-1),state:captionState(Math.min(index,cues.length-1))}}));return true;
+    commitCaptionChange(Math.min(index,cues.length-1));return true;
   }
 };
 window.CutflowExport={start:exportVideo,cancel(){if(window.currentExport){window.currentExport.cancelled=true;CutEncoder.cancel();$('exportStatus').textContent='취소하는 중…';return true;}return false;},get busy(){return exporting}};
