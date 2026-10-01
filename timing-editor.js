@@ -362,7 +362,7 @@
   document.addEventListener('pointerdown',startDrag);
   document.addEventListener('pointermove',moveDrag);
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
-  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target))syncSelectedCueToScene(target);requestAnimationFrame(renderAll);});
+  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing)pendingCenter=true;}requestAnimationFrame(renderAll);});
   window.addEventListener('cutflow-scene-updated',()=>requestAnimationFrame(renderAll));
   window.addEventListener('cutflow-project-restored',()=>requestAnimationFrame(()=>{pendingCenter=true;renderAll();}));
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
