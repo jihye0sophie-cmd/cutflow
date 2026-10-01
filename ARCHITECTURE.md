@@ -46,8 +46,10 @@ Do not append a new versioned override block when changing an existing canonical
 - Scene selection is controlled through `window.CutflowScene`.
 - Platform UI controls may proxy those APIs but must not create a second state machine.
 - Core update APIs emit their own `cutflow-*` events. Platform UI must not schedule an extra full refresh after a direct core update unless that control is only a DOM proxy.
+- Standalone and caption-linked scene actions both route through `window.CutflowScene`; legacy DOM handlers must not maintain a second reorder/delete state path.
 - Mobile refresh requests are coalesced into one animation-frame render; a later force refresh upgrades the already queued render instead of creating a second render.
-- Desktop observer-driven refreshes are coalesced through one queued sync.
+- Desktop observer-driven refreshes and precision-timing refreshes are coalesced into one animation-frame update.
+- Ordinary project edits may refresh the BGM summary silently; `cutflow-bgm-updated` is reserved for actual BGM state changes or explicit BGM restores.
 - iPhone touch controls that must work during playback use the shared mobile tap binding and must not be rebound by render functions.
 - MutationObservers may refresh settings/status UI, but must not observe values rewritten every animation frame or request attribute tracking for structural-only lists.
 
