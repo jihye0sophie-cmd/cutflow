@@ -16,6 +16,6 @@ assert.ok(app.includes('const sequential=options?.sequentialVideo'),'sequential 
 assert.ok(app.includes('scene.trimStart=sourceStart+cue.start')&&app.includes('scene.trimEnd=sourceStart+cue.end'),'video trims must follow caption timing');
 assert.ok(app.includes('requiredEnd>scene.sourceDuration+.02'),'short source video guard missing');
 assert.ok(mobile.includes("autoLongVideoBtn:'autoLongVideo'"),'mobile long-video file bridge missing');
-assert.ok(mobile.includes("data-auto-media-mode-view="long-video""),'mobile long-video quick start UI missing');
+assert.ok(mobile.includes('data-auto-media-mode-view="long-video"'),'mobile long-video quick start UI missing');
 assert.ok(mobile.includes("source===$('autoMediaMode')"),'mobile media mode switch refresh missing');
 console.log('PASS: long-video quick start reuses caption timing without changing the existing multi-image path.');
