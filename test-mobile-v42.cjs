@@ -196,6 +196,9 @@ assert(js.includes("e.target?.name==='v42AutoSilence'"),'mobile auto silence pre
 assert(js.includes("e.detail?.live"),'mobile grid mirror must not rerender during a live iPhone drag');
 assert(js.includes('closeMobileSettings'),'settings close must release iPhone keyboard focus');
 assert(bgmEditor.includes('window.webkitAudioContext'),'BGM decoding must support iPhone WebKit audio context');
+assert(autoSetup.includes("kind:'grid-add'")&&autoSetup.includes("kind:'single-add'"),'mobile auto media additions must refresh settings mirrors');
+assert(js.includes('const autoWasOpen=')&&js.includes('previousScroll'),'settings rerender must preserve open state and scroll');
+assert(js.includes('const editingGrid=')&&js.includes("addEventListener('focusout'"),'iPhone grid numeric editing must preserve focus until commit');
 assert(js.includes('function openPreviewFullscreen()')&&js.includes("previewDialog.hidden=false")&&js.includes("classList.add('v42-preview-lock')"),'fullscreen preview overlay missing');
 assert(js.includes('suppressMobileClickUntil=performance.now()+550'),'fullscreen close click-through guard missing');
 assert(js.includes('CutflowPlayer?.seekProgress'),'direct mobile scrubber bridge missing');
