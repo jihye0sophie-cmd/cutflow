@@ -838,11 +838,9 @@
     if(tab==='timing'){renderSceneStrip();syncPlayer();requestAnimationFrame(()=>followSelectedScene('smooth'));return;}
     requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));
   });
-  window.addEventListener('cutflow-scene-updated',()=>{if(tab==='timing'){renderSceneStrip();syncPlayer();return;}requestRefresh(false);});
-  window.addEventListener('cutflow-caption-updated',()=>{if(tab==='timing'){renderSceneStrip();syncPlayer();return;}requestRefresh(false);});
-  window.addEventListener('cutflow-caption-style-updated',()=>requestRefresh(false));
-  window.addEventListener('cutflow-compose-updated',()=>requestRefresh(false));
-  window.addEventListener('cutflow-typography-updated',()=>requestRefresh(false));
+  const refreshEditorState=()=>{if(tab==='timing'){renderSceneStrip();syncPlayer();return;}requestRefresh(false);};
+  for(const eventName of ['cutflow-scene-updated','cutflow-caption-updated'])window.addEventListener(eventName,refreshEditorState);
+  for(const eventName of ['cutflow-caption-style-updated','cutflow-compose-updated','cutflow-typography-updated'])window.addEventListener(eventName,()=>requestRefresh(false));
   window.addEventListener('cutflow-bgm-updated',()=>{
     const active=document.activeElement;
     const editingBgm=!!active?.dataset?.bgmField;
