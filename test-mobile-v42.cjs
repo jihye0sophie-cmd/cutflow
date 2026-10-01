@@ -249,7 +249,8 @@ assert(!js.includes("if(api.split(index,cursor))requestRefresh(true)")&&!js.incl
 assert(js.includes('function ensureMirrorStage()')&&js.includes('if(mobileActive||fullOpen)ensureMirrorStage();'),'mobile preview mirror must stop when inactive');
 assert(js.includes('restoredIndex=window.CutflowScene?.index?.()??0'),'mobile project restore must select the scene at the restored playhead');
 assert(desktop.includes('function requestSync()')&&desktop.includes('requestAnimationFrame(()=>{syncQueued=false;sync();})')&&desktop.includes('new MutationObserver(requestSync)'),'desktop observer refreshes must be coalesced to one animation frame');
-assert(!desktop.includes("if(mode==='timing')requestAnimationFrame(()=>window.CutflowTiming?.render?.())"),'desktop scene events must not trigger a second precision timing render');
+assert(!desktop.includes("window.addEventListener('cutflow-scene',()=>{requestSync();if(mode==='timing')requestAnimationFrame(()=>window.CutflowTiming?.render?.());});"),'desktop scene events must not trigger a second precision timing render');
+assert(desktop.includes("window.addEventListener('cutflow-scene',requestSync);"),'desktop scene events must use the shared sync queue');
 assert(!desktop.includes("new MutationObserver(requestSync).observe($('exportBtn')"),'desktop export state must use core export events instead of a DOM observer');
 assert(desktop.includes("['cutflow-export-start','cutflow-export-progress','cutflow-export-complete','cutflow-export-error','cutflow-export-cancelled']"),'desktop export state event bridge missing');
 assert(js.includes('observer.observe(el,{subtree:true,childList:true,characterData:true})')&&!js.includes('attributes:!structural'),'mobile mutation observers must ignore attribute-only churn');
