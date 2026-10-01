@@ -3,11 +3,13 @@ const $=id=>document.getElementById(id);
 const state={grids:[],singles:[],narration:null,processedNarration:null,silencePreset:'normal',bgm:null,running:false,drag:null};
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const setText=(id,text)=>{const el=$(id);text=String(text);if(el&&el.textContent!==text)el.textContent=text;};
+const setDisabled=(id,value)=>{const el=$(id),next=!!value;if(el&&el.disabled!==next)el.disabled=next;};
 function lines(){return window.CutflowAutoBridge?.scriptLines($('autoScript').value||'')||[];}
 function silencePreset(){return document.querySelector('input[name="autoSilencePreset"]:checked')?.value||'normal';}
 function updateSilenceInfo(){
   state.silencePreset=silencePreset();const cfg=window.CutflowSilenceCut?.PRESETS?.[state.silencePreset];if(!cfg)return;
-  const info=$('autoSilenceInfo');if(info)info.textContent=`${cfg.label} · ${cfg.thresholdDb} dB · 최소 ${cfg.minSilence.toFixed(2)}초 · 공백 ${cfg.keepSilence.toFixed(2)}초`;
+  setText('autoSilenceInfo',`${cfg.label} · ${cfg.thresholdDb} dB · 최소 ${cfg.minSilence.toFixed(2)}초 · 공백 ${cfg.keepSilence.toFixed(2)}초`);
 }
 
 function evenCuts(count){return Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)*100/count);}
@@ -28,11 +30,11 @@ function autoState(){
   return {scriptCount,imageCount,hasNarration,running:state.running,canStart,reason};
 }
 function update(){
-  const info=autoState(),n=info.scriptCount,c=info.imageCount;$('autoScriptCount').textContent=`${n}개`;$('autoImageCount').textContent=`${c}개`;
-  $('autoNarrationName').textContent=state.narration?.name||'선택 안 됨';$('autoBgmName').textContent=state.bgm?.name||'선택 안 됨';$('autoGridName').textContent=gridName();if($('autoSingleName'))$('autoSingleName').textContent=singleName();
-  const m=$('autoMatch');m.className='auto-match '+(!n||!c?'muted':c<n?'bad':c===n?'good':'warn');
-  m.textContent=!n?'대본을 입력하면 필요한 장면 수를 계산합니다.':!c?'그리드 또는 개별 이미지를 추가해 주세요.':c<n?`이미지가 ${n-c}장 부족합니다.`:c===n?'대본 장면 수와 이미지 수가 일치합니다.':`이미지가 ${c-n}장 더 많습니다. 앞에서 ${n}장만 사용합니다.`;
-  $('autoStart').disabled=!info.canStart;
+  const info=autoState(),n=info.scriptCount,c=info.imageCount;setText('autoScriptCount',`${n}개`);setText('autoImageCount',`${c}개`);
+  setText('autoNarrationName',state.narration?.name||'선택 안 됨');setText('autoBgmName',state.bgm?.name||'선택 안 됨');setText('autoGridName',gridName());setText('autoSingleName',singleName());
+  const m=$('autoMatch'),matchClass='auto-match '+(!n||!c?'muted':c<n?'bad':c===n?'good':'warn');if(m.className!==matchClass)m.className=matchClass;
+  setText('autoMatch',!n?'대본을 입력하면 필요한 장면 수를 계산합니다.':!c?'그리드 또는 개별 이미지를 추가해 주세요.':c<n?`이미지가 ${n-c}장 부족합니다.`:c===n?'대본 장면 수와 이미지 수가 일치합니다.':`이미지가 ${c-n}장 더 많습니다. 앞에서 ${n}장만 사용합니다.`);
+  setDisabled('autoStart',!info.canStart);
   emit('cutflow-auto-state',info);
 }
 function gridMarkup(grid,index){
