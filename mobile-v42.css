@@ -953,9 +953,11 @@ body.v42-mobile .v42-main{
   max-height:none!important;
   pointer-events:none!important;
 }
-body.v42-mobile .v42-stage-wrap:has(#v42Stage.v42-transform-active){
+body.v42-mobile .v42-stage-wrap.v42-transform-interactive{
   pointer-events:auto!important;
+  touch-action:none!important;
 }
+body.v42-mobile .v42-stage-wrap.v42-transform-interactive #v42Stage,
 body.v42-mobile #v42Stage.v42-transform-active{
   pointer-events:auto!important;
   touch-action:none!important;
