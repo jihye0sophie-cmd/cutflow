@@ -102,7 +102,7 @@ assert(sceneUi.includes("window.dispatchEvent(new CustomEvent('cutflow-scene-upd
 assert(sceneUi.includes('sameVideo=previous.type===\'video\'&&added.type===\'video\''),'replacement audio defaults hardening missing');
 assert(js.includes('function applyMediaField('),'mobile media field bridge missing');
 assert(js.includes("'cutflow-scene-updated'"),'mobile scene update listener missing');
-assert(js.includes('at=start+duration/2'),'mobile split midpoint fallback missing');
+assert(js.includes("const cursor=captionText?.selectionStart")&&js.includes("api.split(index,cursor)"),'mobile caption split must use the selected text cursor');
 assert(new RegExp('app\\.js\\?v=[^"\\x27]+').test(html),'caption bridge cache key missing');
 assert(new RegExp('style-editor\\.js\\?v=[^"\\x27]+').test(html),'caption style bridge cache key missing');
 assert(new RegExp('timing-editor\\.js\\?v=[^"\\x27]+').test(html),'timing mount cache key missing');
