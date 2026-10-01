@@ -26,7 +26,10 @@
       <div class="caption-batch-shell">
         <header class="caption-batch-head">
           <div><strong>전체 자막 편집</strong><small>장면별 자막을 빠르게 나누고 합칩니다.</small></div>
-          <button type="button" data-caption-batch-close aria-label="닫기">×</button>
+          <div class="caption-batch-head-actions">
+            <button type="button" class="caption-batch-auto-wrap" data-caption-batch-auto-wrap>전체 자동 줄바꿈</button>
+            <button type="button" data-caption-batch-close aria-label="닫기">×</button>
+          </div>
         </header>
         <div class="caption-batch-list" data-caption-batch-list></div>
         <footer class="caption-batch-actions" data-caption-batch-actions hidden>
@@ -141,6 +144,24 @@
     }
   }
 
+  async function autoWrapAllCaptions(){
+    commitDraft();
+    const wrap=window.CutflowAutoBridge?.autoWrapCaptions;
+    if(typeof wrap!=='function')return;
+    const button=dialog?.querySelector('[data-caption-batch-auto-wrap]');
+    if(button){button.disabled=true;button.textContent='줄바꿈 중…';}
+    try{
+      await wrap();
+      if(selected>=0){
+        const state=api()?.state?.(selected);
+        draft=state?.text||'';cursor=draft.length;
+      }
+      render({focus:false});
+    }finally{
+      if(button){button.disabled=false;button.textContent='전체 자동 줄바꿈';}
+    }
+  }
+
   function removeSelected(){
     const state=selectedState();if(!state)return;
     if(!confirm('선택한 자막을 삭제할까요?'))return;
@@ -155,6 +176,7 @@
   function handleClick(e){
     if(e.target===dialog)return;
     if(e.target.closest('[data-caption-batch-close]')){commitDraft();dialog.close();return;}
+    if(e.target.closest('[data-caption-batch-auto-wrap]')){autoWrapAllCaptions();return;}
     const seg=e.target.closest('[data-caption-index]');
     if(seg&&!e.target.matches('[data-caption-batch-input]')){selectCaption(Number(seg.dataset.captionIndex));return;}
     if(e.target.closest('[data-caption-batch-split]')){splitSelected();return;}
