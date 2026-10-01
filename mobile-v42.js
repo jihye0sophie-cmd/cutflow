@@ -164,7 +164,7 @@
     mobileTransformPoints.delete(e.pointerId);
     if(mobileTransformPoints.size)rebaseMobileTransform();
     else{
-      const state=window.CutflowScene?.commitTransformGesture?.(mobileTransformScene);mobileTransformGesture=null;hideMobileTransformGuides();syncMobileTransformFields(state);requestRefresh(false);
+      const state=window.CutflowScene?.commitTransformGesture?.(mobileTransformScene);mobileTransformGesture=null;hideMobileTransformGuides();syncMobileTransformFields(state);
     }
   };
   stage.addEventListener('pointerup',endMobileTransformPointer);
