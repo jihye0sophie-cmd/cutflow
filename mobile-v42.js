@@ -51,13 +51,13 @@
       </section>
       <nav id="v42Tabs" class="v42-tabs" aria-label="모바일 편집 탭">
         <button type="button" data-tab="caption" aria-pressed="true" aria-label="자막" title="자막">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M12 6v12M8 18h8"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.25" y="5.25" width="15.5" height="12.5" rx="5.25"/><path d="M8 10.2h8M8 13.8h5.5"/></svg>
         </button>
         <button type="button" data-tab="media" aria-label="이미지·영상" title="이미지·영상">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m6.5 16 4-4 3 3 2-2 2 3"/><circle cx="15.5" cy="9" r="1.2"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.25" y="4.75" width="15.5" height="14.5" rx="4.5"/><circle cx="15.5" cy="9" r="1.25"/><path d="m7.3 16 3.35-3.35 2.55 2.55 2.05-2.05 1.8 1.8"/></svg>
         </button>
         <button type="button" data-tab="timing" aria-label="정밀 타이밍" title="정밀 타이밍">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="7.5"/><path d="M12 8.5v4.4l3 1.8M9.3 3.5h5.4"/></svg>
         </button>
       </nav>
       <section id="v42Panel" class="v42-panel"></section>
