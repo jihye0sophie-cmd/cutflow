@@ -1302,3 +1302,46 @@ body.v42-mobile #toast{
   font-weight:700!important;
   text-align:center!important;
 }
+
+/* Mobile precision timing polish: compact match actions + one-row caption times. */
+body.v42-mobile .v42-timing-host .timing-head-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:6px!important;
+  margin-top:8px!important;
+}
+body.v42-mobile .v42-timing-host .timing-head-actions button{
+  width:100%!important;
+  min-width:0!important;
+  min-height:34px!important;
+  padding:6px 8px!important;
+  border:1px solid #3a4049!important;
+  border-radius:8px!important;
+  background:#1b1f24!important;
+  color:#eef1f4!important;
+  font-size:10px!important;
+  font-weight:750!important;
+  box-shadow:none!important;
+}
+body.v42-mobile .v42-timing-host .timing-head-actions button:first-child{
+  border-color:rgba(245,230,66,.46)!important;
+  color:#f5e642!important;
+}
+body.v42-mobile .v42-timing-host .timing-head-actions button:active{
+  background:#252a30!important;
+  transform:scale(.98);
+}
+body.v42-mobile .v42-timing-host .timeline-selection-grid>section:nth-child(2) .timing-fields{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+body.v42-mobile .v42-timing-host .timeline-selection-grid>section:nth-child(2) .timing-fields label{
+  grid-column:auto!important;
+  min-width:0!important;
+}
+body.v42-mobile .v42-timing-host .timeline-selection-grid>section:nth-child(2) .timing-fields input{
+  width:100%!important;
+  min-width:0!important;
+}
+body.v42-mobile .v42-timing-host .timeline-selection-grid>section:first-child .timing-fields label:last-child{
+  grid-column:1/-1;
+}
