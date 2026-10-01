@@ -133,6 +133,8 @@ assert(css.includes('.v42-settings-palette')&&css.includes('.v42-typo-color-row'
 assert(new RegExp('bgm-editor\\.js\\?v=[^"\\x27]+').test(html),'BGM bridge cache key missing');
 assert(bgmEditor.includes('window.CutflowBgm={'),'shared BGM bridge missing');
 assert(bgmEditor.includes("cutflow-bgm-updated"),'BGM update event missing');
+assert(app.includes("window.syncBgm?.({emit:false})"),'ordinary edits must refresh BGM summary without emitting a BGM change event');
+assert(bgmEditor.includes('function syncBgm({emit=true}={})'),'BGM sync must support silent summary refreshes');
 assert(js.includes('function applyBgmField('),'mobile BGM direct field bridge missing');
 assert(js.includes("pb($('bgmBtn'),'음악 파일 추가')")&&js.includes("pb($('bgmRemove'),'음악 제거'"),'mobile BGM direct file controls missing');
 assert(js.includes("pc($('bgmStart'),'음악 시작 지점 (초)')")&&js.includes("pc($('bgmVolume'),'BGM 볼륨')")&&js.includes("pc($('bgmRepeat'),'음악이 짧을 때')"),'mobile BGM fields missing');
