@@ -822,7 +822,13 @@
     $('v42ExportDownload').click();
   };
 
-  for(const id of ['cueList','sceneList','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus']){const el=$(id);if(el)new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}}).observe(el,{subtree:true,childList:true,attributes:true});}
+  const refreshSources=['cueList','sceneList','projectSaveStatus','bgmStatus','bgmSummary','audioStatus','autoGridList','autoSingleList','autoGridName','autoSingleName','autoNarrationName','autoMatch','autoScriptCount','autoImageCount','autoSilenceInfo','autoStatus'];
+  for(const id of refreshSources){
+    const el=$(id);if(!el)continue;
+    const observer=new MutationObserver(()=>{const active=document.activeElement,isBgmMutation=(id==='bgmStatus'||id==='bgmSummary'),editingBgm=!!active?.dataset?.bgmField||(settingsDialog.open&&!!active?.dataset?.proxy&&settingsDialog.contains(active));if(!(isBgmMutation&&editingBgm))requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();if(!isBgmMutation)syncSettingsGridMirror();}});
+    const structural=id==='cueList'||id==='sceneList';
+    observer.observe(el,{subtree:true,childList:true,attributes:!structural});
+  }
   window.addEventListener('cutflow-scene',e=>{
     if(mobileTransformMode)setMobileTransformMode(false);
     sceneIndex=Number(e.detail)||0;lastSceneId=null;
