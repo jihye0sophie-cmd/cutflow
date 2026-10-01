@@ -1424,3 +1424,18 @@ body.v42-mobile.v42-ios textarea,
 body.v42-mobile.v42-ios select{
   -webkit-text-size-adjust:100%;
 }
+
+/* iPhone header action stability and touch feedback. */
+body.v42-mobile .v42-head-actions button{
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+}
+body.v42-mobile .v42-head-actions button:active:not(:disabled){
+  transform:scale(.97)!important;
+}
+body.v42-mobile .v42-head-actions button:disabled{
+  opacity:.42!important;
+  pointer-events:none!important;
+}
