@@ -1112,7 +1112,7 @@ body.v42-mobile .v42-panel{
   max-height:none!important;
   margin-top:3px!important;
   margin-bottom:0!important;
-  padding:7px 7px calc(54px + env(safe-area-inset-bottom))!important;
+  padding:7px 7px calc(96px + env(safe-area-inset-bottom))!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   touch-action:pan-y!important;
@@ -1135,7 +1135,7 @@ body.v42-mobile .v42-tabs button[aria-pressed=true]{
   background:rgba(46,51,58,.56)!important;
 }
 body.v42-mobile.v42-standalone .v42-panel{
-  padding-bottom:8px!important;
+  padding-bottom:calc(88px + env(safe-area-inset-bottom))!important;
 }
 
 /* Browser chrome mitigation; installed Home Screen mode uses the full viewport. */
