@@ -863,8 +863,8 @@
   $('projectDialog')?.addEventListener('close',()=>setTimeout(()=>requestRefresh(false),0));
   const syncAfterProjectRestore=()=>{
     if(mobileTransformMode)setMobileTransformMode(false);
-    const items=window.CutflowScene?.items?.()||[];
-    sceneIndex=Math.max(0,Math.min(sceneIndex,Math.max(0,items.length-1)));
+    const items=window.CutflowScene?.items?.()||[],restoredIndex=window.CutflowScene?.index?.()??0;
+    sceneIndex=Math.max(0,Math.min(restoredIndex,Math.max(0,items.length-1)));
     lastSceneId=null;
     const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);
     requestRefresh(true);
