@@ -19,7 +19,7 @@ for(const kind of ['title','channel']){
     textStrokeOverrides[kind]=$(kind+'StrokeEnabled').checked;syncTextStrokes();changed();
   });
 }
-$('layoutSelect').addEventListener('input',()=>{syncTextStrokes();changed();});
+$('layoutSelect').addEventListener('input',syncTextStrokes);
 syncTextStrokes();
 const styleFields={font:'captionFont',size:'captionSize',bold:'captionBold',italic:'captionItalic',color:'captionColor',strokeColor:'captionStrokeColor',strokeWidth:'captionStroke',background:'captionBackground',backgroundColor:'captionBackgroundColor',backgroundOpacity:'captionOpacity',padding:'captionPadding',radius:'captionRadius',y:'captionY'};
 const fontOptions=CutFonts.list.map(f=>`<option value="${f.id}">${esc(f.label)}</option>`).join('');
@@ -57,7 +57,7 @@ async function applyCaptionStyle(patch,record=true){
   targets.forEach(c=>{c.style={...c.style,...patch};if(patch.color)c.color=patch.color;});
   jump(cue.start);renderCues();
   changed();
-  try{await CutRenderer.fonts(project());changed();}catch{toast('폰트를 불러오지 못했습니다. 연결을 확인해 주세요.');}
+  try{await CutRenderer.fonts(project());}catch{toast('폰트를 불러오지 못했습니다. 연결을 확인해 주세요.');}
 }
 function applyAllCaptionStyle(){
   const cue=styleCue();if(!cue)return;
@@ -104,14 +104,14 @@ async function applyTemplateTypography(layout,{applyCues=true,notify=false}={}){
   if(applyCues&&cues.length){rememberCues();cues.forEach(c=>{c.style={...c.style,font:preset.captionFont,bold:preset.captionBold,italic:preset.captionItalic};});renderCues();}
   else syncStyleEditor();
   syncTextStyleNotes();changed();
-  try{await CutRenderer.fonts(project());changed();}catch{toast('폰트를 불러오지 못했습니다.');}
+  try{await CutRenderer.fonts(project());}catch{toast('폰트를 불러오지 못했습니다.');}
   if(notify)toast('영상 템플릿의 기본 폰트 스타일을 적용했습니다.');
 }
 window.applyTemplateTypography=applyTemplateTypography;
 $('layoutSelect').addEventListener('input',()=>applyTemplateTypography($('layoutSelect').value,{applyCues:true,notify:true}));
-['titleFont','channelFont'].forEach(id=>$(id).onchange=async()=>{syncTextStyleNotes();changed();try{await CutRenderer.fonts(project());changed();}catch{toast('폰트를 불러오지 못했습니다.');}});
+['titleFont','channelFont'].forEach(id=>$(id).onchange=async()=>{syncTextStyleNotes();changed();try{await CutRenderer.fonts(project());}catch{toast('폰트를 불러오지 못했습니다.');}});
 function syncTextPositionUI(){for(const id of ['titleX','titleY','channelX','channelY']){const out=$(id+'Value');if(out)out.textContent=`${Number($(id).value).toFixed(Number($(id).value)%1?1:0)}%`;}}
-['titleX','titleY','channelX','channelY'].forEach(id=>$(id).addEventListener('input',()=>{syncTextPositionUI();changed();}));
+['titleX','titleY','channelX','channelY'].forEach(id=>$(id).addEventListener('input',syncTextPositionUI));
 syncTextPositionUI();
 ['titleSize','channelSize'].forEach(id=>$(id).addEventListener('change',()=>{
   const input=$(id),fallback=id==='titleSize'?86.4:43.2;
@@ -137,7 +137,7 @@ window.CutflowTypography={
       el.dispatchEvent(new Event(['font','size','strokeEnabled','strokeWidth'].includes(key)?'change':'input',{bubbles:true}));
     }
     syncTextStrokes();syncTextPositionUI();syncTextStyleNotes();changed();
-    try{await CutRenderer.fonts(project());changed();}catch{}
+    try{await CutRenderer.fonts(project());}catch{}
     const state=typographyState(p);window.dispatchEvent(new CustomEvent('cutflow-typography-updated',{detail:{kind:p,state}}));return state;
   }
 };
