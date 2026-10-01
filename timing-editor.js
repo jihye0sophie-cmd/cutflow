@@ -262,7 +262,6 @@
     requestAnimationFrame(()=>{renderAllQueued=false;renderAll();});
   }
   function visiblePanel(){if(externalPanel?.isConnected)return externalPanel;if(q('desktopEditor')?.dataset.mode==='timing')return q('desktopTiming');return null;}
-  function selectCaption(delta){const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;const pos=item.cueIndices.indexOf(sel.index),target=item.cueIndices[clamp(pos+delta,0,item.cueIndices.length-1)],cue=cues[target];if(cue){selectedCueId=cue.id;jump(cue.start);requestRenderAll();}}
   function selectSceneRelative(delta){
     const list=sceneItems(),target=clamp(sceneIndex()+delta,0,Math.max(0,list.length-1));if(!list.length||target===sceneIndex())return;
     syncSelectedCueToScene(target,{forceFirst:true});pendingCenter=true;
