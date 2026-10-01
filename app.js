@@ -162,7 +162,7 @@ function selectNavigationCue(index,scroll=false){
   lastCue=index;
   window.selectStyleCue?.(index);
   const sourceIndex=scenes.findIndex(scene=>scene.id===cue.sceneId);
-  $('nowPlaying').textContent=`자막 ${index+1} · 컷 ${sourceIndex+1}`;
+  const label=`자막 ${index+1} · 컷 ${sourceIndex+1}`;if($('nowPlaying').textContent!==label)$('nowPlaying').textContent=label;
 }
 function navigateCut(direction){
   if(desktopNavigation()&&window.CutflowScene?.items?.().length){
