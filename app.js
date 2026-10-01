@@ -5,8 +5,9 @@ window.CutflowMotionMeta=motionMeta;
 const transitionLabels={cut:'하드 컷',dissolve:'디졸브',fade:'블랙 페이드',flash:'화이트 플래시',slide:'슬라이드'};
 const rhythms={reference:{motions:['zoom-in','still','zoom-out','still','pan-left','pan-right'],transitions:['cut']},balanced:{motions:['zoom-in','pan-right','zoom-out','pan-left','pan-up','pan-down'],transitions:['cut','dissolve']},calm:{motions:['zoom-in','pan-right','zoom-out','pan-left'],transitions:['dissolve','fade']},impact:{motions:['zoom-in','pan-left','zoom-out','pan-right'],transitions:['cut','flash','cut','slide']}};
 const autoMotionPool=Object.keys(motionLabels).filter(m=>m!=='still');
+function pickAutoMotion(recent=[]){const available=autoMotionPool.filter(m=>!recent.includes(m)),pool=available.length?available:autoMotionPool;return pool[Math.floor(Math.random()*pool.length)];}
 let autoMotionRecent=[];
-function chooseAutoMotion(){const available=autoMotionPool.filter(m=>!autoMotionRecent.includes(m));const pool=available.length?available:autoMotionPool;const next=pool[Math.floor(Math.random()*pool.length)];autoMotionRecent=[...autoMotionRecent,next].slice(-2);return next;}
+function chooseAutoMotion(){const next=pickAutoMotion(autoMotionRecent);autoMotionRecent=[...autoMotionRecent,next].slice(-2);return next;}
 let scenes=[],cues=[],audioBuffer=null,audioUrl=null,audioName='',audioFile=null,silences=[],envelope=[],timingAnalysis=null;
 let titleColorRanges=[],lastTitleText='';
 let playRequest=0;
@@ -284,7 +285,7 @@ $('uploadBtn').onclick=$('addMoreBtn').onclick=()=>$('fileInput').click();$('fil
 $('audioBtn').onclick=()=>$('audioInput').click();$('audioInput').onchange=e=>loadAudio(e.target.files[0]);$('scriptFileBtn').onclick=()=>$('scriptFile').click();$('scriptFile').onchange=async e=>{if(e.target.files[0]){$('scriptInput').value=await e.target.files[0].text();$('scriptInput').dispatchEvent(new Event('input',{bubbles:true}));changed();}e.target.value='';};
 function applyRandomMotion(){
   pause();if(cues.length)rememberCues();let previous=[];
-  const choose=()=>{const pool=Object.keys(motionLabels).filter(m=>m!=='still'&&!previous.includes(m));const next=pool[Math.floor(Math.random()*pool.length)];previous=[...previous,next].slice(-2);return next;};
+  const choose=()=>{const next=pickAutoMotion(previous);previous=[...previous,next].slice(-2);return next;};
   scenes.forEach(s=>{if(s.type==='image')s.motion=choose();});
   cues.forEach(c=>{delete c.motion;delete c.transition;delete c.transform;});
   renderCues();toast('장면별로 겹치지 않는 랜덤 무빙을 적용했습니다. 자막을 나눠도 효과는 유지됩니다.');
