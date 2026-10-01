@@ -82,7 +82,7 @@
     const endHit=nearestNarrationBoundary(live.end,endMin,Math.max(endMin,endMax),.8);
     if(endHit!=null){setCaptionEdge(sel.index,'end',endHit,{commit:false});snapped++;}
     const currentItem=sceneItems().find(g=>g?.cueIndices?.includes(sel.index));if(currentItem)updateOffsets(currentItem);
-    changed();renderCues();window.CutflowScene.select(Math.max(0,sceneForCueIndex(sel.index)));renderAll();
+    changed();renderCues();window.CutflowScene.select(Math.max(0,sceneForCueIndex(sel.index)));
     toast(snapped?`선택 자막을 내레이션 쉼 ${snapped}곳에 맞췄습니다.`:'선택 자막 주변에서 가까운 쉼을 찾지 못해 현재 시간을 유지했습니다.');
   };
   const alignAllCaptions=()=>{
@@ -93,14 +93,14 @@
     if(!aligned?.boundaries||aligned.boundaries.length!==cues.length+1){toast('전체 자막을 내레이션에 맞추지 못했습니다.');return;}
     cues.forEach((cue,i)=>{cue.start=aligned.boundaries[i];cue.end=aligned.boundaries[i+1];});
     for(const group of sceneItems())updateOffsets(group);
-    changed();renderCues();window.CutflowScene.select(Math.min(sceneIndex(),Math.max(0,sceneItems().length-1)));renderAll();
+    changed();renderCues();window.CutflowScene.select(Math.min(sceneIndex(),Math.max(0,sceneItems().length-1)));
     const matched=(aligned.pauseHits||0)+(aligned.valleyHits||0),fallback=aligned.fallbackCount||0;
     toast(matched?`전체 자막을 내레이션 쉼 ${matched}곳에 맞췄습니다.${fallback?` ${fallback}곳은 문장 길이 기준으로 보정했습니다.`:''}`:'전체 자막을 문장 길이 기준으로 다시 배분했습니다.');
   };
   const redistribute=alignSelectedCaption;
   const changeSelectedTime=(side,value)=>{
     const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;
-    rememberCues();setCaptionEdge(sel.index,side,value,{commit:false});changed();renderCues();window.CutflowScene.select(sceneForCueIndex(sel.index));renderAll();
+    rememberCues();setCaptionEdge(sel.index,side,value,{commit:false});changed();renderCues();window.CutflowScene.select(sceneForCueIndex(sel.index));
   };
   const timelineRanges=()=>{
     const list=sceneItems();if(cues?.length)return list;
@@ -250,16 +250,22 @@
     if(!targets.size){const visible=visiblePanel();if(visible)targets.add(visible);}
     targets.forEach(renderPanel);
   }
+  let renderAllQueued=false;
+  function requestRenderAll(){
+    if(renderAllQueued)return;
+    renderAllQueued=true;
+    requestAnimationFrame(()=>{renderAllQueued=false;renderAll();});
+  }
   function visiblePanel(){if(externalPanel?.isConnected)return externalPanel;if(q('desktopEditor')?.dataset.mode==='timing')return q('desktopTiming');return null;}
   function selectCaption(delta){const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;const pos=item.cueIndices.indexOf(sel.index),target=item.cueIndices[clamp(pos+delta,0,item.cueIndices.length-1)],cue=cues[target];if(cue){selectedCueId=cue.id;jump(cue.start);renderAll();}}
   function selectSceneRelative(delta){
     const list=sceneItems(),target=clamp(sceneIndex()+delta,0,Math.max(0,list.length-1));if(!list.length||target===sceneIndex())return;
     syncSelectedCueToScene(target,{forceFirst:true});pendingCenter=true;
-    window.CutflowScene?.select?.(target);renderAll();
+    window.CutflowScene?.select?.(target);
   }
   function handleAction(e){
     const panel=e.target.closest('.timing-panel');if(!panel)return;
-    const sceneBtn=e.target.closest('[data-timeline-scene]');if(sceneBtn){const target=Number(sceneBtn.dataset.timelineScene);syncSelectedCueToScene(target,{forceFirst:true});pendingCenter=true;window.CutflowScene?.select?.(target);renderAll();return;}
+    const sceneBtn=e.target.closest('[data-timeline-scene]');if(sceneBtn){const target=Number(sceneBtn.dataset.timelineScene);syncSelectedCueToScene(target,{forceFirst:true});pendingCenter=true;window.CutflowScene?.select?.(target);return;}
     const cueBtn=e.target.closest('[data-timing-cue]');if(cueBtn){const i=Number(cueBtn.dataset.timingCue);if(cues[i]){selectedCueId=cues[i].id;pendingCenter=true;jump(cues[i].start);renderAll();}return;}
     const action=e.target.closest('[data-timing-action]')?.dataset.timingAction;
     if(action){
@@ -283,8 +289,8 @@
   }
   function handleChange(e){
     if(!e.target.closest('.timing-panel'))return;
-    if(e.target.dataset.timingScene){rememberCues();setSceneBoundary(e.target.dataset.timingScene,e.target.value);renderAll();}
-    else if(e.target.hasAttribute('data-timing-scene-duration')){const item=sceneItem();if(item){rememberCues();setSceneBoundary('end',item.start+Math.max(.1,num(e.target.value,.1)));renderAll();}}
+    if(e.target.dataset.timingScene){rememberCues();setSceneBoundary(e.target.dataset.timingScene,e.target.value);}
+    else if(e.target.hasAttribute('data-timing-scene-duration')){const item=sceneItem();if(item){rememberCues();setSceneBoundary('end',item.start+Math.max(.1,num(e.target.value,.1)));}}
     else if(e.target.dataset.timingCaption){changeSelectedTime(e.target.dataset.timingCaption,e.target.value);}
   }
   function updatePlayheadFeedback(t){
@@ -355,19 +361,19 @@
       if(desktopTiming){syncSelectedCueToTime(t);renderAll();}
       return;
     }
-    const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();syncSelectedCueToScene(idx);CutflowScene.select(idx);renderAll();
+    const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();syncSelectedCueToScene(idx);CutflowScene.select(idx);
   }
   document.addEventListener('click',handleAction);
   document.addEventListener('change',handleChange);
   document.addEventListener('pointerdown',startDrag);
   document.addEventListener('pointermove',moveDrag);
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
-  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing){pendingCenter=true;playbackFollowScene=target;}}requestAnimationFrame(renderAll);});
-  window.addEventListener('cutflow-scene-updated',()=>requestAnimationFrame(renderAll));
-  window.addEventListener('cutflow-project-restored',()=>requestAnimationFrame(()=>{pendingCenter=true;renderAll();}));
-  new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
+  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing){pendingCenter=true;playbackFollowScene=target;}}requestRenderAll();});
+  window.addEventListener('cutflow-scene-updated',requestRenderAll);
+  window.addEventListener('cutflow-project-restored',()=>{pendingCenter=true;requestRenderAll();});
+  new MutationObserver(requestRenderAll).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
-  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const playerState=window.CutflowPlayer?.state?.(),track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration(),time=currentTime();line.style.left=`${pctAll(time,duration)}%`;if(clock)clock.textContent=`${fmt(time)} / ${fmt(duration)}`;if(playerState?.playing){const activeScene=sceneIndex();if(activeScene!==playbackFollowScene){playbackFollowScene=activeScene;syncSelectedCueToScene(activeScene);pendingCenter=true;requestAnimationFrame(renderAll);}}else playbackFollowScene=-1;},100);
+  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const playerState=window.CutflowPlayer?.state?.(),track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration(),time=currentTime();line.style.left=`${pctAll(time,duration)}%`;if(clock)clock.textContent=`${fmt(time)} / ${fmt(duration)}`;if(playerState?.playing){const activeScene=sceneIndex();if(activeScene!==playbackFollowScene){playbackFollowScene=activeScene;syncSelectedCueToScene(activeScene);pendingCenter=true;requestRenderAll();}}else playbackFollowScene=-1;},100);
   function selectTimelineCaption(index){
     if(!cues[index])return false;
     selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);renderAll();return true;
