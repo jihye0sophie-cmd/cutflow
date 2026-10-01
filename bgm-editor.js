@@ -15,8 +15,8 @@ $('bgmInput').onchange=async e=>{const file=e.target.files[0];if(!file)return;pa
   catch{toast('음악을 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');}
   finally{await ctx?.close();loading--;e.target.value='';if(loaded)changed();else stats();syncBgm();}
 };
-$('bgmRemove').onclick=()=>{pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed();syncBgm();};
-['bgmStart','bgmVolume','bgmRepeat','bgmFadeIn','bgmFadeOut'].forEach(id=>$(id).addEventListener('input',()=>{pause();const input=$(id);if(id==='bgmStart')input.value=String(Math.min(Math.max(0,Number(input.value)||0),Math.max(0,(bgmBuffer?.duration||0)-.01)));if(id==='bgmFadeIn'||id==='bgmFadeOut')input.value=String(Math.max(0,Math.min(30,Number(input.value)||0)));CutAudio.invalidate();changed();syncBgm();}));
+$('bgmRemove').onclick=()=>{pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed({syncBgm:false});syncBgm();};
+['bgmStart','bgmVolume','bgmRepeat','bgmFadeIn','bgmFadeOut'].forEach(id=>$(id).addEventListener('input',()=>{pause();const input=$(id);if(id==='bgmStart')input.value=String(Math.min(Math.max(0,Number(input.value)||0),Math.max(0,(bgmBuffer?.duration||0)-.01)));if(id==='bgmFadeIn'||id==='bgmFadeOut')input.value=String(Math.max(0,Math.min(30,Number(input.value)||0)));CutAudio.invalidate();changed({syncBgm:false});syncBgm();}));
 
 function bgmSnapshot(){return bgmBuffer?{file:bgmFile,name:bgmName,start:Number($('bgmStart').value)||0,volume:Number($('bgmVolume').value)||0,repeat:$('bgmRepeat').value,fadeIn:Number($('bgmFadeIn').value)||0,fadeOut:Number($('bgmFadeOut').value)||0}:null;}
 async function restoreBgmSnapshot(snapshot,{silent=false}={}){
@@ -35,14 +35,14 @@ async function restoreBgmSnapshot(snapshot,{silent=false}={}){
 }
 async function loadBgmFile(file){
   if(!file)return false;pause();const id=++bgmLoadId;loading++;stats();$('bgmStatus').textContent='음악 읽는 중…';let ctx;
-  try{ctx=new AudioContext();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return false;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();changed();syncBgm();return true;}
+  try{ctx=new AudioContext();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return false;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();changed({syncBgm:false});syncBgm();return true;}
   catch{return false;}finally{await ctx?.close();loading--;stats();}
 }
 window.loadBgmFile=loadBgmFile;
 window.bgmSnapshot=bgmSnapshot;window.restoreBgmSnapshot=restoreBgmSnapshot;
 
 window.CutflowBgm={
-  remove(){pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed();syncBgm();return true;},
+  remove(){pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed({syncBgm:false});syncBgm();return true;},
   update(patch={}){
     if(!bgmBuffer)return false;pause();
     if(patch.start!=null)$('bgmStart').value=String(Math.min(Math.max(0,Number(patch.start)||0),Math.max(0,bgmBuffer.duration-.01)));
@@ -50,7 +50,7 @@ window.CutflowBgm={
     if(patch.repeat!=null)$('bgmRepeat').value=patch.repeat==='loop'?'loop':'stop';
     if(patch.fadeIn!=null)$('bgmFadeIn').value=String(Math.max(0,Math.min(30,Number(patch.fadeIn)||0)));
     if(patch.fadeOut!=null)$('bgmFadeOut').value=String(Math.max(0,Math.min(30,Number(patch.fadeOut)||0)));
-    CutAudio.invalidate();changed();syncBgm();return true;
+    CutAudio.invalidate();changed({syncBgm:false});syncBgm();return true;
   }
 };
 
