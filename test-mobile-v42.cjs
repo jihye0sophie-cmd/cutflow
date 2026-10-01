@@ -233,6 +233,8 @@ assert(js.includes("section('장면 관리'"),'mobile scene management section m
 assert(js.includes("section('이미지·영상 크기 / 위치',transform)"),'mobile transform controls should stay always visible like desktop');
 assert(js.includes('v42TransformReset'),'mobile transform reset missing');
 assert(js.includes('renderForce=renderForce||!!force')&&js.includes('if(renderQueued)return'),'mobile refresh requests must be coalesced');
+assert(js.includes('const refreshEditorState=()=>')&&js.includes("['cutflow-scene-updated','cutflow-caption-updated']"),'mobile core update events must share one refresh path');
+assert(!js.includes("if(api.split(index,cursor))requestRefresh(true)")&&!js.includes("CutflowScene?.select?.(i);requestRefresh(true)"),'mobile core scene/caption actions must not trigger duplicate refreshes');
 assert(js.includes('function ensureMirrorStage()')&&js.includes('if(mobileActive||fullOpen)ensureMirrorStage();'),'mobile preview mirror must stop when inactive');
 assert(desktop.includes('function requestSync()')&&desktop.includes('new MutationObserver(requestSync)'),'desktop observer refreshes must be coalesced');
 assert(js.includes('data-media-volume'),'mobile video volume presets missing');
