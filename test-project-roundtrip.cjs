@@ -14,7 +14,7 @@ assert.ok(app.includes("capture(){return {schemaVersion:1"),'project bridge capt
 assert.ok(app.includes("async restore(data,options={})"),'project bridge restore missing');
 assert.ok(app.includes("await clearProjectMedia()"),'restore must clear old media before rebuilding');
 assert.ok(app.includes("scene=await makeScene(file)"),'restore must rebuild scene media elements');
-assert.ok(app.includes("await loadAudio(f)"),'restore must rebuild narration audio state');
+assert.ok(app.includes("await loadAudio(f,{commit:false,notify:false})"),'restore must rebuild narration audio state without intermediate dirty commits');
 assert.ok(app.includes("await window.restoreBgmSnapshot?.(data.bgm||null,{silent:true})"),'restore must rebuild BGM state');
 assert.ok(app.includes("cutflow-project-restored"),'restore completion event missing');
 
