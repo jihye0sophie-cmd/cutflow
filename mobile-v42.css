@@ -859,17 +859,17 @@ body.v42-mobile{
   flex-direction:column!important;
   box-sizing:border-box!important;
   width:100%;
-  height:100svh!important;
-  min-height:100svh!important;
-  max-height:100svh!important;
+  height:var(--v42-visual-height,100svh)!important;
+  min-height:var(--v42-visual-height,100svh)!important;
+  max-height:var(--v42-visual-height,100svh)!important;
   padding-top:calc(52px + env(safe-area-inset-top))!important;
   padding-bottom:0!important;
   overflow:hidden!important;
   background:#0d0f12!important;
 }body.v42-mobile.v42-standalone #mobileAppV42{
-  height:100dvh!important;
-  min-height:100dvh!important;
-  max-height:100dvh!important;
+  height:var(--v42-visual-height,100dvh)!important;
+  min-height:var(--v42-visual-height,100dvh)!important;
+  max-height:var(--v42-visual-height,100dvh)!important;
 }
 
 /* Opaque fixed header including iOS safe area. */
@@ -1407,3 +1407,20 @@ body.v42-mobile .v42-stage-wrap .v42-transform-guide{
 body.v42-mobile .v42-stage-wrap .v42-transform-guide.vertical{width:1px!important}
 body.v42-mobile .v42-stage-wrap .v42-transform-guide.horizontal{height:1px!important}
 body.v42-mobile .v42-stage-wrap .v42-transform-guide[hidden]{display:none!important}
+
+/* iPhone Safari/PWA common viewport + keyboard safeguards. */
+body.v42-mobile.v42-ios #v42SettingsDialog[open],
+body.v42-mobile.v42-ios #v42ExportDialog[open]{
+  max-height:calc(var(--v42-visual-height,100dvh) - max(8px,env(safe-area-inset-top)))!important;
+}
+body.v42-mobile.v42-ios.v42-keyboard-open .v42-panel{
+  scroll-padding-bottom:120px!important;
+}
+body.v42-mobile.v42-ios.v42-keyboard-open .v42-settings-body{
+  scroll-padding-bottom:140px!important;
+}
+body.v42-mobile.v42-ios input,
+body.v42-mobile.v42-ios textarea,
+body.v42-mobile.v42-ios select{
+  -webkit-text-size-adjust:100%;
+}
