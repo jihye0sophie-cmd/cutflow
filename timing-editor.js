@@ -1,7 +1,7 @@
 /* Timing workspace: narration is the fixed reference, scenes are large ranges, captions are nested ranges. */
 (()=>{
   const q=id=>document.getElementById(id);
-  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,timelineScrollLeft=0;
+  let selectedCueId=null,drag=null,raf=0,externalPanel=null,timelineZoom=1,snapEnabled=true,pendingCenter=false,timelineScrollLeft=0,playbackFollowScene=-1;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   const num=(n,d=0)=>Number.isFinite(Number(n))?Number(n):d;
   const fmt=n=>num(n).toFixed(2);
@@ -362,12 +362,12 @@
   document.addEventListener('pointerdown',startDrag);
   document.addEventListener('pointermove',moveDrag);
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
-  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing)pendingCenter=true;}requestAnimationFrame(renderAll);});
+  window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing){pendingCenter=true;playbackFollowScene=target;}}requestAnimationFrame(renderAll);});
   window.addEventListener('cutflow-scene-updated',()=>requestAnimationFrame(renderAll));
   window.addEventListener('cutflow-project-restored',()=>requestAnimationFrame(()=>{pendingCenter=true;renderAll();}));
   new MutationObserver(()=>requestAnimationFrame(renderAll)).observe(q('cueList'),{childList:true});
   new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
-  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration();line.style.left=`${pctAll(currentTime(),duration)}%`;if(clock)clock.textContent=`${fmt(currentTime())} / ${fmt(duration)}`;},100);
+  setInterval(()=>{const panel=visiblePanel();if(!panel)return;const playerState=window.CutflowPlayer?.state?.(),track=panel.querySelector('.timing-track'),line=track?.querySelector('.timing-playhead'),clock=track?.querySelector('[data-timeline-clock]');if(!track||!line)return;const duration=timelineDuration(),time=currentTime();line.style.left=`${pctAll(time,duration)}%`;if(clock)clock.textContent=`${fmt(time)} / ${fmt(duration)}`;if(playerState?.playing){const activeScene=sceneIndex();if(activeScene!==playbackFollowScene){playbackFollowScene=activeScene;syncSelectedCueToScene(activeScene);pendingCenter=true;requestAnimationFrame(renderAll);}}else playbackFollowScene=-1;},100);
   function selectTimelineCaption(index){
     if(!cues[index])return false;
     selectedCueId=cues[index].id;pendingCenter=true;jump(cues[index].start);renderAll();return true;
