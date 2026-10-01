@@ -96,6 +96,6 @@ function sync(){
  window.addEventListener('cutflow-scene',()=>{requestSync();if(mode==='timing')requestAnimationFrame(()=>window.CutflowTiming?.render?.());});window.addEventListener('cutflow-mobile-activate',deactivate);window.addEventListener('cutflow-mobile-deactivate',syncDesktopMode);
  if(typeof mq.addEventListener==='function')mq.addEventListener('change',syncDesktopMode);else if(typeof mq.addListener==='function')mq.addListener(syncDesktopMode);
  for(const id of ['cueList','sceneList'])new MutationObserver(requestSync).observe($(id),{childList:true});
- let previewLabel='';new MutationObserver(()=>{const value=$('nowPlaying').textContent;if(value!==previewLabel){previewLabel=value;requestSync();}}).observe($('nowPlaying'),{childList:true});
+ window.addEventListener('cutflow-caption-active',requestSync);
  new MutationObserver(requestSync).observe($('exportBtn'),{attributes:true,attributeFilter:['disabled']});syncDesktopMode();requestAnimationFrame(()=>revealCutflowUI());
 })();
