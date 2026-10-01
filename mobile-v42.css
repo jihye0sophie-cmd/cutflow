@@ -1368,3 +1368,35 @@ body.v42-mobile .v42-timing-host .timeline-selection-grid>section:nth-child(2) .
 body.v42-mobile .v42-timing-host .timeline-selection-grid>section:first-child .timing-fields label:last-child{
   grid-column:1/-1;
 }
+
+/* Mobile typography +1px trial — remove this block to revert. */
+body.v42-mobile .v42-head button,
+body.v42-mobile .v42-btn,
+body.v42-mobile .v42-player button,
+body.v42-mobile .v42-add-scene,
+body.v42-mobile .v42-scene-nav button{font-size:11px!important}
+body.v42-mobile .v42-brand small,
+body.v42-mobile .v42-section-head small,
+body.v42-mobile .v42-details summary small{font-size:9px!important}
+body.v42-mobile .v42-section-head strong{font-size:14px!important}
+body.v42-mobile .v42-field>span,
+body.v42-mobile .v42-help,
+body.v42-mobile .v42-status,
+body.v42-mobile .v42-edit-action-group>strong,
+body.v42-mobile .v42-caption-segment-nav>span,
+body.v42-mobile .v42-caption-selection-tools>strong,
+body.v42-mobile .v42-caption-base-color>strong,
+body.v42-mobile .v42-media-subsection>strong,
+body.v42-mobile .v42-media-audio-head>strong{font-size:11px!important}
+body.v42-mobile .v42-check,
+body.v42-mobile .v42-details summary{font-size:12px!important}
+body.v42-mobile .v42-empty-strip,
+body.v42-mobile .v42-pills span,
+body.v42-mobile .v42-auto-check span,
+body.v42-mobile .v42-auto-match,
+body.v42-mobile .v42-grid-source small,
+body.v42-mobile .v42-selection-picker,
+body.v42-mobile .v42-live-value{font-size:10px!important}
+body.v42-mobile .v42-caption-selection-tools>small{font-size:9px!important}
+body.v42-mobile .v42-caption-timing-head strong{font-size:12px!important}
+body.v42-mobile .v42-caption-timing-head span{font-size:10px!important}
