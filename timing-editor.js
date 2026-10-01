@@ -226,9 +226,9 @@
     const scroller=host.querySelector('.timing-scroll');
     if(scroller){
       const maxScroll=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
-      if(selected&&pendingCenter){
-        const center=((selected.start+selected.end)/2)*pps;
-        requestAnimationFrame(()=>{timelineScrollLeft=Math.max(0,Math.min(maxScroll,center-scroller.clientWidth/2));scroller.scrollLeft=timelineScrollLeft;});
+      if(pendingCenter){
+        const focus=selected||list[activeScene],center=focus?((num(focus.start)+num(focus.end))/2)*pps:null;
+        if(center!=null)requestAnimationFrame(()=>{timelineScrollLeft=Math.max(0,Math.min(maxScroll,center-scroller.clientWidth/2));scroller.scrollLeft=timelineScrollLeft;});
         pendingCenter=false;
       }else{
         timelineScrollLeft=Math.max(0,Math.min(maxScroll,timelineScrollLeft));
