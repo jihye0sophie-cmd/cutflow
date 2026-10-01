@@ -191,6 +191,11 @@ assert(js.includes('--v42-visual-height')&&js.includes('window.visualViewport'),
 assert(js.includes('v42-keyboard-open'),'iPhone keyboard viewport guard missing');
 assert(css.includes('var(--v42-visual-height,100svh)'),'mobile shell must follow the visual viewport');
 assert(css.includes('v42-mobile.v42-ios.v42-keyboard-open'),'iPhone keyboard CSS guard missing');
+assert(js.includes("try{input.value='';}catch{}input.click()"),'iPhone settings file picker must allow reselecting the same file');
+assert(js.includes("e.target?.name==='v42AutoSilence'"),'mobile auto silence preset must sync to the core control');
+assert(js.includes("e.detail?.live"),'mobile grid mirror must not rerender during a live iPhone drag');
+assert(js.includes('closeMobileSettings'),'settings close must release iPhone keyboard focus');
+assert(bgmEditor.includes('window.webkitAudioContext'),'BGM decoding must support iPhone WebKit audio context');
 assert(js.includes('function openPreviewFullscreen()')&&js.includes("previewDialog.hidden=false")&&js.includes("classList.add('v42-preview-lock')"),'fullscreen preview overlay missing');
 assert(js.includes('suppressMobileClickUntil=performance.now()+550'),'fullscreen close click-through guard missing');
 assert(js.includes('CutflowPlayer?.seekProgress'),'direct mobile scrubber bridge missing');
