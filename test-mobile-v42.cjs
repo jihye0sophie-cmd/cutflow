@@ -231,6 +231,9 @@ assert(js.includes("details('영상 고급 설정'"),'video advanced settings sh
 assert(js.includes("section('장면 관리'"),'mobile scene management section missing');
 assert(js.includes("section('이미지·영상 크기 / 위치',transform)"),'mobile transform controls should stay always visible like desktop');
 assert(js.includes('v42TransformReset'),'mobile transform reset missing');
+assert(js.includes('renderForce=renderForce||!!force')&&js.includes('if(renderQueued)return'),'mobile refresh requests must be coalesced');
+assert(js.includes('function ensureMirrorStage()')&&js.includes('if(mobileActive||fullOpen)ensureMirrorStage();'),'mobile preview mirror must stop when inactive');
+assert(desktop.includes('function requestSync()')&&desktop.includes('new MutationObserver(requestSync)'),'desktop observer refreshes must be coalesced');
 assert(js.includes('data-media-volume'),'mobile video volume presets missing');
 assert(css.includes('.v42-media-volume-presets'),'mobile video volume preset styling missing');
 console.log('Cutflow v42.6.4 image video tab parity checks passed');
