@@ -358,15 +358,16 @@
     $('v42CaptionDelete').onclick=()=>{if(confirm(`자막 ${state.segment.position}을 삭제할까요?`)&&api.remove(index))requestRefresh(true);};
     $('v42SceneSplitCaption').onclick=async()=>{if(captionSceneIndex<0)return;if(await window.CutflowScene?.split?.(captionSceneIndex,state.start))requestRefresh(true);};
     $('v42SceneMergeCaption').onclick=()=>{if(captionSceneIndex<0)return;if(confirm('다음 장면과 합칠까요? 현재 장면의 이미지·영상 설정이 유지됩니다.')&&window.CutflowScene?.mergeNext?.(captionSceneIndex))requestRefresh(true);};
-    $('v42SceneDeleteCaption').onclick=()=>{if(captionSceneIndex<0)return;if(confirm(`장면 ${captionSceneIndex+1}을 삭제할까요?`)&&window.CutflowScene?.remove?.(captionSceneIndex))requestRefresh(true);};
+    $('v42SceneDeleteCaption').onclick=()=>{if(captionSceneIndex<0)return;if(window.CutflowScene?.confirmStructureEdit?.()===false)return;if(confirm(`장면 ${captionSceneIndex+1}을 삭제할까요?`)&&window.CutflowScene?.remove?.(captionSceneIndex))requestRefresh(true);};
   }
 
   function renderTiming(){
     proxyMap.clear();
-    const api=window.CutflowCaption,index=api?.currentIndex?.()??-1,state=api?.state?.(index);
-    if(!state){panel.innerHTML=section('정밀 타이밍','<p class="v42-help">조정할 자막이 없습니다.</p>');return;}
-    panel.innerHTML=section('정밀 타이밍',`<div id="v42TimingHost" class="v42-timing-host"></div>`,`자막 ${state.segment.position}/${state.segment.count}`);
-    window.CutflowTiming?.mount?.($('v42TimingHost'),index);
+    const scene= currentScene(),api=window.CutflowCaption,index=api?.currentIndex?.()??-1,state=api?.state?.(index);
+    if(!scene.items.length){panel.innerHTML=section('정밀 타이밍','<p class="v42-help">조정할 장면이 없습니다.</p>');return;}
+    const meta=state?`자막 ${state.segment.position}/${state.segment.count}`:`장면 ${scene.index+1}/${scene.items.length}`;
+    panel.innerHTML=section('정밀 타이밍',`<div id="v42TimingHost" class="v42-timing-host"></div>`,meta);
+    window.CutflowTiming?.mount?.($('v42TimingHost'),state?index:undefined);
   }
   function renderMedia(){
     proxyMap.clear();const {item,index,mediaRow}=currentRows();
@@ -409,7 +410,7 @@
       transformPreview.onclick=()=>setMobileTransformMode(!(mobileTransformMode&&mobileTransformScene===index),index);
     }
     $('v42TransformReset').onclick=()=>{setMobileTransformMode(false,index);window.CutflowScene?.update?.(index,{transform:{scale:100,x:0,y:0}});requestRefresh(false);};
-    $('v42DeleteScene').onclick=()=>{if(confirm(`장면 ${index+1}을 삭제할까요?`))window.CutflowScene?.remove?.(index);};
+    $('v42DeleteScene').onclick=()=>{if(window.CutflowScene?.confirmStructureEdit?.()===false)return;if(confirm(`장면 ${index+1}을 삭제할까요?`))window.CutflowScene?.remove?.(index);};
   }
   function autoSetupMarkup(map=proxyMap){
     const preset=document.querySelector('input[name="autoSilencePreset"]:checked')?.value||'normal';
