@@ -47,7 +47,7 @@
         <div class="v42-scene-nav"><strong id="v42SceneLabel">0 / 0</strong></div>
       </section>
       <section class="v42-scenes-card" aria-label="장면 목록">
-        <div class="v42-scenes-row"><div id="v42SceneStrip" class="v42-scene-strip"></div><button id="v42AddScene" type="button" class="v42-add-scene" aria-label="장면 추가">＋</button></div>
+        <div class="v42-scenes-row"><div id="v42SceneStrip" class="v42-scene-strip"></div><button id="v42AddScene" type="button" class="v42-add-scene" aria-label="장면 추가">＋</button><input id="v42AddSceneInput" type="file" accept="image/*,video/*" multiple hidden></div>
       </section>
       <nav id="v42Tabs" class="v42-tabs" aria-label="모바일 편집 탭">
         <button type="button" data-tab="caption" aria-pressed="true" aria-label="자막" title="자막">
@@ -360,8 +360,18 @@
     panel.querySelectorAll('[data-caption-selection-color]').forEach(btn=>btn.onclick=()=>applySelectedCaptionColor(btn.dataset.captionSelectionColor));
     $('v42CaptionSelectionPicker').oninput=e=>applySelectedCaptionColor(e.target.value);
     $('v42CaptionSelectionReset').onclick=()=>applySelectedCaptionColor(null);
-    $('v42CaptionPrev').onclick=()=>{if(index>state.segment.first)api.select(index-1);};
-    $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)api.select(index+1);};
+    const selectCaptionAndEdit=nextIndex=>{
+      if(!api.select(nextIndex))return;
+      requestRefresh(true);
+      requestAnimationFrame(()=>{
+        const input=$('v42CaptionText');
+        input?.focus?.({preventScroll:true});
+        if(input&&typeof input.setSelectionRange==='function'){const at=input.value.length;input.setSelectionRange(at,at);}
+        ensurePanelVisible();
+      });
+    };
+    $('v42CaptionPrev').onclick=()=>{if(index>state.segment.first)selectCaptionAndEdit(index-1);};
+    $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)selectCaptionAndEdit(index+1);};
     $('v42CaptionPlay').onclick=()=>api.play?.(index);
     $('v42CaptionTiming').onclick=()=>{tab='timing';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.tab==='timing')));renderPanel(true);};
     $('v42CaptionSplit').onclick=()=>{const cursor=captionText?.selectionStart;api.split(index,cursor);};
@@ -767,7 +777,26 @@
   $('v42SettingsBody').addEventListener('pointerup',endMobileGridDrag);
   $('v42SettingsBody').addEventListener('pointercancel',endMobileGridDrag);
   tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const timingHost=$('v42TimingHost');if(timingHost)window.CutflowTiming?.unmount?.(timingHost);if(b.dataset.tab!=='media')setMobileTransformMode(false);tab=b.dataset.tab;qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderPanel(true);requestAnimationFrame(ensurePanelVisible);});
-  $('v42AddScene').onclick=()=>$('fileInput')?.click();
+  const mobileSceneInput=$('v42AddSceneInput');
+  $('v42AddScene').onclick=()=>{
+    if(!mobileSceneInput)return;
+    mobileSceneInput.value='';
+    mobileSceneInput.click();
+  };
+  mobileSceneInput.onchange=async e=>{
+    const files=[...(e.target.files||[])];e.target.value='';
+    if(!files.length)return;
+    const before=window.CutflowScene?.items?.().length||0;
+    const added=await window.CutflowAutoBridge?.addTimelineMedia?.(files);
+    if(added){
+      requestRefresh(true);
+      requestAnimationFrame(()=>{
+        const count=window.CutflowScene?.items?.().length||0;
+        if(count>before)window.CutflowScene?.select?.(count-1);
+        followSelectedScene('smooth');
+      });
+    }
+  };
   $('v42Undo').onclick=()=>window.CutflowHistory?.undo?.();
   $('v42Redo').onclick=()=>window.CutflowHistory?.redo?.();
   const syncPreviewHistory=()=>{const undo=$('v42Undo'),redo=$('v42Redo');if(undo)undo.disabled=!window.CutflowHistory?.canUndo;if(redo)redo.disabled=!window.CutflowHistory?.canRedo;};
@@ -863,7 +892,7 @@
     requestRefresh(true);requestAnimationFrame(()=>followSelectedScene('smooth'));
   });
   const refreshEditorState=()=>{if(tab==='timing'){renderSceneStrip();syncPlayer();return;}requestRefresh(false);};
-  for(const eventName of ['cutflow-scene-updated','cutflow-caption-updated'])window.addEventListener(eventName,refreshEditorState);
+  for(const eventName of ['cutflow-scene-updated','cutflow-caption-updated','cutflow-caption-selected'])window.addEventListener(eventName,refreshEditorState);
   for(const eventName of ['cutflow-caption-style-updated','cutflow-compose-updated','cutflow-typography-updated'])window.addEventListener(eventName,()=>requestRefresh(false));
   window.addEventListener('cutflow-bgm-updated',()=>{
     const active=document.activeElement;
