@@ -15,4 +15,9 @@
 .media-transform-frame{position:absolute;pointer-events:none;box-sizing:border-box;border:2px solid #26c6da;z-index:2}
 .media-transform-frame[hidden]{display:none}
 #desktopEditor:not([data-mode=image]) #mediaTransform{display:none}
-@media(max-width:760px){#mediaTransform button,#mediaTransform input[type=number]{min-height:44px}#transformRange{min-height:30px}.transform-fields{gap:6px}}
+@media(max-width:819px){#mediaTransform button,#mediaTransform input[type=number]{min-height:44px}#transformRange{min-height:30px}.transform-fields{gap:6px}}
+
+.media-transform-guide{position:absolute;z-index:4;pointer-events:none;background:var(--studio-accent,#f5e642);box-shadow:0 0 0 1px #0008,0 0 8px color-mix(in srgb,var(--studio-accent,#f5e642) 55%,transparent)}
+.media-transform-guide.vertical{width:1px}
+.media-transform-guide.horizontal{height:1px}
+.media-transform-guide[hidden]{display:none}
