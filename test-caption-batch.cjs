@@ -19,8 +19,8 @@ assert.ok(js.includes("api()?.split?.(selected,cursor)"),'cursor split missing')
 assert.ok(js.includes("api()?.mergeNext?.(target)"),'merge previous workflow missing');
 assert.ok(js.includes("api()?.mergeNext?.(selected)"),'merge next workflow missing');
 assert.ok(js.includes("api()?.remove?.(selected)"),'caption delete workflow missing');
-assert.ok(app.includes('const d=c.end-c.start')&&app.includes('d*ratio'),'caption split must stay inside the existing time range');
-assert.ok(app.includes('c.end=next.end'),'caption merge must preserve the combined narration time range');
+assert.ok(app.includes('const firstDuration=Math.max(.1,Math.min(duration-.1,duration*ratio))')&&app.includes('splitAt=start+firstDuration'),'caption split must stay inside the existing time range');
+assert.ok(app.includes('const end=Number(next.end)')&&app.includes('c.end=end'),'caption merge must preserve the combined narration time range');
 assert.ok(desktop.includes('desktopBatchCaptions'),'desktop whole-caption entry missing');
 assert.ok(mobile.includes('v42CaptionBatchOpen'),'mobile whole-caption entry missing');
 assert.ok(css.includes('@media(max-width:760px)'),'mobile whole-caption layout missing');
