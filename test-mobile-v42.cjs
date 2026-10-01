@@ -15,6 +15,8 @@ const history=fs.readFileSync('history.js','utf8');
 
 assert(new RegExp('mobile-v42\\.css\\?v=[^"\\x27]+').test(html),'mobile css cache key missing');
 assert(new RegExp('mobile-v42\\.js\\?v=[^"\\x27]+').test(html),'responsive mobile js cache key missing');
+assert(projectStore.includes("'cutflow-project-status'")&&projectStore.includes('if(changed&&typeof CustomEvent'), 'project status updates must be event-driven and deduplicated');
+assert(js.includes("const refreshSources=['cueList','sceneList','audioStatus']")&&!js.includes("'projectSaveStatus','audioStatus'"),'mobile refresh observers must stay limited to editor content');
 assert(!html.includes('mobile-ui.css?v=')&&!html.includes('mobile-ui.js?v='),'legacy mobile UI must not load');
 assert(!js.includes('location.reload()'),'responsive mode switching must not reload the page');
 assert(js.includes("const compactMq=matchMedia('(max-width:819px)')"),'responsive mobile breakpoint missing');
