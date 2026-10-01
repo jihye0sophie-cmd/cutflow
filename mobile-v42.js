@@ -124,6 +124,14 @@
       window.CutflowPlayer?.pause?.();mobileTransformMode=true;mobileTransformScene=index;
     }
     stage.classList.toggle('v42-transform-active',mobileTransformMode);
+    const stageWrap=stage.parentElement;
+    stageWrap?.classList.toggle('v42-transform-interactive',mobileTransformMode);
+    if(stageWrap){
+      stageWrap.style.setProperty('pointer-events',mobileTransformMode?'auto':'','important');
+      stageWrap.style.setProperty('touch-action',mobileTransformMode?'none':'','important');
+    }
+    stage.style.setProperty('pointer-events',mobileTransformMode?'auto':'','important');
+    stage.style.setProperty('touch-action',mobileTransformMode?'none':'','important');
     const btn=$('v42TransformPreview');if(btn){btn.setAttribute('aria-pressed',String(mobileTransformMode));btn.textContent=mobileTransformMode?'조절 모드 종료':'미리보기에서 조절';}
   }
   function rebaseMobileTransform(){
@@ -151,8 +159,8 @@
       const display=stage.getBoundingClientRect();
       const snapped=snapApi.apply({
         rect:geometry.rect,box:geometry.box,transform:state.transform,unit:'percent',
-        thresholdX:8*stage.width/Math.max(1,display.width),
-        thresholdY:8*stage.height/Math.max(1,display.height)
+        thresholdX:6*stage.width/Math.max(1,display.width),
+        thresholdY:6*stage.height/Math.max(1,display.height)
       });
       if(snapped.guides.x||snapped.guides.y)state=window.CutflowScene?.previewTransformGesture?.(mobileTransformScene,snapped.transform)||state;
       showMobileTransformGuides(snapped.guides);
