@@ -251,7 +251,7 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
   padding:7px 5px;
 }.v42-scene-caption-actions{
   display:grid;
-  grid-template-columns:minmax(0,.75fr) minmax(0,1.45fr);
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:6px;
   margin:0;
 }.v42-scene-caption-actions .v42-btn{
