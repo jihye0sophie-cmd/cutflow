@@ -608,8 +608,10 @@
     const mobilePlay=$('v42Play');if(mobilePlay)mobilePlay.textContent=label;
     const fullPlay=$('v42FullPlay');if(fullPlay)fullPlay.textContent=label;
   }
-  let lastMirrorAt=0;
+  let lastMirrorAt=0,mirrorRaf=0;
+  function ensureMirrorStage(){if(!mirrorRaf)mirrorRaf=requestAnimationFrame(mirrorStage);}
   function mirrorStage(frameNow=performance.now()){
+    mirrorRaf=0;
     const mobileActive=window.CutflowUI?.mobileActive===true,fullOpen=!previewDialog.hidden;
     if((mobileActive||fullOpen)&&frameNow-lastMirrorAt>=33){
       lastMirrorAt=frameNow;
@@ -622,7 +624,7 @@
       }
       syncPlayer();
     }
-    requestAnimationFrame(mirrorStage);
+    if(mobileActive||fullOpen)ensureMirrorStage();
   }
 
   function proxyInput(e,map){const k=e.target.dataset.proxy,el=map.get(k);if(!el)return false;if(el.type==='checkbox')el.checked=e.target.checked;else el.value=e.target.value;dispatch(el,'input');return true;}
@@ -788,6 +790,7 @@
     setSourcePreviewSize(1080,1920);
     previewDialog.hidden=false;
     document.body.classList.add('v42-preview-lock');
+    ensureMirrorStage();
     syncPlayer();
     requestAnimationFrame(()=>$('v42FullPlay')?.focus?.({preventScroll:true}));
   }
@@ -875,10 +878,11 @@
     const el=$(id);if(!el)continue;
     el.addEventListener(id==='scriptInput'||id==='projectCaptionWrap'?'input':'change',()=>setTimeout(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}},id==='audioInput'?350:40));
   }
+  window.addEventListener('cutflow-mobile-activate',ensureMirrorStage);
   window.addEventListener('cutflow-auto-grid-change',()=>{if(settingsDialog.open){syncSettingsGridMirror(true);syncSettingsProxyState();}});
   window.addEventListener('cutflow-auto-state',()=>{if(settingsDialog.open)syncSettingsProxyState();});
   window.addEventListener('cutflow-auto-ready',()=>{if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestRefresh(false);});
   window.addEventListener('pageshow',()=>requestRefresh(false));
-  renderSceneStrip();renderPanel(true);syncPlayer();mirrorStage();requestAnimationFrame(()=>revealCutflowUI());
+  renderSceneStrip();renderPanel(true);syncPlayer();ensureMirrorStage();requestAnimationFrame(()=>revealCutflowUI());
 })();
