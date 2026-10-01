@@ -132,9 +132,13 @@ window.CutflowTypography={
     const fields={font:'Font',size:'Size',color:'Color',bold:'Bold',italic:'Italic',strokeEnabled:'StrokeEnabled',strokeWidth:'StrokeWidth',x:'X',y:'Y'};
     for(const [key,suffix] of Object.entries(fields)){
       if(patch[key]==null)continue;const el=$(p+suffix);if(!el)continue;
-      if(el.type==='checkbox')el.checked=!!patch[key];else el.value=String(patch[key]);
+      if(el.type==='checkbox')el.checked=!!patch[key];
+      else{
+        let value=patch[key];
+        if(key==='size'){const min=Number(el.min),max=Number(el.max),n=Number(value);if(Number.isFinite(n))value=Math.min(max,Math.max(min,n));}
+        el.value=String(value);
+      }
       if(key==='strokeEnabled'||key==='strokeWidth')textStrokeOverrides[p]=key==='strokeEnabled'?!!patch[key]:$(p+'StrokeEnabled').checked;
-      el.dispatchEvent(new Event(['font','size','strokeEnabled','strokeWidth'].includes(key)?'change':'input',{bubbles:true}));
     }
     syncTextStrokes();syncTextPositionUI();syncTextStyleNotes();changed();
     try{await CutRenderer.fonts(project());}catch{}
