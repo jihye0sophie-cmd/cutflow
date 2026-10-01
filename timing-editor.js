@@ -121,6 +121,18 @@
     const target=!forceFirst&&item.cueIndices.includes(activeIndex)?activeIndex:item.firstCueIndex;
     const cue=cues[target];selectedCueId=cue?.id||null;return cue?target:-1;
   };
+  const syncSelectedCueToTime=time=>{
+    time=num(time,currentTime());
+    const index=(cues||[]).findIndex((cue,i)=>{
+      const start=num(cue.start),end=num(cue.end);
+      if(time>=start&&time<end)return true;
+      return i===cues.length-1&&Math.abs(time-end)<.001;
+    });
+    if(index<0)return -1;
+    selectedCueId=cues[index].id;
+    return index;
+  };
+  const isDesktopTimingTarget=target=>!!target?.closest?.('#desktopTiming');
   const snapCandidates=()=>{
     const values=[0,timelineDuration()];
     for(const item of timelineRanges())values.push(num(item.start),num(item.end));
@@ -263,8 +275,10 @@
     }
     const canvas=e.target.closest('[data-timeline-seek]');
     if(canvas&&!e.target.closest('button,input,select,textarea')){
-      const body=canvas.querySelector('.timing-scene-layer .timing-layer-body'),rect=(body||canvas).getBoundingClientRect(),duration=timelineDuration(),time=clamp((e.clientX-rect.left)/Math.max(1,rect.width),0,1)*duration;
-      jump(snapTime(time));renderAll();
+      const body=canvas.querySelector('.timing-scene-layer .timing-layer-body'),rect=(body||canvas).getBoundingClientRect(),duration=timelineDuration(),time=clamp((e.clientX-rect.left)/Math.max(1,rect.width),0,1)*duration,t=snapTime(time);
+      jump(t);
+      if(isDesktopTimingTarget(canvas))syncSelectedCueToTime(t);
+      renderAll();
     }
   }
   function handleChange(e){
@@ -300,7 +314,7 @@
     if(playhead){
       const canvas=playhead.closest('.timing-canvas'),body=canvas?.querySelector('.timing-scene-layer .timing-layer-body'),start=num(canvas?.dataset.windowStart,0),end=num(canvas?.dataset.windowEnd,timelineDuration()),rect=(body||canvas)?.getBoundingClientRect();
       if(!canvas||!rect)return;
-      drag={kind:'playhead',start,end,rect,pointerId:e.pointerId,scene:sceneIndex(),el:playhead};
+      drag={kind:'playhead',start,end,rect,pointerId:e.pointerId,scene:sceneIndex(),el:playhead,desktopTiming:isDesktopTimingTarget(playhead)};
       playhead.setPointerCapture?.(e.pointerId);e.preventDefault();return;
     }
     const h=e.target.closest('.timing-handle');
@@ -319,7 +333,7 @@
       const body=canvas.querySelector('.timing-scene-layer .timing-layer-body'),start=num(canvas.dataset.windowStart,0),end=num(canvas.dataset.windowEnd,timelineDuration()),rect=(body||canvas).getBoundingClientRect();
       if(!rect)return;
       const raw=start+clamp((e.clientX-rect.left)/Math.max(1,rect.width),0,1)*(end-start),t=snapTime(raw,40*timelineZoom);
-      drag={kind:'playhead',start,end,rect,pointerId:e.pointerId,scene:sceneIndex(),el:canvas};
+      drag={kind:'playhead',start,end,rect,pointerId:e.pointerId,scene:sceneIndex(),el:canvas,desktopTiming:isDesktopTimingTarget(canvas)};
       jump(t);updatePlayheadFeedback(t);
       canvas.setPointerCapture?.(e.pointerId);e.preventDefault();
     }
@@ -335,7 +349,12 @@
   }
   function endDrag(){
     if(!drag)return;
-    if(drag.kind==='playhead'){const t=currentTime();drag=null;updatePlayheadFeedback(t);return;}
+    if(drag.kind==='playhead'){
+      const t=currentTime(),desktopTiming=!!drag.desktopTiming;
+      drag=null;updatePlayheadFeedback(t);
+      if(desktopTiming){syncSelectedCueToTime(t);renderAll();}
+      return;
+    }
     const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();syncSelectedCueToScene(idx);CutflowScene.select(idx);renderAll();
   }
   document.addEventListener('click',handleAction);
