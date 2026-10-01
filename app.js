@@ -95,17 +95,21 @@ function project(){return {titleStrokeEnabled:$('titleStrokeEnabled').checked,ti
 function rememberCues(){window.CutflowHistory?.begin?.('자막 편집');}
 function repeatFlags(){const flags=new Set(),entries=timelineScenes().map((s,i)=>({s,i})).filter(({s})=>!s.captionSegment||s.captionSegment.position===1);entries.forEach((entry,pos)=>{const s=entry.s;if(s.motion==='still')return;if(pos&&s.motion===entries[pos-1].s.motion){flags.add(entry.i);flags.add(entries[pos-1].i);}const hits=entries.slice(Math.max(0,pos-3),pos+1).filter(x=>x.s.motion===s.motion);if(hits.length>=3)hits.forEach(x=>flags.add(x.i));});return flags;}
 function changed(){dirty=true;stats();window.syncBgm?.({emit:false});window.CutflowProjects?.markDirty?.();window.CutflowHistory?.commit?.();}
+function setUiText(id,text){const el=$(id);text=String(text);if(el&&el.textContent!==text)el.textContent=text;}
+function setUiDisabled(id,value){const el=$(id),next=!!value;if(el&&el.disabled!==next)el.disabled=next;}
 function stats(){
-  const duration=totalDuration(),flags=repeatFlags();$('sceneCount').textContent=`${scenes.length} 컷`;$('totalDuration').textContent=`${duration.toFixed(2)}초`;$('endTime').textContent=timeText(duration);
-  $('repeatCount').textContent=flags.size?`${flags.size}개 확인`:'없음';$('repeatCount').className=flags.size?'warn':'safe';
+  const duration=totalDuration(),flags=repeatFlags();
+  setUiText('sceneCount',`${scenes.length} 컷`);setUiText('totalDuration',`${duration.toFixed(2)}초`);setUiText('endTime',timeText(duration));
+  setUiText('repeatCount',flags.size?`${flags.size}개 확인`:'없음');const repeat=$('repeatCount'),repeatClass=flags.size?'warn':'safe';if(repeat&&repeat.className!==repeatClass)repeat.className=repeatClass;
   const missing=cues.filter(c=>!scenes.some(s=>s.id===c.sceneId)).length;
-  $('exportBtn').disabled=!scenes.length||missing>0||loading>0||exporting;
-  $('audioStatus').textContent=audioBuffer?`${audioName} · ${audioBuffer.duration.toFixed(2)}초`:'오디오 없음';
+  setUiDisabled('exportBtn',!scenes.length||missing>0||loading>0||exporting);
+  setUiText('audioStatus',audioBuffer?`${audioName} · ${audioBuffer.duration.toFixed(2)}초`:'오디오 없음');
   const delta=audioBuffer?cutDuration()-audioBuffer.duration:0;
-  $('timingNotice').textContent=!audioBuffer?(window.bgmProject?.().buffer?'내레이션 없이 BGM만 포함해 MP4를 저장합니다.':'오디오 없이도 무음 MP4를 저장할 수 있습니다.'):Math.abs(delta)<.05?'컷 길이와 내레이션 길이가 일치합니다.':delta<0?`컷이 내레이션보다 ${(-delta).toFixed(2)}초 짧아 마지막 프레임을 유지합니다.`:`컷이 내레이션보다 ${delta.toFixed(2)}초 깁니다. 남은 구간은 무음입니다.`;
-  if(cues.length)$('timingNotice').textContent=missing?`${missing}개 자막에 컷이 없습니다. 해당 구간에서 사용할 컷을 선택해 주세요.`:!audioBuffer&&cues.some(c=>c.freeEdit)?'내레이션 없는 자유 편집 모드입니다. 장면 길이와 자막을 직접 수정할 수 있습니다.':'자막 시작·종료와 연결된 컷 시간이 자동으로 일치합니다. 자막 사이 빈 구간에는 컷이 표시되지 않습니다.';
-  $('randomMotionBtn').disabled=!scenes.some(s=>s.type==='image');
-  $('fitCutsBtn').disabled=!scenes.length; $('applyTemplateBtn').disabled=!scenes.length;
+  let timingNotice=!audioBuffer?(window.bgmProject?.().buffer?'내레이션 없이 BGM만 포함해 MP4를 저장합니다.':'오디오 없이도 무음 MP4를 저장할 수 있습니다.'):Math.abs(delta)<.05?'컷 길이와 내레이션 길이가 일치합니다.':delta<0?`컷이 내레이션보다 ${(-delta).toFixed(2)}초 짧아 마지막 프레임을 유지합니다.`:`컷이 내레이션보다 ${delta.toFixed(2)}초 깁니다. 남은 구간은 무음입니다.`;
+  if(cues.length)timingNotice=missing?`${missing}개 자막에 컷이 없습니다. 해당 구간에서 사용할 컷을 선택해 주세요.`:!audioBuffer&&cues.some(c=>c.freeEdit)?'내레이션 없는 자유 편집 모드입니다. 장면 길이와 자막을 직접 수정할 수 있습니다.':'자막 시작·종료와 연결된 컷 시간이 자동으로 일치합니다. 자막 사이 빈 구간에는 컷이 표시되지 않습니다.';
+  setUiText('timingNotice',timingNotice);
+  setUiDisabled('randomMotionBtn',!scenes.some(s=>s.type==='image'));
+  setUiDisabled('fitCutsBtn',!scenes.length);setUiDisabled('applyTemplateBtn',!scenes.length);
 }
 function renderScenes(){
   const flags=repeatFlags();
