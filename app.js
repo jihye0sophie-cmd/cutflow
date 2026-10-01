@@ -260,13 +260,13 @@ async function makeScene(file){
     return {id:uid(),name:file.name,file,url,element,type:video?'video':'image',sourceDuration,trimStart:0,trimEnd:video?sourceDuration:0,duration:video?Math.min(2.4,sourceDuration):2.4,motion:'still',transition:'cut',mediaVolume:0,mediaMuted:false,mediaFadeIn:0,mediaFadeOut:0,thumb:canvas.toDataURL('image/jpeg',.65)};
   }catch(error){URL.revokeObjectURL(url);throw error;}
 }
-async function addFiles(files,{createFreeCues=true,deferCommit=false}={}){
+async function addFiles(files,{createFreeCues=true,forceFreeCues=false,deferCommit=false}={}){
   const list=[...files].filter(f=>/^image\/|^video\//.test(f.type)||/\.(mp4|mov|webm|m4v)$/i.test(f.name));if(!list.length){toast('이미지 또는 영상 파일을 선택해 주세요.');return [];}
   pause();loading++;stats();let success=0,errors=[],added=[];
   for(const file of list){try{const scene=await makeScene(file);scene.motion=scene.type==='image'?chooseAutoMotion():'still';
-      if(!audioBuffer&&createFreeCues){scene.duration=scene.type==='video'?Math.max(.1,Math.min(600,scene.sourceDuration)):3;scene.mediaVolume=scene.type==='video'?1:0;}
+      if(createFreeCues&&(!audioBuffer||forceFreeCues)){scene.duration=scene.type==='video'?Math.max(.1,Math.min(600,scene.sourceDuration)):3;scene.mediaVolume=scene.type==='video'?1:0;}
       scenes.push(scene);added.push(scene);success++;}catch{errors.push(file.name);}}
-  if(!audioBuffer&&createFreeCues&&added.length){rememberCues();for(const scene of added)cues.push(createFreeCue(scene));}
+  if(createFreeCues&&(!audioBuffer||forceFreeCues)&&added.length){rememberCues();for(const scene of added)cues.push(createFreeCue(scene));}
   loading--;
   if(deferCommit){stats();return added;}
   assignAvailableCuts();renderCues();if(success)changed();$('fileInput').value='';toast(`${success}개 장면을 추가했습니다.${!audioBuffer&&success?' 내레이션 없이 자막을 직접 입력할 수 있습니다.':''}${errors.length?' 읽기 실패: '+errors.join(', '):''}`);
@@ -452,6 +452,7 @@ window.CutflowAutoBridge={
   async loadNarration(file){return loadAudio(file);},
   async processNarration(preset='normal',onProgress){if(!audioFile)throw new Error('먼저 내레이션을 불러오세요.');if(!window.CutflowSilenceCut?.process)throw new Error('무음컷 엔진을 불러오지 못했습니다.');const result=await window.CutflowSilenceCut.process(audioFile,preset,onProgress);if(!await loadAudio(result.processedFile))throw new Error('무음컷 결과 음성을 불러오지 못했습니다.');return result;},
   async addMedia(files){const added=await addFiles(files,{createFreeCues:false});return added.length;},
+  async addTimelineMedia(files){const added=await addFiles(files,{createFreeCues:true,forceFreeCues:true});return added.length;},
   buildTimeline(options={}){buildCues();if(cues.length&&scenes.length)fitCuts(false);const sequential=options?.sequentialVideo;if(sequential&&cues.length){const sourceStart=Math.max(0,Number(sequential.start)||0),requiredEnd=sourceStart+(cues.at(-1)?.end||0);for(let i=0;i<cues.length;i++){const scene=scenes[i],cue=cues[i];if(!scene||scene.type!=='video')throw new Error('긴 영상 자동 분할에는 영상 파일 1개를 사용해 주세요.');if(requiredEnd>scene.sourceDuration+.02)throw new Error(`원본 영상이 짧습니다. 시작 ${sourceStart.toFixed(1)}초 기준으로 최소 ${requiredEnd.toFixed(1)}초가 필요하지만 영상은 ${scene.sourceDuration.toFixed(1)}초입니다.`);scene.trimStart=sourceStart+cue.start;scene.trimEnd=sourceStart+cue.end;scene.duration=Math.max(.1,cue.end-cue.start);scene.motion='still';scene.transition=i?'cut':'cut';cue.mediaOffset=0;}renderCues();changed();}const missingSceneCount=cues.filter(c=>!scenes.some(s=>s.id===c.sceneId)).length;return {cueCount:cues.length,sceneCount:scenes.length,missingSceneCount};},
   counts(){return {sceneCount:scenes.length,cueCount:cues.length,scriptCount:scriptLines($('scriptInput').value).length,missingSceneCount:cues.filter(c=>!scenes.some(s=>s.id===c.sceneId)).length};},
   async clearScenesOnly(){pause();for(const s of scenes)releaseSceneResources(s);scenes=[];cues.forEach(c=>{c.sceneId=null;});offset=0;renderCues();changed();},
