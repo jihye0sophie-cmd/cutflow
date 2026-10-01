@@ -355,12 +355,12 @@
     $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)api.select(index+1);};
     $('v42CaptionPlay').onclick=()=>api.play?.(index);
     $('v42CaptionTiming').onclick=()=>{tab='timing';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.tab==='timing')));renderPanel(true);};
-    $('v42CaptionSplit').onclick=()=>{const cursor=captionText?.selectionStart;if(api.split(index,cursor))requestRefresh(true);};
-    $('v42CaptionMerge').onclick=()=>{if(api.mergeNext(index))requestRefresh(true);};
-    $('v42CaptionDelete').onclick=()=>{if(confirm(`자막 ${state.segment.position}을 삭제할까요?`)&&api.remove(index))requestRefresh(true);};
-    $('v42SceneSplitCaption').onclick=async()=>{if(captionSceneIndex<0)return;if(await window.CutflowScene?.split?.(captionSceneIndex,state.start))requestRefresh(true);};
-    $('v42SceneMergeCaption').onclick=()=>{if(captionSceneIndex<0)return;if(confirm('다음 장면과 합칠까요? 현재 장면의 이미지·영상 설정이 유지됩니다.')&&window.CutflowScene?.mergeNext?.(captionSceneIndex))requestRefresh(true);};
-    $('v42SceneDeleteCaption').onclick=()=>{if(captionSceneIndex<0)return;if(window.CutflowScene?.confirmStructureEdit?.()===false)return;if(confirm(`장면 ${captionSceneIndex+1}을 삭제할까요?`)&&window.CutflowScene?.remove?.(captionSceneIndex))requestRefresh(true);};
+    $('v42CaptionSplit').onclick=()=>{const cursor=captionText?.selectionStart;api.split(index,cursor);};
+    $('v42CaptionMerge').onclick=()=>{api.mergeNext(index);};
+    $('v42CaptionDelete').onclick=()=>{if(confirm(`자막 ${state.segment.position}을 삭제할까요?`))api.remove(index);};
+    $('v42SceneSplitCaption').onclick=async()=>{if(captionSceneIndex<0)return;await window.CutflowScene?.split?.(captionSceneIndex,state.start);};
+    $('v42SceneMergeCaption').onclick=()=>{if(captionSceneIndex<0)return;if(confirm('다음 장면과 합칠까요? 현재 장면의 이미지·영상 설정이 유지됩니다.'))window.CutflowScene?.mergeNext?.(captionSceneIndex);};
+    $('v42SceneDeleteCaption').onclick=()=>{if(captionSceneIndex<0)return;if(window.CutflowScene?.confirmStructureEdit?.()===false)return;if(confirm(`장면 ${captionSceneIndex+1}을 삭제할까요?`))window.CutflowScene?.remove?.(captionSceneIndex);};
   }
 
   function renderTiming(){
@@ -403,15 +403,15 @@
       section('이미지·영상 크기 / 위치',transform)+
       section('장면 관리',sceneActions);
     $('v42ReplaceBtn').onclick=()=>$('v42ReplaceInput').click();
-    $('v42ReplaceInput').onchange=async e=>{const f=e.target.files?.[0];if(f&&window.CutflowScene?.replace)await window.CutflowScene.replace(f);e.target.value='';requestRefresh(true);};
-    panel.querySelectorAll('[data-media-volume]').forEach(btn=>btn.onclick=()=>{window.CutflowScene?.update?.(index,{mediaVolume:Number(btn.dataset.mediaVolume)});requestRefresh(false);});
+    $('v42ReplaceInput').onchange=async e=>{const f=e.target.files?.[0];if(f&&window.CutflowScene?.replace)await window.CutflowScene.replace(f);e.target.value='';};
+    panel.querySelectorAll('[data-media-volume]').forEach(btn=>btn.onclick=()=>{window.CutflowScene?.update?.(index,{mediaVolume:Number(btn.dataset.mediaVolume)});});
     const transformPreview=$('v42TransformPreview');
     if(transformPreview){
       transformPreview.setAttribute('aria-pressed',String(mobileTransformMode&&mobileTransformScene===index));
       transformPreview.textContent=mobileTransformMode&&mobileTransformScene===index?'조절 모드 종료':'미리보기에서 조절';
       transformPreview.onclick=()=>setMobileTransformMode(!(mobileTransformMode&&mobileTransformScene===index),index);
     }
-    $('v42TransformReset').onclick=()=>{setMobileTransformMode(false,index);window.CutflowScene?.update?.(index,{transform:{scale:100,x:0,y:0}});requestRefresh(false);};
+    $('v42TransformReset').onclick=()=>{setMobileTransformMode(false,index);window.CutflowScene?.update?.(index,{transform:{scale:100,x:0,y:0}});};
     $('v42DeleteScene').onclick=()=>{if(window.CutflowScene?.confirmStructureEdit?.()===false)return;if(confirm(`장면 ${index+1}을 삭제할까요?`))window.CutflowScene?.remove?.(index);};
   }
   function autoSetupMarkup(map=proxyMap){
