@@ -19,6 +19,9 @@ assert.ok(js.includes("api()?.split?.(selected,cursor)"),'cursor split missing')
 assert.ok(js.includes("api()?.mergeNext?.(target)"),'merge previous workflow missing');
 assert.ok(js.includes("api()?.mergeNext?.(selected)"),'merge next workflow missing');
 assert.ok(js.includes("api()?.remove?.(selected)"),'caption delete workflow missing');
+assert.ok(js.includes('data-caption-batch-auto-wrap'),'batch auto-wrap action missing');
+assert.ok(js.includes('window.CutflowAutoBridge?.autoWrapCaptions'),'batch editor must reuse shared auto-wrap logic');
+assert.ok(css.includes('caption-batch-auto-wrap'),'batch auto-wrap control styling missing');
 assert.ok(app.includes('const firstDuration=Math.max(.1,Math.min(duration-.1,duration*ratio))')&&app.includes('splitAt=start+firstDuration'),'caption split must stay inside the existing time range');
 assert.ok(app.includes('const end=Number(next.end)')&&app.includes('c.end=end'),'caption merge must preserve the combined narration time range');
 assert.ok(desktop.includes('desktopBatchCaptions'),'desktop whole-caption entry missing');
