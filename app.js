@@ -218,10 +218,10 @@ function analyzeAudio(buffer){
   window.CutflowTimingData=timingAnalysis;
 }
 async function loadAudio(file){
-  if(!file)return;pause();loading++;stats();$('audioStatus').textContent='오디오 읽는 중…';let context;
+  if(!file)return;pause();loading++;stats();$('audioStatus').textContent='오디오 읽는 중…';let context,loaded=false;
   try{context=new AudioContext();const decoded=await context.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(decoded.duration)||decoded.duration<=0)throw new Error('오디오 길이를 확인할 수 없습니다.');
-    if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(file);audioBuffer=decoded;audioName=file.name;audioFile=file;$('narration').src=audioUrl;analyzeAudio(decoded);offset=0;toast('오디오를 불러왔습니다. 대본으로 자막 구간을 만들어 주세요.');
-  }catch{toast('오디오를 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');}finally{await context?.close();loading--;changed();waveform();$('audioInput').value='';}
+    if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(file);audioBuffer=decoded;audioName=file.name;audioFile=file;$('narration').src=audioUrl;analyzeAudio(decoded);offset=0;loaded=true;toast('오디오를 불러왔습니다. 대본으로 자막 구간을 만들어 주세요.');
+  }catch{toast('오디오를 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');}finally{await context?.close();loading--;if(loaded)changed();else stats();waveform();$('audioInput').value='';}
 }
 function scriptLines(text){let lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);if(lines.length===1)lines=lines[0].split(/(?<=[.!?。！？])\s+/).filter(Boolean);return lines.flatMap(line=>{if(line.length<=100)return [line];const result=[];while(line.length>100){let at=line.lastIndexOf(' ',90);if(at<30)at=80;result.push(line.slice(0,at).trim());line=line.slice(at).trim();}if(line)result.push(line);return result;});}
 function buildCues(){
