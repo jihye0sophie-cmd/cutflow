@@ -61,6 +61,7 @@
       motionOptions:Object.entries(motionLabels),transitionOptions:Object.entries(transitionLabels)
     };
   };
+  const emitSceneUpdated=index=>{const state=inspect(index);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state}}));return state;};
   const patchScene=(index,patch={})=>{
     const {item,scene}=sourceForIndex(index);if(!item||!scene||exporting||loading)return false;
     pause();if(cues.length)rememberCues();
@@ -85,8 +86,7 @@
     }
     if(cues.length)renderCues();else renderScenes();
     changed();
-    window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state:inspect(index)}}));
-    return inspect(index);
+    return emitSceneUpdated(index);
   };
 
   const snapAxis=(candidates,threshold)=>{
@@ -153,7 +153,7 @@
   const commitTransformGesture=index=>{
     if(index!==transformGestureIndex)return false;
     transformGestureIndex=-1;changed();
-    const state=inspect(index);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state}}));return state;
+    return emitSceneUpdated(index);
   };
   const cancelTransformGesture=()=>{transformGestureIndex=-1;};
 
@@ -245,9 +245,9 @@
             mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};
           if(addedIndex>=0&&addedIndex!==previousIndex)scenes.splice(scenes.indexOf(added),1);releaseScene(previous);
         }else{group.cueIndices.forEach(ci=>{cues[ci].sceneId=added.id;});}
-        renderCues();changed();this.select(sceneIndex);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:sceneIndex,state:inspect(sceneIndex)}}));return true;
+        renderCues();changed();this.select(sceneIndex);emitSceneUpdated(sceneIndex);return true;
       }else if(group){
-        const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target],sameVideo=previous.type==='video'&&added.type==='video';scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};scenes.splice(scenes.indexOf(added),1);releaseScene(previous);renderScenes();changed();this.select(target);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index:target,state:inspect(target)}}));return true;}
+        const target=scenes.findIndex(s=>s.id===group.id||s===group);if(target>=0){const previous=scenes[target],sameVideo=previous.type==='video'&&added.type==='video';scenes[target]={...added,id:previous.id,duration:previous.duration,transform:previous.transform,motion:previous.motion,transition:previous.transition,mediaVolume:sameVideo?previous.mediaVolume:added.mediaVolume,mediaMuted:sameVideo?previous.mediaMuted:added.mediaMuted,mediaFadeIn:sameVideo?previous.mediaFadeIn:added.mediaFadeIn,mediaFadeOut:sameVideo?previous.mediaFadeOut:added.mediaFadeOut};scenes.splice(scenes.indexOf(added),1);releaseScene(previous);renderScenes();changed();this.select(target);emitSceneUpdated(target);return true;}
       }
       return false;
     }
