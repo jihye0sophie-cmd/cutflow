@@ -61,11 +61,11 @@ const handheldA=context.CutRenderer.motion({motion:'handheld-subtle',duration:2}
 assert.deepEqual(handheldA,handheldB);assert.ok(Math.abs(handheldA.x)<.01&&Math.abs(handheldA.y)<.01&&handheldA.scale>1&&handheldA.scale<1.04);
 console.log('PASS: current/all caption patches preserve unrelated styles; random images avoid repeats and leave video unchanged; all camera paths are finite; vertical zoom-pan directions and deterministic subtle handheld motion are bounded; punch zoom holds.');
 run("cues=[{id:'r1',start:0,end:4,text:'가나다 라마바',colorRanges:CaptionRanges.apply('가나다 라마바',[],1,6,'#ff4949')},{id:'r2',start:4,end:6,text:'다음'}];renderCues()");
-run("$('cueList').onclick({target:{dataset:{action:'split'},closest(){return {dataset:{index:'0'}}}}})");
+run("window.CutflowCaption.split(0,3)");
 assert.equal(run('cues[0].text'),'가나다');assert.equal(run('cues[1].text'),'라마바');
 assert.equal(run('JSON.stringify(cues[0].colorRanges)'),JSON.stringify([{start:1,end:3,color:'#ff4949'}]));
 assert.equal(run('JSON.stringify(cues[1].colorRanges)'),JSON.stringify([{start:0,end:2,color:'#ff4949'}]));
-run("$('cueList').onclick({target:{dataset:{action:'merge'},closest(){return {dataset:{index:'0'}}}}})");
+run("window.CutflowCaption.mergeNext(0)");
 assert.equal(run('cues[0].colorRanges[1].start'),4);
 assert.equal(run("JSON.stringify(CaptionRanges.edit('가나다','앞가나다',[{start:1,end:3,color:'#ff4949'}]))"),JSON.stringify([{start:2,end:4,color:'#ff4949'}]));
 assert.equal(run("JSON.stringify(CaptionRanges.apply('가나다',[{start:0,end:3,color:'#ff4949'}],1,2,null))"),JSON.stringify([{start:0,end:1,color:'#ff4949'},{start:2,end:3,color:'#ff4949'}]));
