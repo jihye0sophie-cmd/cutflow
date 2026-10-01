@@ -132,3 +132,6 @@ body.desktop-editor .auto-script-column textarea{min-height:142px}
     border-radius:11px;
   }
 }
+
+.auto-media-mode-control{display:grid;grid-template-columns:140px minmax(0,320px);align-items:center;gap:10px;margin-bottom:12px;color:var(--studio-muted,#aeb3bc);font-size:12px}.auto-media-mode-control>span{font-weight:800;color:#fff}.auto-long-video-section{padding:12px;border:1px solid var(--studio-border,#30343b);border-radius:12px;background:#111418}.auto-long-video-pick{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);align-items:center;gap:10px}.auto-long-video-pick .button{width:100%}.auto-long-video-start{display:grid;grid-template-columns:160px minmax(100px,180px);align-items:center;gap:10px;margin-top:12px;color:var(--studio-muted,#aeb3bc);font-size:11px}.auto-long-video-start input{width:100%}
+@media(max-width:760px){.auto-media-mode-control,.auto-long-video-pick,.auto-long-video-start{grid-template-columns:1fr}.auto-media-mode-control{gap:6px}.auto-long-video-start{gap:5px}}
