@@ -122,6 +122,15 @@
     }
   };
 
+  let structureEditWarningShown=false;
+  const confirmStructureEdit=()=>{
+    const list=logicalItems();
+    if(!audioBuffer||list.every(item=>item.freeEdit)||structureEditWarningShown)return true;
+    const ok=confirm('이 프로젝트는 내레이션 기준으로 장면 시간이 생성되었습니다. 장면 순서 변경이나 삭제 시 내레이션과 장면 내용이 어긋날 수 있습니다. 계속할까요?');
+    if(ok)structureEditWarningShown=true;
+    return ok;
+  };
+
   let transformGestureIndex=-1;
   const beginTransformGesture=index=>{
     const {scene}=sourceForIndex(index);if(!scene||exporting||loading)return false;
@@ -150,6 +159,7 @@
   window.CutflowScene={
     items:logicalItems,
     state:inspect,
+    confirmStructureEdit,
     geometry(index,width,height){
       const {item,scene}=sourceForIndex(index);if(!item||!scene)return null;
       width=Math.max(1,Number(width)||1080);height=Math.max(1,Number(height)||1920);
