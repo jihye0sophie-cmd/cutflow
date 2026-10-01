@@ -34,6 +34,12 @@ This document is the maintenance baseline for the current stable editor. The goa
 
 Do not append a new versioned override block when changing an existing canonical rule. Edit the owning rule in place. Version query strings in `index.html` are only cache-busters, not architecture layers.
 
+## Render rules
+
+- `renderCues()` and `renderScenes()` render current state only. They must not assign media, mutate scene/caption model data, or commit project/history state.
+- Data preparation such as automatic cue-to-scene assignment happens explicitly at the operation that creates or restores data, before rendering.
+- A user edit should produce one model mutation path, one history commit, and the minimum required render/event refresh.
+
 ## Event rules
 
 - Core playback state is controlled through `window.CutflowPlayer`.
