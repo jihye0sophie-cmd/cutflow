@@ -235,6 +235,19 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
 }.v42-caption-actions .v42-btn{
   min-width:0;
   padding:7px 5px;
+}.v42-scene-caption-actions{
+  display:grid;
+  grid-template-columns:auto minmax(0,.72fr) minmax(0,1.45fr);
+  align-items:center;
+  gap:6px;
+  margin:6px 0 8px;
+}.v42-scene-caption-actions>span{
+  color:var(--v42-muted);
+  font-size:10px;
+  font-weight:800;
+}.v42-scene-caption-actions .v42-btn{
+  min-width:0;
+  padding:7px 5px;
 }.v42-caption-timing{
   margin-top:8px;
   padding:9px;
