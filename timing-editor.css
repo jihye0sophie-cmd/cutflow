@@ -22,4 +22,3 @@
 
 .timeline-selection-grid{grid-template-columns:1fr 1fr!important}
 .timeline-selection-grid>section{height:100%}
-@media(max-width:819px){.timeline-selection-grid{grid-template-columns:1fr!important}}
