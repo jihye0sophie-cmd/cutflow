@@ -38,6 +38,9 @@ assert(js.includes('autoSilencePreset')&&js.includes('v42AutoSilence'),'auto set
 assert(js.includes('scriptFileBtn')&&js.includes('audioBtn')&&js.includes('buildCuesBtn')&&js.includes('CutflowAutoBridge?.processNarration'),'script/voice workflow missing');
 assert(js.includes("field('Scale (%)','scale'")&&js.includes("field('Position X (%)','x'")&&js.includes("field('Position Y (%)','y'"),'direct media transform controls missing');
 assert(js.includes('id="v42TransformPreview"')&&js.includes('setMobileTransformMode')&&js.includes('previewTransformGesture'),'mobile preview drag/pinch transform missing');
+assert(js.includes("classList.toggle('v42-transform-interactive',mobileTransformMode)"),'mobile transform must explicitly unlock preview wrapper');
+assert(js.includes("style.setProperty('pointer-events',mobileTransformMode?'auto':''"),'mobile transform must explicitly unlock preview canvas');
+assert(js.includes('thresholdX:6*stage.width')&&js.includes('thresholdY:6*stage.height'),'mobile transform snap must use 6px display threshold');
 assert(js.indexOf("section('이미지·영상 크기 / 위치',transform)")<js.indexOf("section('장면 관리',sceneActions)"),'mobile scene management must stay last after transform controls');
 assert(js.includes("details('영상 고급 설정'")&&js.includes("field('시작 (초)','trimStart'")&&js.includes('data-media-field="mediaVolume"')&&js.includes("field('페이드 인 (초)','mediaFadeIn'"),'video advanced controls missing');
 assert(js.includes("advancedOpen=!!panel.querySelector('.v42-details[open]')")&&js.includes("'Trim · 원음 · Fade',advancedOpen"),'mobile video advanced open state must survive media rerenders');
@@ -51,6 +54,7 @@ assert(js.includes('bgmVolume')&&js.includes('bgmFadeIn')&&js.includes('bgmFadeO
 assert(css.includes('--v42-accent:var(--studio-accent,#f5e642)'),'Cutflow yellow accent token missing');
 assert(!css.includes('#d9ff38'),'old green accent must be removed');
 assert(css.includes('body.v42-mobile .v42-preview-card{')&&css.includes('position:relative!important'),'fixed-shell preview ownership missing');
+assert(css.includes('.v42-stage-wrap.v42-transform-interactive'),'mobile transform wrapper interaction CSS missing');
 assert(css.includes('body.v42-mobile .v42-tabs{')&&css.includes('bottom:calc(max(8px,env(safe-area-inset-bottom)) - 2px)!important'),'fixed rounded three-tab bar missing');
 assert(css.includes('background:rgba(18,19,22,.78)!important')&&css.includes('backdrop-filter:blur(20px) saturate(120%)'),'translucent mobile dock styling missing');
 assert(!css.includes('body.v42-mobile.v42-standalone .v42-tabs{\n  bottom:6px!important'),'legacy standalone dock override must stay removed');
