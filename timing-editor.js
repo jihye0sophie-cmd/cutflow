@@ -35,6 +35,11 @@
     for(let k=1;k<list.length;k++){const boundary=(list[k-1].end+list[k].start)/2;list[k-1].end=boundary;list[k].start=boundary;}
     updateOffsets({...item,start:newStart,end:newEnd});
   };
+  const commitTimingMutation=targetScene=>{
+    changed();renderCues();
+    if(Number.isInteger(targetScene)&&targetScene>=0)window.CutflowScene.select(targetScene);
+    else requestRenderAll();
+  };
   const setSceneBoundaryAt=(i,side,value,{commit=true}={})=>{
     const list=sceneItems(),item=list[i];if(!item||!cues.length)return false;
     value=num(value,side==='start'?item.start:item.end);
@@ -45,7 +50,7 @@
       const next=list[i+1],min=item.start+.1,max=next?next.end-.1:Math.max(item.start+.1,audioBuffer?.duration||item.end+60);
       value=clamp(value,min,max);rescaleGroup(item,item.start,value);if(next)rescaleGroup(next,value,next.end);
     }
-    if(commit){changed();renderCues();window.CutflowScene.select(Math.min(i,sceneItems().length-1));}
+    if(commit)commitTimingMutation(Math.min(i,sceneItems().length-1));
     return true;
   };
   const setSceneBoundary=(side,value,options)=>setSceneBoundaryAt(sceneIndex(),side,value,options);
@@ -54,7 +59,7 @@
     const pos=item.cueIndices.indexOf(leftIndex),rightIndex=item.cueIndices[pos+1];if(rightIndex==null)return false;
     const left=cues[leftIndex],right=cues[rightIndex],min=left.start+.08,max=right.end-.08;value=clamp(num(value,left.end),min,max);
     left.end=value;right.start=value;updateOffsets(item);
-    if(commit){changed();renderCues();const si=items.indexOf(item);if(si>=0)window.CutflowScene.select(si);}
+    if(commit)commitTimingMutation(items.indexOf(item));
     return true;
   };
   const setCaptionEdge=(cueIndex,side,value,{commit=true}={})=>{
@@ -67,7 +72,7 @@
       if(pos===item.cueIndices.length-1)setSceneBoundaryAt(si,'end',value,{commit:false});
       else setCaptionBoundary(cueIndex,value,{commit:false});
     }
-    if(commit){changed();renderCues();window.CutflowScene.select(Math.max(0,si));}
+    if(commit)commitTimingMutation(Math.max(0,si));
     return true;
   };
   const alignSelectedCaption=()=>{
@@ -82,7 +87,7 @@
     const endHit=nearestNarrationBoundary(live.end,endMin,Math.max(endMin,endMax),.8);
     if(endHit!=null){setCaptionEdge(sel.index,'end',endHit,{commit:false});snapped++;}
     const currentItem=sceneItems().find(g=>g?.cueIndices?.includes(sel.index));if(currentItem)updateOffsets(currentItem);
-    changed();renderCues();window.CutflowScene.select(Math.max(0,sceneForCueIndex(sel.index)));
+    commitTimingMutation(Math.max(0,sceneForCueIndex(sel.index)));
     toast(snapped?`선택 자막을 내레이션 쉼 ${snapped}곳에 맞췄습니다.`:'선택 자막 주변에서 가까운 쉼을 찾지 못해 현재 시간을 유지했습니다.');
   };
   const alignAllCaptions=()=>{
@@ -93,14 +98,14 @@
     if(!aligned?.boundaries||aligned.boundaries.length!==cues.length+1){toast('전체 자막을 내레이션에 맞추지 못했습니다.');return;}
     cues.forEach((cue,i)=>{cue.start=aligned.boundaries[i];cue.end=aligned.boundaries[i+1];});
     for(const group of sceneItems())updateOffsets(group);
-    changed();renderCues();window.CutflowScene.select(Math.min(sceneIndex(),Math.max(0,sceneItems().length-1)));
+    commitTimingMutation(Math.min(sceneIndex(),Math.max(0,sceneItems().length-1)));
     const matched=(aligned.pauseHits||0)+(aligned.valleyHits||0),fallback=aligned.fallbackCount||0;
     toast(matched?`전체 자막을 내레이션 쉼 ${matched}곳에 맞췄습니다.${fallback?` ${fallback}곳은 문장 길이 기준으로 보정했습니다.`:''}`:'전체 자막을 문장 길이 기준으로 다시 배분했습니다.');
   };
   const redistribute=alignSelectedCaption;
   const changeSelectedTime=(side,value)=>{
     const item=sceneItem(),sel=cueForSelection(item);if(!item||!sel)return;
-    rememberCues();setCaptionEdge(sel.index,side,value,{commit:false});changed();renderCues();window.CutflowScene.select(sceneForCueIndex(sel.index));
+    rememberCues();setCaptionEdge(sel.index,side,value,{commit:false});commitTimingMutation(sceneForCueIndex(sel.index));
   };
   const timelineRanges=()=>{
     const list=sceneItems();if(cues?.length)return list;
@@ -361,7 +366,7 @@
       if(desktopTiming){syncSelectedCueToTime(t);requestRenderAll();}
       return;
     }
-    const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));changed();drag=null;renderCues();syncSelectedCueToScene(idx);CutflowScene.select(idx);
+    const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));drag=null;syncSelectedCueToScene(idx);commitTimingMutation(idx);
   }
   document.addEventListener('click',handleAction);
   document.addEventListener('change',handleChange);
