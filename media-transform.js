@@ -9,6 +9,14 @@
  <p>조절 모드: 드래그로 이동 · 두 손가락으로 확대/축소<br>X/Y는 영상 영역 기준 비율입니다. 현재 장면에만 적용됩니다.</p>`;
  $('sceneList').before(panel);
  const frame=document.createElement('div');frame.className='media-transform-frame';frame.hidden=true;wrap.append(frame);
+ const guideX=document.createElement('div'),guideY=document.createElement('div');
+ guideX.className='media-transform-guide vertical';guideY.className='media-transform-guide horizontal';guideX.hidden=true;guideY.hidden=true;wrap.append(guideX,guideY);
+ const hideGuides=()=>{guideX.hidden=true;guideY.hidden=true;};
+ function showGuides(guides){
+  const v=viewport(),b=wrap.getBoundingClientRect();
+  if(guides?.x){guideX.hidden=false;guideX.style.left=`${v.x-b.left+guides.x.position*v.w/stage.width}px`;guideX.style.top=`${v.y-b.top}px`;guideX.style.height=`${v.h}px`;}else guideX.hidden=true;
+  if(guides?.y){guideY.hidden=false;guideY.style.top=`${v.y-b.top+guides.y.position*v.h/stage.height}px`;guideY.style.left=`${v.x-b.left}px`;guideY.style.width=`${v.w}px`;}else guideY.hidden=true;
+ }
  let enabled=false,identity=null,gesture=null,inputSaved=false;
  const points=new Map(),mode=$('transformMode');
  const fields={scale:$('transformScale'),x:$('transformX'),y:$('transformY')};
@@ -17,7 +25,7 @@
  function save(){if(cues.length)rememberCues();}
  function write(value){const {item}=state();if(!item||exporting)return;item.transform=CutRenderer.transform(value);changed();syncValues();}
  function syncValues(){const v=CutRenderer.transform(state().scene?.transform);for(const k in fields)if(document.activeElement!==fields[k])fields[k].value=+(v[k]*100).toFixed(2);$('transformRange').value=v.scale*100;}
- function stop(){points.clear();gesture=null;}
+ function stop(){points.clear();gesture=null;hideGuides();}
  mode.onclick=()=>{enabled=!enabled;mode.setAttribute('aria-pressed',String(enabled));if(enabled)pause();stop();};
  $('transformReset').onclick=()=>{if(exporting)return;pause();save();write({scale:1,x:0,y:0});};
  for(const [key,input] of [...Object.entries(fields),['scale',$('transformRange')]]){
@@ -45,9 +53,15 @@
   const bx=g.box.x+g.box.w/2,by=g.box.y+g.box.h/2;
   const candidate=CutRenderer.mediaGeometry({...state().scene,transform:{...g.base,scale}},state().loc.elapsed,g.rect,$('layoutSelect').value==='fullscreen'?'cover':$('fitSelect').value);
   // Keep the pinched image point under the moving two-finger centroid.
-  write({scale,x:g.base.x+(c.x-g.center.x+(g.center.x-bx)*(1-r)+bx-candidate.x-candidate.w/2)/g.rect.w,y:g.base.y+(c.y-g.center.y+(g.center.y-by)*(1-r)+by-candidate.y-candidate.h/2)/g.rect.h});
+  let proposed={scale,x:g.base.x+(c.x-g.center.x+(g.center.x-bx)*(1-r)+bx-candidate.x-candidate.w/2)/g.rect.w,y:g.base.y+(c.y-g.center.y+(g.center.y-by)*(1-r)+by-candidate.y-candidate.h/2)/g.rect.h};
+  const proposedBox=CutRenderer.mediaGeometry({...state().scene,transform:proposed},state().loc.elapsed,g.rect,$('layoutSelect').value==='fullscreen'?'cover':$('fitSelect').value),snapApi=window.CutflowTransformSnap;
+  if(proposedBox&&snapApi?.apply){
+   const v=viewport(),snapped=snapApi.apply({rect:g.rect,box:proposedBox,transform:proposed,unit:'normalized',thresholdX:10*stage.width/Math.max(1,v.w),thresholdY:10*stage.height/Math.max(1,v.h)});
+   proposed=snapped.transform;showGuides(snapped.guides);
+  }else hideGuides();
+  write(proposed);
  });
- function release(e){if(!points.has(e.pointerId))return;points.delete(e.pointerId);if(points.size)rebase();else gesture=null;}
+ function release(e){if(!points.has(e.pointerId))return;points.delete(e.pointerId);if(points.size)rebase();else{gesture=null;hideGuides();}}
  stage.addEventListener('pointerup',release);stage.addEventListener('pointercancel',()=>stop());stage.addEventListener('lostpointercapture',release);
  // Capture before the pre-existing touch swipe handlers. Outside this mode they are unchanged.
  for(const name of ['touchstart','touchmove','touchend','touchcancel'])stage.addEventListener(name,e=>{if(allowed()){e.stopImmediatePropagation();if(e.cancelable)e.preventDefault();}},{capture:true,passive:false});
