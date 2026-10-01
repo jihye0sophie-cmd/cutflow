@@ -237,7 +237,7 @@ assert(js.includes('const refreshEditorState=()=>')&&js.includes("['cutflow-scen
 assert(!js.includes("if(api.split(index,cursor))requestRefresh(true)")&&!js.includes("CutflowScene?.select?.(i);requestRefresh(true)"),'mobile core scene/caption actions must not trigger duplicate refreshes');
 assert(js.includes('function ensureMirrorStage()')&&js.includes('if(mobileActive||fullOpen)ensureMirrorStage();'),'mobile preview mirror must stop when inactive');
 assert(js.includes('restoredIndex=window.CutflowScene?.index?.()??0'),'mobile project restore must select the scene at the restored playhead');
-assert(desktop.includes('function requestSync()')&&desktop.includes('new MutationObserver(requestSync)'),'desktop observer refreshes must be coalesced');
+assert(desktop.includes('function requestSync()')&&desktop.includes('requestAnimationFrame(()=>{syncQueued=false;sync();})')&&desktop.includes('new MutationObserver(requestSync)'),'desktop observer refreshes must be coalesced to one animation frame');
 assert(js.includes('data-media-volume'),'mobile video volume presets missing');
 assert(css.includes('.v42-media-volume-presets'),'mobile video volume preset styling missing');
 console.log('Cutflow v42.6.4 image video tab parity checks passed');
