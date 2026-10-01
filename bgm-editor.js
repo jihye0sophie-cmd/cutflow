@@ -21,7 +21,7 @@ $('bgmRemove').onclick=()=>{pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFil
 function bgmSnapshot(){return bgmBuffer?{file:bgmFile,name:bgmName,start:Number($('bgmStart').value)||0,volume:Number($('bgmVolume').value)||0,repeat:$('bgmRepeat').value,fadeIn:Number($('bgmFadeIn').value)||0,fadeOut:Number($('bgmFadeOut').value)||0}:null;}
 async function restoreBgmSnapshot(snapshot,{silent=false}={}){
   bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;
-  if(!snapshot?.file){CutAudio.invalidate();syncBgm();return;}
+  if(!snapshot?.file){CutAudio.invalidate();syncBgm({emit:!silent});return;}
   let ctx;
   try{
     const file=snapshot.file instanceof File?snapshot.file:new File([snapshot.file],snapshot.name||'bgm.wav',{type:snapshot.file.type||'audio/wav'});
@@ -29,8 +29,8 @@ async function restoreBgmSnapshot(snapshot,{silent=false}={}){
     bgmBuffer=buffer;bgmFile=file;bgmName=snapshot.name||file.name;
     $('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);$('bgmStart').value=String(Math.min(Math.max(0,Number(snapshot.start)||0),Math.max(0,buffer.duration-.01)));
     $('bgmVolume').value=String(Math.max(0,Math.min(100,Number(snapshot.volume)||0)));$('bgmRepeat').value=snapshot.repeat==='loop'?'loop':'stop';$('bgmFadeIn').value=String(Math.max(0,Math.min(30,Number(snapshot.fadeIn)||0)));$('bgmFadeOut').value=String(Math.max(0,Math.min(30,Number(snapshot.fadeOut)||0)));
-    CutAudio.invalidate();syncBgm();if(!silent)toast('BGM을 복원했습니다.');
-  }catch(error){bgmBuffer=null;bgmName='';bgmFile=null;syncBgm();throw new Error('저장된 BGM을 복원하지 못했습니다.');}
+    CutAudio.invalidate();syncBgm({emit:!silent});if(!silent)toast('BGM을 복원했습니다.');
+  }catch(error){bgmBuffer=null;bgmName='';bgmFile=null;syncBgm({emit:!silent});throw new Error('저장된 BGM을 복원하지 못했습니다.');}
   finally{await ctx?.close();}
 }
 async function loadBgmFile(file){
