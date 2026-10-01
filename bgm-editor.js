@@ -13,7 +13,7 @@ $('bgmBtn').onclick=()=>$('bgmInput').click();
 $('bgmInput').onchange=async e=>{const file=e.target.files[0];if(!file)return;pause();const id=++bgmLoadId;loading++;stats();$('bgmStatus').textContent='음악 읽는 중…';let ctx,loaded=false;
   try{ctx=new AudioContext();const buffer=await ctx.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(buffer.duration)||buffer.duration<=.01)throw new Error();if(id!==bgmLoadId)return;bgmBuffer=buffer;bgmName=file.name;bgmFile=file;$('bgmStart').value='0';$('bgmStart').max=Math.max(0,buffer.duration-.01).toFixed(2);CutAudio.invalidate();loaded=true;toast('BGM을 추가했습니다. 미리보기 재생으로 함께 들어보세요.');}
   catch{toast('음악을 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');}
-  finally{await ctx?.close();loading--;e.target.value='';if(loaded)changed();else stats();syncBgm();}
+  finally{await ctx?.close();loading--;e.target.value='';if(loaded)changed({syncBgm:false});else stats();syncBgm();}
 };
 $('bgmRemove').onclick=()=>{pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed({syncBgm:false});syncBgm();};
 ['bgmStart','bgmVolume','bgmRepeat','bgmFadeIn','bgmFadeOut'].forEach(id=>$(id).addEventListener('input',()=>{pause();const input=$(id);if(id==='bgmStart')input.value=String(Math.min(Math.max(0,Number(input.value)||0),Math.max(0,(bgmBuffer?.duration||0)-.01)));if(id==='bgmFadeIn'||id==='bgmFadeOut')input.value=String(Math.max(0,Math.min(30,Number(input.value)||0)));CutAudio.invalidate();changed({syncBgm:false});syncBgm();}));
