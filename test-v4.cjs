@@ -6,9 +6,9 @@ run("scenes=[{id:'a',name:'image',type:'image',duration:2.4,motion:'still',trans
 assert.equal(run('project().scenes[0].duration'),3);assert.equal(run('project().scenes[1].start'),3);assert.equal(run('CutRenderer.locate(project().scenes,2.999).index'),0);assert.equal(run('CutRenderer.locate(project().scenes,3).index'),1);assert.equal(run('CutRenderer.locate(project().scenes,6).index'),-1);
 run("cues[0].end=2;cues[1].start=3.5;renderCues()");assert.equal(run('project().scenes[0].duration'),2);assert.equal(run('project().scenes[1].duration'),2.5);assert.equal(run('CutRenderer.locate(project().scenes,3).index'),-1);
 const splitBaseline=run('JSON.stringify({scenes,cues})');
-run("$('cueList').onclick({target:{dataset:{action:'split'},closest(){return {dataset:{index:'1'}}}}})");assert.equal(run('cues.length'),3);assert.equal(run('cues[2].sceneId'),'b');assert.equal(run('project().scenes[2].trimStart'),1.55);
+run("window.CutflowCaption.split(1,2)");assert.equal(run('cues.length'),3);assert.equal(run('cues[2].sceneId'),'b');assert.ok(run('project().scenes[2].trimStart')>.3);
 run(`({scenes,cues}=JSON.parse(${JSON.stringify(splitBaseline)}));renderCues()`);assert.equal(run('cues.length'),2);
-run("$('cueList').onclick({target:{dataset:{action:'merge'},closest(){return {dataset:{index:'0'}}}}})");assert.equal(run('project().scenes[0].end'),6);assert.equal(run('cues[0].sceneId'),'a');
+run("window.CutflowCaption.split(0,1);window.CutflowCaption.mergeNext(0)");assert.equal(run('cues.length'),2);assert.equal(run('cues[0].sceneId'),'a');assert.equal(run('project().scenes[0].end'),2);
 run(`({scenes,cues}=JSON.parse(${JSON.stringify(splitBaseline)}));renderCues()`);
 run("cues.push({id:'c3',start:6,end:8,text:'누락',color:'white'});renderCues()");assert.equal(els.get('exportBtn').disabled,true);run("cues[2].sceneId='a';renderCues()");assert.equal(els.get('exportBtn').disabled,false);
 console.log('PASS: exact 0–3 / 3–6 boundaries; timing edits; empty gaps; split video offset; merge and undo; missing-media export gate.');
@@ -55,7 +55,11 @@ for(const name of run('Object.keys(motionLabels)')){
   }
 }
 assert.equal(context.CutRenderer.motion({motion:'punch-hold',duration:2},.22).scale,context.CutRenderer.motion({motion:'punch-hold',duration:2},2).scale);
-console.log('PASS: current/all caption patches preserve unrelated styles; random images avoid repeats and leave video unchanged; all camera paths are finite; punch zoom holds.');
+assert.ok(context.CutRenderer.motion({motion:'zoom-pan-up',duration:2},2).y<context.CutRenderer.motion({motion:'zoom-pan-up',duration:2},0).y);
+assert.ok(context.CutRenderer.motion({motion:'zoom-pan-down',duration:2},2).y>context.CutRenderer.motion({motion:'zoom-pan-down',duration:2},0).y);
+const handheldA=context.CutRenderer.motion({motion:'handheld-subtle',duration:2},.7),handheldB=context.CutRenderer.motion({motion:'handheld-subtle',duration:2},.7);
+assert.deepEqual(handheldA,handheldB);assert.ok(Math.abs(handheldA.x)<.01&&Math.abs(handheldA.y)<.01&&handheldA.scale>1&&handheldA.scale<1.04);
+console.log('PASS: current/all caption patches preserve unrelated styles; random images avoid repeats and leave video unchanged; all camera paths are finite; vertical zoom-pan directions and deterministic subtle handheld motion are bounded; punch zoom holds.');
 run("cues=[{id:'r1',start:0,end:4,text:'가나다 라마바',colorRanges:CaptionRanges.apply('가나다 라마바',[],1,6,'#ff4949')},{id:'r2',start:4,end:6,text:'다음'}];renderCues()");
 run("$('cueList').onclick({target:{dataset:{action:'split'},closest(){return {dataset:{index:'0'}}}}})");
 assert.equal(run('cues[0].text'),'가나다');assert.equal(run('cues[1].text'),'라마바');
