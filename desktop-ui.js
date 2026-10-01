@@ -1,7 +1,7 @@
 /* Desktop presentation only. Reparents original controls; no copied editing model. */
 (()=>{
  const q=s=>document.querySelector(s),mq=matchMedia('(min-width:820px)'),slots=new Map();
- let enabled=false,mode='caption',captionOpen=false,signature='',lastIndex=-1,sceneEdit=false,dragIndex=null,narrationSceneWarningShown=false,sceneFollowRaf=0;
+ let enabled=false,mode='caption',captionOpen=false,signature='',lastIndex=-1,sceneEdit=false,dragIndex=null,sceneFollowRaf=0;
  const mobileMode=()=>!!(window.CutflowUI?.mobileActive||window.CutflowUI?.isMobileDevice?.());
  const shell=document.createElement('section');shell.id='desktopStudio';shell.className='desktop-only';
  shell.innerHTML=`<div class="desktop-workspace"><div id="desktopPreview"></div><section id="desktopEditor"><header class="desktop-current"><div><span>CURRENT SCENE</span><h1 id="desktopSceneTitle">장면을 추가하세요</h1></div><div class="desktop-current-actions"><p id="desktopSceneTime"></p></div></header><nav id="desktopTabs" aria-label="장면 편집"><button data-tab="caption" aria-pressed="true">자막</button><button data-tab="image" aria-pressed="false">이미지·영상</button><button data-tab="timing" aria-pressed="false">정밀 타이밍</button></nav><section id="desktopTiming" class="timing-panel"><div class="timing-track"></div><div class="timing-controls"></div></section><div id="desktopEditorScroll"><button id="desktopBatchCaptions" class="desktop-caption-batch-open" type="button">전체 자막 편집</button><button id="desktopReplace">이미지·영상 교체</button><div id="desktopEditorBody"></div><section id="desktopMediaDetails" class="desktop-media-details"><div id="desktopMediaDetailsBody"></div></section><div id="desktopSceneActions" class="desktop-scene-tools"><strong>장면 관리</strong><div><button id="desktopSceneDelete" type="button" class="danger">장면 삭제</button></div></div><div id="desktopCaption"></div></div></section></div><section id="desktopScenes"><header><strong id="desktopSceneTotal">전체 장면 0</strong><div class="desktop-scene-head-actions"><button id="desktopSceneEdit" type="button" aria-pressed="false">순서 편집</button><button id="desktopAdd">+ 장면 추가</button></div></header><div class="desktop-strip-wrap"><button id="desktopStripPrev" aria-label="이전 썸네일">‹</button><div id="desktopStrip" aria-label="전체 장면"></div><button id="desktopStripNext" aria-label="다음 썸네일">›</button></div></section>`;q('.app-shell').prepend(shell);
@@ -65,11 +65,6 @@ function sync(){
   window.syncCaptionStrokeUI?.();
   $('desktopTabs').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===mode)));
  }
- function confirmNarrationSceneEdit(){
-  const list=CutflowScene.items();if(!audioBuffer||list.every(item=>item.freeEdit)||narrationSceneWarningShown)return true;
-  const ok=confirm('이 프로젝트는 내레이션 기준으로 장면 시간이 생성되었습니다. 장면 순서 변경이나 삭제 시 내레이션과 장면 내용이 어긋날 수 있습니다. 계속할까요?');
-  if(ok)narrationSceneWarningShown=true;return ok;
- }
  function sceneStatus(item){const count=(item?.cueIndices||[]).length;const motion={zoomIn:'Z+',zoomOut:'Z−',panLeft:'←',panRight:'→',panUp:'↑',panDown:'↓',still:'●'}[item?.motion]||'';return `${count>1?`<span class="scene-status-badge caption-count">${count}</span>`:''}${motion?`<span class="scene-status-badge motion-state">${motion}</span>`:''}`;}
  function clearDragState(){dragIndex=null;$('desktopStrip').querySelectorAll('.dragging,.drop-target').forEach(el=>el.classList.remove('dragging','drop-target'));}
  $('desktopSettingsTop').onclick=()=>dialog.showModal();$('desktopOpen').onclick=()=>$('projectOpenBtn').click();$('desktopSave').onclick=()=>$('projectSaveBtn').click();$('desktopProjectClose').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
@@ -81,15 +76,15 @@ function sync(){
  $('desktopBatchCaptions').onclick=()=>window.CutflowCaptionBatch?.open?.(window.CutflowCaption?.currentIndex?.());
   new MutationObserver(()=>{if(enabled)requestAnimationFrame(()=>{stabilizeImageLayout();sync();});}).observe($('sceneList'),{childList:true,subtree:false});
  $('desktopPrev').onclick=()=>CutflowScene.select(CutflowScene.index()-1);$('desktopNext').onclick=()=>CutflowScene.select(CutflowScene.index()+1);
- $('desktopSceneDelete').onclick=()=>{const at=CutflowScene.index();if(!confirmNarrationSceneEdit())return;if(confirm(`장면 ${at+1}을 삭제할까요?`)){CutflowScene.remove(at);signature='';sync();}};
+ $('desktopSceneDelete').onclick=()=>{const at=CutflowScene.index();if(!CutflowScene.confirmStructureEdit?.()!==false)return;if(confirm(`장면 ${at+1}을 삭제할까요?`)){CutflowScene.remove(at);signature='';sync();}};
  $('desktopStrip').onclick=e=>{
-  const move=e.target.closest('[data-scene-move]');if(move){const from=Number(move.dataset.index),to=from+Number(move.dataset.sceneMove);if(confirmNarrationSceneEdit()&&CutflowScene.move(from,to)){signature='';sync();}return;}
-  const del=e.target.closest('[data-scene-delete]');if(del){const at=Number(del.dataset.sceneDelete);if(!confirmNarrationSceneEdit())return;if(confirm(`장면 ${at+1}을 삭제할까요? 삭제 후 뒤 장면의 시간이 자동으로 다시 계산됩니다.`)){CutflowScene.remove(at);signature='';sync();}return;}
+  const move=e.target.closest('[data-scene-move]');if(move){const from=Number(move.dataset.index),to=from+Number(move.dataset.sceneMove);if(CutflowScene.confirmStructureEdit?.()!==false&&CutflowScene.move(from,to)){signature='';sync();}return;}
+  const del=e.target.closest('[data-scene-delete]');if(del){const at=Number(del.dataset.sceneDelete);if(!CutflowScene.confirmStructureEdit?.()!==false)return;if(confirm(`장면 ${at+1}을 삭제할까요? 삭제 후 뒤 장면의 시간이 자동으로 다시 계산됩니다.`)){CutflowScene.remove(at);signature='';sync();}return;}
   const b=e.target.closest('[data-scene]');if(b)CutflowScene.select(Number(b.dataset.scene));
  };
  $('desktopStrip').addEventListener('dragstart',e=>{if(!sceneEdit)return;const item=e.target.closest('[data-desktop-scene-item]');if(!item)return;dragIndex=Number(item.dataset.desktopSceneItem);item.classList.add('dragging');e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',String(dragIndex));}catch{}});
  $('desktopStrip').addEventListener('dragover',e=>{if(!sceneEdit||dragIndex===null)return;const item=e.target.closest('[data-desktop-scene-item]');if(!item)return;e.preventDefault();$('desktopStrip').querySelectorAll('.drop-target').forEach(el=>el.classList.remove('drop-target'));if(Number(item.dataset.desktopSceneItem)!==dragIndex)item.classList.add('drop-target');e.dataTransfer.dropEffect='move';});
- $('desktopStrip').addEventListener('drop',e=>{if(!sceneEdit||dragIndex===null)return;const item=e.target.closest('[data-desktop-scene-item]');if(!item){clearDragState();return;}e.preventDefault();const to=Number(item.dataset.desktopSceneItem),from=dragIndex;clearDragState();if(from!==to&&confirmNarrationSceneEdit()&&CutflowScene.move(from,to)){signature='';sync();}});
+ $('desktopStrip').addEventListener('drop',e=>{if(!sceneEdit||dragIndex===null)return;const item=e.target.closest('[data-desktop-scene-item]');if(!item){clearDragState();return;}e.preventDefault();const to=Number(item.dataset.desktopSceneItem),from=dragIndex;clearDragState();if(from!==to&&CutflowScene.confirmStructureEdit?.()!==false&&CutflowScene.move(from,to)){signature='';sync();}});
  $('desktopStrip').addEventListener('dragend',clearDragState);
  for(const [id,d] of [['desktopStripPrev',-1],['desktopStripNext',1]])$(id).onclick=()=>$('desktopStrip').scrollBy({left:d*$('desktopStrip').clientWidth*.7,behavior:'smooth'});
  $('desktopStrip').addEventListener('wheel',e=>{const s=$('desktopStrip');if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&s.scrollWidth>s.clientWidth){const before=s.scrollLeft;s.scrollLeft+=e.deltaY;if(s.scrollLeft!==before)e.preventDefault();}},{passive:false});
