@@ -684,7 +684,7 @@
   app.addEventListener('click',e=>{
     const click=e.target.closest('[data-click]');if(click){const source=$(click.dataset.click),fileTarget=fileTargetFor(source);if(fileTarget&&openFileTarget(fileTarget))return;source?.click();return;}
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;proxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>requestRefresh(true),0);return;}
-    const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);setMobileTransformMode(false);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);requestRefresh(true);return;}
+    const scene=e.target.closest('[data-scene]');if(scene){const i=Number(scene.dataset.scene);setMobileTransformMode(false);lastSceneId=null;sceneIndex=i;window.CutflowScene?.select?.(i);return;}
   });
   panel.addEventListener('input',e=>{if(e.target.dataset.bgmField&&['volume'].includes(e.target.dataset.bgmField)){applyBgmField(e.target);return;}if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
   panel.addEventListener('change',e=>{if(e.target.dataset.bgmField){applyBgmField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.composeField){applyComposeField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);setTimeout(()=>requestRefresh(false),0);return;}const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});setTimeout(()=>requestRefresh(false),0);return;}if(e.target.dataset.mediaField){applyMediaField(e.target);setTimeout(()=>requestRefresh(false),0);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
@@ -773,7 +773,6 @@
     window.CutflowPlayer?.pause?.();
     const {items,index}=currentScene();
     if(items.length)window.CutflowScene?.select?.(Math.max(0,Math.min(items.length-1,index+delta)));
-    requestAnimationFrame(()=>{syncPlayer();requestRefresh(true);});
   };
   bindMobileTap($('v42PrevScene'),()=>selectAdjacentScene(-1));
   bindMobileTap($('v42NextScene'),()=>selectAdjacentScene(1));
