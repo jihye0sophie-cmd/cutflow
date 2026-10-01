@@ -8,7 +8,7 @@ assert.equal(run('project().scenes[0].transform.scale'),1.3);
 assert.equal(run('project().scenes[1].transform.scale'),1.3);
 run("scenes[0].motion='zoom-in';jump(3);jump(0)");
 assert.equal(run('project().scenes[0].transform.x'),.12);
-run("$('cueList').onclick({target:{dataset:{action:'split'},closest(){return {dataset:{index:'0'},querySelector(){return null}}}}})");
+run("window.CutflowCaption.split(0,1)");
 assert.equal(run('cues.length'),3);
 assert.equal(run('project().scenes.filter(s=>s.sourceIndex===0).every(s=>s.transform.scale===1.3)'),true);
 assert.equal(run('cues.every(c=>c.transform===undefined)'),true);
