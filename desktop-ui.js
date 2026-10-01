@@ -93,9 +93,9 @@ function sync(){
  $('cueList').addEventListener('click',e=>{if(!enabled)return;const b=e.target.closest('[data-action="style"],[data-action="jump"]');if(!b)return;const cueIndex=Number(b.closest('[data-index]').dataset.index),sceneIndex=CutflowScene.sceneIndexForCue(cueIndex);if(sceneIndex>=0){lastIndex=sceneIndex;window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:sceneIndex}));}if(b.dataset.action==='style'){mode='caption';requestSync();}},true);
  window.addEventListener('cutflow-open-timing',()=>{if(!enabled)return;mode='timing';sync();requestAnimationFrame(()=>$('desktopTiming')?.scrollIntoView({block:'nearest'}));});
  const syncDesktopMode=()=>queueMicrotask(()=>mobileMode()?deactivate():(mq.matches?activate():deactivate()));
- window.addEventListener('cutflow-scene',()=>{requestSync();if(mode==='timing')requestAnimationFrame(()=>window.CutflowTiming?.render?.());});window.addEventListener('cutflow-mobile-activate',deactivate);window.addEventListener('cutflow-mobile-deactivate',syncDesktopMode);
+ window.addEventListener('cutflow-scene',requestSync);window.addEventListener('cutflow-mobile-activate',deactivate);window.addEventListener('cutflow-mobile-deactivate',syncDesktopMode);
  if(typeof mq.addEventListener==='function')mq.addEventListener('change',syncDesktopMode);else if(typeof mq.addListener==='function')mq.addListener(syncDesktopMode);
  for(const id of ['cueList','sceneList'])new MutationObserver(requestSync).observe($(id),{childList:true});
  window.addEventListener('cutflow-caption-active',requestSync);
- new MutationObserver(requestSync).observe($('exportBtn'),{attributes:true,attributeFilter:['disabled']});syncDesktopMode();requestAnimationFrame(()=>revealCutflowUI());
+ for(const eventName of ['cutflow-export-start','cutflow-export-progress','cutflow-export-complete','cutflow-export-error','cutflow-export-cancelled'])window.addEventListener(eventName,requestSync);syncDesktopMode();requestAnimationFrame(()=>revealCutflowUI());
 })();
