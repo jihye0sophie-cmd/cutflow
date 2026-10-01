@@ -872,7 +872,7 @@
   window.addEventListener('cutflow-project-restored',syncAfterProjectRestore);
   window.addEventListener('cutflow-project-status',()=>requestRefresh(false));
   window.addEventListener('cutflow-history-updated',()=>{syncPreviewHistory();if(settingsDialog.open)syncSettingsProxyState();});
-  for(const id of ['scriptInput','projectCaptionWrap','audioInput','scriptFile','bgmInput','autoNarration','autoGrids','autoSingles','autoBgm']){
+  for(const id of ['scriptInput','projectCaptionWrap','audioInput','scriptFile','bgmInput']){
     const el=$(id);if(!el)continue;
     el.addEventListener(id==='scriptInput'||id==='projectCaptionWrap'?'input':'change',()=>setTimeout(()=>{requestRefresh(false);if(settingsDialog.open){syncSettingsProxyState();syncSettingsGridMirror();}},id==='audioInput'?350:40));
   }
