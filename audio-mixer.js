@@ -18,10 +18,10 @@ window.CutAudio=(()=>{
     const key=JSON.stringify({...s,buffer:null});
     if(cached?.voice===project.audioBuffer&&cached?.music===s.buffer&&cached.key===key)return cached.promise;
     const entry={voice:project.audioBuffer,music:s.buffer,key};
-    entry.promise=(async()=>{const ctx=new OfflineAudioContext(2,Math.ceil(s.duration*48000),48000);schedule(ctx,project);const buffer=await ctx.startRendering();let peak=1;for(let c=0;c<buffer.numberOfChannels;c++){const data=buffer.getChannelData(c);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}if(peak>1)for(let c=0;c<buffer.numberOfChannels;c++){const data=buffer.getChannelData(c);for(let i=0;i<data.length;i++)data[i]/=peak;}return buffer;})();
+    entry.promise=(async()=>{const OfflineCtx=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!OfflineCtx)throw new Error('이 브라우저는 오디오 믹싱을 지원하지 않습니다.');const ctx=new OfflineCtx(2,Math.ceil(s.duration*48000),48000);schedule(ctx,project);const buffer=await ctx.startRendering();let peak=1;for(let c=0;c<buffer.numberOfChannels;c++){const data=buffer.getChannelData(c);for(let i=0;i<data.length;i++)peak=Math.max(peak,Math.abs(data[i]));}if(peak>1)for(let c=0;c<buffer.numberOfChannels;c++){const data=buffer.getChannelData(c);for(let i=0;i<data.length;i++)data[i]/=peak;}return buffer;})();
     cached=entry;try{return await entry.promise;}catch(error){if(cached===entry)cached=null;throw error;}
   }
-  async function unlock(){context??=new AudioContext();await context.resume();}
+  async function unlock(){const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('이 브라우저는 오디오 재생을 지원하지 않습니다.');context??=new AudioCtx();if(context.state==='suspended')await context.resume();}
   function stop(){if(source){try{source.stop();}catch{}source.disconnect();source=null;}}
   function start(buffer,offset){stop();clockStart=context.currentTime;if(buffer&&offset<buffer.duration){source=context.createBufferSource();source.buffer=buffer;source.connect(context.destination);source.start(0,offset);}}
   const elapsed=()=>context?Math.max(0,context.currentTime-clockStart):0;
