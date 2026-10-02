@@ -288,6 +288,12 @@ assert(js.includes("details('영상 고급 설정'"),'video advanced settings sh
 assert(js.includes("section('장면 관리'"),'mobile scene management section missing');
 assert(js.includes("section('이미지·영상 크기 / 위치',transform)"),'mobile transform controls should stay always visible like desktop');
 assert(js.includes('v42TransformReset'),'mobile transform reset missing');
+assert(js.includes("applyMediaField(e.target,{live:true})")&&js.includes("CutflowScene?.commitLive?.(currentScene().index)"),'mobile media live fields must commit as one undo action');
+assert(sceneUi.includes('commitLive:commitSceneLive')&&sceneUi.includes('options.live'),'scene live media edit bridge missing');
+assert(sceneUi.includes("beginScoped?.('이미지·영상 교체','timeline')")&&history.includes('cancelPending'),'media replacement must have explicit scoped undo with failure cleanup');
+assert(app.includes("setAttribute('webkit-playsinline','')")&&app.includes('defaultMuted=true'),'iPhone video element compatibility missing');
+assert(js.includes("const numeric=['scale','x','y','trimStart','trimEnd','mediaVolume','mediaFadeIn','mediaFadeOut']"),'media numeric empty-value guard missing');
+assert(css.includes('#v42Panel[data-active-tab="media"] input[type="range"]'),'iPhone media range touch styling missing');
 assert(js.includes('renderForce=renderForce||!!force')&&js.includes('if(renderQueued)return'),'mobile refresh requests must be coalesced');
 assert(js.includes('const refreshEditorState=()=>')&&js.includes("['cutflow-scene-updated','cutflow-caption-updated']"),'mobile core update events must share one refresh path');
 assert(!js.includes("if(api.split(index,cursor))requestRefresh(true)")&&!js.includes("CutflowScene?.select?.(i);requestRefresh(true)"),'mobile core scene/caption actions must not trigger duplicate refreshes');
