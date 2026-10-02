@@ -1185,7 +1185,7 @@ html,body,body.v42-mobile,body.v42-mobile #mobileAppV42{
   grid-template-rows:auto minmax(0,1fr) auto!important;
   grid-template-columns:1fr!important;
   width:100vw!important;
-  height:100dvh!important;
+  height:var(--v42-visual-height,100dvh)!important;
   max-width:none!important;
   max-height:none!important;
   margin:0!important;
@@ -1438,4 +1438,22 @@ body.v42-mobile .v42-head-actions button:active:not(:disabled){
 body.v42-mobile .v42-head-actions button:disabled{
   opacity:.42!important;
   pointer-events:none!important;
+}
+
+/* iPhone preview controls: keep native range gestures and full-screen overlay stable. */
+body.v42-mobile.v42-ios .v42-scrubber{
+  touch-action:pan-x!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+body.v42-mobile.v42-ios .v42-preview-tools button,
+body.v42-mobile.v42-ios .v42-transport button{
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+}
+body.v42-mobile.v42-ios #v42PreviewDialog.v42-preview-overlay{
+  height:var(--v42-visual-height,100dvh)!important;
+  min-height:var(--v42-visual-height,100dvh)!important;
+  max-height:var(--v42-visual-height,100dvh)!important;
 }
