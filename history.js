@@ -46,6 +46,7 @@
   }
   async function undo(){if(!past.length||busy)return false;const entry=past.pop(),ok=await apply(entry,'undo');if(!ok)past.push(entry);update();return ok;}
   async function redo(){if(!future.length||busy)return false;const entry=future.pop(),ok=await apply(entry,'redo');if(!ok)future.push(entry);update();return ok;}
+  function cancelPending(){pending=null;update();}
   function reset(){past=[];future=[];pending=null;update();}
   function labelFor(target){
     if(!target)return '편집';
@@ -73,6 +74,6 @@
     if(mod&&key==='z'){e.preventDefault();e.stopImmediatePropagation();if(e.shiftKey)redo();else undo();return;}
     if(e.ctrlKey&&!e.metaKey&&!e.altKey&&key==='y'){e.preventDefault();e.stopImmediatePropagation();redo();return;}
   },true);
-  window.CutflowHistory={begin,beginScoped,ensureScoped,commit,undo,redo,reset,get canUndo(){return past.length>0},get canRedo(){return future.length>0},get busy(){return busy}};
+  window.CutflowHistory={begin,beginScoped,ensureScoped,commit,cancelPending,undo,redo,reset,get canUndo(){return past.length>0},get canRedo(){return future.length>0},get busy(){return busy}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update,{once:true});else queueMicrotask(update);
 })();
