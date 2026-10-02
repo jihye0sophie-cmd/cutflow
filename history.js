@@ -13,6 +13,7 @@
   }
   function start(label='편집',scope='project'){
     if(applying||busy)return false;
+    if(pending?.scope===scope)return true;
     const snapshot=capture(scope);if(!snapshot)return false;
     pending={scope,snapshot,signature:signature(snapshot),label};return true;
   }
@@ -59,7 +60,7 @@
   }
   function scopeFor(target){
     if(!target)return 'project';
-    if(target.closest?.('#cueList,#sceneList,#desktopStrip,#v42SceneStrip,#desktopTiming,#v42TimingHost,#mediaTransform'))return 'timeline';
+    if(target.closest?.('#cueList,#sceneList,#desktopStrip,#v42SceneStrip,#desktopTiming,#v42TimingHost,#mediaTransform,#captionBatchDialog'))return 'timeline';
     const panel=target.closest?.('#v42Panel');if(panel&&['caption','media','timing'].includes(panel.dataset.activeTab))return 'timeline';
     return 'project';
   }
