@@ -45,8 +45,8 @@
     dialog.addEventListener('keyup',rememberCursor);
     dialog.addEventListener('mouseup',rememberCursor);
     dialog.addEventListener('touchend',rememberCursor,{passive:true});
-    dialog.addEventListener('cancel',()=>{commitDraft();});
-    dialog.addEventListener('close',()=>{selected=-1;cursor=0;draft='';});
+    dialog.addEventListener('cancel',()=>{commitDraft();dialog.querySelector('[data-caption-batch-input]')?.blur?.();});
+    dialog.addEventListener('close',()=>{dialog.querySelector('[data-caption-batch-input]')?.blur?.();selected=-1;cursor=0;draft='';});
     return dialog;
   }
 
@@ -175,7 +175,7 @@
 
   function handleClick(e){
     if(e.target===dialog)return;
-    if(e.target.closest('[data-caption-batch-close]')){commitDraft();dialog.close();return;}
+    if(e.target.closest('[data-caption-batch-close]')){commitDraft();dialog.querySelector('[data-caption-batch-input]')?.blur?.();dialog.close();return;}
     if(e.target.closest('[data-caption-batch-auto-wrap]')){autoWrapAllCaptions();return;}
     const seg=e.target.closest('[data-caption-index]');
     if(seg&&!e.target.matches('[data-caption-batch-input]')){selectCaption(Number(seg.dataset.captionIndex));return;}
@@ -190,7 +190,7 @@
     if(count&&Number.isInteger(index)&&api().state(index)){selected=index;draft=api().state(index)?.text||'';cursor=draft.length;}
     else{selected=-1;draft='';cursor=0;}
     render({focus:false});
-    if(!d.open)d.showModal();
+    if(!d.open){try{d.showModal();}catch(error){console.warn('Caption batch dialog open failed',error);}}
   }
 
   window.addEventListener('cutflow-caption-updated',()=>{if(dialog?.open)render({focus:false});});
