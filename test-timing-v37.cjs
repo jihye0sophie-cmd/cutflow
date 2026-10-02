@@ -18,8 +18,8 @@ assert.ok(js.includes("drag.cueIndex===cueIndex")&&js.includes("drag.cueIndex++"
 assert.ok(js.includes("prev?.captionGap")&&js.includes("nextCue?.captionGap"),'caption timing gaps must be reusable and collapsible on later drags');
 assert.ok(js.includes("if(side==='start'&&prevIndex!=null)")&&js.includes("prev?.captionGap")&&js.includes('else setCaptionBoundary(prevIndex,next,{commit:false})'),'selected caption start must reuse a gap or move the shared boundary with the previous caption');
 assert.ok(js.includes("else if(side==='end'&&nextIndex!=null)")&&js.includes("nextCue?.captionGap")&&js.includes('else setCaptionBoundary(cueIndex,next,{commit:false})'),'selected caption end must reuse a gap or move the shared boundary with the next caption');
-assert.ok(js.includes("cue.start=clamp(num(value,cue.start),item.start,cue.end-.08)"),'outer caption start must stay inside its scene without moving the scene boundary');
-assert.ok(js.includes("cue.end=clamp(num(value,cue.end),cue.start+.08,item.end)"),'outer caption end must stay inside its scene without moving the scene boundary');
+assert.ok(js.includes("const next=clamp(num(value,cue.start),item.start,cue.end-.08)"),'outer caption start must stay inside its scene while creating or collapsing a caption gap');
+assert.ok(js.includes("const next=clamp(num(value,cue.end),cue.start+.08,item.end)"),'outer caption end must stay inside its scene while creating or collapsing a caption gap');
 assert.ok(!js.includes("if(pos===0){if(si===0){cue.start=clamp")&&!js.includes("if(pos===item.cueIndices.length-1)setSceneBoundaryAt"),'caption edges must not delegate to scene-boundary edits');
 assert.ok(js.includes('snapTime(')&&js.includes('snapEnabled'),'timeline snapping missing');
 assert.ok(js.includes('pendingCenter')&&js.includes('timelineScrollLeft'),'timeline centering/scroll preservation missing');
