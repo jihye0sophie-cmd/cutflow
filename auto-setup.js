@@ -107,7 +107,7 @@ async function run(){
   if(!script.length||!state.narration||(longMode?!state.longVideo:capacity()<script.length))return;
   const bridge=window.CutflowProjectBridge,hadWork=!!bridge?.hasWork?.();
   if(hadWork&&!confirm('자동 세팅을 시작하면 현재 대본·내레이션·장면 구성이 새 입력으로 교체됩니다. 계속할까요?'))return;
-  const rollback=hadWork?bridge?.capture?.():null;
+  const rollback=bridge?.capture?.()||null;
   state.running=true;update();$('autoProgress').hidden=false;
   try{
     status(longMode?'긴 영상을 자막 장면 수에 맞춰 준비하는 중…':'장면 이미지를 준비하는 중…',0);let files=[];
@@ -145,7 +145,7 @@ async function run(){
       try{await bridge.restore(rollback,{history:true});window.CutflowHistory?.reset?.();}
       catch(error){rollbackError=error;console.error('Cutflow auto setup rollback failed',error);}
     }
-    const message=rollbackError?`자동 세팅 중단: ${e.message} · 이전 프로젝트 복원에도 실패했습니다.`:`자동 세팅 중단: ${e.message}${rollback?' · 이전 프로젝트를 복원했습니다.':''}`;
+    const message=rollbackError?`자동 세팅 중단: ${e.message} · 시작 전 상태 복원에도 실패했습니다.`:`자동 세팅 중단: ${e.message}${rollback?' · 시작 전 상태로 복원했습니다.':''}`;
     status(message,0);emit('cutflow-auto-error',{message,error:e,rolledBack:!!rollback&&!rollbackError});window.CutflowAutoBridge?.toast?.(message);
   }
   finally{state.running=false;update();}
