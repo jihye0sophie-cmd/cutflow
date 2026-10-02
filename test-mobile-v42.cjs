@@ -9,6 +9,7 @@ const autoSetup=fs.readFileSync('auto-setup.js','utf8');
 const sceneUi=fs.readFileSync('scene-ui.js','utf8');
 const styleEditor=fs.readFileSync('style-editor.js','utf8');
 const timingEditor=fs.readFileSync('timing-editor.js','utf8');
+const timingCss=fs.readFileSync('timing-editor.css','utf8');
 const bgmEditor=fs.readFileSync('bgm-editor.js','utf8');
 const projectStore=fs.readFileSync('project-store.js','utf8');
 const history=fs.readFileSync('history.js','utf8');
