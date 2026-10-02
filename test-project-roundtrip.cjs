@@ -7,6 +7,10 @@ assert.ok(store.includes("fileRef:ref"),'scene media must be detached into blob 
 assert.ok(store.includes("p.narration.fileRef"),'narration media reference missing');
 assert.ok(store.includes("p.bgm.fileRef"),'BGM media reference missing');
 assert.ok(store.includes("s.file=file(s.fileRef"),'scene media must hydrate back into project payload');
+assert.ok(store.includes('MissingProjectMedia'),'missing saved media must fail load instead of silently dropping scenes');
+assert.ok(store.includes('shared=new Map()')&&store.includes('sharedFiles=new Map()'),'shared long-video media must be stored and hydrated by one shared reference');
+assert.ok(store.includes('replaceBytes=Number(existing?.sizeBytes)||0'),'overwrite quota must account for the project being replaced');
+assert.ok(!store.includes("restore(previous,{history:true});window.CutflowHistory?.reset"),'failed load rollback must preserve the current undo stack');
 assert.ok(store.includes("p.narration.file=file(p.narration.fileRef"),'narration must hydrate back into project payload');
 assert.ok(store.includes("p.bgm.file=file(p.bgm.fileRef"),'BGM must hydrate back into project payload');
 
