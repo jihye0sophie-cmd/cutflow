@@ -63,6 +63,10 @@
     if(commit)commitTimingMutation(items.indexOf(item));
     return true;
   };
+  const makeCaptionGap=(source,start,end)=>{
+    const style=window.newCueStyle?.()||{},base=cloneProjectData(source||{});
+    return {...base,...style,id:uid(),start,end,text:'',colorRanges:[],captionGap:true,sceneId:source?.sceneId||null,mediaOffset:0};
+  };
   const setCaptionEdge=(cueIndex,side,value,{commit=true}={})=>{
     const items=sceneItems(),item=items.find(g=>g?.cueIndices?.includes(cueIndex)),cue=cues[cueIndex];if(!item||!cue)return false;
     const si=items.indexOf(item),pos=item.cueIndices.indexOf(cueIndex),prevIndex=item.cueIndices[pos-1],nextIndex=item.cueIndices[pos+1];
@@ -71,11 +75,20 @@
     }else if(side==='end'&&nextIndex!=null){
       setCaptionBoundary(cueIndex,value,{commit:false});
     }else if(side==='start'){
-      cue.start=clamp(num(value,cue.start),item.start,cue.end-.08);
-      updateOffsets(item);
+      const next=clamp(num(value,cue.start),item.start,cue.end-.08);
+      if(next>item.start+.001){
+        const gap=makeCaptionGap(cue,item.start,next);
+        cue.start=next;cues.splice(cueIndex,0,gap);
+      }else cue.start=next;
+      const live=sceneItems().find(g=>g?.sceneId===item.sceneId&&g.cueIndices.some(i=>cues[i]?.id===cue.id));
+      updateOffsets(live||item);
     }else{
-      cue.end=clamp(num(value,cue.end),cue.start+.08,item.end);
-      updateOffsets(item);
+      const next=clamp(num(value,cue.end),cue.start+.08,item.end);
+      if(next<item.end-.001){
+        cue.end=next;const gap=makeCaptionGap(cue,next,item.end);cues.splice(cueIndex+1,0,gap);
+      }else cue.end=next;
+      const live=sceneItems().find(g=>g?.sceneId===item.sceneId&&g.cueIndices.some(i=>cues[i]?.id===cue.id));
+      updateOffsets(live||item);
     }
     if(commit)commitTimingMutation(Math.max(0,si));
     return true;
