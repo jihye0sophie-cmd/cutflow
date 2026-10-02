@@ -36,6 +36,8 @@ assert.ok(js.includes('requestAnimationFrame(syncPlaybackFrame)'),'precision tim
 assert.ok(js.includes("selectedCueId=null;playbackFollowScene=-1;timelineScrollLeft=0"),'restored projects must reset precision timing selection/follow state');
 assert.ok(js.includes("targets.forEach(renderPanel)"),'timeline should render only active timing panels');
 assert.ok(js.includes("h.closest('.timing-layer-body')"),'drag geometry must use the inset time area');
+assert.ok(js.includes("if(e.pointerType&&e.pointerType!=='mouse')return;"),'touching empty timeline space must allow native iPhone horizontal scrolling');
+assert.ok(js.includes("active&&panel.contains(active)&&active.matches?.('input,textarea,select,[contenteditable=\"true\"]')"),'viewport resize must not replace a focused timing input');
 assert.ok(js.includes("drag.el?.isConnected"),'drag must keep the active handle DOM stable');
 assert.ok(css.includes('--timeline-label-width'),'timeline label/content inset missing');
 assert.ok(css.includes('.timing-playhead-area'),'playhead inset area missing');
