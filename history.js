@@ -63,7 +63,7 @@
     const panel=target.closest?.('#v42Panel');if(panel&&['caption','media','timing'].includes(panel.dataset.activeTab))return 'timeline';
     return 'project';
   }
-  const autoBegin=e=>{const target=e.target,label=labelFor(target),scope=scopeFor(target);scope==='timeline'?beginScoped(label,scope):begin(label);};
+  const autoBegin=e=>{const target=e.target;if(target.closest?.('[data-history-control],[data-scene]'))return;const label=labelFor(target),scope=scopeFor(target);scope==='timeline'?beginScoped(label,scope):begin(label);};
   document.addEventListener('pointerdown',autoBegin,true);
   document.addEventListener('focusin',e=>{const t=e.target;if(t.matches?.('input:not([type=file]),textarea,select,[contenteditable=true]'))autoBegin(e);},true);
   document.addEventListener('dragstart',autoBegin,true);
