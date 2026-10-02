@@ -1457,3 +1457,16 @@ body.v42-mobile.v42-ios #v42PreviewDialog.v42-preview-overlay{
   min-height:var(--v42-visual-height,100dvh)!important;
   max-height:var(--v42-visual-height,100dvh)!important;
 }
+
+/* iPhone preview hit targets and full-screen safe area. */
+body.v42-mobile.v42-ios .v42-preview-tools button{
+  width:32px!important;
+  min-width:32px!important;
+  height:32px!important;
+  min-height:32px!important;
+}
+body.v42-mobile.v42-ios #v42PreviewDialog .v42-full-head{
+  min-height:calc(52px + env(safe-area-inset-top))!important;
+  padding-top:env(safe-area-inset-top)!important;
+  box-sizing:border-box!important;
+}
