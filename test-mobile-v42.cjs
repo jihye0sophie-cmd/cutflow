@@ -225,6 +225,10 @@ assert(autoSetup.includes("emit('cutflow-auto-complete'"),'final audit: auto set
 assert(autoSetup.includes("else window.CutflowBgm?.remove?.()"),'final audit: stale BGM cleanup missing');
 assert(js.includes('v42PrevScene')&&js.includes('v42NextScene'),'final audit: scene navigation missing');
 assert(js.includes('id="v42SceneStrip"')&&!js.includes('data-scene-grid'),'final audit: horizontal scene strip should replace all-scenes selection');
+assert(js.includes('sceneStripGesture')&&js.includes('lastScenePointerTap'),'iPhone scene strip tap-vs-scroll guard missing');
+assert(js.includes('addingMobileScenes')&&js.includes("requestAnimationFrame(()=>requestAnimationFrame(()=>followSelectedScene('smooth')))"),'mobile add-scene follow-up must wait for strip rerender');
+assert(css.includes('touch-action:pan-x!important')&&css.includes('-webkit-overflow-scrolling:touch!important'),'iPhone horizontal scene strip gesture CSS missing');
+assert(history.includes("target.closest?.('[data-history-control],[data-scene]')"),'scene navigation must not create undo history');
 assert(new RegExp('auto-setup\\.js\\?v=[^"\\x27]+').test(html),'final audit: auto setup cache key missing');
 assert(js.includes('v42-settings-primary-actions'),'desktop-like compact settings utility missing');
 assert(js.includes('v42-pc-settings-section'),'desktop-like settings section structure missing');
