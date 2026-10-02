@@ -78,12 +78,9 @@
       actions.querySelector('[data-caption-batch-next]').disabled=state.segment.position>=state.segment.count;
       const input=d.querySelector('[data-caption-batch-input]');
       if(input&&focus){
-        requestAnimationFrame(()=>{
-          input.focus({preventScroll:true});
-          const at=Math.max(0,Math.min(cursor||input.value.length,input.value.length));
-          try{input.setSelectionRange(at,at);}catch{}
-          input.scrollIntoView({block:'nearest'});
-        });
+        input.focus({preventScroll:true});
+        const at=Math.max(0,Math.min(cursor||input.value.length,input.value.length));
+        try{input.setSelectionRange(at,at);}catch{}
       }
     }
   }
