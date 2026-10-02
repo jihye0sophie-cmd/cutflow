@@ -203,10 +203,10 @@
       offset=Math.min(offset,totalDuration());changed();const next=logicalItems();if(next.length)this.select(Math.min(index,next.length-1));else{jump(0);window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:0}));}return true;
     },
     async split(index,time=currentTime()){
-      const list=logicalItems();if(exporting||loading||index<0||index>=list.length)return false;window.CutflowHistory?.beginScoped?.('장면 나누기','timeline');const group=list[index],source=group?.source||scenes[index];if(!source)return false;
+      const list=logicalItems();if(exporting||loading||index<0||index>=list.length)return false;const group=list[index],source=group?.source||scenes[index];if(!source)return false;
       const start=cues.length?group.start:this.start(index),duration=Math.max(.1,cues.length?group.duration:source.duration||0),end=start+duration,splitAt=Number(time);
       if(!Number.isFinite(splitAt)||splitAt<=start+.1||splitAt>=end-.1){toast('장면 안쪽의 원하는 위치로 재생 헤드를 옮긴 뒤 장면 나누기를 눌러 주세요.');return false;}
-      pause();loading++;stats();
+      window.CutflowHistory?.beginScoped?.('장면 나누기','timeline');pause();loading++;stats();
       try{
         const second=await duplicateScene(source),relative=splitAt-start,sourceIndex=scenes.indexOf(source),oldTrimStart=Number(source.trimStart)||0,oldTrimEnd=Number(source.trimEnd??source.sourceDuration)||0;
         source.duration=relative;second.duration=Math.max(.1,duration-relative);second.transition='cut';
@@ -228,10 +228,10 @@
       }catch(error){toast(`장면을 나누지 못했습니다: ${error.message}`);return false;}finally{loading--;stats();}
     },
     mergeNext(index){
-      const list=logicalItems();if(exporting||index<0||index>=list.length-1)return false;window.CutflowHistory?.beginScoped?.('장면 합치기','timeline');const current=list[index],next=list[index+1],a=current?.source||scenes[index],b=next?.source||scenes[index+1];if(!a||!b)return false;
+      const list=logicalItems();if(exporting||index<0||index>=list.length-1)return false;const current=list[index],next=list[index+1],a=current?.source||scenes[index],b=next?.source||scenes[index+1];if(!a||!b)return false;
       if(!sameMedia(a,b)){toast('다음 장면과 미디어가 달라 합칠 수 없습니다. 같은 이미지 또는 같은 영상 장면만 합칠 수 있습니다.');return false;}
       if(a.type==='video'&&Math.abs(Number(a.trimEnd??a.sourceDuration)-Number(b.trimStart||0))>.08){toast('같은 영상이라도 원본 구간이 이어져 있지 않아 합칠 수 없습니다.');return false;}
-      pause();if(cues.length)rememberCues();
+      window.CutflowHistory?.beginScoped?.('장면 합치기','timeline');pause();if(cues.length)rememberCues();
       if(a.type==='video'){a.trimEnd=Number(b.trimEnd??b.sourceDuration)||a.trimEnd;a.mediaFadeOut=b.mediaFadeOut??a.mediaFadeOut;}
       a.duration=Math.max(.1,(current.duration||a.duration||0)+(next.duration||b.duration||0));
       if(cues.length){for(const ci of next.cueIndices){cues[ci].sceneId=a.id;cues[ci].mediaOffset=Math.max(0,cues[ci].start-current.start);}const si=scenes.indexOf(b);if(si>=0){releaseScene(scenes.splice(si,1)[0]);}syncSceneOrderToCues();renderSceneModel();}
