@@ -108,6 +108,7 @@ async function run(){
   const bridge=window.CutflowProjectBridge,hadWork=!!bridge?.hasWork?.();
   if(hadWork&&!confirm('자동 세팅을 시작하면 현재 대본·내레이션·장면 구성이 새 입력으로 교체됩니다. 계속할까요?'))return;
   const rollback=bridge?.capture?.()||null;
+  const historyBatch=!!window.CutflowHistory?.beginBatch?.('자동 세팅','project');let historyDone=false;
   state.running=true;update();$('autoProgress').hidden=false;
   try{
     status(longMode?'긴 영상을 자막 장면 수에 맞춰 준비하는 중…':'장면 이미지를 준비하는 중…',0);let files=[];
@@ -137,18 +138,19 @@ async function run(){
     else window.CutflowBgm?.remove?.();
     status('자동 세팅이 완료되었습니다.',5);$('autoProgress').querySelectorAll('.auto-step').forEach(el=>el.dataset.state='done');
     const complete={cueCount:result.cueCount,sceneCount:result.sceneCount,missingSceneCount:result.missingSceneCount||0,imageCount:longMode?0:files.length,mediaMode:state.mediaMode,longVideoSegments:longMode?files.length:0};
+    if(historyBatch){window.CutflowHistory?.endBatch?.(true);historyDone=true;}
     emit('cutflow-auto-complete',complete);
     if(window.CutflowUI?.mode!=='mobile')setTimeout(()=>document.querySelector('.workspace')?.scrollIntoView({behavior:'smooth',block:'start'}),250);
   }catch(e){
     let rollbackError=null;
     if(rollback&&bridge?.restore){
-      try{await bridge.restore(rollback,{history:true});window.CutflowHistory?.reset?.();}
+      try{await bridge.restore(rollback,{history:true});}
       catch(error){rollbackError=error;console.error('Cutflow auto setup rollback failed',error);}
     }
     const message=rollbackError?`자동 세팅 중단: ${e.message} · 시작 전 상태 복원에도 실패했습니다.`:`자동 세팅 중단: ${e.message}${rollback?' · 시작 전 상태로 복원했습니다.':''}`;
     status(message,0);emit('cutflow-auto-error',{message,error:e,rolledBack:!!rollback&&!rollbackError});window.CutflowAutoBridge?.toast?.(message);
   }
-  finally{state.running=false;update();}
+  finally{if(historyBatch&&!historyDone)window.CutflowHistory?.endBatch?.(false);state.running=false;update();}
 }
 function syncBasicsFromProject(){
   if(!$('autoTitle').value)$('autoTitle').value=$('titleInput').value||'';
