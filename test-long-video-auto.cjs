@@ -9,6 +9,10 @@ assert.ok(html.includes('value="long-video"'),'long-video quick start option mis
 assert.ok(html.includes('id="autoLongVideo"')&&html.includes('id="autoLongVideoStart"'),'long-video source controls missing');
 assert.ok(auto.includes("mediaMode:'multi'")&&auto.includes("longVideo:null"),'long-video auto state missing');
 assert.ok(auto.includes("state.mediaMode==='long-video'"),'long-video run branch missing');
+assert.ok(auto.includes("beginBatch?.('자동 세팅','project')")&&auto.includes("endBatch?.(true)"),'automatic setup must be one undoable history action');
+assert.ok(auto.includes("const rollback=bridge?.capture?.()||null"),'automatic setup must capture rollback state even from an empty project');
+assert.ok(!auto.includes("bridge.restore(rollback,{history:true});window.CutflowHistory?.reset"),'automatic setup rollback must preserve pre-existing undo history');
+assert.ok(auto.includes("input=$('autoNarration');input.value=''")&&auto.includes("input=$('autoBgm');input.value=''"),'auto setup must allow same narration/BGM file reselection');
 assert.ok(auto.includes("Array.from({length:script.length},()=>state.longVideo)"),'long-video scene replication missing');
 assert.ok(auto.includes("sequentialVideo:{start:"),'long-video timeline option missing');
 assert.ok(app.includes('buildTimeline(options={})'),'auto bridge options missing');
