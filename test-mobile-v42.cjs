@@ -318,4 +318,9 @@ assert(!timingEditor.includes("new MutationObserver(()=>requestAnimationFrame(re
 assert(app.includes("'cutflow-caption-active'"),'active caption playback event missing');
 assert(!desktop.includes("observe($('nowPlaying')"),'desktop must not observe per-frame now-playing text');
 assert(timingEditor.includes("h.closest('.timing-layer-body')"),'timeline v43.1 inset drag geometry missing');
+assert(timingEditor.includes('e.pointerId!==drag.pointerId')&&timingEditor.includes("lostpointercapture"),'iPhone timing drag pointer identity/capture guard missing');
+assert(timingEditor.includes('syncSelectedCueToTime(t);requestRenderAll();'),'mobile timeline seek must sync the selected caption');
+assert(timingEditor.includes("input.matches('input[type=\"number\"]')")&&timingEditor.includes("input.value===''"),'timing numeric empty-value guard missing');
+assert(timingEditor.includes("document.addEventListener('visibilitychange'")&&timingEditor.includes("window.addEventListener('blur'"),'iPhone interrupted timing drag cleanup missing');
+assert(timingCss.includes('touch-action:pan-x pan-y!important')&&timingCss.includes('width:32px!important'),'iPhone timing scroll/handle touch CSS missing');
 console.log('Cutflow v42.5.13 ultra-compact scene strip checks passed');
