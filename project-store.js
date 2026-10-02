@@ -83,23 +83,24 @@ async function exportProject(){
 async function importProject(file){
   if(busy||!bridge()||!file)return;
   busy=true;status('프로젝트 파일 확인 중…','busy');
-  const previous=bridge().capture?.()||null,previousStore={currentId,currentName,dirty};
+  const previous=bridge().capture?.()||null,previousStore={currentId,currentName,dirty};let importedId=null,completed=false;
   try{
     const decoded=await decodePackage(file),p=decoded.manifest.project;
     const size=decoded.sourceRows.reduce((n,r)=>n+(r.blob?.size||0),0),name=String(p.name||file.name.replace(/\.cutflow$/i,'')||'가져온 프로젝트');
-    if(!confirm(`“${name}” 프로젝트를 가져올까요?\n장면 ${Number(p.sceneCount)||0}개 · ${(Number(p.duration)||0).toFixed(1)}초 · 미디어 ${bytes(size)}\n\n가져온 프로젝트는 이 기기에도 저장됩니다.`))return;
+    if(!confirm(`“${name}” 프로젝트를 가져올까요?\n장면 ${Number(p.sceneCount)||0}개 · ${(Number(p.duration)||0).toFixed(1)}초 · 미디어 ${bytes(size)}\n\n가져온 프로젝트는 이 기기에도 저장됩니다.`)){completed=true;return;}
     status('프로젝트 가져오는 중…','busy');await persist();const bundle=importedBundle(decoded);
-    bundle.record.name=name;await saveBundle(bundle.record,bundle.rows);
+    bundle.record.name=name;importedId=bundle.record.id;await saveBundle(bundle.record,bundle.rows);
     await bridge().restore(await hydrate(bundle.record));window.CutflowHistory?.reset?.();markSaved(bundle.record);await renderList();
     if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-project-imported',{detail:{id:bundle.record.id,name:bundle.record.name,sceneCount:bundle.record.sceneCount,duration:bundle.record.duration}}));
-    closeDialog();window.toast?.('프로젝트를 가져와 이 기기에 저장했습니다.');
+    closeDialog();completed=true;window.toast?.('프로젝트를 가져와 이 기기에 저장했습니다.');
   }catch(error){
     console.error('Cutflow project import failed',error);let rollbackError=null;
+    if(importedId){try{await remove(importedId);}catch(e){console.error('Cutflow imported project cleanup failed',e)}}
     if(previous){try{await bridge().restore(previous,{history:true});}catch(e){rollbackError=e;console.error('Cutflow import rollback failed',e)}}
     currentId=previousStore.currentId;currentName=previousStore.currentName;dirty=previousStore.dirty;
     status(currentId?`${currentName} · ${dirty?'저장 안 됨':'저장됨'}`:'저장 안 됨',dirty?'dirty':currentId?'saved':'dirty');
     alert(rollbackError?'프로젝트 가져오기에 실패했고 이전 작업 복원에도 실패했습니다.':`프로젝트를 가져오지 못했습니다. ${error?.message||''}`);
-  }finally{busy=false;const input=$('projectImportInput');if(input)input.value='';}
+  }finally{busy=false;const input=$('projectImportInput');if(input)input.value='';if(completed&&currentId)status(`${currentName} · ${dirty?'저장 안 됨':'저장됨'}`,dirty?'dirty':'saved');else if(completed)status('저장 안 됨','dirty');}
 }
 
 async function hydrate(record){const p=clonePlain(record.payload||{}),refs=[],sharedFiles=new Map();(p.scenes||[]).forEach(s=>s.fileRef&&refs.push(s.fileRef));if(p.narration?.fileRef)refs.push(p.narration.fileRef);if(p.bgm?.fileRef)refs.push(p.bgm.fileRef);if(!refs.length)return p;const map=new Map((await media(record.id)).map(r=>[r.key,r])),file=(ref,name)=>{if(sharedFiles.has(ref))return sharedFiles.get(ref);const r=map.get(ref);if(!r?.blob){const e=new Error(`저장 미디어를 찾지 못했습니다: ${name||ref}`);e.name='MissingProjectMedia';throw e}let value;try{value=new File([r.blob],r.name||name||'media',{type:r.type||r.blob.type||'',lastModified:r.lastModified||Date.now()})}catch{value=r.blob}sharedFiles.set(ref,value);return value};(p.scenes||[]).forEach(s=>{if(s.fileRef){s.file=file(s.fileRef,s.meta?.name);delete s.fileRef}});if(p.narration?.fileRef){p.narration.file=file(p.narration.fileRef,p.narration.name);delete p.narration.fileRef}if(p.bgm?.fileRef){p.bgm.file=file(p.bgm.fileRef,p.bgm.name);delete p.bgm.fileRef}return p}
