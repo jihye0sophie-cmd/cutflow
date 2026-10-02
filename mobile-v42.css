@@ -1413,12 +1413,6 @@ body.v42-mobile.v42-ios #v42SettingsDialog[open],
 body.v42-mobile.v42-ios #v42ExportDialog[open]{
   max-height:calc(var(--v42-visual-height,100dvh) - max(8px,env(safe-area-inset-top)))!important;
 }
-body.v42-mobile.v42-ios.v42-keyboard-open .v42-panel{
-  scroll-padding-bottom:120px!important;
-}
-body.v42-mobile.v42-ios.v42-keyboard-open .v42-settings-body{
-  scroll-padding-bottom:140px!important;
-}
 body.v42-mobile.v42-ios input,
 body.v42-mobile.v42-ios textarea,
 body.v42-mobile.v42-ios select{
