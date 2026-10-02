@@ -66,14 +66,17 @@
   const setCaptionEdge=(cueIndex,side,value,{commit=true}={})=>{
     const items=sceneItems(),item=items.find(g=>g?.cueIndices?.includes(cueIndex)),cue=cues[cueIndex];if(!item||!cue)return false;
     const si=items.indexOf(item),pos=item.cueIndices.indexOf(cueIndex),prevIndex=item.cueIndices[pos-1],nextIndex=item.cueIndices[pos+1];
-    if(side==='start'){
-      const min=prevIndex!=null?Math.max(item.start,cues[prevIndex].end):item.start,max=cue.end-.08;
-      cue.start=clamp(num(value,cue.start),min,max);
+    if(side==='start'&&prevIndex!=null){
+      setCaptionBoundary(prevIndex,value,{commit:false});
+    }else if(side==='end'&&nextIndex!=null){
+      setCaptionBoundary(cueIndex,value,{commit:false});
+    }else if(side==='start'){
+      cue.start=clamp(num(value,cue.start),item.start,cue.end-.08);
+      updateOffsets(item);
     }else{
-      const min=cue.start+.08,max=nextIndex!=null?Math.min(item.end,cues[nextIndex].start):item.end;
-      cue.end=clamp(num(value,cue.end),min,max);
+      cue.end=clamp(num(value,cue.end),cue.start+.08,item.end);
+      updateOffsets(item);
     }
-    updateOffsets(item);
     if(commit)commitTimingMutation(Math.max(0,si));
     return true;
   };
