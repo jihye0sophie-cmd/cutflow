@@ -5,6 +5,7 @@ assert(js.includes('async function undo()')&&js.includes('async function redo()'
 assert(js.includes("key==='z'")&&js.includes("key==='y'"),'keyboard shortcuts missing');
 assert(js.includes('beginScoped')&&js.includes('ensureScoped')&&js.includes('cancelPending'),'hybrid history API missing');
 assert(js.includes('beginBatch')&&js.includes('endBatch')&&js.includes('if(batching||applying||busy||!pending)return'),'history batch transaction API missing');
+assert(js.includes('await bridge.restore(current,{history:true})')&&js.includes('Cutflow history rollback failed'),'failed undo/redo restores must roll back to the pre-undo current state');
 assert(js.includes('scopeBridge')&&js.includes("scope==='timeline'"),'timeline history scope missing');
 assert(js.includes("'cutflow-history-updated'"),'history state event missing');
 assert(js.includes('fileSig')&&js.includes('snapshot:current'),'history must fingerprint media metadata while retaining shared File references');
