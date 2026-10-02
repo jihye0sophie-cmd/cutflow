@@ -27,7 +27,7 @@ function packageManifest(record,rows){
 function encodePackage(record,rows){
   const manifest=packageManifest(record,rows),json=new TextEncoder().encode(JSON.stringify(manifest));
   const header=new Uint8Array(PACKAGE_HEADER_BYTES);header.set(new TextEncoder().encode(PACKAGE_MAGIC),0);new DataView(header.buffer).setUint32(8,json.byteLength,true);
-  return new Blob([header,json,...rows.map(r=>r.blob)],{type:'application/x-cutflow-project'});
+  return new Blob([header,json,...rows.map(r=>r.blob)],{type:'application/octet-stream'});
 }
 async function decodePackage(file){
   if(!(file instanceof Blob)||file.size<PACKAGE_HEADER_BYTES)throw new Error('올바른 Cutflow 프로젝트 파일이 아닙니다.');
@@ -69,14 +69,10 @@ async function exportProject(){
       record={id,name,createdAt,updatedAt:Date.now(),schemaVersion:2,appVersion:'42',sizeBytes:Number(raw.estimatedMediaBytes)||0,sceneCount:sum.sceneCount||0,duration:sum.duration||0,payload:d.payload};rows=d.rows;
     }
     const blob=encodePackage(record,rows),filename=`${safeFileName(name)}.cutflow`;
-    if(navigator.share&&navigator.canShare){
-      try{
-        const file=new File([blob],filename,{type:blob.type,lastModified:Date.now()});
-        if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});window.toast?.('프로젝트 파일을 내보냈습니다.');return;}
-      }catch(error){if(error?.name==='AbortError')return;console.warn('Cutflow share export fallback',error);}
-    }
-    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-    window.toast?.('프로젝트 파일을 저장했습니다.');
+    const check=await decodePackage(blob);
+    if(check.sourceRows.length!==rows.length)throw new Error('내보내기 파일 검증에 실패했습니다.');
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.type='application/octet-stream';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    window.toast?.('프로젝트 파일을 저장했습니다. iPhone에서는 파일 앱의 다운로드 폴더에서 공유해 주세요.');
   }catch(error){console.error('Cutflow project export failed',error);alert(`프로젝트를 내보내지 못했습니다. ${error?.message||''}`);}
   finally{busy=false;status(currentId?`${currentName} · ${dirty?'저장 안 됨':'저장됨'}`:'저장 안 됨',dirty?'dirty':currentId?'saved':'dirty');}
 }
