@@ -22,3 +22,34 @@
 
 .timeline-selection-grid{grid-template-columns:1fr 1fr!important}
 .timeline-selection-grid>section{height:100%}
+
+/* iPhone precision timing gesture stability. */
+@media(max-width:819px){
+  body.v42-ios .v42-timing-panel .timing-scroll{
+    touch-action:pan-x!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior-x:contain!important;
+  }
+  body.v42-ios .v42-timing-panel .timing-handle{
+    width:32px!important;
+    min-width:32px!important;
+    margin-left:-16px!important;
+    touch-action:none!important;
+    -webkit-tap-highlight-color:transparent!important;
+  }
+  body.v42-ios .v42-timing-panel .timing-handle:after{
+    left:15px!important;
+  }
+  body.v42-ios .v42-timing-panel .timing-playhead-grip{
+    width:28px!important;
+    min-width:28px!important;
+    margin-left:-14px!important;
+    touch-action:none!important;
+  }
+  body.v42-ios .v42-timing-panel .timing-fields input{
+    font-size:16px!important;
+  }
+  body.v42-ios .v42-timing-panel button{
+    -webkit-tap-highlight-color:transparent!important;
+  }
+}
