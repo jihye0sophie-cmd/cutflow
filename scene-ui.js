@@ -63,9 +63,11 @@
   };
   const emitSceneUpdated=index=>{const state=inspect(index);window.dispatchEvent(new CustomEvent('cutflow-scene-updated',{detail:{index,state}}));return state;};
   const renderSceneModel=()=>{if(cues.length)renderCues();else renderScenes();};
-  const patchScene=(index,patch={})=>{
+  const patchScene=(index,patch={},options={})=>{
     const {item,scene}=sourceForIndex(index);if(!item||!scene||exporting||loading)return false;
-    window.CutflowHistory?.beginScoped?.('장면 설정','timeline');
+    const live=!!options.live;
+    if(live)window.CutflowHistory?.ensureScoped?.('장면 설정','timeline');
+    else window.CutflowHistory?.beginScoped?.('장면 설정','timeline');
     pause();if(cues.length)rememberCues();
     const group=cues.length?item:null;
     if(patch.duration!=null){const next=Math.max(.1,Math.min(600,Number(patch.duration)||(group?.duration||scene.duration||.1)));if(group)setSceneGroupDuration(group.firstCueIndex,next);else scene.duration=next;}
@@ -88,9 +90,11 @@
       if(trimChanged&&group){for(const ci of group.cueIndices){delete cues[ci].trimStart;delete cues[ci].trimEnd;cues[ci].mediaOffset=Math.max(0,cues[ci].start-group.start);}if(group.freeEdit)setSceneGroupDuration(group.firstCueIndex,Math.max(.1,available));}
     }
     renderSceneModel();
-    changed();
+    if(live){dirty=true;stats();window.CutflowProjects?.markDirty?.();}
+    else changed();
     return emitSceneUpdated(index);
   };
+  const commitSceneLive=index=>{window.CutflowHistory?.commit?.();return emitSceneUpdated(index);};
 
   const snapAxis=(candidates,threshold)=>{
     let best=null;
@@ -174,7 +178,7 @@
       const box=CutRenderer.mediaGeometry(scene,elapsed,rect,fit);
       return box?{rect,box,transform:inspect(index)?.transform||null}:null;
     },
-    update:patchScene,
+    update:patchScene,commitLive:commitSceneLive,
     beginTransformGesture,previewTransformGesture,commitTransformGesture,cancelTransformGesture,
     index(){
       const list=logicalItems();if(!list.length)return 0;
@@ -239,7 +243,10 @@
       changed();this.select(index);toast('다음 장면과 합쳤습니다. 현재 장면의 효과 설정을 유지합니다.');return true;
     },
     async replace(file){
-      if(!file)return false;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;const [added]=await addFiles([file],{createFreeCues:false,deferCommit:true});if(!added){toast('장면을 교체하지 못했습니다. 파일을 다시 확인해 주세요.');return false;}if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
+      if(!file)return false;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;
+      window.CutflowHistory?.beginScoped?.('이미지·영상 교체','timeline');
+      const [added]=await addFiles([file],{createFreeCues:false,deferCommit:true});
+      if(!added){window.CutflowHistory?.cancelPending?.();toast('장면을 교체하지 못했습니다. 파일을 다시 확인해 주세요.');return false;}if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
       if(withCues&&group){
         const previous=scenes.find(s=>s.id===group.sceneId),addedIndex=scenes.indexOf(added),previousIndex=previous?scenes.indexOf(previous):-1;
         if(previous&&previousIndex>=0){
