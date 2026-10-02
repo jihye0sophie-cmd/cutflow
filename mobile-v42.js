@@ -918,12 +918,21 @@
   bindMobileTap($('v42FullClose'),closePreviewFullscreen);
   bindMobileTap($('v42FullPlay'),()=>{window.CutflowPlayer?.toggle?.();requestAnimationFrame(syncPlayer);});
   const scrubber=$('v42Scrubber');
-  const beginScrub=()=>{mobileScrubbing=true;window.CutflowPlayer?.pause?.();};
-  const endScrub=()=>{mobileScrubbing=false;requestAnimationFrame(syncPlayer);};
+  let scrubSceneIndex=-1;
+  const beginScrub=()=>{mobileScrubbing=true;scrubSceneIndex=window.CutflowScene?.index?.()??-1;window.CutflowPlayer?.pause?.();};
+  const seekMobilePreview=value=>{
+    window.CutflowPlayer?.seekProgress?.(Number(value)/1000);
+    const nextIndex=window.CutflowScene?.index?.()??-1;
+    if(nextIndex>=0&&nextIndex!==scrubSceneIndex){
+      scrubSceneIndex=nextIndex;
+      window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:nextIndex}));
+    }else{renderSceneStrip();syncPlayer();}
+  };
+  const endScrub=()=>{mobileScrubbing=false;scrubSceneIndex=-1;requestAnimationFrame(()=>{renderSceneStrip();syncPlayer();followSelectedScene('auto');});};
   scrubber.addEventListener('pointerdown',beginScrub,{passive:true});
   scrubber.addEventListener('touchstart',beginScrub,{passive:true});
-  scrubber.addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
-  scrubber.addEventListener('change',e=>{window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000);endScrub();});
+  scrubber.addEventListener('input',e=>seekMobilePreview(e.target.value));
+  scrubber.addEventListener('change',e=>{seekMobilePreview(e.target.value);endScrub();});
   scrubber.addEventListener('pointerup',endScrub,{passive:true});
   scrubber.addEventListener('pointercancel',endScrub,{passive:true});
   scrubber.addEventListener('touchend',endScrub,{passive:true});
