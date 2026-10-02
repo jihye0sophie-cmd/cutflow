@@ -240,6 +240,16 @@
     setTimeout(()=>{
       if(document.activeElement!==target)return;
       syncVisualViewport();
+      const batchDialog=target.closest?.('.caption-batch-dialog');
+      if(batchDialog?.open){
+        const list=batchDialog.querySelector('.caption-batch-list'),tr=target.getBoundingClientRect(),lr=list?.getBoundingClientRect();
+        if(list&&lr){
+          const pad=12,topLimit=lr.top+pad,bottomLimit=lr.bottom-pad;
+          if(tr.top<topLimit)list.scrollTop-=topLimit-tr.top;
+          else if(tr.bottom>bottomLimit)list.scrollTop+=tr.bottom-bottomLimit;
+        }
+        return;
+      }
       if(settingsDialog?.open&&settingsDialog.contains(target)){
         const body=$('v42SettingsBody'),tr=target.getBoundingClientRect(),br=body?.getBoundingClientRect();
         if(body&&br){
