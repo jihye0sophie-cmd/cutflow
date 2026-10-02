@@ -720,6 +720,8 @@
   function applyMediaField(el,{live=false}={}){
     const field=el?.dataset?.mediaField;if(!field)return false;
     const index=currentScene().index,api=window.CutflowScene;if(!api?.update)return false;
+    const numeric=['scale','x','y','trimStart','trimEnd','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(field);
+    if(numeric&&(el.value===''||!Number.isFinite(Number(el.value))))return false;
     const options=live?{live:true}:undefined;
     if(field==='scale'||field==='x'||field==='y')api.update(index,{transform:{[field]:Number(el.value)}},options);
     else if(field==='mediaMuted')api.update(index,{mediaMuted:el.checked},options);
