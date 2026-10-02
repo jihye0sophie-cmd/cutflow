@@ -216,7 +216,9 @@
   const syncVisualViewport=()=>{
     const vv=window.visualViewport;
     const height=Math.max(1,Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||1));
+    const top=Math.max(0,Math.round(vv?.offsetTop||0));
     document.documentElement.style.setProperty('--v42-visual-height',height+'px');
+    document.documentElement.style.setProperty('--v42-visual-top',top+'px');
     const layoutHeight=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0);
     const keyboardOpen=!!(window.CutflowUI?.mobileActive&&vv&&layoutHeight-height>120);
     document.body.classList.toggle('v42-keyboard-open',keyboardOpen);
@@ -235,8 +237,17 @@
     setTimeout(()=>{
       if(document.activeElement!==target)return;
       syncVisualViewport();
+      if(settingsDialog?.open&&settingsDialog.contains(target)){
+        const body=$('v42SettingsBody'),tr=target.getBoundingClientRect(),br=body?.getBoundingClientRect();
+        if(body&&br){
+          const pad=18,topLimit=br.top+pad,bottomLimit=br.bottom-pad;
+          if(tr.top<topLimit)body.scrollTop-=topLimit-tr.top;
+          else if(tr.bottom>bottomLimit)body.scrollTop+=tr.bottom-bottomLimit;
+        }
+        return;
+      }
       try{target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch{}
-    },120);
+    },180);
   },true);
   if(typeof compactMq.addEventListener==='function')compactMq.addEventListener('change',syncResponsiveMode);
   else if(typeof compactMq.addListener==='function')compactMq.addListener(syncResponsiveMode);
