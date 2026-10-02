@@ -459,8 +459,20 @@
       videoAdvanced+
       section('이미지·영상 크기 / 위치',transform)+
       section('장면 관리',sceneActions);
-    $('v42ReplaceBtn').onclick=()=>$('v42ReplaceInput').click();
-    $('v42ReplaceInput').onchange=async e=>{const f=e.target.files?.[0];if(f&&window.CutflowScene?.replace)await window.CutflowScene.replace(f);e.target.value='';};
+    const replaceBtn=$('v42ReplaceBtn'),replaceInput=$('v42ReplaceInput');
+    let replacingMedia=false;
+    bindMobileTap(replaceBtn,()=>{
+      if(replacingMedia||!replaceInput)return;
+      try{replaceInput.value='';}catch{}
+      replaceInput.click();
+    });
+    replaceInput.onchange=async e=>{
+      const f=e.target.files?.[0];e.target.value='';
+      if(!f||replacingMedia||!window.CutflowScene?.replace)return;
+      replacingMedia=true;replaceBtn.disabled=true;
+      try{await window.CutflowScene.replace(f);}
+      finally{replacingMedia=false;replaceBtn.disabled=false;}
+    };
     panel.querySelectorAll('[data-media-volume]').forEach(btn=>btn.onclick=()=>{window.CutflowScene?.update?.(index,{mediaVolume:Number(btn.dataset.mediaVolume)});});
     const transformPreview=$('v42TransformPreview');
     if(transformPreview){
@@ -705,13 +717,15 @@
 
   function proxyInput(e,map){const k=e.target.dataset.proxy,el=map.get(k);if(!el)return false;if(el.type==='checkbox')el.checked=e.target.checked;else el.value=e.target.value;dispatch(el,'input');return true;}
   function proxyChange(e,map){const k=e.target.dataset.proxy,el=map.get(k);if(!el)return false;if(el.type==='checkbox')el.checked=e.target.checked;else el.value=e.target.value;dispatch(el,'change');return true;}
-  function applyMediaField(el){
+  function applyMediaField(el,{live=false}={}){
     const field=el?.dataset?.mediaField;if(!field)return false;
     const index=currentScene().index,api=window.CutflowScene;if(!api?.update)return false;
-    if(field==='scale'||field==='x'||field==='y')api.update(index,{transform:{[field]:Number(el.value)}});
-    else if(field==='mediaMuted')api.update(index,{mediaMuted:el.checked});
-    else if(['trimStart','trimEnd','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(field))api.update(index,{[field]:Number(el.value)});
-    else api.update(index,{[field]:el.value});
+    const options=live?{live:true}:undefined;
+    if(field==='scale'||field==='x'||field==='y')api.update(index,{transform:{[field]:Number(el.value)}},options);
+    else if(field==='mediaMuted')api.update(index,{mediaMuted:el.checked},options);
+    else if(['trimStart','trimEnd','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(field))api.update(index,{[field]:Number(el.value)},options);
+    else api.update(index,{[field]:el.value},options);
+    if(field==='mediaVolume'){const out=el.closest('.v42-field')?.querySelector('.v42-live-value');if(out)out.textContent=Math.round(Number(el.value)||0)+'%';}
     return true;
   }
   function applyComposeField(el){
@@ -786,8 +800,8 @@
     selectSceneFromStrip(Number(button.dataset.scene));
   });
 
-  panel.addEventListener('input',e=>{if(e.target.dataset.bgmField&&['volume'].includes(e.target.dataset.bgmField)){applyBgmField(e.target);return;}if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value},{live:true});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
-  panel.addEventListener('change',e=>{if(e.target.dataset.bgmField){applyBgmField(e.target);return;}if(e.target.dataset.composeField){applyComposeField(e.target);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf){if(cf==='text'){window.CutflowCaption?.commitLive?.(window.CutflowCaption.currentIndex());return;}window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});return;}if(e.target.dataset.mediaField){applyMediaField(e.target);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
+  panel.addEventListener('input',e=>{if(e.target.dataset.bgmField&&['volume'].includes(e.target.dataset.bgmField)){applyBgmField(e.target);return;}if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value},{live:true});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target,{live:true});return;}proxyInput(e,proxyMap);});
+  panel.addEventListener('change',e=>{if(e.target.dataset.bgmField){applyBgmField(e.target);return;}if(e.target.dataset.composeField){applyComposeField(e.target);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf){if(cf==='text'){window.CutflowCaption?.commitLive?.(window.CutflowCaption.currentIndex());return;}window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});return;}if(e.target.dataset.mediaField){const f=e.target.dataset.mediaField;if(['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){window.CutflowScene?.commitLive?.(currentScene().index);return;}applyMediaField(e.target);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
   panel.addEventListener('click',e=>{
     const typoColor=e.target.closest('[data-typo-palette] [data-color]');if(typoColor){const kind=typoColor.closest('[data-typo-palette]').dataset.typoPalette;window.CutflowTypography?.update?.(kind,{color:typoColor.dataset.color});return;}
     const sw=e.target.closest('[data-color-target] [data-color]');if(sw){const wrap=sw.closest('[data-color-target]'),el=$(wrap.dataset.colorTarget);if(el){el.value=sw.dataset.color;dispatch(el,'input');dispatch(el,'change');requestRefresh(false);}return;}
