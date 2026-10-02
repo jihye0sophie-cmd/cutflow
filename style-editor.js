@@ -57,7 +57,7 @@ async function applyCaptionStyle(patch,record=true){
   targets.forEach(c=>{c.style={...c.style,...patch};if(patch.color)c.color=patch.color;});
   jump(cue.start);renderCues();
   changed();
-  try{await CutRenderer.fonts(project());}catch{toast('폰트를 불러오지 못했습니다. 연결을 확인해 주세요.');}
+  if(Object.prototype.hasOwnProperty.call(patch,'font'))try{await CutRenderer.fonts(project());}catch{toast('폰트를 불러오지 못했습니다. 연결을 확인해 주세요.');}
 }
 function applyAllCaptionStyle(){
   const cue=styleCue();if(!cue)return;
@@ -141,7 +141,7 @@ window.CutflowTypography={
       if(key==='strokeEnabled'||key==='strokeWidth')textStrokeOverrides[p]=key==='strokeEnabled'?!!patch[key]:$(p+'StrokeEnabled').checked;
     }
     syncTextStrokes();syncTextPositionUI();syncTextStyleNotes();changed();
-    try{await CutRenderer.fonts(project());}catch{}
+    if(Object.prototype.hasOwnProperty.call(patch,'font'))try{await CutRenderer.fonts(project());}catch{}
     const state=typographyState(p);window.dispatchEvent(new CustomEvent('cutflow-typography-updated',{detail:{kind:p,state}}));return state;
   }
 };
