@@ -72,12 +72,12 @@ async function addGridFiles(files){
 function resetCuts(grid){grid.xCuts=evenCuts(grid.cols);grid.yCuts=evenCuts(grid.rows);}
 function lineBounds(cuts,index){return {min:index?cuts[index-1]+2:2,max:index<cuts.length-1?cuts[index+1]-2:98};}
 function updateDraggedLine(e){
-  const d=state.drag;if(!d)return;const grid=state.grids[d.gridIndex];if(!grid)return;
+  const d=state.drag;if(!d||e.pointerId!==d.pointerId)return;const grid=state.grids[d.gridIndex];if(!grid)return;
   const rect=d.preview.getBoundingClientRect();let pct=d.axis==='x'?(e.clientX-rect.left)/rect.width*100:(e.clientY-rect.top)/rect.height*100;
   const cuts=d.axis==='x'?grid.xCuts:grid.yCuts,b=lineBounds(cuts,d.cutIndex);pct=clamp(pct,b.min,b.max);cuts[d.cutIndex]=pct;
   d.line.style[d.axis==='x'?'left':'top']=`${pct}%`;
 }
-function stopDrag(){if(!state.drag)return;state.drag.line.classList.remove('dragging');state.drag=null;document.body.classList.remove('auto-cut-dragging');}
+function stopDrag(e){if(!state.drag||e?.pointerId!=null&&e.pointerId!==state.drag.pointerId)return;state.drag.line.classList.remove('dragging');state.drag=null;document.body.classList.remove('auto-cut-dragging');}
 async function imageElement(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error(`${file.name}을 읽지 못했습니다.`))};im.src=u;});}
 async function splitGrid(grid,startIndex,limit){
   normalizeGrid(grid);const im=await imageElement(grid.file),out=[];
@@ -165,11 +165,12 @@ document.querySelectorAll('input[name="autoSilencePreset"]').forEach(el=>el.addE
 $('autoGridBtn').onclick=()=>$('autoGrids').click();$('autoGrids').onchange=e=>{addGridFiles([...e.target.files]);e.target.value='';};
 $('autoSingleBtn').onclick=()=>$('autoSingles').click();$('autoSingles').onchange=e=>{addSingleFiles([...e.target.files]);e.target.value='';};
 $('autoBgmBtn').onclick=()=>{const input=$('autoBgm');input.value='';input.click();};$('autoBgm').onchange=e=>{state.bgm=e.target.files[0]||null;e.target.value='';update();};
-$('autoGridList').addEventListener('input',e=>{const item=e.target.closest('.auto-grid-item');if(!item)return;const index=Number(item.dataset.gridIndex),grid=state.grids[index];if(!grid)return;if(e.target.matches('[data-grid-cols]')){grid.cols=clamp(Number(e.target.value)||1,1,12);resetCuts(grid);renderGrids();}if(e.target.matches('[data-grid-rows]')){grid.rows=clamp(Number(e.target.value)||1,1,12);resetCuts(grid);renderGrids();}if(e.target.matches('[data-grid-gap]')){grid.gap=clamp(Number(e.target.value)||0,0,40);renderGrids();}});
+$('autoGridList').addEventListener('input',e=>{const item=e.target.closest('.auto-grid-item');if(!item)return;const index=Number(item.dataset.gridIndex),grid=state.grids[index];if(!grid||e.target.value==='')return;const value=Number(e.target.value);if(!Number.isFinite(value))return;if(e.target.matches('[data-grid-cols]'))grid.cols=clamp(value,1,12);else if(e.target.matches('[data-grid-rows]'))grid.rows=clamp(value,1,12);else if(e.target.matches('[data-grid-gap]'))grid.gap=clamp(value,0,40);else return;update();});
+$('autoGridList').addEventListener('change',e=>{const item=e.target.closest('.auto-grid-item');if(!item)return;const index=Number(item.dataset.gridIndex),grid=state.grids[index];if(!grid)return;let dimension=false;if(e.target.matches('[data-grid-cols]')){grid.cols=clamp(Number(e.target.value)||grid.cols||1,1,12);dimension=true;}else if(e.target.matches('[data-grid-rows]')){grid.rows=clamp(Number(e.target.value)||grid.rows||1,1,12);dimension=true;}else if(e.target.matches('[data-grid-gap]'))grid.gap=clamp(Number(e.target.value)||0,0,40);else return;if(dimension)resetCuts(grid);renderGrids();});
 $('autoGridList').addEventListener('click',e=>{const item=e.target.closest('.auto-grid-item');if(!item)return;const index=Number(item.dataset.gridIndex),grid=state.grids[index];if(e.target.closest('[data-grid-remove]')){URL.revokeObjectURL(grid.url);state.grids.splice(index,1);renderGrids();return;}if(e.target.closest('[data-grid-reset]')){resetCuts(grid);renderGrids();}});
-$('autoGridList').addEventListener('pointerdown',e=>{const line=e.target.closest('.auto-cut-line');if(!line)return;const item=line.closest('.auto-grid-item'),preview=line.closest('.auto-grid-preview');state.drag={gridIndex:Number(item.dataset.gridIndex),axis:line.dataset.axis,cutIndex:Number(line.dataset.cut),line,preview};line.classList.add('dragging');document.body.classList.add('auto-cut-dragging');line.setPointerCapture?.(e.pointerId);e.preventDefault();});
+$('autoGridList').addEventListener('pointerdown',e=>{const line=e.target.closest('.auto-cut-line');if(!line)return;const item=line.closest('.auto-grid-item'),preview=line.closest('.auto-grid-preview');state.drag={gridIndex:Number(item.dataset.gridIndex),axis:line.dataset.axis,cutIndex:Number(line.dataset.cut),line,preview,pointerId:e.pointerId};line.classList.add('dragging');document.body.classList.add('auto-cut-dragging');line.setPointerCapture?.(e.pointerId);e.preventDefault();});
 $('autoSingleList').addEventListener('click',e=>{const item=e.target.closest('.auto-single-item');if(!item)return;const index=Number(item.dataset.singleIndex),single=state.singles[index];if(e.target.closest('[data-single-remove]')){URL.revokeObjectURL(single.url);state.singles.splice(index,1);renderSingles();update();}});
-window.addEventListener('pointermove',updateDraggedLine,{passive:true});window.addEventListener('pointerup',stopDrag);window.addEventListener('pointercancel',stopDrag);
+window.addEventListener('pointermove',updateDraggedLine,{passive:true});window.addEventListener('pointerup',stopDrag);window.addEventListener('pointercancel',stopDrag);$('autoGridList').addEventListener('lostpointercapture',stopDrag,true);
 window.CutflowAutoSetup={
   status:()=>autoState(),
   run,
