@@ -49,8 +49,7 @@ const retiredMarkers=[
   ['index.html','history.css',index],
   ['index.html','undoCuesBtn',index],
   ['app.js','cueHistory',read('app.js')],
-  ['app.js','CutflowTimeline',read('app.js')],
-  ['timing-editor.js','CutflowTimeline',read('timing-editor.js')],
+
   ['style-editor.js','CutflowCaptionStyle',read('style-editor.js')],
   ['project-store.css','.project-tools',read('project-store.css')],
   ['project-store.css','.project-save-status',read('project-store.css')],
@@ -60,6 +59,10 @@ const retiredMarkers=[
 for(const [file,marker,source] of retiredMarkers){
   if(source.includes(marker))fail(`retired marker "${marker}" returned in ${file}`);
 }
+
+if(/window\.CutflowTimeline\s*=/.test(read('app.js'))||/window\.CutflowTimeline\s*=/.test(read('timing-editor.js'))){
+  fail('retired CutflowTimeline API returned');
+}else pass('retired CutflowTimeline API remains removed while CutflowTimelineBridge is allowed');
 if(!process.exitCode)pass('retired compatibility paths remain removed');
 
 if(!/id="v42FullStage" width="1080" height="1920"/.test(mobile)){
