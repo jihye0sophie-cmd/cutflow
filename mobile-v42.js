@@ -383,7 +383,12 @@
     const captionText=$('v42CaptionText');
     const rememberCaptionSelection=()=>{if(!captionText)return;captionSelection={index,start:captionText.selectionStart??0,end:captionText.selectionEnd??0};};
     ['select','keyup','mouseup','touchend'].forEach(type=>captionText?.addEventListener(type,rememberCaptionSelection));
-    const applySelectedCaptionColor=color=>{rememberCaptionSelection();const sel=captionSelection;if(sel.index!==index||sel.start===sel.end){window.CutflowAutoBridge?.toast?.('색상을 바꿀 글자를 먼저 선택해 주세요.');return;}api.applySelectionColor?.(index,sel.start,sel.end,color);};
+    const applySelectedCaptionColor=color=>{
+      if(document.activeElement===captionText)rememberCaptionSelection();
+      const sel=captionSelection;
+      if(sel.index!==index||sel.start===sel.end){window.CutflowAutoBridge?.toast?.('색상을 바꿀 글자를 먼저 선택해 주세요.');return;}
+      api.applySelectionColor?.(index,sel.start,sel.end,color);
+    };
     panel.querySelectorAll('[data-caption-selection-color]').forEach(btn=>btn.onclick=()=>applySelectedCaptionColor(btn.dataset.captionSelectionColor));
     $('v42CaptionSelectionPicker').oninput=e=>applySelectedCaptionColor(e.target.value);
     $('v42CaptionSelectionReset').onclick=()=>applySelectedCaptionColor(null);
@@ -401,7 +406,11 @@
     $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)selectCaptionAndEdit(index+1);};
     $('v42CaptionPlay').onclick=()=>api.play?.(index);
     $('v42CaptionTiming').onclick=()=>{tab='timing';qsa('button',tabs).forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.tab==='timing')));renderPanel(true);};
-    $('v42CaptionSplit').onclick=()=>{const cursor=captionText?.selectionStart;api.split(index,cursor);};
+    $('v42CaptionSplit').onclick=()=>{
+      const liveCursor=document.activeElement===captionText?captionText?.selectionStart:null;
+      const cursor=Number.isInteger(liveCursor)?liveCursor:(captionSelection.index===index?captionSelection.end:captionText?.selectionStart);
+      api.split(index,cursor);
+    };
     $('v42CaptionMerge').onclick=()=>{api.mergeNext(index);};
     $('v42CaptionDelete').onclick=()=>{if(confirm(`자막 ${state.segment.position}을 삭제할까요?`))api.remove(index);};
     $('v42SceneSplitCaption').onclick=async()=>{if(captionSceneIndex<0)return;await window.CutflowScene?.split?.(captionSceneIndex,state.start);};
