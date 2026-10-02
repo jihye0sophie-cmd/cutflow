@@ -213,6 +213,7 @@ assert(js.includes('suppressMobileClickUntil=performance.now()+550'),'fullscreen
 assert(js.includes('CutflowPlayer?.seekProgress'),'direct mobile scrubber bridge missing');
 assert(js.includes('let mobileScrubbing=false')&&js.includes('const beginScrub='),'iPhone scrubber drag-state guard missing');
 assert(js.includes("stage.addEventListener('lostpointercapture'"),'iPhone transform lost-pointer cleanup missing');
+assert(js.includes("stage.addEventListener('pointercancel',e=>{if(mobileTransformPoints.has(e.pointerId))endMobileTransformPointer(e);"),'interrupted iPhone media transforms must commit through the normal gesture end path');
 assert(js.includes("bindMobileTap($('v42Undo')")&&js.includes("bindMobileTap($('v42Redo')"),'iPhone preview history controls need guarded taps');
 assert(css.includes('v42-mobile.v42-ios .v42-scrubber'),'iPhone scrubber touch CSS missing');
 assert(css.includes('height:var(--v42-visual-height,100dvh)!important'),'fullscreen preview must follow iPhone visual viewport');
@@ -297,6 +298,7 @@ assert(js.includes("applyMediaField(e.target,{live:true})")&&js.includes("Cutflo
 assert(sceneUi.includes('commitLive:commitSceneLive')&&sceneUi.includes('options.live'),'scene live media edit bridge missing');
 assert(sceneUi.includes("beginScoped?.('이미지·영상 교체','timeline')")&&history.includes('cancelPending'),'media replacement must have explicit scoped undo with failure cleanup');
 assert(app.includes("setAttribute('webkit-playsinline','')")&&app.includes('defaultMuted=true'),'iPhone video element compatibility missing');
+assert(app.includes('audioLoadId=0')&&app.includes('if(loadId!==audioLoadId)return false'),'newer narration loads must supersede stale async audio decoding');
 assert(js.includes("const numeric=['scale','x','y','trimStart','trimEnd','mediaVolume','mediaFadeIn','mediaFadeOut']"),'media numeric empty-value guard missing');
 assert(css.includes('#v42Panel[data-active-tab="media"] input[type="range"]'),'iPhone media range touch styling missing');
 assert(js.includes('renderForce=renderForce||!!force')&&js.includes('if(renderQueued)return'),'mobile refresh requests must be coalesced');
