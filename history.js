@@ -42,7 +42,12 @@
       window.toast?.(prefix+(entry.label?' · '+entry.label:''));
       return true;
     }catch(error){
-      console.error('Cutflow history restore failed',entry.scope,error);window.toast?.('편집 기록을 복원하지 못했습니다.');return false;
+      let rollbackError=null;
+      try{await bridge.restore(current,{history:true});}
+      catch(rollback){rollbackError=rollback;console.error('Cutflow history rollback failed',entry.scope,rollback);}
+      console.error('Cutflow history restore failed',entry.scope,error);
+      window.toast?.(rollbackError?'편집 기록 복원에 실패했고 현재 상태 복원도 완료하지 못했습니다. 페이지를 새로고침해 주세요.':'편집 기록을 복원하지 못해 현재 상태로 되돌렸습니다.');
+      return false;
     }finally{applying=false;busy=false;update();}
   }
   async function undo(){if(!past.length||busy||batching)return false;const entry=past.pop(),ok=await apply(entry,'undo');if(!ok)past.push(entry);update();return ok;}
