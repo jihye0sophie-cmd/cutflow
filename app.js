@@ -286,7 +286,7 @@ async function exportVideo(){
   if(!scenes.length){emit('cutflow-export-error',{message:'먼저 이미지나 영상을 추가해 주세요.'});toast('먼저 이미지나 영상을 추가해 주세요.');return false;}
   const missing=cues.filter(c=>!scenes.some(s=>s.id===c.sceneId)).length;if(missing){emit('cutflow-export-error',{message:`장면이 연결되지 않은 자막이 ${missing}개 있습니다.`});toast('장면이 연결되지 않은 자막을 먼저 확인해 주세요.');return false;}
   pause();exporting=true;const mobile=window.CutflowUI?.mode==='mobile';
-  if(!mobile)$('exportDialog').showModal();$('downloadLink').hidden=true;$('closeExportBtn').hidden=true;$('cancelExportBtn').hidden=false;$('exportProgress').value=0;if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}stats();
+  if(!mobile){const d=$('exportDialog');if(d&&!d.open){try{d.showModal();}catch(error){console.warn('Cutflow export dialog open failed',error);}}}$('downloadLink').hidden=true;$('closeExportBtn').hidden=true;$('cancelExportBtn').hidden=false;$('exportProgress').value=0;if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}stats();
   const token={cancelled:false};window.currentExport=token;let wakeLock;
   const width=Number($('resolutionSelect').value),filename=`Cutflow_${new Date().toISOString().slice(0,10)}_${width}p.mp4`;
   emit('cutflow-export-start',{width,filename});
