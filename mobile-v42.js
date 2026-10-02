@@ -388,14 +388,14 @@
     $('v42CaptionSelectionPicker').oninput=e=>applySelectedCaptionColor(e.target.value);
     $('v42CaptionSelectionReset').onclick=()=>applySelectedCaptionColor(null);
     const selectCaptionAndEdit=nextIndex=>{
+      captionText?.blur?.();
       if(!api.select(nextIndex))return;
-      requestRefresh(true);
-      requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
         const input=$('v42CaptionText');
         input?.focus?.({preventScroll:true});
-        if(input&&typeof input.setSelectionRange==='function'){const at=input.value.length;input.setSelectionRange(at,at);}
+        if(input&&typeof input.setSelectionRange==='function'){const at=input.value.length;try{input.setSelectionRange(at,at);}catch{}}
         ensurePanelVisible();
-      });
+      }));
     };
     $('v42CaptionPrev').onclick=()=>{if(index>state.segment.first)selectCaptionAndEdit(index-1);};
     $('v42CaptionNext').onclick=()=>{if(index<state.segment.last)selectCaptionAndEdit(index+1);};
@@ -777,8 +777,8 @@
     selectSceneFromStrip(Number(button.dataset.scene));
   });
 
-  panel.addEventListener('input',e=>{if(e.target.dataset.bgmField&&['volume'].includes(e.target.dataset.bgmField)){applyBgmField(e.target);return;}if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
-  panel.addEventListener('change',e=>{if(e.target.dataset.bgmField){applyBgmField(e.target);return;}if(e.target.dataset.composeField){applyComposeField(e.target);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});return;}if(e.target.dataset.mediaField){applyMediaField(e.target);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
+  panel.addEventListener('input',e=>{if(e.target.dataset.bgmField&&['volume'].includes(e.target.dataset.bgmField)){applyBgmField(e.target);return;}if(e.target.dataset.composeField&&['title','channel'].includes(e.target.dataset.composeField)){applyComposeField(e.target);return;}if(e.target.dataset.typoField&&['color','x','y'].includes(e.target.dataset.typoField)){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf==='text'){window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{text:e.target.value},{live:true});return;}const f=e.target.dataset.mediaField;if(f&&['scale','x','y','mediaVolume','mediaFadeIn','mediaFadeOut'].includes(f)){applyMediaField(e.target);return;}proxyInput(e,proxyMap);});
+  panel.addEventListener('change',e=>{if(e.target.dataset.bgmField){applyBgmField(e.target);return;}if(e.target.dataset.composeField){applyComposeField(e.target);return;}if(e.target.dataset.typoField){applyTypographyField(e.target);return;}const cf=e.target.dataset.captionField;if(cf){if(cf==='text'){window.CutflowCaption?.commitLive?.(window.CutflowCaption.currentIndex());return;}window.CutflowCaption?.update?.(window.CutflowCaption.currentIndex(),{[cf]:cf==='color'?e.target.value:Number(e.target.value)});return;}if(e.target.dataset.mediaField){applyMediaField(e.target);return;}if(proxyChange(e,proxyMap))setTimeout(()=>requestRefresh(false),0);});
   panel.addEventListener('click',e=>{
     const typoColor=e.target.closest('[data-typo-palette] [data-color]');if(typoColor){const kind=typoColor.closest('[data-typo-palette]').dataset.typoPalette;window.CutflowTypography?.update?.(kind,{color:typoColor.dataset.color});return;}
     const sw=e.target.closest('[data-color-target] [data-color]');if(sw){const wrap=sw.closest('[data-color-target]'),el=$(wrap.dataset.colorTarget);if(el){el.value=sw.dataset.color;dispatch(el,'input');dispatch(el,'change');requestRefresh(false);}return;}
