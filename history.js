@@ -13,7 +13,6 @@
   }
   function start(label='편집',scope='project'){
     if(applying||busy)return false;
-    if(pending?.scope===scope)return true;
     const snapshot=capture(scope);if(!snapshot)return false;
     pending={scope,snapshot,signature:signature(snapshot),label};return true;
   }
