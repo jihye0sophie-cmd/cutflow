@@ -92,7 +92,7 @@ function createFreeCue(scene){
 let toastTimer;
 function toast(text){$('toast').textContent=text;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),4500);}
 function project(){return {titleStrokeEnabled:$('titleStrokeEnabled').checked,titleStrokeWidth:Math.max(0,Math.min(18,Number($('titleStrokeWidth').value)||0)),channelStrokeEnabled:$('channelStrokeEnabled').checked,channelStrokeWidth:Math.max(0,Math.min(18,Number($('channelStrokeWidth').value)||0)),bgm:window.bgmProject?.(),channelSize:Number($('channelSize').value)||43.2,channelX:Number($('channelX').value),channelY:Number($('channelY').value),channelItalic:$('channelItalic').checked,channelBold:$('channelBold').checked,channelColor:$('channelColor').value||'#dddddd',titleSize:Number($('titleSize').value)||86.4,titleX:Number($('titleX').value),titleY:Number($('titleY').value),titleItalic:$('titleItalic').checked,titleBold:$('titleBold').checked,titleColor:$('titleColor').value||'#ffe22e',titleColorRanges,titleFont:$('titleFont').value||'noto',channelFont:$('channelFont').value||'noto',scenes:timelineScenes(),cues,title:$('titleInput').value,channel:$('channelInput').value,layout:$('layoutSelect').value,fit:$('fitSelect').value,duration:totalDuration(),audioBuffer};}
-function rememberCues(){window.CutflowHistory?.begin?.('자막 편집');}
+function rememberCues(){window.CutflowHistory?.beginScoped?.('자막 편집','timeline')||window.CutflowHistory?.begin?.('자막 편집');}
 function repeatFlags(){const flags=new Set(),entries=timelineScenes().map((s,i)=>({s,i})).filter(({s})=>!s.captionSegment||s.captionSegment.position===1);entries.forEach((entry,pos)=>{const s=entry.s;if(s.motion==='still')return;if(pos&&s.motion===entries[pos-1].s.motion){flags.add(entry.i);flags.add(entries[pos-1].i);}const hits=entries.slice(Math.max(0,pos-3),pos+1).filter(x=>x.s.motion===s.motion);if(hits.length>=3)hits.forEach(x=>flags.add(x.i));});return flags;}
 function changed({syncBgm=true}={}){dirty=true;stats();if(syncBgm)window.syncBgm?.({emit:false});window.CutflowProjects?.markDirty?.();window.CutflowHistory?.commit?.();}
 function setUiText(id,text){const el=$(id);text=String(text);if(el&&el.textContent!==text)el.textContent=text;}
@@ -460,6 +460,28 @@ window.CutflowAutoBridge={
   toast
 };
 
+window.CutflowTimelineBridge={
+  capture(){return {schemaVersion:1,cues:cloneProjectData(cues),scenes:scenes.map(s=>({meta:cleanSceneState(s),file:s.file})),playhead:currentTime()};},
+  async restore(data,options={}){
+    if(!data||data.schemaVersion!==1)throw new Error('지원하지 않는 타임라인 기록입니다.');
+    loading++;stats();
+    try{
+      pause();for(const s of scenes)releaseSceneResources(s);scenes=[];
+      for(const saved of data.scenes||[]){
+        if(!saved?.file)continue;
+        const file=saved.file instanceof File?saved.file:new File([saved.file],saved.meta?.name||'media',{type:saved.file.type||''});
+        const scene=await makeScene(file);Object.assign(scene,saved.meta||{});scene.file=file;scenes.push(scene);
+      }
+      cues=cloneProjectData(data.cues||[]);normalizeSceneSettingsFromCues();assignAvailableCuts();
+      offset=Math.max(0,Math.min(Number(data.playhead)||0,totalDuration()));renderCues();waveform(offset);dirty=true;stats();
+      if(typeof CustomEvent==='function'){
+        window.dispatchEvent(new CustomEvent('cutflow-timeline-restored',{detail:{history:!!options.history,sceneCount:scenes.length,cueCount:cues.length,playhead:offset}}));
+        window.dispatchEvent(new CustomEvent('cutflow-scene',{detail:window.CutflowScene?.index?.()??0}));
+      }
+      return true;
+    }finally{loading--;stats();}
+  }
+};
 window.CutflowProjectBridge={
   capture(){return {schemaVersion:1,controls:captureControls(),titleColorRanges:cloneProjectData(titleColorRanges),cues:cloneProjectData(cues),scenes:scenes.map(s=>({meta:cleanSceneState(s),file:s.file})),narration:audioFile?{file:audioFile,name:audioName}:null,bgm:window.bgmSnapshot?.()||null,playhead:currentTime(),estimatedMediaBytes:mediaBytes()};},
   async restore(data,options={}){if(!data||data.schemaVersion!==1)throw new Error('지원하지 않는 프로젝트 형식입니다.');loading++;stats();try{await clearProjectMedia();restoreControls(data.controls);titleColorRanges=cloneProjectData(data.titleColorRanges||[]);lastTitleText=$('titleInput').value||'';for(const saved of data.scenes||[]){if(!saved?.file)continue;const file=saved.file instanceof File?saved.file:new File([saved.file],saved.meta?.name||'media',{type:saved.file.type||''});const scene=await makeScene(file);Object.assign(scene,saved.meta||{});scene.file=file;scenes.push(scene);}cues=cloneProjectData(data.cues||[]);normalizeSceneSettingsFromCues();assignAvailableCuts();if(data.narration?.file){const f=data.narration.file instanceof File?data.narration.file:new File([data.narration.file],data.narration.name||'narration.wav',{type:data.narration.file.type||'audio/wav'});await loadAudio(f,{commit:false,notify:false});}await window.restoreBgmSnapshot?.(data.bgm||null,{silent:true});offset=Math.max(0,Math.min(Number(data.playhead)||0,totalDuration()));renderCues();waveform(offset);window.syncTextStyleNotes?.();await CutRenderer.fonts(project());dirty=true;if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-project-restored',{detail:{history:!!options.history,sceneCount:scenes.length,cueCount:cues.length,playhead:offset,narration:!!audioBuffer,bgm:!!window.bgmProject?.().buffer}}));return true;}finally{loading--;stats();}},
