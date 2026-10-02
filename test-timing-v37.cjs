@@ -28,6 +28,7 @@ assert.ok(js.includes('data-timing-scene-duration'),'scene duration numeric edit
 assert.ok(!js.includes('timing-narration-layer')&&!js.includes('timing-videoaudio-layer')&&!js.includes('timing-bgm-layer'),'non-editable audio tracks should be removed from precision timing');
 assert.ok(js.includes('data-timing-action="prev-scene"')&&js.includes('data-timing-action="next-scene"'),'previous/next scene timing controls missing');
 assert.ok(css.includes('.timeline-caption-edge'),'caption edge handle styles missing');
+assert.ok(css.includes('.timeline-caption-edge{top:0!important}')&&css.includes('.timeline-scene-handle{top:0!important}'),'nested timing handles must stay at top:0 inside their own track bodies');
 assert.ok(css.includes('.timeline-scene-handle'),'scene boundary handle styles missing');
 assert.ok(css.includes('.timing-waveform-bars')&&js.includes('const bars=420'),'dense narration waveform missing');
 assert.ok(!css.includes('.timeline-audio-block'),'retired audio layer styles should be removed');
