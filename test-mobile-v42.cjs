@@ -260,6 +260,7 @@ assert(js.includes('data-tab="caption"')&&js.includes('data-tab="media"')&&js.in
 assert(!js.includes('data-tab="narration"')&&!js.includes('data-tab="template"')&&!js.includes('data-tab="bgm"'),'legacy five-tab mobile navigation must be removed');
 assert(js.includes('id="v42CaptionPrev"')&&js.includes('id="v42CaptionNext"'),'mobile previous/next caption controls missing');
 assert(js.includes('{text:e.target.value},{live:true}')&&js.includes('commitLive?.'),'mobile caption typing must commit as one edit instead of one undo per keystroke');
+assert(js.includes('document.activeElement===captionText')&&js.includes('captionSelection.index===index?captionSelection.end'),'iPhone caption selection and split cursor preservation missing');
 assert(!js.includes("{[cf]:cf==='color'?e.target.value:Number(e.target.value)});return;}if(e.target.dataset.mediaField"),'caption text change must not coerce text to Number');
 assert(history.includes('#captionBatchDialog'),'whole-caption editor actions must use timeline-scoped undo');
 assert(app.includes("beginScoped?.('전체 자막 자동 줄바꿈','timeline')"),'whole-caption auto wrap must use timeline-scoped undo');
