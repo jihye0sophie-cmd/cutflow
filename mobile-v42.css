@@ -1470,3 +1470,29 @@ body.v42-mobile.v42-ios #v42PreviewDialog .v42-full-head{
   padding-top:env(safe-area-inset-top)!important;
   box-sizing:border-box!important;
 }
+
+/* iPhone scene strip: horizontal gestures must not become accidental scene taps. */
+body.v42-mobile .v42-scene-strip{
+  touch-action:pan-x!important;
+  overscroll-behavior-x:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  scroll-behavior:auto;
+}
+body.v42-mobile.v42-ios .v42-scene-strip>button{
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+}
+body.v42-mobile.v42-ios .v42-add-scene{
+  min-width:34px!important;
+  width:34px!important;
+  min-height:34px!important;
+  height:34px!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+body.v42-mobile .v42-add-scene:disabled{
+  opacity:.45!important;
+  pointer-events:none!important;
+}
