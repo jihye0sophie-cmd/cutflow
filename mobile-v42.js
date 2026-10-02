@@ -179,7 +179,7 @@
     }
   };
   stage.addEventListener('pointerup',endMobileTransformPointer);
-  stage.addEventListener('pointercancel',e=>{mobileTransformPoints.delete(e.pointerId);if(!mobileTransformPoints.size){window.CutflowScene?.cancelTransformGesture?.();mobileTransformGesture=null;hideMobileTransformGuides();}});
+  stage.addEventListener('pointercancel',e=>{if(mobileTransformPoints.has(e.pointerId))endMobileTransformPointer(e);});
   stage.addEventListener('lostpointercapture',e=>{if(mobileTransformPoints.has(e.pointerId))endMobileTransformPointer(e);});
 
   const setMobileActive=(next,{initial=false}={})=>{
