@@ -28,6 +28,6 @@ assert.ok(desktop.includes('desktopBatchCaptions'),'desktop whole-caption entry 
 assert.ok(mobile.includes('v42CaptionBatchOpen'),'mobile whole-caption entry missing');
 assert.ok(css.includes('@media(max-width:760px)'),'mobile whole-caption layout missing');
 assert.ok(css.includes('white-space:nowrap'),'one-line caption rows missing');
-assert.ok(js.includes("dialog.addEventListener('cancel',()=>{commitDraft();})"),'batch editor must commit draft on cancel');
+assert.ok(js.includes("dialog.addEventListener('cancel'")&&js.includes('commitDraft()')&&js.includes("?.blur?.()"),'batch editor must commit draft and release iPhone focus on cancel');
 assert.ok(js.includes("String(state.text||'').trim()"),'deleted caption gaps should be hidden from compact batch rows');
 console.log('PASS: shared whole-caption editor v1 is wired for PC/mobile and preserves caption timing ranges.');
