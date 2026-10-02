@@ -89,12 +89,11 @@
       if(patch.mediaFadeOut!=null)scene.mediaFadeOut=Math.max(0,Math.min(available,Number(patch.mediaFadeOut)||0));
       if(trimChanged&&group){for(const ci of group.cueIndices){delete cues[ci].trimStart;delete cues[ci].trimEnd;cues[ci].mediaOffset=Math.max(0,cues[ci].start-group.start);}if(group.freeEdit)setSceneGroupDuration(group.firstCueIndex,Math.max(.1,available));}
     }
-    renderSceneModel();
     if(live){dirty=true;stats();window.CutflowProjects?.markDirty?.();}
-    else changed();
+    else{renderSceneModel();changed();}
     return emitSceneUpdated(index);
   };
-  const commitSceneLive=index=>{window.CutflowHistory?.commit?.();return emitSceneUpdated(index);};
+  const commitSceneLive=index=>{renderSceneModel();window.CutflowHistory?.commit?.();return emitSceneUpdated(index);};
 
   const snapAxis=(candidates,threshold)=>{
     let best=null;
