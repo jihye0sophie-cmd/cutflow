@@ -18,6 +18,7 @@
   }
   function begin(label='편집'){return start(label,'project')}
   function beginScoped(label='편집',scope='timeline'){return start(label,scope)}
+  function ensureScoped(label='편집',scope='timeline'){if(pending?.scope===scope)return true;return start(label,scope)}
   function commit(){
     if(applying||busy||!pending)return;
     const now=capture(pending.scope);if(!now){pending=null;return;}
@@ -71,6 +72,6 @@
     if(mod&&key==='z'){e.preventDefault();e.stopImmediatePropagation();if(e.shiftKey)redo();else undo();return;}
     if(e.ctrlKey&&!e.metaKey&&!e.altKey&&key==='y'){e.preventDefault();e.stopImmediatePropagation();redo();return;}
   },true);
-  window.CutflowHistory={begin,beginScoped,commit,undo,redo,reset,get canUndo(){return past.length>0},get canRedo(){return future.length>0},get busy(){return busy}};
+  window.CutflowHistory={begin,beginScoped,ensureScoped,commit,undo,redo,reset,get canUndo(){return past.length>0},get canRedo(){return future.length>0},get busy(){return busy}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update,{once:true});else queueMicrotask(update);
 })();
