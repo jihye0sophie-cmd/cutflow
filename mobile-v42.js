@@ -893,7 +893,7 @@
     if(performance.now()>=suppressMobileClickUntil)return;
     e.preventDefault();e.stopImmediatePropagation();
   },true);
-  const bindMobileTap=(el,handler)=>{
+  function bindMobileTap(el,handler){
     if(!el)return;
     let lastPointer=0;
     el.addEventListener('pointerup',e=>{
@@ -907,7 +907,7 @@
       e.preventDefault();e.stopPropagation();
       handler(e);
     });
-  };
+  }
   const selectAdjacentScene=delta=>{
     window.CutflowPlayer?.pause?.();
     const {items,index}=currentScene();
