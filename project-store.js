@@ -58,7 +58,7 @@ async function load(id){
   }catch(e){
     console.error(e);let rollbackError=null;
     if(previous){
-      try{await bridge().restore(previous,{history:true});window.CutflowHistory?.reset?.();}
+      try{await bridge().restore(previous,{history:true});}
       catch(error){rollbackError=error;console.error('Cutflow project load rollback failed',error);}
     }
     if(previous&&!rollbackError){
