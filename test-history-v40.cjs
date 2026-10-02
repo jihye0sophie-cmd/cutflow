@@ -4,11 +4,12 @@ const js=fs.readFileSync('history.js','utf8'),app=fs.readFileSync('app.js','utf8
 assert(js.includes('async function undo()')&&js.includes('async function redo()'),'undo/redo functions missing');
 assert(js.includes("key==='z'")&&js.includes("key==='y'"),'keyboard shortcuts missing');
 assert(js.includes('beginScoped')&&js.includes('ensureScoped')&&js.includes('cancelPending'),'hybrid history API missing');
+assert(js.includes('beginBatch')&&js.includes('endBatch')&&js.includes('if(batching||applying||busy||!pending)return'),'history batch transaction API missing');
 assert(js.includes('scopeBridge')&&js.includes("scope==='timeline'"),'timeline history scope missing');
 assert(js.includes("'cutflow-history-updated'"),'history state event missing');
 assert(js.includes('fileSig')&&js.includes('snapshot:current'),'history must fingerprint media metadata while retaining shared File references');
 assert(!js.includes('structuredClone(snapshot)')&&!js.includes('new File([snapshot'),'history must not duplicate media bytes per entry');
-assert(js.includes("function ensureScoped(label='편집',scope='timeline'){if(pending?.scope===scope)return true;"),'continuous live edits must preserve their first scoped snapshot');
+assert(js.includes("function ensureScoped(label='편집',scope='timeline')")&&js.includes("if(pending?.scope===scope)return true"),'continuous live edits must preserve their first scoped snapshot');
 assert(!js.includes("function start(label='편집',scope='project'){\n    if(applying||busy)return false;\n    if(pending?.scope===scope)return true;"),'a new user action must not reuse a stale pending snapshot');
 assert(app.includes('window.CutflowTimelineBridge={'),'timeline-only restore bridge missing');
 assert(app.includes('window.CutflowHistory?.commit?.()'),'changed() must commit history');
