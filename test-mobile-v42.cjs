@@ -299,7 +299,7 @@ assert(app.includes("setAttribute('webkit-playsinline','')")&&app.includes('defa
 assert(js.includes("const numeric=['scale','x','y','trimStart','trimEnd','mediaVolume','mediaFadeIn','mediaFadeOut']"),'media numeric empty-value guard missing');
 assert(css.includes('#v42Panel[data-active-tab="media"] input[type="range"]'),'iPhone media range touch styling missing');
 assert(js.includes('renderForce=renderForce||!!force')&&js.includes('if(renderQueued)return'),'mobile refresh requests must be coalesced');
-assert(js.includes('const refreshEditorState=()=>')&&js.includes("['cutflow-scene-updated','cutflow-caption-updated']"),'mobile core update events must share one refresh path');
+assert(js.includes('const refreshEditorState=()=>')&&js.includes("['cutflow-scene-updated','cutflow-caption-updated','cutflow-caption-selected']"),'mobile core update events must share one refresh path');
 assert(!js.includes("if(api.split(index,cursor))requestRefresh(true)")&&!js.includes("CutflowScene?.select?.(i);requestRefresh(true)"),'mobile core scene/caption actions must not trigger duplicate refreshes');
 assert(js.includes('function ensureMirrorStage()')&&js.includes('if(mobileActive||fullOpen)ensureMirrorStage();'),'mobile preview mirror must stop when inactive');
 assert(js.includes('restoredIndex=window.CutflowScene?.index?.()??0'),'mobile project restore must select the scene at the restored playhead');
