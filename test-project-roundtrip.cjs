@@ -1,6 +1,7 @@
 const fs=require('node:fs'),assert=require('node:assert');
 const store=fs.readFileSync('project-store.js','utf8');
 const app=fs.readFileSync('app.js','utf8');
+const html=fs.readFileSync('index.html','utf8');
 
 assert.ok(store.includes("appVersion:'42'"),'saved project metadata must use current app version');
 assert.ok(store.includes("fileRef:ref"),'scene media must be detached into blob references');
