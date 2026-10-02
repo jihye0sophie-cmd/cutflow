@@ -261,7 +261,7 @@ assert(!js.includes('data-tab="narration"')&&!js.includes('data-tab="template"')
 assert(js.includes('id="v42CaptionPrev"')&&js.includes('id="v42CaptionNext"'),'mobile previous/next caption controls missing');
 assert(js.includes('{text:e.target.value},{live:true}')&&js.includes('commitLive?.'),'mobile caption typing must commit as one edit instead of one undo per keystroke');
 assert(js.includes('document.activeElement===captionText')&&js.includes('captionSelection.index===index?captionSelection.end'),'iPhone caption selection and split cursor preservation missing');
-assert(!js.includes("{[cf]:cf==='color'?e.target.value:Number(e.target.value)});return;}if(e.target.dataset.mediaField"),'caption text change must not coerce text to Number');
+assert(js.includes("if(cf==='text'){window.CutflowCaption?.commitLive?.(window.CutflowCaption.currentIndex());return;}"),'caption text change must commit live text without numeric coercion');
 assert(history.includes('#captionBatchDialog'),'whole-caption editor actions must use timeline-scoped undo');
 assert(app.includes("beginScoped?.('전체 자막 자동 줄바꿈','timeline')"),'whole-caption auto wrap must use timeline-scoped undo');
 assert(!js.includes('data-caption-color'),'current caption color must not appear in mobile caption body');
