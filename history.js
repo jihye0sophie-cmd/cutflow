@@ -8,7 +8,7 @@
   const signature=value=>{try{return JSON.stringify(value,(k,v)=>fileSig(v))}catch{return ''}};
   const capture=(scope='project')=>{try{return (scope==='project'?projectBridge():scopeBridge(scope))?.capture?.()||null}catch(error){console.warn('Cutflow history capture failed',scope,error);return null}};
   function update(){
-    const canUndo=!busy&&past.length>0,canRedo=!busy&&future.length>0;
+    const canUndo=!busy&&!batching&&past.length>0,canRedo=!busy&&!batching&&future.length>0;
     if(typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('cutflow-history-updated',{detail:{canUndo,canRedo,busy}}));
   }
   function start(label='편집',scope='project'){
