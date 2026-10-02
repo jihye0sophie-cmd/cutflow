@@ -172,6 +172,10 @@ assert(app.includes("'cutflow-project-restored'"),'project restore completion ev
 assert(projectStore.includes("'cutflow-project-loaded'"),'project loaded event missing');
 assert(projectStore.includes("'cutflow-project-saved'"),'project saved event missing');
 assert(history.includes("'cutflow-history-updated'"),'history updated event missing');
+assert(history.includes('beginScoped')&&history.includes('ensureScoped')&&history.includes('scopeFor(target)'),'hybrid scoped history API missing');
+assert(app.includes('window.CutflowTimelineBridge={'),'timeline-only history bridge missing');
+assert(sceneUi.includes("beginScoped?.('장면 나누기','timeline')")&&sceneUi.includes("beginScoped?.('장면 삭제','timeline')")&&sceneUi.includes("beginScoped?.('장면 합치기','timeline')"),'scene structural edits must use timeline-scoped undo');
+assert(app.includes("ensureScoped?.('자막 편집','timeline')"),'caption edits must preserve timeline-scoped history');
 assert(js.includes('syncAfterProjectRestore'),'mobile project restore resync missing');
 assert(js.includes("data-history-control=\"1\""),'mobile history controls must bypass history capture');
 assert(app.includes('window.CutflowPlayer={'),'shared playback bridge missing');
