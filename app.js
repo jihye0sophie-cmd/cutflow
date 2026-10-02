@@ -345,19 +345,24 @@ window.CutflowCaption={
     const si=window.CutflowScene?.index?.()||0,ci=window.CutflowScene?.cueIndex?.(si);
     return Number.isInteger(ci)&&ci>=0?ci:Math.max(0,active);
   },
-  update(index,patch={}){
-    const c=cues[index];if(!c)return false;const seg=captionSegmentInfo(index);
+  update(index,patch={},options={}){
+    const c=cues[index];if(!c)return false;const seg=captionSegmentInfo(index),live=!!options.live;
+    if(live)window.CutflowHistory?.ensureScoped?.('자막 수정','timeline');
     const nextStart=patch.start!=null&&!c.freeEdit?Number(patch.start):null,nextEnd=patch.end!=null&&!c.freeEdit?Number(patch.end):null;
     if(nextStart!=null&&(!Number.isFinite(nextStart)||nextStart<0||nextStart>=c.end-.05||(index>0&&nextStart<cues[index-1].end))){toast('자막 시작 시간을 확인해 주세요.');return false;}
     if(nextEnd!=null&&(!Number.isFinite(nextEnd)||nextEnd<=(nextStart??c.start)+.05||(index<cues.length-1&&nextEnd>cues[index+1].start))){toast('자막 종료 시간을 확인해 주세요.');return false;}
-    rememberCues();
+    if(!live)rememberCues();
     if(patch.text!=null){c.colorRanges=CaptionRanges.edit(c.text,String(patch.text),c.colorRanges);c.text=String(patch.text);c.captionGap=!c.text.trim();}
     if(patch.color!=null){c.color=patch.color;c.style={...c.style,color:patch.color};}
     if(nextStart!=null)c.start=nextStart;
     if(nextEnd!=null)c.end=nextEnd;
     if(c.sceneId){for(let j=seg.first;j<=seg.last;j++)cues[j].mediaOffset=Math.max(0,cues[j].start-cues[seg.first].start);}
+    if(live){
+      dirty=true;stats();window.CutflowProjects?.markDirty?.();captionChanged(index);return captionState(index);
+    }
     return commitCaptionChange(index);
   },
+  commitLive(index){window.CutflowHistory?.commit?.();return captionState(index);},
   play(index){const c=cues[index];if(!c)return false;jump(c.start);play();return true;},
   applySelectionColor(index,start,end,color){
     const c=cues[index];if(!c)return false;start=Number(start);end=Number(end);
@@ -426,6 +431,7 @@ function autoWrapCaptionText(text,style={}){
 }
 async function autoWrapCaptions(){
   try{await CutRenderer.fonts(project());}catch{}
+  window.CutflowHistory?.beginScoped?.('전체 자막 자동 줄바꿈','timeline');
   let changedCount=0;
   for(const cue of cues){const style=CaptionStyle.resolve(cue,project()),next=autoWrapCaptionText(cue.text,style);if(next!==cue.text){cue.text=next;changedCount++;}}
   if(changedCount){changed();renderCues();}
