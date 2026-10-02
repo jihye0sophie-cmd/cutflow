@@ -19,7 +19,7 @@ assert.ok(store.includes("const key=\`\${id}:import:\${i}\`")&&store.includes('r
 assert.ok(store.includes('await saveBundle(bundle.record,bundle.rows)')&&store.includes('await bridge().restore(await hydrate(bundle.record))'),'imported projects must be saved locally and opened for editing');
 assert.ok(store.includes('if(importedId){try{await remove(importedId);}')&&store.includes('Cutflow import rollback failed'),'failed imports must clean the partial saved project and restore the previous workspace');
 assert.ok(html.includes('projectExportBtn')&&html.includes('projectImportBtn')&&html.includes('projectImportInput'),'project transfer controls missing');
-assert.ok(/project-store\.js\?v=41\.8/.test(html)&&/project-store\.css\?v=24\.2/.test(html),'project transfer runtime cache keys missing');
+assert.ok(/project-store\.js\?v=41\.9/.test(html)&&/project-store\.css\?v=24\.2/.test(html),'project transfer runtime cache keys missing');
 assert.ok(store.includes('replaceBytes=Number(existing?.sizeBytes)||0'),'overwrite quota must account for the project being replaced');
 assert.ok(!store.includes("restore(previous,{history:true});window.CutflowHistory?.reset"),'failed load rollback must preserve the current undo stack');
 assert.ok(store.includes("p.narration.file=file(p.narration.fileRef"),'narration must hydrate back into project payload');
