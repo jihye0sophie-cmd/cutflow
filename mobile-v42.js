@@ -694,6 +694,7 @@
     }
   }
   function ensurePanelVisible(){
+    if(document.body.classList.contains('v42-keyboard-open'))return;
     const rect=panel.getBoundingClientRect(),nav=tabs.getBoundingClientRect(),vh=window.visualViewport?.height||window.innerHeight;
     const visibleBottom=Math.min(nav.top||vh,vh)-8;
     if(rect.top>=visibleBottom||rect.bottom<=0)panel.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
