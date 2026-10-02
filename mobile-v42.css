@@ -86,7 +86,7 @@ body.v42-mobile #mobileAppV42 .primary,body.v42-mobile #v42SettingsDialog .prima
   border-color:#3c434d;
   background:#0f1216!important;
   color:#f7f8fa!important;
-  font-size:15px;
+  font-size:16px;
 }#v42SettingsDialog .v42-actions{
   gap:6px;
   margin-top:6px;
@@ -551,7 +551,7 @@ body.v42-mobile .v42-main{
   margin-bottom:8px;
 }#v42SettingsDialog .v42-grid-control-row label{display:grid;gap:4px}#v42SettingsDialog .v42-grid-control-row label span{font-size:8px;color:#cfd5dc}#v42SettingsDialog .v42-grid-control-row input{
   width:100%;min-height:38px;padding:7px 8px;box-sizing:border-box;
-  border:1px solid #3c434d;border-radius:7px;background:#171b20;color:#fff;font-size:14px;
+  border:1px solid #3c434d;border-radius:7px;background:#171b20;color:#fff;font-size:16px;
 }#v42SettingsDialog .v42-grid-control-row>b{align-self:center;margin-bottom:9px;color:#cfd5dc}#v42SettingsDialog .v42-grid-control-row .reset{min-height:38px}#v42SettingsDialog .v42-grid-preview{margin:6px 0 7px}#v42SettingsDialog .v42-settings-details{
   margin:8px 0;
   border:1px solid #303640;
@@ -1509,4 +1509,28 @@ body.v42-mobile.v42-ios #v42Panel[data-active-tab="media"] select{
 }
 body.v42-mobile.v42-ios #v42Panel[data-active-tab="media"] input[type="number"]{
   font-size:16px!important;
+}
+
+/* iPhone: prevent Safari input auto-zoom and keep settings inside the visual viewport. */
+body.v42-mobile.v42-ios #v42SettingsDialog input:not([type="range"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]),
+body.v42-mobile.v42-ios #v42SettingsDialog textarea,
+body.v42-mobile.v42-ios #v42SettingsDialog select{
+  font-size:16px!important;
+  line-height:1.35!important;
+}
+body.v42-mobile.v42-ios.v42-keyboard-open #v42SettingsDialog[open]{
+  inset:var(--v42-visual-top,0px) 0 auto!important;
+  bottom:auto!important;
+  height:var(--v42-visual-height,100dvh)!important;
+  max-height:var(--v42-visual-height,100dvh)!important;
+  margin:0 auto!important;
+  border-radius:0!important;
+  transform:none!important;
+}
+body.v42-mobile.v42-ios.v42-keyboard-open #v42SettingsDialog .v42-settings-body{
+  min-height:0!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  scroll-padding-top:18px!important;
+  scroll-padding-bottom:32px!important;
 }
