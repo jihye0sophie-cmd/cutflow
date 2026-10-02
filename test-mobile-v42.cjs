@@ -192,6 +192,8 @@ assert(js.includes('safeShowModal')&&js.includes("bindMobileTap($('v42Settings')
 assert(js.includes('syncHeaderActions'),'mobile header busy state sync missing');
 assert(css.includes('.v42-head-actions button:disabled'),'mobile header disabled feedback missing');
 assert(js.includes('--v42-visual-height')&&js.includes('window.visualViewport'),'iPhone visual viewport sync missing');
+assert(js.includes('--v42-visual-top')&&js.includes('settingsDialog.contains(target)'),'iPhone settings focus must use the visual viewport without page scroll');
+assert(css.includes('v42-keyboard-open #v42SettingsDialog[open]')&&css.includes('font-size:16px!important'),'iPhone settings auto-zoom guard missing');
 assert(js.includes('v42-keyboard-open'),'iPhone keyboard viewport guard missing');
 assert(css.includes('var(--v42-visual-height,100svh)'),'mobile shell must follow the visual viewport');
 assert(css.includes('v42-mobile.v42-ios.v42-keyboard-open'),'iPhone keyboard CSS guard missing');
