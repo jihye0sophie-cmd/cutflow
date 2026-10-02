@@ -207,6 +207,8 @@ assert(js.includes("stage.addEventListener('lostpointercapture'"),'iPhone transf
 assert(js.includes("bindMobileTap($('v42Undo')")&&js.includes("bindMobileTap($('v42Redo')"),'iPhone preview history controls need guarded taps');
 assert(css.includes('v42-mobile.v42-ios .v42-scrubber'),'iPhone scrubber touch CSS missing');
 assert(css.includes('height:var(--v42-visual-height,100dvh)!important'),'fullscreen preview must follow iPhone visual viewport');
+assert(js.includes('const seekMobilePreview=')&&js.includes('scrubSceneIndex'),'scrubbing must keep the selected mobile scene in sync');
+assert(css.includes('body.v42-mobile.v42-ios .v42-preview-tools button'),'iPhone preview utility touch targets missing');
 assert(css.includes('#v42ExportDialog'),'mobile export dialog styling missing');
 assert(js.includes("uploadBtn:'fileInput'"),'final audit: image/video input bridge missing');
 assert(js.includes('data-direct-click="demoBtn"'),'final audit: sample start missing');
