@@ -11,6 +11,9 @@ assert.ok(/caption-batch-editor\.js\?v=[^\"']+/.test(html),'whole-caption editor
 assert.ok(/caption-batch-editor\.css\?v=[^\"']+/.test(html),'whole-caption editor css missing');
 assert.ok(build.includes('runtimeRefs')&&build.includes('index.matchAll'),'build must derive caption batch assets from index.html');
 assert.ok(js.includes('window.CutflowCaptionBatch={'),'shared whole-caption editor API missing');
+assert.ok(js.includes('input.focus({preventScroll:true})'),'whole-caption editor must focus selected text without moving the dialog');
+assert.ok(!js.includes("input.scrollIntoView({block:'nearest'})"),'whole-caption editor must not browser-scroll the dialog when selecting text');
+assert.ok(css.includes('overflow-y:auto;overflow-x:hidden'),'whole-caption list must block horizontal viewport drift');
 assert.ok(js.includes('sceneApi()?.items?.()'),'whole-caption editor must group by logical scenes');
 assert.ok(js.includes('caption-batch-row'),'scene row UI missing');
 assert.ok(js.includes('caption-batch-divider'),'slash divider UI missing');
