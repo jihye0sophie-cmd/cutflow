@@ -351,6 +351,7 @@
     }
     const canvas=e.target.closest('[data-timeline-seek]');
     if(canvas&&!e.target.closest('button,input,select,textarea')){
+      if(e.pointerType&&e.pointerType!=='mouse')return;
       const body=canvas.querySelector('.timing-scene-layer .timing-layer-body'),start=num(canvas.dataset.windowStart,0),end=num(canvas.dataset.windowEnd,timelineDuration()),rect=(body||canvas).getBoundingClientRect();
       if(!rect)return;
       const raw=start+clamp((e.clientX-rect.left)/Math.max(1,rect.width),0,1)*(end-start),t=snapTime(raw,40*timelineZoom);
