@@ -246,6 +246,13 @@
         }
         return;
       }
+      if(panel?.contains(target)){
+        const tr=target.getBoundingClientRect(),pr=panel.getBoundingClientRect(),pad=14;
+        const topLimit=pr.top+pad,bottomLimit=pr.bottom-pad;
+        if(tr.top<topLimit)panel.scrollTop-=topLimit-tr.top;
+        else if(tr.bottom>bottomLimit)panel.scrollTop+=tr.bottom-bottomLimit;
+        return;
+      }
       try{target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch{}
     },180);
   },true);
