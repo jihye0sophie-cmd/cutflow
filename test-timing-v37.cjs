@@ -15,8 +15,8 @@ assert.ok(js.includes('data-caption-edge="start"')&&js.includes('data-caption-ed
 assert.ok(js.includes('setCaptionEdge'),'shared caption edge editing missing');
 assert.ok(js.includes("if(side==='start'&&prevIndex!=null)")&&js.includes('setCaptionBoundary(prevIndex,value,{commit:false})'),'selected caption start must move the shared boundary with the previous caption');
 assert.ok(js.includes("else if(side==='end'&&nextIndex!=null)")&&js.includes('setCaptionBoundary(cueIndex,value,{commit:false})'),'selected caption end must move the shared boundary with the next caption');
-assert.ok(js.includes('const min=prevIndex!=null?Math.max(item.start,cues[prevIndex].end):item.start'),'caption start must stay inside its scene without moving the scene boundary');
-assert.ok(js.includes('const min=cue.start+.08,max=nextIndex!=null?Math.min(item.end,cues[nextIndex].start):item.end'),'caption end must stay inside its scene without moving the scene boundary');
+assert.ok(js.includes("cue.start=clamp(num(value,cue.start),item.start,cue.end-.08)"),'outer caption start must stay inside its scene without moving the scene boundary');
+assert.ok(js.includes("cue.end=clamp(num(value,cue.end),cue.start+.08,item.end)"),'outer caption end must stay inside its scene without moving the scene boundary');
 assert.ok(!js.includes("if(pos===0){if(si===0){cue.start=clamp")&&!js.includes("if(pos===item.cueIndices.length-1)setSceneBoundaryAt"),'caption edges must not delegate to scene-boundary edits');
 assert.ok(js.includes('snapTime(')&&js.includes('snapEnabled'),'timeline snapping missing');
 assert.ok(js.includes('pendingCenter')&&js.includes('timelineScrollLeft'),'timeline centering/scroll preservation missing');
