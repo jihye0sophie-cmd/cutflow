@@ -26,7 +26,7 @@
 /* iPhone precision timing gesture stability. */
 @media(max-width:819px){
   body.v42-ios .v42-timing-panel .timing-scroll{
-    touch-action:pan-x!important;
+    touch-action:pan-x pan-y!important;
     -webkit-overflow-scrolling:touch!important;
     overscroll-behavior-x:contain!important;
   }
