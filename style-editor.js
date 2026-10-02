@@ -78,7 +78,8 @@ $('captionStyleFields').addEventListener('input',e=>{
   const value=e.target.type==='checkbox'?e.target.checked:['range','number'].includes(e.target.type)?Number(e.target.value):e.target.value;
   applyCaptionStyle({[key]:value},activeStyleGesture!==e.target);
 });
-document.addEventListener('pointerup',()=>activeStyleGesture=null);
+const clearStyleGesture=()=>{activeStyleGesture=null;};
+document.addEventListener('pointerup',clearStyleGesture);document.addEventListener('pointercancel',clearStyleGesture);
 $('captionPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(button)applyCaptionStyle({color:button.dataset.color});};
 $('titlePalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('titleColor').value=button.dataset.color;changed();};
 $('channelPalette').onclick=e=>{const button=e.target.closest('[data-color]');if(!button)return;$('channelColor').value=button.dataset.color;changed();};
