@@ -8,7 +8,7 @@ const autoMotionPool=Object.keys(motionLabels).filter(m=>m!=='still');
 function pickAutoMotion(recent=[]){const available=autoMotionPool.filter(m=>!recent.includes(m)),pool=available.length?available:autoMotionPool;return pool[Math.floor(Math.random()*pool.length)];}
 let autoMotionRecent=[];
 function chooseAutoMotion(){const next=pickAutoMotion(autoMotionRecent);autoMotionRecent=[...autoMotionRecent,next].slice(-2);return next;}
-let scenes=[],cues=[],audioBuffer=null,audioUrl=null,audioName='',audioFile=null,silences=[],envelope=[],timingAnalysis=null;
+let scenes=[],cues=[],audioBuffer=null,audioUrl=null,audioName='',audioFile=null,audioLoadId=0,silences=[],envelope=[],timingAnalysis=null;
 let titleColorRanges=[],lastTitleText='';
 let playRequest=0;
 let previewMediaAudio=null;
@@ -223,8 +223,8 @@ function analyzeAudio(buffer){
   window.CutflowTimingData=timingAnalysis;
 }
 async function loadAudio(file,{commit=true,notify=true}={}){
-  if(!file)return false;pause();loading++;stats();$('audioStatus').textContent='오디오 읽는 중…';let context,loaded=false;
-  try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('오디오 디코더를 사용할 수 없습니다.');context=new AudioCtx();const decoded=await context.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(decoded.duration)||decoded.duration<=0)throw new Error('오디오 길이를 확인할 수 없습니다.');
+  if(!file)return false;const loadId=++audioLoadId;pause();loading++;stats();$('audioStatus').textContent='오디오 읽는 중…';let context,loaded=false;
+  try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('오디오 디코더를 사용할 수 없습니다.');context=new AudioCtx();const decoded=await context.decodeAudioData(await file.arrayBuffer());if(!Number.isFinite(decoded.duration)||decoded.duration<=0)throw new Error('오디오 길이를 확인할 수 없습니다.');if(loadId!==audioLoadId)return false;
     if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(file);audioBuffer=decoded;audioName=file.name;audioFile=file;$('narration').src=audioUrl;analyzeAudio(decoded);offset=0;loaded=true;if(notify)toast('오디오를 불러왔습니다. 대본으로 자막 구간을 만들어 주세요.');
   }catch{if(notify)toast('오디오를 읽지 못했습니다. MP3 또는 WAV 파일로 다시 시도해 주세요.');}finally{await context?.close();loading--;if(loaded&&commit)changed();else stats();waveform();$('audioInput').value='';}
   return loaded;
@@ -407,7 +407,7 @@ function captureControls(){const out={};for(const id of savedControlIds){const e
 function restoreControls(values={}){for(const [id,value] of Object.entries(values)){const el=$(id);if(!el)continue;if(el.type==='checkbox')el.checked=!!value;else el.value=value;}lastTitleText=$('titleInput').value||'';$('fitSelect').disabled=$('layoutSelect').value==='fullscreen';$('layoutDescription').textContent=$('layoutSelect').value==='framed'?'노란 제목 · 중앙 이미지 · 하단 자막과 채널명':$('layoutSelect').value==='fullscreen'?'이미지·영상 전체 채우기 · 자막 오버레이':'노란 제목 · 세로 확장 영상 · 강조 자막과 채널명';}
 function cleanSceneState(scene){const {id,name,type,sourceDuration,trimStart,trimEnd,duration,motion,transition,transform,mediaVolume,mediaMuted,mediaFadeIn,mediaFadeOut}=scene;return {id,name,type,sourceDuration,trimStart,trimEnd:trimEnd??sourceDuration,duration,motion,transition,transform,mediaVolume:mediaVolume??0,mediaMuted:!!mediaMuted,mediaFadeIn:mediaFadeIn??0,mediaFadeOut:mediaFadeOut??0};}
 function mediaBytes(){const bgm=window.bgmSnapshot?.();return scenes.reduce((n,s)=>n+(s.file?.size||0),0)+(audioFile?.size||0)+(bgm?.file?.size||0);}
-async function clearProjectMedia(){pause();for(const s of scenes)releaseSceneResources(s);scenes=[];cues=[];if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=null;audioBuffer=null;audioFile=null;audioName='';$('narration').removeAttribute('src');$('narration').load();silences=[];envelope=[];timingAnalysis=null;window.CutflowTimingData=null;await window.restoreBgmSnapshot?.(null,{silent:true});}
+async function clearProjectMedia(){pause();audioLoadId++;for(const s of scenes)releaseSceneResources(s);scenes=[];cues=[];if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=null;audioBuffer=null;audioFile=null;audioName='';$('narration').removeAttribute('src');$('narration').load();silences=[];envelope=[];timingAnalysis=null;window.CutflowTimingData=null;await window.restoreBgmSnapshot?.(null,{silent:true});}
 const cloneProjectData=value=>{if(value==null)return value;try{if(typeof structuredClone==='function')return structuredClone(value);}catch{}return JSON.parse(JSON.stringify(value));};
 function autoWrapCaptionText(text,style={}){
   const raw=String(text||'').replace(/\s*\n\s*/g,' ').replace(/\s+/g,' ').trim();
