@@ -180,6 +180,7 @@
   };
   stage.addEventListener('pointerup',endMobileTransformPointer);
   stage.addEventListener('pointercancel',e=>{mobileTransformPoints.delete(e.pointerId);if(!mobileTransformPoints.size){window.CutflowScene?.cancelTransformGesture?.();mobileTransformGesture=null;hideMobileTransformGuides();}});
+  stage.addEventListener('lostpointercapture',e=>{if(mobileTransformPoints.has(e.pointerId))endMobileTransformPointer(e);});
 
   const setMobileActive=(next,{initial=false}={})=>{
     next=!!next;
@@ -661,11 +662,12 @@
     renderQueued=true;
     requestAnimationFrame(()=>{const forceNow=renderForce;renderForce=false;renderQueued=false;renderSceneStrip();renderPanel(forceNow);syncPlayer();});
   }
+  let mobileScrubbing=false;
   function syncPlayer(){
     const state=window.CutflowPlayer?.state?.(),m=$('v42Scrubber');
     if(state&&m){
       const progress=Math.max(0,Math.min(1,Number(state.progress)||0));
-      if(document.activeElement!==m){m.min='0';m.max='1000';m.value=String(Math.round(progress*1000));}
+      if(!mobileScrubbing&&document.activeElement!==m){m.min='0';m.max='1000';m.value=String(Math.round(progress*1000));}
       m.style.setProperty('--v42-progress',`${progress*100}%`);
     }
     const ct=$('currentTime')?.textContent||'0:00.0',et=$('endTime')?.textContent||'0:00.0';$('v42TimeLabel').textContent=`${ct} / ${et}`;
@@ -854,8 +856,6 @@
       });
     }
   };
-  $('v42Undo').onclick=()=>window.CutflowHistory?.undo?.();
-  $('v42Redo').onclick=()=>window.CutflowHistory?.redo?.();
   const syncPreviewHistory=()=>{const undo=$('v42Undo'),redo=$('v42Redo');if(undo)undo.disabled=!window.CutflowHistory?.canUndo;if(redo)redo.disabled=!window.CutflowHistory?.canRedo;};
   syncPreviewHistory();
   let suppressMobileClickUntil=0;
@@ -895,6 +895,8 @@
     }
   }
   function openPreviewFullscreen(){
+    document.activeElement?.blur?.();
+    syncVisualViewport();
     setSourcePreviewSize(1080,1920);
     previewDialog.hidden=false;
     document.body.classList.add('v42-preview-lock');
@@ -908,13 +910,24 @@
     previewDialog.hidden=true;
     document.body.classList.remove('v42-preview-lock');
     setSourcePreviewSize(window.CutflowUI?.mobileActive?540:1080,window.CutflowUI?.mobileActive?960:1920);
-    requestAnimationFrame(()=>{syncPlayer();window.CutflowPlayer?.invalidate?.();});
+    requestAnimationFrame(()=>{syncVisualViewport();syncPlayer();window.CutflowPlayer?.invalidate?.();});
   }
+  bindMobileTap($('v42Undo'),()=>window.CutflowHistory?.undo?.());
+  bindMobileTap($('v42Redo'),()=>window.CutflowHistory?.redo?.());
   bindMobileTap($('v42Fullscreen'),openPreviewFullscreen);
   bindMobileTap($('v42FullClose'),closePreviewFullscreen);
   bindMobileTap($('v42FullPlay'),()=>{window.CutflowPlayer?.toggle?.();requestAnimationFrame(syncPlayer);});
-  $('v42Scrubber').addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
-  $('v42Scrubber').addEventListener('change',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
+  const scrubber=$('v42Scrubber');
+  const beginScrub=()=>{mobileScrubbing=true;window.CutflowPlayer?.pause?.();};
+  const endScrub=()=>{mobileScrubbing=false;requestAnimationFrame(syncPlayer);};
+  scrubber.addEventListener('pointerdown',beginScrub,{passive:true});
+  scrubber.addEventListener('touchstart',beginScrub,{passive:true});
+  scrubber.addEventListener('input',e=>window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000));
+  scrubber.addEventListener('change',e=>{window.CutflowPlayer?.seekProgress?.(Number(e.target.value)/1000);endScrub();});
+  scrubber.addEventListener('pointerup',endScrub,{passive:true});
+  scrubber.addEventListener('pointercancel',endScrub,{passive:true});
+  scrubber.addEventListener('touchend',endScrub,{passive:true});
+  scrubber.addEventListener('touchcancel',endScrub,{passive:true});
 
   let mobileExportBlob=null,mobileExportFilename='',mobileExportUrl='';
   const resetMobileExport=()=>{
