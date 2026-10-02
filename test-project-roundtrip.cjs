@@ -19,6 +19,8 @@ assert.ok(app.includes("async restore(data,options={})"),'project bridge restore
 assert.ok(app.includes("await clearProjectMedia()"),'restore must clear old media before rebuilding');
 assert.ok(app.includes("scene=await makeScene(file)"),'restore must rebuild scene media elements');
 assert.ok(app.includes("await loadAudio(f,{commit:false,notify:false})"),'restore must rebuild narration audio state without intermediate dirty commits');
+assert.ok(app.includes("if(!(await loadAudio(f,{commit:false,notify:false})))throw new Error('저장된 내레이션을 복원하지 못했습니다.')"),'project restore must fail if saved narration cannot be decoded');
+assert.ok(!app.includes("if(!saved?.file)continue;"),'project/timeline restore must never silently drop a scene with missing media');
 assert.ok(app.includes("await window.restoreBgmSnapshot?.(data.bgm||null,{silent:true})"),'restore must rebuild BGM state');
 assert.ok(app.includes("cutflow-project-restored"),'restore completion event missing');
 
