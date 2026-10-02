@@ -19,6 +19,7 @@ assert.ok(app.includes('buildTimeline(options={})'),'auto bridge options missing
 assert.ok(app.includes('const sequential=options?.sequentialVideo'),'sequential video fit path missing');
 assert.ok(app.includes('scene.trimStart=sourceStart+cue.start')&&app.includes('scene.trimEnd=sourceStart+cue.end'),'video trims must follow caption timing');
 assert.ok(app.includes('requiredEnd>scene.sourceDuration+.02'),'short source video guard missing');
+assert.ok(app.includes('seen=new Set()')&&app.includes('seen.has(file)'),'shared long-video files must be counted once in project storage estimates');
 assert.ok(mobile.includes("autoLongVideoBtn:'autoLongVideo'"),'mobile long-video file bridge missing');
 assert.ok(mobile.includes('data-auto-media-mode-view="long-video"'),'mobile long-video quick start UI missing');
 assert.ok(mobile.includes("source===$('autoMediaMode')"),'mobile media mode switch refresh missing');
