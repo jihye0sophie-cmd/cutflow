@@ -1006,13 +1006,15 @@
   };
   const endScrub=()=>{mobileScrubbing=false;scrubSceneIndex=-1;requestAnimationFrame(()=>{renderSceneStrip();syncPlayer();followSelectedScene('auto');});};
   scrubber.addEventListener('pointerdown',beginScrub,{passive:true});
-  scrubber.addEventListener('touchstart',beginScrub,{passive:true});
   scrubber.addEventListener('input',e=>seekMobilePreview(e.target.value));
   scrubber.addEventListener('change',e=>{seekMobilePreview(e.target.value);endScrub();});
   scrubber.addEventListener('pointerup',endScrub,{passive:true});
   scrubber.addEventListener('pointercancel',endScrub,{passive:true});
-  scrubber.addEventListener('touchend',endScrub,{passive:true});
-  scrubber.addEventListener('touchcancel',endScrub,{passive:true});
+  if(!window.PointerEvent){
+    scrubber.addEventListener('touchstart',beginScrub,{passive:true});
+    scrubber.addEventListener('touchend',endScrub,{passive:true});
+    scrubber.addEventListener('touchcancel',endScrub,{passive:true});
+  }
 
   let mobileExportBlob=null,mobileExportFilename='',mobileExportUrl='';
   const resetMobileExport=()=>{
