@@ -259,6 +259,10 @@ assert(css.includes('margin-top:3px!important')&&css.includes('padding:3px 4px!i
 assert(js.includes('data-tab="caption"')&&js.includes('data-tab="media"')&&js.includes('data-tab="timing"'),'three mobile editor tabs missing');
 assert(!js.includes('data-tab="narration"')&&!js.includes('data-tab="template"')&&!js.includes('data-tab="bgm"'),'legacy five-tab mobile navigation must be removed');
 assert(js.includes('id="v42CaptionPrev"')&&js.includes('id="v42CaptionNext"'),'mobile previous/next caption controls missing');
+assert(js.includes('{text:e.target.value},{live:true}')&&js.includes('commitLive?.'),'mobile caption typing must commit as one edit instead of one undo per keystroke');
+assert(!js.includes("{[cf]:cf==='color'?e.target.value:Number(e.target.value)});return;}if(e.target.dataset.mediaField"),'caption text change must not coerce text to Number');
+assert(history.includes('#captionBatchDialog'),'whole-caption editor actions must use timeline-scoped undo');
+assert(app.includes("beginScoped?.('전체 자막 자동 줄바꿈','timeline')"),'whole-caption auto wrap must use timeline-scoped undo');
 assert(!js.includes('data-caption-color'),'current caption color must not appear in mobile caption body');
 assert(js.includes("proxyControl($('captionColor'),'직접 선택'"),'caption base color must live in detailed settings');
 assert(js.includes("proxyControl($('styleScope'),'적용 범위'"),'caption style scope missing from details');
