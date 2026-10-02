@@ -296,15 +296,17 @@
     if(canvas&&!e.target.closest('button,input,select,textarea')){
       const body=canvas.querySelector('.timing-scene-layer .timing-layer-body'),rect=(body||canvas).getBoundingClientRect(),duration=timelineDuration(),time=clamp((e.clientX-rect.left)/Math.max(1,rect.width),0,1)*duration,t=snapTime(time);
       jump(t);
-      if(isDesktopTimingTarget(canvas))syncSelectedCueToTime(t);
+      syncSelectedCueToTime(t);
       requestRenderAll();
     }
   }
   function handleChange(e){
     if(!e.target.closest('.timing-panel'))return;
-    if(e.target.dataset.timingScene){rememberCues();setSceneBoundary(e.target.dataset.timingScene,e.target.value);}
-    else if(e.target.hasAttribute('data-timing-scene-duration')){const item=sceneItem();if(item){rememberCues();setSceneBoundary('end',item.start+Math.max(.1,num(e.target.value,.1)));}}
-    else if(e.target.dataset.timingCaption){changeSelectedTime(e.target.dataset.timingCaption,e.target.value);}
+    const input=e.target;
+    if(input.matches('input[type="number"]')&&(input.value===''||!Number.isFinite(Number(input.value)))){requestRenderAll();return;}
+    if(input.dataset.timingScene){rememberCues();setSceneBoundary(input.dataset.timingScene,input.value);}
+    else if(input.hasAttribute('data-timing-scene-duration')){const item=sceneItem();if(item){rememberCues();setSceneBoundary('end',item.start+Math.max(.1,num(input.value,.1)));}}
+    else if(input.dataset.timingCaption){changeSelectedTime(input.dataset.timingCaption,input.value);}
   }
   function updatePlayheadFeedback(t){
     const duration=timelineDuration();
@@ -358,7 +360,8 @@
     }
   }
   function moveDrag(e){
-    if(!drag)return;
+    if(!drag||e.pointerId!==drag.pointerId)return;
+    if(e.cancelable)e.preventDefault();
     const raw=drag.start+clamp((e.clientX-drag.rect.left)/Math.max(1,drag.rect.width),0,1)*(drag.end-drag.start),t=snapTime(raw,40*timelineZoom);
     if(drag.kind==='playhead'){jump(t);updatePlayheadFeedback(t);return;}
     if(drag.kind==='caption-edge')setCaptionEdge(drag.cueIndex,drag.side,t,{commit:false});
@@ -366,12 +369,12 @@
     if(drag.el?.isConnected)drag.el.style.left=`${pctAll(t,timelineDuration())}%`;
     updateBoundaryFeedback();
   }
-  function endDrag(){
-    if(!drag)return;
+  function endDrag(e){
+    if(!drag||e?.pointerId!=null&&e.pointerId!==drag.pointerId)return;
     if(drag.kind==='playhead'){
-      const t=currentTime(),desktopTiming=!!drag.desktopTiming;
+      const t=currentTime();
       drag=null;updatePlayheadFeedback(t);
-      if(desktopTiming){syncSelectedCueToTime(t);requestRenderAll();}
+      syncSelectedCueToTime(t);requestRenderAll();
       return;
     }
     const idx=Math.max(0,Math.min(drag.scene,sceneItems().length-1));drag=null;syncSelectedCueToScene(idx);commitTimingMutation(idx);
@@ -381,6 +384,9 @@
   document.addEventListener('pointerdown',startDrag);
   document.addEventListener('pointermove',moveDrag);
   document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
+  document.addEventListener('lostpointercapture',endDrag,true);
+  window.addEventListener('blur',()=>endDrag());
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)endDrag();});
   window.addEventListener('cutflow-scene',e=>{const target=Number(e.detail);if(Number.isInteger(target)){syncSelectedCueToScene(target);if(window.CutflowPlayer?.state?.().playing){const time=currentTime(),activeScene=sceneIndexAtTime(time);playbackFollowScene=activeScene>=0?activeScene:target;syncSelectedCueToTime(time);pendingCenter=true;}}requestRenderAll();});
   window.addEventListener('cutflow-scene-updated',requestRenderAll);
   window.addEventListener('cutflow-project-restored',()=>{selectedCueId=null;playbackFollowScene=-1;timelineScrollLeft=0;pendingCenter=true;syncSelectedCueToTime(currentTime());requestRenderAll();});
