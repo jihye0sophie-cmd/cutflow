@@ -1496,3 +1496,17 @@ body.v42-mobile .v42-add-scene:disabled{
   opacity:.45!important;
   pointer-events:none!important;
 }
+
+/* iPhone media editor input stability. */
+body.v42-mobile.v42-ios #v42Panel[data-active-tab="media"] input[type="range"]{
+  touch-action:pan-x!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+body.v42-mobile.v42-ios #v42Panel[data-active-tab="media"] .v42-btn,
+body.v42-mobile.v42-ios #v42Panel[data-active-tab="media"] select{
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+body.v42-mobile.v42-ios #v42Panel[data-active-tab="media"] input[type="number"]{
+  font-size:16px!important;
+}
