@@ -48,7 +48,7 @@ function stopPreviewMediaAudio(){
 }
 function previewAudioElement(scene){
   if(scene?.type!=='video')return null;
-  if(!scene.audioElement){const el=document.createElement('video');el.src=scene.url;el.preload='auto';el.playsInline=true;el.muted=false;el.volume=1;scene.audioElement=el;}
+  if(!scene.audioElement){const el=document.createElement('video');el.src=scene.url;el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');el.setAttribute('webkit-playsinline','');el.muted=false;el.volume=1;scene.audioElement=el;}
   return scene.audioElement;
 }
 function releaseSceneResources(scene){if(!scene)return;try{scene.audioElement?.pause();if(scene.audioElement){scene.audioElement.removeAttribute?.('src');scene.audioElement.load?.();scene.audioElement=null;}if(scene.element){scene.element.removeAttribute?.('src');scene.element.src='';}}catch{}if(scene.url){URL.revokeObjectURL(scene.url);scene.url='';}}
