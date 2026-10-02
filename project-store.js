@@ -46,7 +46,7 @@ async function save({asNew=false}={}){
 async function load(id){
   if(busy||!bridge())return;
   if(dirty&&!confirm('현재 작업에 저장하지 않은 변경사항이 있습니다. 다른 프로젝트를 불러올까요?'))return;
-  const previous=bridge().hasWork?.()?bridge().capture?.():null;
+  const previous=bridge().capture?.()||null;
   const previousStore={currentId,currentName,dirty};
   busy=true;status('프로젝트 불러오는 중…','busy');closeDialog();let r=null;
   try{
