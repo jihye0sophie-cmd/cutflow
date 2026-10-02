@@ -1559,17 +1559,17 @@ body.v42-mobile.v42-ios.v42-keyboard-open .v42-main{
   padding-top:6px!important;
   padding-bottom:0!important;
 }
-body.v42-mobile.v42-ios.v42-keyboard-open .v42-preview-card,
-body.v42-mobile.v42-ios.v42-keyboard-open .v42-scenes-card{
+body.v42-mobile.v42-ios.v42-keyboard-open.v42-caption-keyboard .v42-preview-card,
+body.v42-mobile.v42-ios.v42-keyboard-open.v42-caption-keyboard .v42-scenes-card{
   display:none!important;
 }
 body.v42-mobile.v42-ios.v42-keyboard-open .v42-tabs{
   display:none!important;
 }
 body.v42-mobile.v42-ios.v42-keyboard-open .v42-panel{
-  flex:1 1 auto!important;
+  flex:1 1 0!important;
   min-height:0!important;
-  height:100%!important;
+  height:auto!important;
   max-height:none!important;
   margin-top:0!important;
   padding:7px 7px 18px!important;
@@ -1583,4 +1583,9 @@ body.v42-mobile.v42-ios.v42-keyboard-open .v42-panel textarea,
 body.v42-mobile.v42-ios.v42-keyboard-open .v42-panel input:not([type="range"]):not([type="color"]),
 body.v42-mobile.v42-ios.v42-keyboard-open .v42-panel select{
   font-size:16px!important;
+}
+
+body.v42-mobile.v42-ios.v42-keyboard-open.v42-caption-keyboard .v42-panel{
+  flex:1 1 auto!important;
+  height:100%!important;
 }
