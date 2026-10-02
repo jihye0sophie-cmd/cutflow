@@ -135,6 +135,7 @@ assert(js.includes('data-caption-field="text"'),'direct mobile caption text fiel
 assert(js.includes('v42CaptionSplit')&&js.includes('v42CaptionMerge')&&js.includes('v42CaptionDelete'),'direct mobile caption actions missing');
 assert(js.includes('id="v42CaptionPlay"')&&js.includes("api.play?.(index)"),'mobile current-caption playback quick action missing');
 assert(js.includes('v42CaptionBatchOpen'),'mobile whole-caption editor entry missing');
+assert(js.includes("target.closest?.('.caption-batch-dialog')")&&js.includes("list.scrollTop"),'mobile focus handling must keep whole-caption scrolling inside its dialog');
 assert(new RegExp('caption-batch-editor\\.js\\?v=[^"\\x27]+').test(html),'shared whole-caption editor script missing');
 assert(new RegExp('caption-batch-editor\\.css\\?v=[^"\\x27]+').test(html),'shared whole-caption editor css missing');
 assert(new RegExp('mobile-v42\\.css\\?v=[^"\\x27]+').test(html),'template typography css cache key missing');
