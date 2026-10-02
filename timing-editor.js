@@ -391,7 +391,12 @@
   window.addEventListener('cutflow-scene-updated',requestRenderAll);
   window.addEventListener('cutflow-project-restored',()=>{selectedCueId=null;playbackFollowScene=-1;timelineScrollLeft=0;pendingCenter=true;syncSelectedCueToTime(currentTime());requestRenderAll();});
   new MutationObserver(requestRenderAll).observe(q('cueList'),{childList:true});
-  new ResizeObserver(()=>{const panel=visiblePanel();if(panel)renderPanel(panel);}).observe(document.documentElement);
+  new ResizeObserver(()=>{
+    const panel=visiblePanel();if(!panel)return;
+    const active=document.activeElement;
+    if(active&&panel.contains(active)&&active.matches?.('input,textarea,select,[contenteditable="true"]'))return;
+    renderPanel(panel);
+  }).observe(document.documentElement);
   function syncPlaybackFrame(){
     const panel=visiblePanel(),playerState=window.CutflowPlayer?.state?.();
     if(panel){
