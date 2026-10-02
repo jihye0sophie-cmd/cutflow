@@ -1,7 +1,7 @@
 /* Hybrid undo / redo history. Timeline edits restore only scenes + captions; global operations keep whole-project snapshots. */
 (()=>{
   const MAX=40;
-  let past=[],future=[],pending=null,applying=false,busy=false;
+  let past=[],future=[],pending=null,applying=false,busy=false,batching=false;
   const projectBridge=()=>window.CutflowProjectBridge;
   const scopeBridge=scope=>scope==='timeline'?window.CutflowTimelineBridge:null;
   const fileSig=file=>file instanceof Blob?{__file:true,name:file.name||'',size:Number(file.size)||0,lastModified:Number(file.lastModified)||0,type:file.type||''}:file;
@@ -16,11 +16,13 @@
     const snapshot=capture(scope);if(!snapshot)return false;
     pending={scope,snapshot,signature:signature(snapshot),label};return true;
   }
-  function begin(label='편집'){return start(label,'project')}
-  function beginScoped(label='편집',scope='timeline'){return start(label,scope)}
-  function ensureScoped(label='편집',scope='timeline'){if(pending?.scope===scope)return true;return start(label,scope)}
+  function begin(label='편집'){return batching?true:start(label,'project')}
+  function beginScoped(label='편집',scope='timeline'){return batching?true:start(label,scope)}
+  function ensureScoped(label='편집',scope='timeline'){if(batching)return true;if(pending?.scope===scope)return true;return start(label,scope)}
+  function beginBatch(label='편집',scope='project'){if(batching||applying||busy)return false;if(!start(label,scope))return false;batching=true;update();return true;}
+  function endBatch(shouldCommit=true){if(!batching)return false;batching=false;if(shouldCommit)commit();else cancelPending();update();return true;}
   function commit(){
-    if(applying||busy||!pending)return;
+    if(batching||applying||busy||!pending)return;
     const now=capture(pending.scope);if(!now){pending=null;return;}
     if(signature(now)!==pending.signature){past.push(pending);if(past.length>MAX)past.shift();future=[];}
     pending=null;update();
@@ -43,10 +45,10 @@
       console.error('Cutflow history restore failed',entry.scope,error);window.toast?.('편집 기록을 복원하지 못했습니다.');return false;
     }finally{applying=false;busy=false;update();}
   }
-  async function undo(){if(!past.length||busy)return false;const entry=past.pop(),ok=await apply(entry,'undo');if(!ok)past.push(entry);update();return ok;}
-  async function redo(){if(!future.length||busy)return false;const entry=future.pop(),ok=await apply(entry,'redo');if(!ok)future.push(entry);update();return ok;}
+  async function undo(){if(!past.length||busy||batching)return false;const entry=past.pop(),ok=await apply(entry,'undo');if(!ok)past.push(entry);update();return ok;}
+  async function redo(){if(!future.length||busy||batching)return false;const entry=future.pop(),ok=await apply(entry,'redo');if(!ok)future.push(entry);update();return ok;}
   function cancelPending(){pending=null;update();}
-  function reset(){past=[];future=[];pending=null;update();}
+  function reset(){past=[];future=[];pending=null;batching=false;update();}
   function labelFor(target){
     if(!target)return '편집';
     const text=(target.getAttribute?.('aria-label')||target.textContent||'').trim().replace(/\s+/g,' ');
@@ -73,6 +75,6 @@
     if(mod&&key==='z'){e.preventDefault();e.stopImmediatePropagation();if(e.shiftKey)redo();else undo();return;}
     if(e.ctrlKey&&!e.metaKey&&!e.altKey&&key==='y'){e.preventDefault();e.stopImmediatePropagation();redo();return;}
   },true);
-  window.CutflowHistory={begin,beginScoped,ensureScoped,commit,cancelPending,undo,redo,reset,get canUndo(){return past.length>0},get canRedo(){return future.length>0},get busy(){return busy}};
+  window.CutflowHistory={begin,beginScoped,ensureScoped,beginBatch,endBatch,commit,cancelPending,undo,redo,reset,get canUndo(){return !batching&&past.length>0},get canRedo(){return !batching&&future.length>0},get busy(){return busy||batching},get batching(){return batching}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update,{once:true});else queueMicrotask(update);
 })();
