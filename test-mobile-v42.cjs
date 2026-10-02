@@ -194,7 +194,7 @@ assert(css.includes('.v42-head-actions button:disabled'),'mobile header disabled
 assert(js.includes('--v42-visual-height')&&js.includes('window.visualViewport'),'iPhone visual viewport sync missing');
 assert(js.includes('--v42-visual-top')&&js.includes('settingsDialog.contains(target)'),'iPhone settings focus must use the visual viewport without page scroll');
 assert(js.includes('panel?.contains(target)')&&js.includes('panel.scrollTop+='),'iPhone editor focus must scroll only the editor panel');
-assert(css.includes('v42-keyboard-open #mobileAppV42')&&css.includes('v42-keyboard-open .v42-preview-card'),'iPhone keyboard editor mode must fill the visual viewport and hide fixed preview chrome');
+assert(css.includes('v42-keyboard-open #mobileAppV42')&&css.includes('v42-keyboard-open.v42-caption-keyboard .v42-preview-card'),'iPhone caption keyboard mode must fill the visual viewport and hide preview chrome only for caption editing');
 assert(css.includes('v42-keyboard-open #v42SettingsDialog[open]')&&css.includes('font-size:16px!important'),'iPhone settings auto-zoom guard missing');
 assert(js.includes('v42-keyboard-open'),'iPhone keyboard viewport guard missing');
 assert(css.includes('var(--v42-visual-height,100svh)'),'mobile shell must follow the visual viewport');
