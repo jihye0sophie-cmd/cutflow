@@ -221,7 +221,10 @@
     document.documentElement.style.setProperty('--v42-visual-top',top+'px');
     const layoutHeight=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0);
     const keyboardOpen=!!(window.CutflowUI?.mobileActive&&vv&&layoutHeight-height>120);
+    const active=document.activeElement;
+    const captionKeyboard=!!(keyboardOpen&&active&&(active.id==='v42CaptionText'||active.matches?.('[data-caption-field="text"]')));
     document.body.classList.toggle('v42-keyboard-open',keyboardOpen);
+    document.body.classList.toggle('v42-caption-keyboard',captionKeyboard);
   };
   const syncResponsiveMode=()=>{setMobileActive(compactMq.matches);syncVisualViewport();};
   setMobileActive(compactMq.matches,{initial:true});
