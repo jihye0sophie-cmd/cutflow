@@ -16,6 +16,16 @@ let offset=0,started=0,playing=false,rendering=false,dirty=true,exporting=false,
 const uid=()=>crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const options=(map,value)=>Object.entries(map).map(([k,v])=>`<option value="${k}" ${k===value?'selected':''}>${v}</option>`).join('');
+const brandHome=document.querySelector('.brand');
+if(brandHome){
+  brandHome.setAttribute('role','button');
+  brandHome.setAttribute('tabindex','0');
+  brandHome.setAttribute('title','새로고침');
+  brandHome.style.cursor='pointer';
+  const reload=()=>window.location.reload();
+  brandHome.addEventListener('click',reload);
+  brandHome.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();reload();}});
+}
 // Imported media stay reusable; each subtitle owns its exact playback interval.
 function assignAvailableCuts(){const used=new Set(cues.map(c=>c.sceneId));const available=scenes.filter(s=>!used.has(s.id));cues.forEach(c=>{if(c.sceneId===undefined&&available.length)c.sceneId=available.shift().id;});}
 function captionSegmentInfo(index){
