@@ -300,7 +300,10 @@ async function exportVideo(){
   pause();exporting=true;const mobile=window.CutflowUI?.mode==='mobile';
   if(!mobile){const d=$('exportDialog');if(d&&!d.open){try{d.showModal();}catch(error){console.warn('Cutflow export dialog open failed',error);}}}$('downloadLink').hidden=true;$('closeExportBtn').hidden=true;$('cancelExportBtn').hidden=false;$('exportProgress').value=0;if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}stats();
   const token={cancelled:false};window.currentExport=token;let wakeLock;
-  const width=Number($('resolutionSelect').value),filename=`Cutflow_${new Date().toISOString().slice(0,10)}_${width}p.mp4`;
+  const width=Number($('resolutionSelect').value);
+  const rawTitle=String($('titleInput')?.value||'').replace(/\s+/g,' ').trim();
+  const safeTitle=rawTitle.replace(/[\\/:*?"<>|\x00-\x1f]/g,'').replace(/[. ]+$/g,'').trim().slice(0,120);
+  const filename=`${safeTitle||`Cutflow_${new Date().toISOString().slice(0,10)}_${width}p`}.mp4`;
   emit('cutflow-export-start',{width,filename});
   try{while(rendering)await new Promise(r=>setTimeout(r,20));await CutRenderer.fonts(project());try{wakeLock=await navigator.wakeLock?.request('screen');}catch{}
     const blob=await CutEncoder.exportMP4(project(),width,token,(progress,message)=>{$('exportProgress').value=progress;$('exportStatus').textContent=message;emit('cutflow-export-progress',{progress,message,width});});
