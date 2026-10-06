@@ -14,6 +14,7 @@ assert.ok(js.includes('window.CutflowCaptionBatch={'),'shared whole-caption edit
 assert.ok(js.includes('input.focus({preventScroll:true})'),'whole-caption editor must focus selected text without moving the dialog');
 assert.ok(!js.includes("input.scrollIntoView({block:'nearest'})"),'whole-caption editor must not browser-scroll the dialog when selecting text');
 assert.ok(css.includes('overflow-y:auto;overflow-x:hidden'),'whole-caption list must block horizontal viewport drift');
+assert.ok(css.includes('flex-wrap:wrap')&&css.includes('overflow-wrap:anywhere'),'whole-caption segments must wrap onto new lines instead of horizontal scrolling');
 assert.ok(js.includes('sceneApi()?.items?.()'),'whole-caption editor must group by logical scenes');
 assert.ok(js.includes('caption-batch-row'),'scene row UI missing');
 assert.ok(js.includes('caption-batch-divider'),'slash divider UI missing');
