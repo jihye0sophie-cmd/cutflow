@@ -11,3 +11,7 @@ S.select(0);assert.equal(now,0);assert.equal(lastSelected,0);
 assert.equal(S.move(0,1),true);assert.equal(JSON.stringify(ctx.cues.map(c=>c.id)),'["c3","c1","c2"]');assert.equal(S.items().length,2);assert.equal(S.items()[1].cueIndices.length,2);
 assert.equal(S.remove(1),true);assert.equal(JSON.stringify(ctx.cues.map(c=>c.id)),'["c3"]');assert.equal(JSON.stringify(ctx.scenes.map(s=>s.id)),'["s2"]');assert.ok(changedCount>=2&&renderCount>=2);
 console.log('PASS: logical scenes keep multiple caption segments grouped for navigation, reorder and delete.');
+
+assert.ok(app.includes('mediaVolume:0'),'new video scenes must start with original audio muted by volume');
+assert.ok(!app.includes("scene.mediaVolume=scene.type==='video'?1:0"),'free-cue video insertion must not force original audio to 100%');
+assert.ok(!sceneUI.includes("added.mediaVolume=1"),'video replacement must not force original audio to 100%');
