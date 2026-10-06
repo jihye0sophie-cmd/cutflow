@@ -245,7 +245,7 @@
       if(!file)return false;const list=logicalItems(),sceneIndex=this.index(),group=list[sceneIndex],withCues=!!cues.length;
       window.CutflowHistory?.beginScoped?.('이미지·영상 교체','timeline');
       const [added]=await addFiles([file],{createFreeCues:false,deferCommit:true});
-      if(!added){window.CutflowHistory?.cancelPending?.();toast('장면을 교체하지 못했습니다. 파일을 다시 확인해 주세요.');return false;}if(!audioBuffer&&added.type==='video'&&(added.mediaVolume??0)===0)added.mediaVolume=1;
+      if(!added){window.CutflowHistory?.cancelPending?.();toast('장면을 교체하지 못했습니다. 파일을 다시 확인해 주세요.');return false;}
       if(withCues&&group){
         const previous=scenes.find(s=>s.id===group.sceneId),addedIndex=scenes.indexOf(added),previousIndex=previous?scenes.indexOf(previous):-1;
         if(previous&&previousIndex>=0){
