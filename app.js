@@ -274,7 +274,7 @@ async function addFiles(files,{createFreeCues=true,forceFreeCues=false,deferComm
   const list=[...files].filter(f=>/^image\/|^video\//.test(f.type)||/\.(mp4|mov|webm|m4v)$/i.test(f.name));if(!list.length){toast('이미지 또는 영상 파일을 선택해 주세요.');return [];}
   pause();loading++;stats();let success=0,errors=[],added=[];
   for(const file of list){try{const scene=await makeScene(file);scene.motion=scene.type==='image'?chooseAutoMotion():'still';
-      if(createFreeCues&&(!audioBuffer||forceFreeCues)){scene.duration=scene.type==='video'?Math.max(.1,Math.min(600,scene.sourceDuration)):3;scene.mediaVolume=scene.type==='video'?1:0;}
+      if(createFreeCues&&(!audioBuffer||forceFreeCues)){scene.duration=scene.type==='video'?Math.max(.1,Math.min(600,scene.sourceDuration)):3;}
       scenes.push(scene);added.push(scene);success++;}catch{errors.push(file.name);}}
   if(createFreeCues&&(!audioBuffer||forceFreeCues)&&added.length){rememberCues();for(const scene of added)cues.push(createFreeCue(scene));}
   loading--;
