@@ -166,6 +166,9 @@ assert(app.includes('applySelectionColor(index,start,end,color)'),'shared select
 assert(js.includes('data-caption-selection-color'),'mobile instant selected text color palette missing');
 assert(js.includes('v42CaptionSelectionReset'),'mobile selected color reset button missing');
 assert(js.includes('const editingBgm=!!active?.dataset?.bgmField'),'mobile BGM live-edit rerender guard missing');
+assert(js.includes("editingBgmNumber=source&&['bgmStart','bgmFadeIn','bgmFadeOut'].includes(source.id)")&&js.includes("dispatch(source,'change')"),'BGM numeric settings must commit on change without live proxy rerenders');
+assert(bgmEditor.includes('function commitBgmField(id)')&&bgmEditor.includes("['bgmStart','bgmFadeIn','bgmFadeOut'].forEach(id=>$(id).addEventListener('change'"),'BGM numeric fields must commit only on change');
+assert(!bgmEditor.includes("['bgmStart','bgmVolume','bgmRepeat','bgmFadeIn','bgmFadeOut'].forEach(id=>$(id).addEventListener('input'"),'legacy BGM all-input commit path must stay removed');
 assert(css.includes('.v42-caption-selection-tools'),'mobile selected text color styling missing');
 assert(app.includes("typeof CustomEvent==='function'"),'compose event guard missing');
 assert(new RegExp('history\\.js\\?v=[^"\\x27]+').test(html),'history cache key missing');
