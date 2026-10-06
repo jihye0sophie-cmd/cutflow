@@ -16,7 +16,22 @@ $('bgmInput').onchange=async e=>{const file=e.target.files[0];if(!file)return;pa
   finally{await ctx?.close();loading--;e.target.value='';if(loaded)changed({syncBgm:false});else stats();syncBgm();}
 };
 $('bgmRemove').onclick=()=>{pause();bgmLoadId++;bgmBuffer=null;bgmName='';bgmFile=null;CutAudio.invalidate();changed({syncBgm:false});syncBgm();};
-['bgmStart','bgmVolume','bgmRepeat','bgmFadeIn','bgmFadeOut'].forEach(id=>$(id).addEventListener('input',()=>{pause();const input=$(id);if(id==='bgmStart')input.value=String(Math.min(Math.max(0,Number(input.value)||0),Math.max(0,(bgmBuffer?.duration||0)-.01)));if(id==='bgmFadeIn'||id==='bgmFadeOut')input.value=String(Math.max(0,Math.min(30,Number(input.value)||0)));CutAudio.invalidate();changed({syncBgm:false});syncBgm();}));
+function commitBgmField(id){
+  if(!bgmBuffer)return false;const input=$(id),raw=input?.value;
+  if(!input)return false;
+  if(id==='bgmStart'){
+    if(raw===''||!Number.isFinite(Number(raw))){input.value=String(Math.min(Math.max(0,Number(bgmProject().start)||0),Math.max(0,bgmBuffer.duration-.01)));return false;}
+    input.value=String(Math.min(Math.max(0,Number(raw)),Math.max(0,bgmBuffer.duration-.01)));
+  }else if(id==='bgmFadeIn'||id==='bgmFadeOut'){
+    if(raw===''||!Number.isFinite(Number(raw))){input.value='0';return false;}
+    input.value=String(Math.max(0,Math.min(30,Number(raw))));
+  }
+  pause();CutAudio.invalidate();changed({syncBgm:false});syncBgm();return true;
+}
+$('bgmVolume').addEventListener('input',()=>{if(!bgmBuffer)return;pause();CutAudio.invalidate();syncBgm();});
+$('bgmVolume').addEventListener('change',()=>{if(!bgmBuffer)return;pause();CutAudio.invalidate();changed({syncBgm:false});syncBgm();});
+$('bgmRepeat').addEventListener('change',()=>commitBgmField('bgmRepeat'));
+['bgmStart','bgmFadeIn','bgmFadeOut'].forEach(id=>$(id).addEventListener('change',()=>commitBgmField(id)));
 
 function bgmSnapshot(){return bgmBuffer?{file:bgmFile,name:bgmName,start:Number($('bgmStart').value)||0,volume:Number($('bgmVolume').value)||0,repeat:$('bgmRepeat').value,fadeIn:Number($('bgmFadeIn').value)||0,fadeOut:Number($('bgmFadeOut').value)||0}:null;}
 async function restoreBgmSnapshot(snapshot,{silent=false}={}){
