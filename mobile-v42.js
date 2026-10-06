@@ -888,7 +888,12 @@
     const proxy=e.target.closest('[data-proxy-click]');if(proxy){const fileTarget=proxy.dataset.fileTarget;if(fileTarget&&openFileTarget(fileTarget))return;settingsProxyMap.get(proxy.dataset.proxyClick)?.click();setTimeout(()=>{syncSettingsProxyState();syncSettingsGridMirror();},0);return;}
     handleAutoClick(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});
   });
-  $('v42SettingsBody').addEventListener('input',e=>{proxyInput(e,settingsProxyMap);handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});});
+  $('v42SettingsBody').addEventListener('input',e=>{
+    const k=e.target?.dataset?.proxy,source=k?settingsProxyMap.get(k):null;
+    const editingBgmNumber=source&&['bgmStart','bgmFadeIn','bgmFadeOut'].includes(source.id);
+    if(!editingBgmNumber)proxyInput(e,settingsProxyMap);
+    handleAutoInput(e,()=>{syncSettingsProxyState();syncSettingsGridMirror();});
+  });
   $('v42SettingsBody').addEventListener('select',e=>{const k=e.target?.dataset?.proxy,source=k?settingsProxyMap.get(k):null;if(source===$('titleInput')&&typeof source.setSelectionRange==='function')source.setSelectionRange(e.target.selectionStart||0,e.target.selectionEnd||0);},true);
   $('v42SettingsBody').addEventListener('change',e=>{
     if(e.target?.name==='v42AutoSilence'){
@@ -897,6 +902,7 @@
       setTimeout(syncSettingsProxyState,0);return;
     }
     const k=e.target?.dataset?.proxy,source=k?settingsProxyMap.get(k):null;
+    if(source&&['bgmStart','bgmFadeIn','bgmFadeOut'].includes(source.id)){source.value=e.target.value;dispatch(source,'change');syncSettingsProxyState();return;}
     proxyChange(e,settingsProxyMap);
     if(source===$('autoMediaMode')){requestAnimationFrame(renderSettings);return;}
     setTimeout(syncSettingsProxyState,0);
