@@ -171,7 +171,7 @@
     geometry(index,width,height){
       const {item,scene}=sourceForIndex(index);if(!item||!scene)return null;
       width=Math.max(1,Number(width)||1080);height=Math.max(1,Number(height)||1920);
-      const rect=CutRenderer.mediaRect(width,height,$('layoutSelect').value);
+      const rect=CutRenderer.mediaRect(width,height,$('layoutSelect').value,project(),currentTime());
       const elapsed=cues.length?Math.max(0,currentTime()-Number(item.start||0)):Math.max(0,CutRenderer.locate(timelineScenes(),currentTime()).elapsed||0);
       const fit=$('layoutSelect').value==='fullscreen'?'cover':$('fitSelect').value;
       const box=CutRenderer.mediaGeometry(scene,elapsed,rect,fit);
