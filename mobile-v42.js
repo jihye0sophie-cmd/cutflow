@@ -661,13 +661,21 @@
         <div class="full v42-stroke-row">${pc($('channelStrokeEnabled'),'스트로크 사용')}${pc($('channelStrokeWidth'),'두께')}</div>
       </div>
       <p class="v42-help">${esc($('channelFontNote')?.textContent||'')}</p>`;
-    const project=`
-      <div class="v42-grid2"><label class="v42-field"><span>화면 비율</span><div class="v42-format-lock">9:16 <small>세로형 고정</small></div></label>${pc($('layoutSelect'),'영상 템플릿')}</div>
-      <p class="v42-help">${esc($('layoutDescription')?.textContent||'')}</p>
+    const storyProject=$('layoutSelect')?.value==='story'?`
+      <details class="v42-settings-details v42-pc-style-card" open><summary>썰쇼츠 게시판 설정 <small>헤더 · 제목 · 보조정보</small></summary><div class="v42-grid2">
+        ${pc($('storyPreset'),'디자인 프리셋')}${pc($('storyChannel'),'채널명',{wide:true})}
+        ${pc($('storyTitle'),'게시글 제목',{wide:true})}${pc($('storyMeta'),'보조정보',{wide:true})}
+        ${pc($('storyHeaderColor'),'헤더 배경색')}${pc($('storyHeaderTextColor'),'헤더 글자색')}
+      </div><p class="v42-help">상단 컬러 헤더와 게시글 정보는 고정되고, 아래에서 장면별 자막과 이미지·영상이 바뀝니다.</p></details>`:'';
+    const standardProject=$('layoutSelect')?.value==='story'?'':`
       <div class="v42-compose-title">${pc($('titleInput'),'상단 제목',{wide:true})}</div>
       <details class="v42-settings-details v42-pc-style-card"><summary>제목 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${titleStyle}</div></details>
       ${pc($('channelInput'),'채널명',{wide:true})}
-      <details class="v42-settings-details v42-pc-style-card"><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>
+      <details class="v42-settings-details v42-pc-style-card"><summary>채널명 스타일 <small>폰트 · 크기 · 색상 · B · I · 스트로크</small></summary><div>${channelStyle}</div></details>`;
+    const project=`
+      <div class="v42-grid2"><label class="v42-field"><span>화면 비율</span><div class="v42-format-lock">9:16 <small>세로형 고정</small></div></label>${pc($('layoutSelect'),'영상 템플릿')}</div>
+      <p class="v42-help">${esc($('layoutDescription')?.textContent||'')}</p>
+      ${storyProject}${standardProject}
       ${pc($('fitSelect'),'이미지·영상 맞춤')}
       ${pc($('templateSelect'),'움직임 프리셋')}
       <div class="v42-actions v42-compact-actions v42-motion-actions">${pb($('applyTemplateBtn'),'움직임만 전체 적용')}${pb($('randomMotionBtn'),'전체 이미지에 랜덤 무빙')}</div>
