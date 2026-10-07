@@ -61,6 +61,7 @@ window.CutRenderer = (() => {
     return {scale:Math.max(.1,Math.min(5,finite(value?.scale,1))),x:Math.max(-2,Math.min(2,finite(value?.x,0))),y:Math.max(-2,Math.min(2,finite(value?.y,0)))};
   }
   function mediaRect(w,h,layout) {
+    if(layout==='story')return {x:w*.07,y:h*.48,w:w*.86,h:h*.43};
     return layout==='fullscreen'?{x:0,y:0,w,h}:{x:0,y:h*(layout==='immersive'?.237:.203),w,h:h*(layout==='immersive'?.763:.594)};
   }
   function mediaGeometry(scene,elapsed,rect,fit) {
@@ -87,7 +88,7 @@ window.CutRenderer = (() => {
       out.push({c,color:ranges.find(r=>at>=r.start&&at<r.end)?.color||(highlight&&marked?'#eeff00':base)});
     }return out;
   }
-  function drawText(ctx,text,{x,y,w,h,size,letterSpacing=0,color='#fff',italic=false,outline=false,highlight=false,align='center',font='noto',weight=900,strokeColor='#111111',strokeWidth=null,background=null,padding=0,radius=0,colorRanges=[]}) {
+  function drawText(ctx,text,{x,y,w,h,size,letterSpacing=0,color='#fff',italic=false,outline=false,highlight=false,align='center',textAlign='center',font='noto',weight=900,strokeColor='#111111',strokeWidth=null,background=null,padding=0,radius=0,colorRanges=[]}) {
     if(!text)return;
     const fontInfo=window.CutFonts?.get(font);
     // Single-weight custom faces must never request OS-dependent synthetic bold.
@@ -117,7 +118,7 @@ window.CutRenderer = (() => {
       ctx.fill();ctx.globalAlpha=1;
     }
     ctx.textBaseline='top';ctx.lineJoin='round';ctx.miterLimit=2;
-    for(const line of lines){let xx=x+(w-line.width)/2;
+    for(const line of lines){let xx=textAlign==='left'?x:textAlign==='right'?x+w-line.width:x+(w-line.width)/2;
       line.glyphs.forEach((g,index)=>{if(outline){ctx.strokeStyle=strokeColor;ctx.lineWidth=strokeWidth??fontSize*.11;ctx.strokeText(g.c,xx,yy);}if(extraBold){ctx.strokeStyle=g.color;ctx.lineWidth=fontSize*.018;ctx.strokeText(g.c,xx,yy);}ctx.fillStyle=g.color;ctx.fillText(g.c,xx,yy);xx+=g.width+(index<line.glyphs.length-1?spacing:0);});yy+=fontSize*1.25;
     }ctx.restore();
   }
@@ -129,13 +130,13 @@ window.CutRenderer = (() => {
   async function draw(canvas,project,time) {
     await fonts(project);
     const ctx=canvas.getContext('2d',{alpha:false});const w=canvas.width,h=canvas.height;
-    const loc=locate(project.scenes,time),scene=project.scenes[loc.index],portrait=project.layout==='immersive',fullscreen=project.layout==='fullscreen';
+    const loc=locate(project.scenes,time),scene=project.scenes[loc.index],portrait=project.layout==='immersive',fullscreen=project.layout==='fullscreen',story=project.layout==='story';
     const rect=mediaRect(w,h,project.layout);
     const fit=fullscreen?'cover':project.fit;
     if(scene?.element) {
       await seek(scene,loc.elapsed);
       const candidate=project.scenes[loc.index-1],prior=candidate?.element&&(!Number.isFinite(scene.start)||Math.abs(candidate.end-scene.start)<.001)?candidate:null;const progress=Math.min(1,loc.elapsed/Math.min(.35,scene.duration/2));
-      ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);drawMedia(ctx,scene,loc.elapsed,rect,fit);
+      ctx.fillStyle=story?'#fff':'#000';ctx.fillRect(0,0,w,h);drawMedia(ctx,scene,loc.elapsed,rect,fit);
       if(prior&&progress<1&&['dissolve','slide'].includes(scene.transition))await seek(prior,prior.duration);
       if(prior&&progress<1&&scene.transition!=='cut') {
         ctx.save();
@@ -144,7 +145,18 @@ window.CutRenderer = (() => {
         else{ctx.globalAlpha=1-progress;ctx.fillStyle=scene.transition==='flash'?'#fff':'#000';ctx.fillRect(0,rect.y,w,rect.h);}
         ctx.restore();
       }
-    }else{ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);if(!project.scenes.length)drawText(ctx,'이미지·영상 컷을\n불러와 주세요',{x:w*.1,y:h*.35,w:w*.8,h:h*.25,size:w*.065,color:'#b9b9b9'});}
+    }else{ctx.fillStyle=story?'#fff':'#000';ctx.fillRect(0,0,w,h);if(!project.scenes.length)drawText(ctx,'이미지·영상 컷을\n불러와 주세요',{x:story?rect.x:w*.1,y:story?rect.y:h*.35,w:story?rect.w:w*.8,h:story?rect.h:h*.25,size:w*.065,color:'#b9b9b9'});}
+    if(story){
+      const scale=w/1080,headerH=h*.078;
+      ctx.fillStyle=project.storyHeaderColor||'#d94b53';ctx.fillRect(0,0,w,headerH);
+      drawText(ctx,project.storyChannel||'채널명',{x:w*.06,y:0,w:w*.88,h:headerH,size:42*scale,color:project.storyHeaderTextColor||'#ffffff',weight:900,font:project.channelFont||'noto'});
+      drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.07,y:h*.095,w:w*.86,h:h*.075,size:58*scale,color:'#111111',weight:900,font:project.titleFont||'noto',textAlign:'left'});
+      drawText(ctx,project.storyMeta||'19:00 | 조회수 : 132,343 | 댓글 : 33',{x:w*.07,y:h*.158,w:w*.86,h:h*.04,size:28*scale,color:'#777777',weight:400,font:project.channelFont||'noto',textAlign:'left'});
+      ctx.strokeStyle='#d2d2d2';ctx.lineWidth=Math.max(1,2*scale);ctx.beginPath();ctx.moveTo(w*.055,h*.215);ctx.lineTo(w*.945,h*.215);ctx.stroke();
+      const cue=project.cues.find(c=>time>=c.start&&time<c.end);
+      if(cue){const style=window.CaptionStyle.resolve(cue,project);drawText(ctx,cue.text,{x:w*.07,y:h*.245,w:w*.86,h:h*.18,size:style.size*scale,letterSpacing:style.letterSpacing*scale,color:style.color,colorRanges:cue.colorRanges||[],highlight:true,italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:'center',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});}
+      return loc;
+    }
     drawText(ctx,project.title,{x:w*((project.titleX??50)/100-.45),y:h*((project.titleY??((portrait?.07:.04)*100))/100),w:w*.90,h:h*(portrait?.155:.15),size:(project.titleSize||86.4)*w/1080,italic:!!project.titleItalic,color:project.titleColor||'#ffe22e',colorRanges:project.titleColorRanges||[],weight:project.titleBold===false?400:900,align:'bottom',font:project.titleFont||'noto',...textStroke(project,'title',fullscreen,w/1080)});
     const cue=project.cues.find(c=>time>=c.start&&time<c.end);
     if(cue){
@@ -160,7 +172,7 @@ window.CutRenderer = (() => {
   }
   let fontSignature='',fontPromise=Promise.resolve();
   async function fonts(project){
-    const text=[project.title,project.channel,...project.cues.map(c=>c.text)].join('')||'가나다';
+    const text=[project.title,project.channel,project.storyChannel,project.storyTitle,project.storyMeta,...project.cues.map(c=>c.text)].join('')||'가나다';
     const ids=[...new Set([project.titleFont||'noto',project.channelFont||'noto',...project.cues.map(c=>window.CaptionStyle.resolve(c,project).font)])];
     const signature=ids.join('|')+'::'+text;
     if(signature!==fontSignature){
