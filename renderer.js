@@ -44,6 +44,12 @@ window.CutRenderer = (() => {
     return m;
   }
   async function seek(scene,elapsed) {
+    if(scene.type==='gif'&&scene.gifDecoder){
+      const total=Math.max(.001,Number(scene.sourceDuration)||.001),local=((Math.max(0,elapsed)%total)+total)%total,durations=scene.gifFrameDurations||[];
+      let acc=0,index=0;for(;index<durations.length-1;index++){acc+=durations[index];if(local<acc)break;}
+      if(scene.gifFrameIndex===index&&scene.gifFrame)return;
+      const decoded=await scene.gifDecoder.decode({frameIndex:index});scene.gifFrame?.close?.();scene.gifFrame=decoded.image;scene.gifFrameIndex=index;return;
+    }
     if(scene.type!=='video') return;
     const video=scene.element;
     const trimStart=Math.max(0,Number(scene.trimStart)||0),trimEnd=Math.min(Number(scene.sourceDuration)||Infinity,Number(scene.trimEnd)||Number(scene.sourceDuration)||Infinity);const target=Math.max(trimStart,Math.min(trimEnd-.02,trimStart+elapsed));
@@ -60,13 +66,24 @@ window.CutRenderer = (() => {
     const finite=(v,d)=>Number.isFinite(v)?v:d;
     return {scale:Math.max(.1,Math.min(5,finite(value?.scale,1))),x:Math.max(-2,Math.min(2,finite(value?.x,0))),y:Math.max(-2,Math.min(2,finite(value?.y,0)))};
   }
-  function mediaRect(w,h,layout) {
-    if(layout==='story')return {x:w*.07,y:h*.48,w:w*.86,h:h*.43};
+  function storyCaptionText(project,time){
+    const index=(project.cues||[]).findIndex(c=>time>=c.start&&time<c.end);if(index<0)return '';
+    if(project.storyCaptionMode!=='cumulative')return project.cues[index]?.text||'';
+    return project.cues.slice(0,index+1).map(c=>String(c.text||'').trim()).filter(Boolean).join('\n');
+  }
+  function storyLayout(w,h,project,time){
+    const text=storyCaptionText(project,time),fontSize=Math.max(24,Number(window.CaptionStyle?.resolve?.((project.cues||[]).find(c=>time>=c.start&&time<c.end)||{},project)?.size)||60);
+    const charsPerLine=Math.max(10,Math.floor((w*.86)/(fontSize*.92))),logical=String(text||'').split('\n');let lines=0;for(const line of logical)lines+=Math.max(1,Math.ceil([...line].length/charsPerLine));
+    lines=Math.max(1,lines);const captionTop=h*.245,captionH=Math.min(h*.27,Math.max(h*.12,lines*fontSize*1.32+h*.025)),mediaY=Math.min(h*.64,captionTop+captionH+h*.022),mediaH=Math.max(h*.20,Math.min(h*.43,h*.91-mediaY));
+    return {text,lines,captionTop,captionH,media:{x:w*.07,y:mediaY,w:w*.86,h:mediaH}};
+  }
+  function mediaRect(w,h,layout,project=null,time=0) {
+    if(layout==='story')return project?storyLayout(w,h,project,time).media:{x:w*.07,y:h*.48,w:w*.86,h:h*.43};
     return layout==='fullscreen'?{x:0,y:0,w,h}:{x:0,y:h*(layout==='immersive'?.237:.203),w,h:h*(layout==='immersive'?.763:.594)};
   }
   function mediaGeometry(scene,elapsed,rect,fit) {
-    const el=scene?.element;if(!el)return null;
-    const sw=el.videoWidth||el.naturalWidth||el.width,sh=el.videoHeight||el.naturalHeight||el.height;
+    const el=scene?.type==='gif'?(scene.gifFrame||scene.element):scene?.element;if(!el)return null;
+    const sw=el.videoWidth||el.naturalWidth||el.displayWidth||el.codedWidth||el.width,sh=el.videoHeight||el.naturalHeight||el.displayHeight||el.codedHeight||el.height;
     if(!sw||!sh)return null;
     const factor=fit==='contain'?Math.min(rect.w/sw,rect.h/sh):Math.max(rect.w/sw,rect.h/sh);
     const m=motion(scene,elapsed),base=transform(scene.transform);
@@ -77,7 +94,7 @@ window.CutRenderer = (() => {
   function drawMedia(ctx,scene,elapsed,rect,fit) {
     const box=mediaGeometry(scene,elapsed,rect,fit);if(!box)return;
     ctx.save();ctx.beginPath();ctx.rect(rect.x,rect.y,rect.w,rect.h);ctx.clip();
-    ctx.drawImage(scene.element,box.x,box.y,box.w,box.h);ctx.restore();
+    ctx.drawImage(scene.type==='gif'?(scene.gifFrame||scene.element):scene.element,box.x,box.y,box.w,box.h);ctx.restore();
   }
   function glyphs(text,highlight,base,ranges=[]) {
     const out=[];let marked=false;
@@ -131,7 +148,7 @@ window.CutRenderer = (() => {
     await fonts(project);
     const ctx=canvas.getContext('2d',{alpha:false});const w=canvas.width,h=canvas.height;
     const loc=locate(project.scenes,time),scene=project.scenes[loc.index],portrait=project.layout==='immersive',fullscreen=project.layout==='fullscreen',story=project.layout==='story';
-    const rect=mediaRect(w,h,project.layout);
+    const rect=mediaRect(w,h,project.layout,project,time);
     const fit=fullscreen?'cover':project.fit;
     if(scene?.element) {
       await seek(scene,loc.elapsed);
@@ -153,8 +170,8 @@ window.CutRenderer = (() => {
       drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.07,y:h*.095,w:w*.86,h:h*.085,size:(project.storyTitleSize||76)*scale,color:'#111111',weight:900,font:project.storyTitleFont||'ohsquare',textAlign:'left'});
       drawText(ctx,project.storyMeta||'19:00 | 조회수 : 132,343 | 댓글 : 33',{x:w*.07,y:h*.165,w:w*.86,h:h*.035,size:28*scale,color:'#777777',weight:400,font:'noto',textAlign:'left'});
       ctx.strokeStyle='#d2d2d2';ctx.lineWidth=Math.max(1,2*scale);ctx.beginPath();ctx.moveTo(w*.055,h*.215);ctx.lineTo(w*.945,h*.215);ctx.stroke();
-      const cue=project.cues.find(c=>time>=c.start&&time<c.end);
-      if(cue){const style=window.CaptionStyle.resolve(cue,project);drawText(ctx,cue.text,{x:w*.07,y:h*.245,w:w*.86,h:h*.18,size:style.size*scale,letterSpacing:style.letterSpacing*scale,color:style.color,colorRanges:cue.colorRanges||[],highlight:true,italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:'center',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});}
+      const cue=project.cues.find(c=>time>=c.start&&time<c.end),layout=storyLayout(w,h,project,time);
+      if(cue){const style=window.CaptionStyle.resolve(cue,project);drawText(ctx,layout.text,{x:w*.07,y:layout.captionTop,w:w*.86,h:layout.captionH,size:style.size*scale,letterSpacing:style.letterSpacing*scale,color:style.color,colorRanges:project.storyCaptionMode==='cumulative'?[]:(cue.colorRanges||[]),highlight:project.storyCaptionMode!=='cumulative',italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:'center',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});}
       return loc;
     }
     drawText(ctx,project.title,{x:w*((project.titleX??50)/100-.45),y:h*((project.titleY??((portrait?.07:.04)*100))/100),w:w*.90,h:h*(portrait?.155:.15),size:(project.titleSize||86.4)*w/1080,italic:!!project.titleItalic,color:project.titleColor||'#ffe22e',colorRanges:project.titleColorRanges||[],weight:project.titleBold===false?400:900,align:'bottom',font:project.titleFont||'noto',...textStroke(project,'title',fullscreen,w/1080)});
@@ -181,5 +198,5 @@ window.CutRenderer = (() => {
     }
     await fontPromise;
   }
-  return {draw,locate,motion,cutDuration,fonts,transform,mediaRect,mediaGeometry};
+  return {draw,locate,motion,cutDuration,fonts,transform,mediaRect,mediaGeometry,storyLayout,storyCaptionText};
 })();
