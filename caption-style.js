@@ -5,7 +5,8 @@ window.CaptionStyle=(()=>{
   const templateDefaults={
     framed:{font:'danjunghae',bold:true,italic:true},
     immersive:{font:'ohsquare',bold:false,italic:true},
-    fullscreen:{font:'danjunghae',bold:true,italic:true}
+    fullscreen:{font:'danjunghae',bold:true,italic:true},
+    story:{font:'danjunghae',size:66,letterSpacing:1.5,bold:true,italic:false,color:'#111111',strokeWidth:0}
   };
   const presets={
     basic:{...defaults},
@@ -15,6 +16,6 @@ window.CaptionStyle=(()=>{
     simple:{...defaults,bold:false,italic:false,strokeWidth:0,weight:400}
   };
   function resolve(cue={},project={}){const template=templateDefaults[project.layout]||{};return {...defaults,...template,font:cue.style?.font||template.font||project.subtitleFont||defaults.font,color:palette[cue.color]||cue.color||defaults.color,...cue.style};}
-  function defaultY(layout){return layout==='framed'?74.2:layout==='fullscreen'?82:71.5;}
+  function defaultY(layout){return layout==='framed'?74.2:layout==='fullscreen'?82:layout==='story'?34:71.5;}
   return {palette,defaults,templateDefaults,presets,resolve,defaultY};
 })();
