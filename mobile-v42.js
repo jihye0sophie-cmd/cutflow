@@ -666,7 +666,8 @@
         ${pc($('storyPreset'),'디자인 프리셋')}${pc($('storyChannel'),'채널명',{wide:true})}
         ${pc($('storyChannelFont'),'채널명 폰트')}${pc($('storyChannelSize'),'채널명 크기')}
         ${pc($('storyTitle'),'게시글 제목',{wide:true})}${pc($('storyTitleFont'),'제목 폰트')}${pc($('storyTitleSize'),'제목 크기')}
-        ${pc($('storyMeta'),'보조정보',{wide:true})}${pc($('storyHeaderColor'),'헤더 배경색')}${pc($('storyHeaderTextColor'),'헤더 글자색')}
+        ${pc($('storyMeta'),'보조정보',{wide:true})}${pb($('storyMetaGenerate'),'보조정보 숫자 자동 생성',{wide:true})}${pc($('storyCaptionMode'),'자막 표시 방식')}
+        ${pc($('storyHeaderColor'),'헤더 배경색')}${pc($('storyHeaderTextColor'),'헤더 글자색')}
       </div><p class="v42-help">상단 컬러 헤더와 게시글 정보는 고정되고, 아래에서 장면별 자막과 이미지·영상이 바뀝니다.</p></details>`:'';
     const standardProject=$('layoutSelect')?.value==='story'?'':`
       <div class="v42-compose-title">${pc($('titleInput'),'상단 제목',{wide:true})}</div>
