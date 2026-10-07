@@ -174,8 +174,8 @@ window.CutRenderer = (() => {
       const cy=headerH*.52,chevX=w*.075,chevW=w*.022,chevH=headerH*.18;
       ctx.beginPath();ctx.moveTo(chevX+chevW,cy-chevH);ctx.lineTo(chevX,cy);ctx.lineTo(chevX+chevW,cy+chevH);ctx.stroke();
       const menuX=w*.89,menuW=w*.055,menuGap=headerH*.105;for(let k=-1;k<=1;k++){ctx.beginPath();ctx.moveTo(menuX,cy+k*menuGap);ctx.lineTo(menuX+menuW,cy+k*menuGap);ctx.stroke();}ctx.restore();
-      drawText(ctx,project.storyChannel||'채널명',{x:w*.16,y:0,w:w*.68,h:headerH,size:(project.storyChannelSize||42)*scale,color:headerColor,weight:900,font:project.storyChannelFont||'noto'});
-      drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.055,y:h*.155,w:w*.89,h:h*.075,size:(project.storyTitleSize||76)*scale,color:'#111111',weight:900,font:project.storyTitleFont||'ohsquare',textAlign:'left'});
+      drawText(ctx,project.storyChannel||'채널명',{x:w*.16,y:0,w:w*.68,h:headerH,size:(project.storyChannelSize||50)*scale,color:headerColor,weight:900,font:project.storyChannelFont||'noto'});
+      drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.055,y:h*.155,w:w*.89,h:h*.075,size:(project.storyTitleSize||65)*scale,color:'#111111',weight:900,font:project.storyTitleFont||'ohsquare',textAlign:'left'});
       drawText(ctx,project.storyMeta||'19:00 | 조회수 : 132,343 | 댓글 : 33',{x:w*.055,y:h*.225,w:w*.89,h:h*.028,size:28*scale,color:'#777777',weight:400,font:'noto',textAlign:'left'});
       ctx.strokeStyle='#c9c9c9';ctx.lineWidth=Math.max(1,2*scale);ctx.beginPath();ctx.moveTo(w*.035,h*.27);ctx.lineTo(w*.965,h*.27);ctx.stroke();
       const cue=project.cues.find(c=>time>=c.start&&time<c.end),layout=storyLayout(w,h,project,time);
