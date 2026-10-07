@@ -149,9 +149,9 @@ window.CutRenderer = (() => {
     if(story){
       const scale=w/1080,headerH=h*.078;
       ctx.fillStyle=project.storyHeaderColor||'#d94b53';ctx.fillRect(0,0,w,headerH);
-      drawText(ctx,project.storyChannel||'채널명',{x:w*.06,y:0,w:w*.88,h:headerH,size:42*scale,color:project.storyHeaderTextColor||'#ffffff',weight:900,font:project.channelFont||'noto'});
-      drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.07,y:h*.095,w:w*.86,h:h*.075,size:58*scale,color:'#111111',weight:900,font:project.titleFont||'noto',textAlign:'left'});
-      drawText(ctx,project.storyMeta||'19:00 | 조회수 : 132,343 | 댓글 : 33',{x:w*.07,y:h*.158,w:w*.86,h:h*.04,size:28*scale,color:'#777777',weight:400,font:project.channelFont||'noto',textAlign:'left'});
+      drawText(ctx,project.storyChannel||'채널명',{x:w*.06,y:0,w:w*.88,h:headerH,size:(project.storyChannelSize||42)*scale,color:project.storyHeaderTextColor||'#ffffff',weight:900,font:project.storyChannelFont||'noto'});
+      drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.07,y:h*.095,w:w*.86,h:h*.085,size:(project.storyTitleSize||76)*scale,color:'#111111',weight:900,font:project.storyTitleFont||'ohsquare',textAlign:'left'});
+      drawText(ctx,project.storyMeta||'19:00 | 조회수 : 132,343 | 댓글 : 33',{x:w*.07,y:h*.165,w:w*.86,h:h*.035,size:28*scale,color:'#777777',weight:400,font:'noto',textAlign:'left'});
       ctx.strokeStyle='#d2d2d2';ctx.lineWidth=Math.max(1,2*scale);ctx.beginPath();ctx.moveTo(w*.055,h*.215);ctx.lineTo(w*.945,h*.215);ctx.stroke();
       const cue=project.cues.find(c=>time>=c.start&&time<c.end);
       if(cue){const style=window.CaptionStyle.resolve(cue,project);drawText(ctx,cue.text,{x:w*.07,y:h*.245,w:w*.86,h:h*.18,size:style.size*scale,letterSpacing:style.letterSpacing*scale,color:style.color,colorRanges:cue.colorRanges||[],highlight:true,italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:'center',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});}
@@ -173,7 +173,7 @@ window.CutRenderer = (() => {
   let fontSignature='',fontPromise=Promise.resolve();
   async function fonts(project){
     const text=[project.title,project.channel,project.storyChannel,project.storyTitle,project.storyMeta,...project.cues.map(c=>c.text)].join('')||'가나다';
-    const ids=[...new Set([project.titleFont||'noto',project.channelFont||'noto',...project.cues.map(c=>window.CaptionStyle.resolve(c,project).font)])];
+    const ids=[...new Set([project.titleFont||'noto',project.channelFont||'noto',project.storyTitleFont||'ohsquare',project.storyChannelFont||'noto',...project.cues.map(c=>window.CaptionStyle.resolve(c,project).font)])];
     const signature=ids.join('|')+'::'+text;
     if(signature!==fontSignature){
       fontSignature=signature;
