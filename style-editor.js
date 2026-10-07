@@ -95,7 +95,7 @@ const templateTypography={
   framed:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true},
   immersive:{titleFont:'aggro',channelFont:'gangwon',captionFont:'ohsquare',captionBold:false,captionItalic:true},
   fullscreen:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true},
-  story:{titleFont:'ohsquare',channelFont:'noto',captionFont:'noto',captionSize:60,captionBold:true,captionItalic:false,captionColor:'#111111',captionStrokeWidth:0,captionLetterSpacing:1.5}
+  story:{titleFont:'ohsquare',channelFont:'noto',captionFont:'noto',captionSize:55,captionBold:true,captionItalic:false,captionColor:'#111111',captionStrokeWidth:0,captionLetterSpacing:1.5}
 };
 async function applyTemplateTypography(layout,{applyCues=true,notify=false,record=true}={}){
   const preset=templateTypography[layout]||templateTypography.framed;
