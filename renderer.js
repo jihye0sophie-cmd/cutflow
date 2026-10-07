@@ -87,21 +87,23 @@ window.CutRenderer = (() => {
       out.push({c,color:ranges.find(r=>at>=r.start&&at<r.end)?.color||(highlight&&marked?'#eeff00':base)});
     }return out;
   }
-  function drawText(ctx,text,{x,y,w,h,size,color='#fff',italic=false,outline=false,highlight=false,align='center',font='noto',weight=900,strokeColor='#111111',strokeWidth=null,background=null,padding=0,radius=0,colorRanges=[]}) {
+  function drawText(ctx,text,{x,y,w,h,size,letterSpacing=0,color='#fff',italic=false,outline=false,highlight=false,align='center',font='noto',weight=900,strokeColor='#111111',strokeWidth=null,background=null,padding=0,radius=0,colorRanges=[]}) {
     if(!text)return;
     const fontInfo=window.CutFonts?.get(font);
     // Single-weight custom faces must never request OS-dependent synthetic bold.
     const nativeWeight=fontInfo?.file?400:weight;
     const extraBold=fontInfo?.file&&!fontInfo.fixedBold&&weight>=700;
     const chars=glyphs(text,highlight,color,colorRanges);let lines=[],fontSize=size;
+    const spacing=Number.isFinite(letterSpacing)?letterSpacing:0;
     function wrap(){
       ctx.font=`${italic?'italic ':''}${nativeWeight} ${fontSize}px "${window.CutFonts?.get(font).family||'Noto Sans KR'}", sans-serif`;
       lines=[];let line=[],width=0;
       for(const char of chars){
         if(char.c==='\n'){lines.push({glyphs:line,width});line=[];width=0;continue;}
-        const cw=ctx.measureText(char.c).width;
-        if(width+cw>w && line.length){lines.push({glyphs:line,width});line=[];width=0;}
-        line.push({...char,width:cw});width+=cw;
+        const cw=ctx.measureText(char.c).width,advance=cw+(line.length?spacing:0);
+        if(width+advance>w && line.length){lines.push({glyphs:line,width});line=[];width=0;}
+        const nextAdvance=cw+(line.length?spacing:0);
+        line.push({...char,width:cw});width+=nextAdvance;
       }lines.push({glyphs:line,width});
     }
     wrap();while(lines.length*fontSize*1.25>h && fontSize>size*.35){fontSize*=.94;wrap();}
@@ -116,7 +118,7 @@ window.CutRenderer = (() => {
     }
     ctx.textBaseline='top';ctx.lineJoin='round';ctx.miterLimit=2;
     for(const line of lines){let xx=x+(w-line.width)/2;
-      for(const g of line.glyphs){if(outline){ctx.strokeStyle=strokeColor;ctx.lineWidth=strokeWidth??fontSize*.11;ctx.strokeText(g.c,xx,yy);}if(extraBold){ctx.strokeStyle=g.color;ctx.lineWidth=fontSize*.018;ctx.strokeText(g.c,xx,yy);}ctx.fillStyle=g.color;ctx.fillText(g.c,xx,yy);xx+=g.width;}yy+=fontSize*1.25;
+      line.glyphs.forEach((g,index)=>{if(outline){ctx.strokeStyle=strokeColor;ctx.lineWidth=strokeWidth??fontSize*.11;ctx.strokeText(g.c,xx,yy);}if(extraBold){ctx.strokeStyle=g.color;ctx.lineWidth=fontSize*.018;ctx.strokeText(g.c,xx,yy);}ctx.fillStyle=g.color;ctx.fillText(g.c,xx,yy);xx+=g.width+(index<line.glyphs.length-1?spacing:0);});yy+=fontSize*1.25;
     }ctx.restore();
   }
   function textStroke(project,kind,templateDefault,scale){
@@ -151,7 +153,7 @@ window.CutRenderer = (() => {
       const center=(style.y??window.CaptionStyle.defaultY(project.layout))/100*h;
       const areaH=customPosition?Math.min(h*.30,center*2,(h-center)*2):h*(portrait?.16:.14);
       const y=customPosition?Math.max(0,Math.min(h-areaH,center-areaH/2)):(portrait?h*.635:h*.64);
-      drawText(ctx,cue.text,{x:w*.07,y,w:w*.86,h:areaH,size:style.size*scale,color:style.color,colorRanges:cue.colorRanges||[],highlight:true,italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:customPosition||portrait?'center':'bottom',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});
+      drawText(ctx,cue.text,{x:w*.07,y,w:w*.86,h:areaH,size:style.size*scale,letterSpacing:style.letterSpacing*scale,color:style.color,colorRanges:cue.colorRanges||[],highlight:true,italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:customPosition||portrait?'center':'bottom',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});
     }
     drawText(ctx,project.channel,{x:w*((project.channelX??50)/100-.46),y:h*((project.channelY??((fullscreen||portrait?.92:.817)*100))/100),w:w*.92,h:h*.06,size:(project.channelSize||43.2)*w/1080,italic:!!project.channelItalic,color:project.channelColor||'#dddddd',weight:project.channelBold===false?400:900,font:project.channelFont||'noto',...textStroke(project,'channel',fullscreen||portrait,w/1080)});
     return loc;
