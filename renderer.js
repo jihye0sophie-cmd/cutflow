@@ -74,8 +74,11 @@ window.CutRenderer = (() => {
   function storyLayout(w,h,project,time){
     const text=storyCaptionText(project,time),fontSize=Math.max(24,Number(window.CaptionStyle?.resolve?.((project.cues||[]).find(c=>time>=c.start&&time<c.end)||{},project)?.size)||60);
     const charsPerLine=Math.max(10,Math.floor((w*.86)/(fontSize*.92))),logical=String(text||'').split('\n');let lines=0;for(const line of logical)lines+=Math.max(1,Math.ceil([...line].length/charsPerLine));
-    lines=Math.max(1,lines);const captionTop=h*.245,captionH=Math.min(h*.27,Math.max(h*.12,lines*fontSize*1.32+h*.025)),mediaY=Math.min(h*.64,captionTop+captionH+h*.022),mediaH=Math.max(h*.20,Math.min(h*.43,h*.91-mediaY));
-    return {text,lines,captionTop,captionH,media:{x:w*.07,y:mediaY,w:w*.86,h:mediaH}};
+    lines=Math.max(1,lines);
+    // Story Shorts uses a YouTube-safe vertical composition: header 13.5%, post info to 27%, body to 82%, bottom 18% kept clear for platform UI.
+    const captionTop=h*.305,captionH=Math.min(h*.225,Math.max(h*.105,lines*fontSize*1.30+h*.018));
+    const mediaY=Math.min(h*.575,captionTop+captionH+h*.018),mediaBottom=h*.82,mediaH=Math.max(h*.18,mediaBottom-mediaY);
+    return {text,lines,captionTop,captionH,media:{x:w*.07,y:mediaY,w:w*.86,h:mediaH},safeBottom:h*.18};
   }
   function mediaRect(w,h,layout,project=null,time=0) {
     if(layout==='story')return project?storyLayout(w,h,project,time).media:{x:w*.07,y:h*.48,w:w*.86,h:h*.43};
@@ -164,12 +167,17 @@ window.CutRenderer = (() => {
       }
     }else{ctx.fillStyle=story?'#fff':'#000';ctx.fillRect(0,0,w,h);if(!project.scenes.length)drawText(ctx,'이미지·영상 컷을\n불러와 주세요',{x:story?rect.x:w*.1,y:story?rect.y:h*.35,w:story?rect.w:w*.8,h:story?rect.h:h*.25,size:w*.065,color:'#b9b9b9'});}
     if(story){
-      const scale=w/1080,headerH=h*.078;
+      const scale=w/1080,headerH=h*.135,headerColor=project.storyHeaderTextColor||'#ffffff';
       ctx.fillStyle=project.storyHeaderColor||'#d94b53';ctx.fillRect(0,0,w,headerH);
-      drawText(ctx,project.storyChannel||'채널명',{x:w*.06,y:0,w:w*.88,h:headerH,size:(project.storyChannelSize||42)*scale,color:project.storyHeaderTextColor||'#ffffff',weight:900,font:project.storyChannelFont||'noto'});
-      drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.07,y:h*.095,w:w*.86,h:h*.085,size:(project.storyTitleSize||76)*scale,color:'#111111',weight:900,font:project.storyTitleFont||'ohsquare',textAlign:'left'});
-      drawText(ctx,project.storyMeta||'19:00 | 조회수 : 132,343 | 댓글 : 33',{x:w*.07,y:h*.165,w:w*.86,h:h*.035,size:28*scale,color:'#777777',weight:400,font:'noto',textAlign:'left'});
-      ctx.strokeStyle='#d2d2d2';ctx.lineWidth=Math.max(1,2*scale);ctx.beginPath();ctx.moveTo(w*.055,h*.215);ctx.lineTo(w*.945,h*.215);ctx.stroke();
+      // Fixed story-board navigation marks, kept inside the header safe area.
+      ctx.save();ctx.strokeStyle=headerColor;ctx.lineWidth=Math.max(3,7*scale);ctx.lineCap='round';ctx.lineJoin='round';
+      const cy=headerH*.52,chevX=w*.075,chevW=w*.022,chevH=headerH*.18;
+      ctx.beginPath();ctx.moveTo(chevX+chevW,cy-chevH);ctx.lineTo(chevX,cy);ctx.lineTo(chevX+chevW,cy+chevH);ctx.stroke();
+      const menuX=w*.89,menuW=w*.055,menuGap=headerH*.105;for(let k=-1;k<=1;k++){ctx.beginPath();ctx.moveTo(menuX,cy+k*menuGap);ctx.lineTo(menuX+menuW,cy+k*menuGap);ctx.stroke();}ctx.restore();
+      drawText(ctx,project.storyChannel||'채널명',{x:w*.16,y:0,w:w*.68,h:headerH,size:(project.storyChannelSize||42)*scale,color:headerColor,weight:900,font:project.storyChannelFont||'noto'});
+      drawText(ctx,project.storyTitle||'썰쇼츠 제목',{x:w*.055,y:h*.155,w:w*.89,h:h*.075,size:(project.storyTitleSize||76)*scale,color:'#111111',weight:900,font:project.storyTitleFont||'ohsquare',textAlign:'left'});
+      drawText(ctx,project.storyMeta||'19:00 | 조회수 : 132,343 | 댓글 : 33',{x:w*.055,y:h*.225,w:w*.89,h:h*.028,size:28*scale,color:'#777777',weight:400,font:'noto',textAlign:'left'});
+      ctx.strokeStyle='#c9c9c9';ctx.lineWidth=Math.max(1,2*scale);ctx.beginPath();ctx.moveTo(w*.035,h*.27);ctx.lineTo(w*.965,h*.27);ctx.stroke();
       const cue=project.cues.find(c=>time>=c.start&&time<c.end),layout=storyLayout(w,h,project,time);
       if(cue){const style=window.CaptionStyle.resolve(cue,project);drawText(ctx,layout.text,{x:w*.07,y:layout.captionTop,w:w*.86,h:layout.captionH,size:style.size*scale,letterSpacing:style.letterSpacing*scale,color:style.color,colorRanges:project.storyCaptionMode==='cumulative'?[]:(cue.colorRanges||[]),highlight:project.storyCaptionMode!=='cumulative',italic:style.italic,outline:style.strokeWidth>0,strokeColor:style.strokeColor,strokeWidth:style.strokeWidth*scale,align:'center',font:style.font,weight:style.bold?900:400,background:style.background?{color:style.backgroundColor,opacity:style.backgroundOpacity}:null,padding:style.padding*scale,radius:style.radius*scale});}
       return loc;
