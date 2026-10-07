@@ -61,7 +61,7 @@ function previewAudioElement(scene){
   if(!scene.audioElement){const el=document.createElement('video');el.src=scene.url;el.preload='auto';el.playsInline=true;el.setAttribute('playsinline','');el.setAttribute('webkit-playsinline','');el.muted=false;el.volume=1;scene.audioElement=el;}
   return scene.audioElement;
 }
-function releaseSceneResources(scene){if(!scene)return;try{scene.audioElement?.pause();if(scene.audioElement){scene.audioElement.removeAttribute?.('src');scene.audioElement.load?.();scene.audioElement=null;}if(scene.element){scene.element.removeAttribute?.('src');scene.element.src='';}}catch{}if(scene.url){URL.revokeObjectURL(scene.url);scene.url='';}}
+function releaseSceneResources(scene){if(!scene)return;try{scene.audioElement?.pause();if(scene.audioElement){scene.audioElement.removeAttribute?.('src');scene.audioElement.load?.();scene.audioElement=null;}scene.gifFrame?.close?.();scene.gifFrame=null;scene.gifDecoder?.close?.();scene.gifDecoder=null;if(scene.element){scene.element.removeAttribute?.('src');scene.element.src='';}}catch{}if(scene.url){URL.revokeObjectURL(scene.url);scene.url='';}}
 window.CutflowReleaseSceneResources=releaseSceneResources;
 function mediaFadeGain(item,elapsed){
   const clipLength=Math.max(0,Math.min(Number(item.duration)||0,(Number(item.trimEnd)||Number(item.sourceDuration)||0)-(Number(item.trimStart)||0)));
@@ -263,15 +263,17 @@ function fitCuts(message=true){
 }
 function waitMedia(element,event){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>finish(new Error('파일을 읽는 시간이 초과되었습니다.')),15000);const ok=()=>finish(),bad=()=>finish(new Error('브라우저에서 재생할 수 없는 파일입니다.'));function finish(error){clearTimeout(timer);element.removeEventListener(event,ok);element.removeEventListener('error',bad);error?reject(error):resolve();}element.addEventListener(event,ok,{once:true});element.addEventListener('error',bad,{once:true});});}
 async function makeScene(file){
-  const video=file.type.startsWith('video/')||/\.(mp4|mov|webm|m4v)$/i.test(file.name),url=URL.createObjectURL(file);const element=video?document.createElement('video'):new Image();
+  const video=file.type.startsWith('video/')||/\.(mp4|mov|webm|m4v)$/i.test(file.name),gif=/image\/gif/i.test(file.type)||/\.gif$/i.test(file.name),url=URL.createObjectURL(file);const element=video?document.createElement('video'):new Image();
   try{if(video){element.muted=true;element.defaultMuted=true;element.playsInline=true;element.setAttribute('playsinline','');element.setAttribute('webkit-playsinline','');element.preload='auto';}const ready=waitMedia(element,video?'loadeddata':'load');element.src=url;if(video)element.load?.();await ready;
-    const sourceDuration=video?element.duration:0;if(video&&(!Number.isFinite(sourceDuration)||sourceDuration<=0))throw new Error('유효한 영상 길이가 아닙니다.');
-    const canvas=document.createElement('canvas');canvas.width=120;canvas.height=90;canvas.getContext('2d').drawImage(element,0,0,120,90);
-    return {id:uid(),name:file.name,file,url,element,type:video?'video':'image',sourceDuration,trimStart:0,trimEnd:video?sourceDuration:0,duration:video?Math.min(2.4,sourceDuration):2.4,motion:'still',transition:'cut',mediaVolume:0,mediaMuted:false,mediaFadeIn:0,mediaFadeOut:0,thumb:canvas.toDataURL('image/jpeg',.65)};
+    let gifDecoder=null,gifFrameDurations=null,gifFrame=null,gifFrameIndex=-1,sourceDuration=video?element.duration:0,type=video?'video':'image';
+    if(video&&(!Number.isFinite(sourceDuration)||sourceDuration<=0))throw new Error('유효한 영상 길이가 아닙니다.');
+    if(gif&&'ImageDecoder' in window){const data=new Uint8Array(await file.arrayBuffer());gifDecoder=new ImageDecoder({data,type:'image/gif'});await gifDecoder.tracks.ready;const track=gifDecoder.tracks.selectedTrack,frameCount=Math.max(1,track?.frameCount||1);gifFrameDurations=[];for(let i=0;i<frameCount;i++){const decoded=await gifDecoder.decode({frameIndex:i}),seconds=Math.max(.02,Number(decoded.image.duration||100000)/1000000);gifFrameDurations.push(seconds);if(i===0){gifFrame=decoded.image;gifFrameIndex=0;}else decoded.image.close?.();}sourceDuration=gifFrameDurations.reduce((a,b)=>a+b,0);type='gif';}
+    const canvas=document.createElement('canvas');canvas.width=120;canvas.height=90;canvas.getContext('2d').drawImage(gifFrame||element,0,0,120,90);
+    return {id:uid(),name:file.name,file,url,element,type,sourceDuration,trimStart:0,trimEnd:video?sourceDuration:0,duration:type==='gif'?Math.min(3,sourceDuration||3):(video?Math.min(2.4,sourceDuration):2.4),motion:'still',transition:'cut',mediaVolume:0,mediaMuted:false,mediaFadeIn:0,mediaFadeOut:0,thumb:canvas.toDataURL('image/jpeg',.65),gifDecoder,gifFrameDurations,gifFrame,gifFrameIndex};
   }catch(error){URL.revokeObjectURL(url);throw error;}
 }
 async function addFiles(files,{createFreeCues=true,forceFreeCues=false,deferCommit=false}={}){
-  const list=[...files].filter(f=>/^image\/|^video\//.test(f.type)||/\.(mp4|mov|webm|m4v)$/i.test(f.name));if(!list.length){toast('이미지 또는 영상 파일을 선택해 주세요.');return [];}
+  const list=[...files].filter(f=>/^image\/|^video\//.test(f.type)||/\.(mp4|mov|webm|m4v|gif)$/i.test(f.name));if(!list.length){toast('이미지 또는 영상 파일을 선택해 주세요.');return [];}
   pause();loading++;stats();let success=0,errors=[],added=[];
   for(const file of list){try{const scene=await makeScene(file);scene.motion=scene.type==='image'?chooseAutoMotion():'still';
       if(createFreeCues&&(!audioBuffer||forceFreeCues)){scene.duration=scene.type==='video'?Math.max(.1,Math.min(600,scene.sourceDuration)):3;}
