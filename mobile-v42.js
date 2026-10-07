@@ -379,7 +379,7 @@
     if(!state){panel.innerHTML=section('자막','<p class="v42-help">아직 자막 구간이 없습니다. 프로젝트 설정에서 대본과 내레이션을 불러온 뒤 자막 구간을 만들어 주세요.</p>');return;}
     window.selectStyleCue?.(index,false);
     const selectionPalette=paletteColors.map(([name,color])=>`<button type="button" data-caption-selection-color="${color}" title="${name}" aria-label="${name}" style="--swatch:${color}"></button>`).join('');
-    const storyModeControl=$('layoutSelect')?.value==='story'?`<div class="v42-caption-batch-entry">${proxyControl($('storyCaptionMode'),'자막 표시 방식',{wide:true})}<p class="v42-help">썰쇼츠 전체 장면에 적용됩니다.</p></div>`:'';
+    const storyModeControl=$('layoutSelect')?.value==='story'?`<div class="v42-caption-batch-entry">${proxyControl($('storyCaptionMode'),'자막 표시 방식',{wide:true})}<p class="v42-help">같은 장면 안에서만 누적되며, 장면이 바뀌면 자막이 다시 시작됩니다.</p></div>`:'';
     const core=`
       ${storyModeControl}<div class="v42-caption-batch-entry"><button type="button" id="v42CaptionBatchOpen" class="v42-btn wide">전체 자막 편집</button></div>
       <label class="v42-field wide"><span>자막 · [[강조]] 지원</span><textarea id="v42CaptionText" data-caption-field="text" rows="3" maxlength="240">${esc(state.text)}</textarea></label>
