@@ -21,7 +21,7 @@ for(const kind of ['title','channel']){
 }
 $('layoutSelect').addEventListener('input',syncTextStrokes);
 syncTextStrokes();
-const styleFields={font:'captionFont',size:'captionSize',bold:'captionBold',italic:'captionItalic',color:'captionColor',strokeColor:'captionStrokeColor',strokeWidth:'captionStroke',background:'captionBackground',backgroundColor:'captionBackgroundColor',backgroundOpacity:'captionOpacity',padding:'captionPadding',radius:'captionRadius',y:'captionY'};
+const styleFields={font:'captionFont',size:'captionSize',letterSpacing:'captionLetterSpacing',bold:'captionBold',italic:'captionItalic',color:'captionColor',strokeColor:'captionStrokeColor',strokeWidth:'captionStroke',background:'captionBackground',backgroundColor:'captionBackgroundColor',backgroundOpacity:'captionOpacity',padding:'captionPadding',radius:'captionRadius',y:'captionY'};
 const fontOptions=CutFonts.list.map(f=>`<option value="${f.id}">${esc(f.label)}</option>`).join('');
 ['titleFont','channelFont','captionFont'].forEach(id=>$(id).innerHTML=fontOptions);
 const paletteNames={white:'흰색',yellow:'노란색',lime:'연두색',sky:'하늘색',red:'빨간색',orange:'주황색'};
@@ -36,7 +36,7 @@ function syncTextStyleNotes(){
   ['title','channel'].forEach(kind=>$(kind+'FontNote').textContent=fontNote($(kind+'Font').value));
 }
 function styleOutputs(style){
-  $('sizeValue').textContent=`${style.size}px`;$('strokeValue').textContent=`${Number(style.strokeWidth.toFixed(2))}px`;
+  $('sizeValue').textContent=`${style.size}px`;$('letterSpacingValue').textContent=`${Number(style.letterSpacing.toFixed(1))}px`;$('strokeValue').textContent=`${Number(style.strokeWidth.toFixed(2))}px`;
   $('opacityValue').textContent=`${Math.round(style.backgroundOpacity*100)}%`;$('paddingValue').textContent=`${style.padding}px`;$('radiusValue').textContent=`${style.radius}px`;
   $('yValue').textContent=`${style.y??CaptionStyle.defaultY($('layoutSelect').value)}%`;
 }
