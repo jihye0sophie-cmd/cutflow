@@ -100,7 +100,7 @@ async function applyProjectBasics(){
   const title=$('autoTitle').value||'',channel=$('autoChannel').value||'',layout=$('autoLayout').value||'fullscreen';
   $('titleInput').value=title;$('titleInput').dispatchEvent(new Event('input',{bubbles:true}));
   $('channelInput').value=channel;$('channelInput').dispatchEvent(new Event('input',{bubbles:true}));
-  $('layoutSelect').value=layout;$('layoutSelect').dispatchEvent(new Event('input',{bubbles:true}));
+  $('layoutSelect').value=layout;$('layoutSelect').dispatchEvent(new Event('input',{bubbles:true}));if(layout==='story'){if($('storyTitle')){$('storyTitle').value=title;$('storyTitle').dispatchEvent(new Event('input',{bubbles:true}));}if($('storyChannel')){$('storyChannel').value=channel;$('storyChannel').dispatchEvent(new Event('input',{bubbles:true}));}}
 }
 async function run(){
   if(state.running)return;const script=lines();state.silencePreset=silencePreset();const longMode=state.mediaMode==='long-video';
@@ -153,8 +153,8 @@ async function run(){
   finally{if(historyBatch&&!historyDone)window.CutflowHistory?.endBatch?.(false);state.running=false;update();}
 }
 function syncBasicsFromProject(){
-  if(!$('autoTitle').value)$('autoTitle').value=$('titleInput').value||'';
-  if(!$('autoChannel').value)$('autoChannel').value=$('channelInput').value||'';
+  if(!$('autoTitle').value)$('autoTitle').value=$('layoutSelect').value==='story'?($('storyTitle')?.value||$('titleInput').value||''):($('titleInput').value||'');
+  if(!$('autoChannel').value)$('autoChannel').value=$('layoutSelect').value==='story'?($('storyChannel')?.value||$('channelInput').value||''):($('channelInput').value||'');
   $('autoLayout').value=$('layoutSelect').value||'fullscreen';
 }
 $('autoToggle').onclick=()=>{const open=$('autoPanel').hidden;if(open)syncBasicsFromProject();$('autoPanel').hidden=!open;$('autoToggle').setAttribute('aria-expanded',String(open));$('autoToggle').closest('.auto-setup')?.classList.toggle('is-open',open);};
