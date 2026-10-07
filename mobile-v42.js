@@ -379,8 +379,9 @@
     if(!state){panel.innerHTML=section('자막','<p class="v42-help">아직 자막 구간이 없습니다. 프로젝트 설정에서 대본과 내레이션을 불러온 뒤 자막 구간을 만들어 주세요.</p>');return;}
     window.selectStyleCue?.(index,false);
     const selectionPalette=paletteColors.map(([name,color])=>`<button type="button" data-caption-selection-color="${color}" title="${name}" aria-label="${name}" style="--swatch:${color}"></button>`).join('');
+    const storyModeControl=$('layoutSelect')?.value==='story'?`<div class="v42-caption-batch-entry">${proxyControl($('storyCaptionMode'),'자막 표시 방식',{wide:true})}<p class="v42-help">썰쇼츠 전체 장면에 적용됩니다.</p></div>`:'';
     const core=`
-      <div class="v42-caption-batch-entry"><button type="button" id="v42CaptionBatchOpen" class="v42-btn wide">전체 자막 편집</button></div>
+      ${storyModeControl}<div class="v42-caption-batch-entry"><button type="button" id="v42CaptionBatchOpen" class="v42-btn wide">전체 자막 편집</button></div>
       <label class="v42-field wide"><span>자막 · [[강조]] 지원</span><textarea id="v42CaptionText" data-caption-field="text" rows="3" maxlength="240">${esc(state.text)}</textarea></label>
       <div class="v42-caption-selection-tools"><strong>선택 글자색</strong><div class="v42-palette">${selectionPalette}</div><label class="v42-selection-picker">직접 선택 <input id="v42CaptionSelectionPicker" type="color" value="#f5e642" aria-label="선택 글자색 직접 선택"></label><button type="button" id="v42CaptionSelectionReset" class="v42-btn">선택 색상 해제</button><small>자막에서 글자를 드래그한 뒤 색상을 누르면 즉시 적용됩니다.</small></div>
       <div class="v42-caption-segment-nav"><span>자막 ${state.segment.position} / ${state.segment.count}</span><div><button type="button" id="v42CaptionPrev" class="v42-btn" ${state.segment.position===1?'disabled':''}>‹ 이전 자막</button><button type="button" id="v42CaptionNext" class="v42-btn" ${state.segment.position===state.segment.count?'disabled':''}>다음 자막 ›</button></div></div>
