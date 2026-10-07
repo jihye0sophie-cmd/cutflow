@@ -94,15 +94,16 @@ $('styleCue').onchange=e=>{styleCueId=e.target.value;syncStyleEditor();jump(styl
 const templateTypography={
   framed:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true},
   immersive:{titleFont:'aggro',channelFont:'gangwon',captionFont:'ohsquare',captionBold:false,captionItalic:true},
-  fullscreen:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true}
+  fullscreen:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true},
+  story:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:false,captionColor:'#111111',captionStrokeWidth:0,captionLetterSpacing:1.5}
 };
 async function applyTemplateTypography(layout,{applyCues=true,notify=false,record=true}={}){
   const preset=templateTypography[layout]||templateTypography.framed;
-  const positions={framed:{titleY:4,channelY:81.7},immersive:{titleY:7,channelY:92},fullscreen:{titleY:4,channelY:92}}[layout]||{titleY:4,channelY:81.7};
+  const positions={framed:{titleY:4,channelY:81.7},immersive:{titleY:7,channelY:92},fullscreen:{titleY:4,channelY:92},story:{titleY:4,channelY:92}}[layout]||{titleY:4,channelY:81.7};
   $('titleX').value='50';$('titleY').value=String(positions.titleY);$('channelX').value='50';$('channelY').value=String(positions.channelY);syncTextPositionUI();
   $('titleFont').value=preset.titleFont;$('titleBold').checked=true;$('titleItalic').checked=false;
   $('channelFont').value=preset.channelFont;$('channelBold').checked=true;$('channelItalic').checked=false;
-  if(applyCues&&cues.length){rememberCues();cues.forEach(c=>{c.style={...c.style,font:preset.captionFont,bold:preset.captionBold,italic:preset.captionItalic};});renderCues();}
+  if(applyCues&&cues.length){rememberCues();cues.forEach(c=>{const patch={font:preset.captionFont,bold:preset.captionBold,italic:preset.captionItalic};if(preset.captionColor)patch.color=preset.captionColor;if(Number.isFinite(preset.captionStrokeWidth))patch.strokeWidth=preset.captionStrokeWidth;if(Number.isFinite(preset.captionLetterSpacing))patch.letterSpacing=preset.captionLetterSpacing;c.style={...c.style,...patch};if(preset.captionColor)c.color=preset.captionColor;});renderCues();}
   else syncStyleEditor();
   syncTextStyleNotes();if(record)changed();
   try{await CutRenderer.fonts(project());}catch{toast('폰트를 불러오지 못했습니다.');}
