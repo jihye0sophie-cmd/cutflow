@@ -442,7 +442,7 @@ function autoWrapCaptionText(text,style={}){
   const family=fontInfo?.family||'Noto Sans KR',nativeWeight=fontInfo?.file?400:(style.bold===false?400:900),size=Number(style.size)||66;
   ctx.font=`${style.italic?'italic ':''}${nativeWeight} ${size}px "${family}", sans-serif`;
   const clean=v=>v.replace(/\[\[|\]\]/g,'');
-  const width=v=>ctx.measureText(clean(v)).width;
+  const width=v=>{const value=clean(v),spacing=Number(style.letterSpacing)||0;return ctx.measureText(value).width+Math.max(0,[...value].length-1)*spacing;};
   const maxWidth=1080*.86,fullWidth=width(raw);
   if(fullWidth<=maxWidth)return raw;
   const words=raw.split(' ');let best=null;
