@@ -23,7 +23,7 @@ $('layoutSelect').addEventListener('input',syncTextStrokes);
 syncTextStrokes();
 const styleFields={font:'captionFont',size:'captionSize',letterSpacing:'captionLetterSpacing',bold:'captionBold',italic:'captionItalic',color:'captionColor',strokeColor:'captionStrokeColor',strokeWidth:'captionStroke',background:'captionBackground',backgroundColor:'captionBackgroundColor',backgroundOpacity:'captionOpacity',padding:'captionPadding',radius:'captionRadius',y:'captionY'};
 const fontOptions=CutFonts.list.map(f=>`<option value="${f.id}">${esc(f.label)}</option>`).join('');
-['titleFont','channelFont','captionFont'].forEach(id=>$(id).innerHTML=fontOptions);
+['titleFont','channelFont','captionFont','storyTitleFont','storyChannelFont'].forEach(id=>{if($(id))$(id).innerHTML=fontOptions;});if($('storyTitleFont'))$('storyTitleFont').value='ohsquare';if($('storyChannelFont'))$('storyChannelFont').value='noto';
 const paletteNames={white:'흰색',yellow:'노란색',lime:'연두색',sky:'하늘색',red:'빨간색',orange:'주황색'};
 const paletteMarkup=action=>Object.entries(CaptionStyle.palette).map(([name,color])=>`<button type="button" class="color-swatch" ${action?`data-action="${action}"`:''} data-color="${color}" style="--swatch:${color}" aria-label="${paletteNames[name]}" title="${paletteNames[name]}"></button>`).join('');
 $('captionPalette').innerHTML=paletteMarkup('caption-base');
@@ -95,7 +95,7 @@ const templateTypography={
   framed:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true},
   immersive:{titleFont:'aggro',channelFont:'gangwon',captionFont:'ohsquare',captionBold:false,captionItalic:true},
   fullscreen:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:true},
-  story:{titleFont:'aggro',channelFont:'gangwon',captionFont:'danjunghae',captionBold:true,captionItalic:false,captionColor:'#111111',captionStrokeWidth:0,captionLetterSpacing:1.5}
+  story:{titleFont:'ohsquare',channelFont:'noto',captionFont:'noto',captionSize:60,captionBold:true,captionItalic:false,captionColor:'#111111',captionStrokeWidth:0,captionLetterSpacing:1.5}
 };
 async function applyTemplateTypography(layout,{applyCues=true,notify=false,record=true}={}){
   const preset=templateTypography[layout]||templateTypography.framed;
@@ -103,7 +103,7 @@ async function applyTemplateTypography(layout,{applyCues=true,notify=false,recor
   $('titleX').value='50';$('titleY').value=String(positions.titleY);$('channelX').value='50';$('channelY').value=String(positions.channelY);syncTextPositionUI();
   $('titleFont').value=preset.titleFont;$('titleBold').checked=true;$('titleItalic').checked=false;
   $('channelFont').value=preset.channelFont;$('channelBold').checked=true;$('channelItalic').checked=false;
-  if(applyCues&&cues.length){rememberCues();cues.forEach(c=>{const patch={font:preset.captionFont,bold:preset.captionBold,italic:preset.captionItalic};if(preset.captionColor)patch.color=preset.captionColor;if(Number.isFinite(preset.captionStrokeWidth))patch.strokeWidth=preset.captionStrokeWidth;if(Number.isFinite(preset.captionLetterSpacing))patch.letterSpacing=preset.captionLetterSpacing;c.style={...c.style,...patch};if(preset.captionColor)c.color=preset.captionColor;});renderCues();}
+  if(applyCues&&cues.length){rememberCues();cues.forEach(c=>{const patch={font:preset.captionFont,bold:preset.captionBold,italic:preset.captionItalic};if(Number.isFinite(preset.captionSize))patch.size=preset.captionSize;if(preset.captionColor)patch.color=preset.captionColor;if(Number.isFinite(preset.captionStrokeWidth))patch.strokeWidth=preset.captionStrokeWidth;if(Number.isFinite(preset.captionLetterSpacing))patch.letterSpacing=preset.captionLetterSpacing;c.style={...c.style,...patch};if(preset.captionColor)c.color=preset.captionColor;});renderCues();}
   else syncStyleEditor();
   syncTextStyleNotes();if(record)changed();
   try{await CutRenderer.fonts(project());}catch{toast('폰트를 불러오지 못했습니다.');}
