@@ -6,7 +6,7 @@ window.CaptionStyle=(()=>{
     framed:{font:'danjunghae',bold:true,italic:true},
     immersive:{font:'ohsquare',bold:false,italic:true},
     fullscreen:{font:'danjunghae',bold:true,italic:true},
-    story:{font:'noto',size:60,letterSpacing:1.5,bold:true,italic:false,color:'#111111',strokeWidth:0}
+    story:{font:'noto',size:55,letterSpacing:1.5,bold:true,italic:false,color:'#111111',strokeWidth:0}
   };
   const presets={
     basic:{...defaults},
