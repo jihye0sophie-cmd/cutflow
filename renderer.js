@@ -67,9 +67,12 @@ window.CutRenderer = (() => {
     return {scale:Math.max(.1,Math.min(5,finite(value?.scale,1))),x:Math.max(-2,Math.min(2,finite(value?.x,0))),y:Math.max(-2,Math.min(2,finite(value?.y,0)))};
   }
   function storyCaptionText(project,time){
-    const index=(project.cues||[]).findIndex(c=>time>=c.start&&time<c.end);if(index<0)return '';
-    if(project.storyCaptionMode!=='cumulative')return project.cues[index]?.text||'';
-    return project.cues.slice(0,index+1).map(c=>String(c.text||'').trim()).filter(Boolean).join('\n');
+    const cues=project.cues||[],index=cues.findIndex(c=>time>=c.start&&time<c.end);if(index<0)return '';
+    const current=cues[index];if(project.storyCaptionMode!=='cumulative')return current?.text||'';
+    // Accumulate captions only inside the current scene. A new scene always starts fresh.
+    const sceneId=current?.sceneId;if(!sceneId)return current?.text||'';
+    let first=index;while(first>0&&cues[first-1]?.sceneId===sceneId)first--;
+    return cues.slice(first,index+1).map(c=>String(c.text||'').trim()).filter(Boolean).join('\n');
   }
   function storyLayout(w,h,project,time){
     const text=storyCaptionText(project,time),fontSize=Math.max(24,Number(window.CaptionStyle?.resolve?.((project.cues||[]).find(c=>time>=c.start&&time<c.end)||{},project)?.size)||60);
